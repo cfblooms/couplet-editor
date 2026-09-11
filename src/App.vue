@@ -837,7 +837,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (已移除角落灰色括號) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1213,7 +1213,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (100% 依照圖片重新設計，統編無每格內線) ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 依照指示全新排版) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1331,7 +1331,7 @@
               transformOrigin: 'top left'
             }"
           >
-            <!-- 標題與日期 -->
+            <!-- 標題與日期 (日期往下微調增加間距) -->
             <div class="f-header">
               <div class="f-title-wrap">
                 <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
@@ -1341,18 +1341,17 @@
               </div>
             </div>
 
-            <!-- 主表格 (完全對齊圖片) -->
+            <!-- 主表格 (住址後無格線、蔡鎮遠橫向無小框) -->
             <table class="f-table">
               <tbody>
                 <tr>
                   <td class="f-lbl f-w-head">購貨商號名稱</td>
                   <td class="f-val f-buyer-val">{{ farmerReceipt.buyerName }}</td>
                   <td class="f-lbl f-w-addr" rowspan="2">住<br><br>址</td>
-                  <td class="f-val f-addr-val" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
+                  <td class="f-val f-addr-clean-val" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
                 </tr>
                 <tr>
                   <td class="f-lbl">統一編號</td>
-                  <!-- 統編純淨單一輸入框，無每格格線 -->
                   <td class="f-val f-tax-clean">{{ farmerReceipt.taxId }}</td>
                 </tr>
                 <tr class="f-col-header">
@@ -1396,22 +1395,24 @@
                     </div>
                   </td>
                 </tr>
-                <!-- 底部農民資料 (蔡鎮遠橫式 + 旁邊蓋章框 + 垂直住址 + 統號) -->
+                <!-- 底部農民資料 (第一列：農民姓名蔡鎮遠直接橫寫留白印章空間) -->
                 <tr>
                   <td class="f-lbl f-lh1">農（漁、牧）民姓名</td>
-                  <td class="f-farmer-cell">
-                    <span class="f-farmer-name">蔡鎮遠</span>
-                    <span class="f-farmer-seal">蓋章</span>
+                  <td class="f-val f-farmer-clean-cell" colspan="5">
+                    <span class="f-farmer-name-clean">蔡鎮遠</span>
                   </td>
-                  <td class="f-lbl f-w-addr">住<br><br>址</td>
-                  <td class="f-val"></td>
+                </tr>
+                <!-- 底部農民資料 (第二列：住址與統一身分證編號皆為橫向單行) -->
+                <tr>
+                  <td class="f-lbl f-lh1">住 址</td>
+                  <td class="f-val" colspan="2"></td>
                   <td class="f-lbl f-lh1">國民統一身分證編號</td>
-                  <td class="f-val f-bold f-text-center">F129940801</td>
+                  <td class="f-val f-bold f-text-center" colspan="2">F129940801</td>
                 </tr>
               </tbody>
             </table>
 
-            <!-- 附註法條聲明 -->
+            <!-- 附註法條聲明 (已移除括號引用字樣) -->
             <div class="f-statement">
               本收據之農民身分確實無誤，若有不實者願依法受罰。
             </div>
@@ -1831,7 +1832,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (100% 精準對齊圖片格式)
+// 4. 農民收據 (嚴格依照使用者指示修改)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1938,26 +1939,27 @@ const exportFarmerReceiptImage = () => {
 
   ctx.font = `14px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 750, 75)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 750, 80)
 
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#000000'
-  ctx.strokeRect(40, 85, 714, 380)
+  ctx.strokeRect(40, 95, 714, 370)
 
   ctx.textAlign = 'left'
   ctx.font = `bold 14px ${fontFam}`
-  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 115)
-  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 145)
-  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 115)
-  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 185)
-  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 225)
-  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 275)
-  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠 【蓋章】    國民統一身分證編號：F129940801`, 50, 335)
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 125)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 155)
+  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 125)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 195)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 235)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 285)
+  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 50, 335)
+  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 50, 365)
   
   ctx.font = `11px ${fontFam}`
-  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 50, 395)
+  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 50, 405)
   ctx.font = `9.5px ${fontFam}`
-  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 50, 425)
+  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 50, 430)
 
   const link = document.createElement('a')
   link.download = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
@@ -2737,7 +2739,7 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* A4 卡片 (無灰色角落括號) */
+/* A4 卡片 */
 .card-scaler-container { position: relative; }
 .card-board { background: #fff; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; }
 .card-board.mode-vertical { width: 560px; height: 792px; font-family: "DFKai-SB", "BiauKai", serif; }
@@ -2789,14 +2791,14 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (完全依照圖片復刻，統編單一框)
+   農民出售農產品收據 (完全依照指示精準復刻)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px;
   height: 560px;
   background: #ffffff;
-  padding: 24px 35px;
+  padding: 22px 35px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -2809,12 +2811,13 @@ input, select, textarea {
   left: 0;
 }
 
+/* 標題與日期 (往下增加間距) */
 .f-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 .f-main-title {
   font-size: 24px;
@@ -2826,7 +2829,7 @@ input, select, textarea {
   align-self: flex-end;
   font-size: 14px;
   letter-spacing: 2px;
-  margin-top: 2px;
+  margin-top: 8px; /* 往下微調距離 */
 }
 .f-date-wrap span {
   display: inline-block;
@@ -2858,9 +2861,9 @@ input, select, textarea {
 .f-w-head { width: 18%; }
 .f-w-addr { width: 6%; text-align: center; line-height: 1.4; font-weight: bold; }
 .f-buyer-val { width: 44%; }
-.f-addr-val { width: 32%; }
+.f-addr-clean-val { width: 32%; }
 
-/* 統一編號：整格統一顯示，無內部垂直線 */
+/* 統一編號：整格統一顯示，無內部垂直格線 */
 .f-tax-clean {
   font-size: 16px;
   font-weight: bold;
@@ -2906,25 +2909,14 @@ input, select, textarea {
 .f-pr { padding-right: 12px !important; }
 .f-lh1 { line-height: 1.2; }
 
-/* 農民姓名橫式與蓋章框 */
-.f-farmer-cell {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px !important;
+/* 蔡鎮遠姓名橫式，無小框與印章提示 */
+.f-farmer-clean-cell {
+  padding-left: 24px !important;
 }
-.f-farmer-name {
-  font-size: 15px;
-  letter-spacing: 2px;
+.f-farmer-name-clean {
+  font-size: 17px;
+  letter-spacing: 6px;
   font-weight: bold;
-}
-.f-farmer-seal {
-  border: 1px dashed #dc2626;
-  color: #dc2626;
-  font-size: 11px;
-  padding: 2px 10px;
-  border-radius: 3px;
-  letter-spacing: 2px;
 }
 
 .f-statement {
@@ -2932,14 +2924,14 @@ input, select, textarea {
   text-align: center;
   letter-spacing: 1px;
   font-weight: bold;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .f-footer-note {
   font-size: 9.5px;
   line-height: 1.35;
   color: #222;
-  margin-top: 2px;
+  margin-top: 3px;
   text-align: justify;
 }
 
