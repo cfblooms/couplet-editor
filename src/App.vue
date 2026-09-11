@@ -25,6 +25,13 @@
         >
           📄 訂單 A5 簽收單
         </button>
+        <button 
+          type="button" 
+          :class="{ active: currentTab === 'farmer_receipt' }" 
+          @click="currentTab = 'farmer_receipt'"
+        >
+          🧾 農民收據
+        </button>
       </div>
     </header>
 
@@ -86,17 +93,15 @@
                 </datalist>
               </div>
 
-              <!-- 株數與單價 -->
               <div class="field">
                 <label>株數 (棵)</label>
                 <input v-model.number="formOrder.stalks" type="number" min="1" @input="calcOrderPrice" />
               </div>
               <div class="field">
-                <label>每棵單價 (元，選填自動乘算)</label>
-                <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" placeholder="單株價格" />
+                <label>每棵單價 (元)</label>
+                <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" />
               </div>
 
-              <!-- 盆器選擇（所有客群皆可選） -->
               <div class="field">
                 <label>使用盆器</label>
                 <select v-model="formOrder.pot">
@@ -108,7 +113,6 @@
                 </select>
               </div>
 
-              <!-- 快捷盆選擇 -->
               <div class="field">
                 <label>快捷盆選擇</label>
                 <select v-model="formOrder.quick_pot">
@@ -119,12 +123,17 @@
 
               <div class="field">
                 <label>預估總成本 (元)</label>
-                <input v-model.number="formOrder.cost" type="number" min="0" placeholder="花材與盆器成本" />
+                <input v-model.number="formOrder.cost" type="number" min="0" />
               </div>
 
               <div class="field">
                 <label>訂單總售價 (元)</label>
-                <input v-model.number="formOrder.price" type="number" min="0" placeholder="訂單金額" />
+                <input v-model.number="formOrder.price" type="number" min="0" />
+              </div>
+
+              <div class="field">
+                <label>訂單備註 / 統一編號</label>
+                <input v-model="formOrder.note" type="text" placeholder="例: 統編: 12345678" />
               </div>
 
               <div class="field">
@@ -189,6 +198,7 @@
                   <tr>
                     <th>單號</th>
                     <th>客戶名稱</th>
+                    <th>備註/統編</th>
                     <th>週期</th>
                     <th>電話</th>
                     <th>品項規格</th>
@@ -205,6 +215,7 @@
                   <tr v-for="ord in orderList" :key="ord.id">
                     <td><b>{{ ord.id }}</b></td>
                     <td>{{ ord.customer }}</td>
+                    <td>{{ ord.note || '—' }}</td>
                     <td><span class="badge badge-purple">{{ ord.billing_cycle || '每單結' }}</span></td>
                     <td>{{ ord.phone }}</td>
                     <td>{{ ord.spec }}</td>
@@ -245,18 +256,19 @@
                     </td>
                     <td class="action-cell">
                       <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
-                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 轉簽收單</button>
+                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
+                      <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
                       <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
                     </td>
                   </tr>
-                  <tr v-if="orderList.length === 0"><td colspan="12" class="text-center">尚無訂單資料</td></tr>
+                  <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ================= 模組：客戶未結帳款對帳專區 ================= -->
+        <!-- ================= 模組：客戶未結對帳專區 ================= -->
         <section v-if="subTab === 'statement'" class="tab-pane">
           <div class="card-box">
             <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -329,8 +341,8 @@
                     <th>單號</th>
                     <th>下單日</th>
                     <th>客戶名稱</th>
+                    <th>備註/統編</th>
                     <th>品項規格</th>
-                    <th>選用盆器</th>
                     <th>金額</th>
                     <th>賀卡</th>
                     <th>簽收單</th>
@@ -343,8 +355,8 @@
                     <td><b>{{ ord.id }}</b></td>
                     <td>{{ ord.order_date }}</td>
                     <td>{{ ord.customer }}</td>
+                    <td>{{ ord.note || '—' }}</td>
                     <td>{{ ord.spec }}</td>
-                    <td>{{ ord.pot }}</td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
                     <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
                     <td>
@@ -359,6 +371,7 @@
                     </td>
                     <td>
                       <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                      <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                     </td>
                   </tr>
                   <tr v-if="statementOrders.length === 0">
@@ -446,16 +459,18 @@
               </template>
 
               <div class="field">
-                <label>進貨株數 (棵/個)</label>
+                <label>{{ formInv.category === '陶瓷盆' ? '進貨數量' : '進貨株數 (棵)' }}</label>
                 <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
               </div>
+
               <div class="field">
-                <label>單株價格 (元)</label>
-                <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" placeholder="每棵/個單價" />
+                <label>{{ formInv.category === '陶瓷盆' ? '單個價格 (元)' : '單株價格 (元)' }}</label>
+                <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
               </div>
+
               <div class="field">
-                <label>總成本 (元，自動計算)</label>
-                <input v-model.number="formInv.cost" type="number" min="0" placeholder="株數 × 單株價格" />
+                <label>總成本 (元)</label>
+                <input v-model.number="formInv.cost" type="number" min="0" />
               </div>
 
               <div class="field">
@@ -488,8 +503,8 @@
                     <th>類別</th>
                     <th>品項名稱</th>
                     <th>規格</th>
-                    <th>進貨株數</th>
-                    <th>單株價格</th>
+                    <th>進貨數量/株數</th>
+                    <th>單價</th>
                     <th>總成本</th>
                     <th>供應商</th>
                     <th>日期</th>
@@ -502,7 +517,7 @@
                     <td><span class="badge">{{ inv.category }}</span></td>
                     <td><b>{{ inv.item_name }}</b></td>
                     <td>{{ inv.spec }}</td>
-                    <td><b>{{ inv.qty }} 棵/個</b></td>
+                    <td><b>{{ inv.qty }} {{ inv.category === '陶瓷盆' ? '個' : '棵' }}</b></td>
                     <td class="text-blue">${{ inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0) }}</td>
                     <td class="text-red"><b>${{ inv.cost }}</b></td>
                     <td>{{ inv.supplier }}</td>
@@ -1025,7 +1040,6 @@
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
 
-        <!-- 依單號自動帶入 -->
         <div class="panel-section highlight-panel">
           <label class="section-title">依訂單編號快速帶入：</label>
           <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
@@ -1036,7 +1050,6 @@
           </select>
         </div>
 
-        <!-- 花店店名設定 -->
         <div class="panel-section">
           <label class="section-title">抬頭花店名稱：</label>
           <div class="btn-group">
@@ -1064,38 +1077,37 @@
           />
         </div>
 
-        <!-- 自由修改專區 -->
         <div class="panel-section">
           <label class="section-title">✏️ 簽收單內容確認與修改：</label>
           
           <div class="form-group">
             <label>收件單位 / 聯絡人 / 電話：</label>
-            <input type="text" v-model="receiptForm.recipient" placeholder="例: 宏達實業 總經理室 (0912-345678)" />
+            <input type="text" v-model="receiptForm.recipient" />
           </div>
 
           <div class="form-group">
             <label>送達地址：</label>
-            <input type="text" v-model="receiptForm.address" placeholder="例: 桃園市桃園區縣府路 82 號 1 樓" />
+            <input type="text" v-model="receiptForm.address" />
           </div>
 
           <div class="form-group">
             <label>送達日期：</label>
-            <input type="text" v-model="receiptForm.deliveryDate" placeholder="例: 115-09-03 送達" />
+            <input type="text" v-model="receiptForm.deliveryDate" />
           </div>
 
           <div class="form-group">
             <label>花禮品項規格與盆器：</label>
-            <textarea v-model="receiptForm.item" rows="2" placeholder="花禮品項與盆器規格"></textarea>
+            <textarea v-model="receiptForm.item" rows="2"></textarea>
           </div>
 
           <div class="form-group">
             <label>致贈單位 / 祝賀詞：</label>
-            <input type="text" v-model="receiptForm.giver" placeholder="例: 敬領 誌慶 / 宸豐蘭藝 敬製" />
+            <input type="text" v-model="receiptForm.giver" />
           </div>
 
           <div class="form-group">
             <label>備註說明：</label>
-            <textarea v-model="receiptForm.notes" rows="2" placeholder="備註或交付注意事項"></textarea>
+            <textarea v-model="receiptForm.notes" rows="2"></textarea>
           </div>
         </div>
 
@@ -1109,7 +1121,6 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (A5 橫式) -->
       <div class="receipt-preview-area" ref="receiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
@@ -1132,7 +1143,6 @@
               transformOrigin: 'top left'
             }"
           >
-            <!-- 頂部標頭 -->
             <div class="sheet-header">
               <div class="shop-name-title">{{ displayShopName }}</div>
               <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
@@ -1142,7 +1152,6 @@
               </div>
             </div>
 
-            <!-- 表格內容 -->
             <table class="receipt-table">
               <tbody>
                 <tr>
@@ -1168,7 +1177,6 @@
               </tbody>
             </table>
 
-            <!-- 底部簽收欄位 -->
             <div class="sheet-footer">
               <div class="footer-left">
                 <div>送貨司機 / 經手人：______________</div>
@@ -1178,6 +1186,209 @@
                 <div class="sign-box-title">客戶簽收章 / 簽名欄</div>
                 <div class="sign-box-area">（請於此處簽名或蓋章）</div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 模式 4：農民收據 (自動代入 + 欄位自由修改 + A5 自適應縮放) ================= -->
+    <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
+      <div class="control-panel no-print">
+        <h2>🧾 農民出售農產品收據管理</h2>
+
+        <div class="panel-section highlight-panel">
+          <label class="section-title">依訂單編號快速帶入收據：</label>
+          <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
+            <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
+            <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+              【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (備註: {{ ord.note || '無' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="panel-section">
+          <label class="section-title">✏️ 收據內容確認與自由修改：</label>
+          <div class="form-row">
+            <div class="field">
+              <label>民國年</label>
+              <input type="text" v-model="farmerReceipt.year" />
+            </div>
+            <div class="field">
+              <label>月</label>
+              <input type="text" v-model="farmerReceipt.month" />
+            </div>
+            <div class="field">
+              <label>日</label>
+              <input type="text" v-model="farmerReceipt.day" />
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>購貨商號名稱：</label>
+            <input type="text" v-model="farmerReceipt.buyerName" />
+          </div>
+
+          <div class="form-group">
+            <label>統一編號：</label>
+            <input type="text" v-model="farmerReceipt.taxId" />
+          </div>
+
+          <div class="form-group">
+            <label>住址：</label>
+            <input type="text" v-model="farmerReceipt.buyerAddress" />
+          </div>
+
+          <div class="form-group">
+            <label>品名：</label>
+            <input type="text" v-model="farmerReceipt.itemName" />
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label>規格</label>
+              <input type="text" v-model="farmerReceipt.spec" />
+            </div>
+            <div class="field">
+              <label>數量</label>
+              <input type="text" v-model="farmerReceipt.qty" />
+            </div>
+            <div class="field">
+              <label>單價</label>
+              <input type="text" v-model="farmerReceipt.unitPrice" />
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>總金額 (元)：</label>
+            <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" />
+          </div>
+
+          <div class="form-group">
+            <label>備註：</label>
+            <input type="text" v-model="farmerReceipt.note" />
+          </div>
+        </div>
+
+        <button 
+          type="button" 
+          class="print-action-btn" 
+          @click="printFarmerReceipt"
+        >
+          🖨️ 列印農民收據
+        </button>
+      </div>
+
+      <!-- 右側預覽區 (A5 比例與手機自適應縮放) -->
+      <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
+        <div class="zoom-toolbar no-print">
+          <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
+          <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
+          <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
+          <button type="button" class="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+        </div>
+
+        <div 
+          class="farmer-scaler-container"
+          :style="{
+            width: (794 * farmerZoom) + 'px',
+            height: (560 * farmerZoom) + 'px'
+          }"
+        >
+          <div 
+            class="farmer-receipt-sheet"
+            :style="{
+              transform: `scale(${farmerZoom})`,
+              transformOrigin: 'top left'
+            }"
+          >
+            <!-- 標題與日期 -->
+            <div class="f-header">
+              <div class="f-title-wrap">
+                <div class="f-main-title">農(漁、牧)民出售農(漁、牧)產品收據</div>
+              </div>
+              <div class="f-date-wrap">
+                中華民國 <span>{{ farmerReceipt.year }}</span> 年 <span>{{ farmerReceipt.month }}</span> 月 <span>{{ farmerReceipt.day }}</span> 日
+              </div>
+            </div>
+
+            <!-- 主表格 -->
+            <table class="f-table">
+              <tbody>
+                <tr>
+                  <td class="f-lbl f-w1">購貨商號名稱</td>
+                  <td class="f-val f-w2" colspan="3">{{ farmerReceipt.buyerName }}</td>
+                  <td class="f-lbl f-w3">統一編號</td>
+                  <td class="f-val f-w4" colspan="3">{{ farmerReceipt.taxId }}</td>
+                </tr>
+                <tr>
+                  <td class="f-lbl">住 址</td>
+                  <td class="f-val" colspan="7">{{ farmerReceipt.buyerAddress }}</td>
+                </tr>
+                <tr class="f-col-header">
+                  <td class="f-col-name" colspan="2">品 名</td>
+                  <td class="f-col-spec">規 格</td>
+                  <td class="f-col-qty">數 量</td>
+                  <td class="f-col-price">單 價</td>
+                  <td class="f-col-total" colspan="2">金 額</td>
+                  <td class="f-col-note">備 註</td>
+                </tr>
+                <!-- 項目行 -->
+                <tr class="f-item-row">
+                  <td colspan="2" class="f-text-center f-bold">{{ farmerReceipt.itemName }}</td>
+                  <td class="f-text-center">{{ farmerReceipt.spec }}</td>
+                  <td class="f-text-center">{{ farmerReceipt.qty }}</td>
+                  <td class="f-text-center">{{ farmerReceipt.unitPrice }}</td>
+                  <td colspan="2" class="f-text-right f-bold f-pr">${{ farmerReceipt.totalAmount }}</td>
+                  <td class="f-text-center">{{ farmerReceipt.note }}</td>
+                </tr>
+                <!-- 空白行 1 -->
+                <tr class="f-item-row f-empty-row">
+                  <td colspan="2"></td><td></td><td></td><td></td><td colspan="2"></td><td></td>
+                </tr>
+                <!-- 空白行 2 -->
+                <tr class="f-item-row f-empty-row">
+                  <td colspan="2"></td><td></td><td></td><td></td><td colspan="2"></td><td></td>
+                </tr>
+                <!-- 合計大寫金額 -->
+                <tr>
+                  <td class="f-lbl">合計新台幣<br>(中文大寫)</td>
+                  <td colspan="7" class="f-amount-td">
+                    <div class="f-chinese-amount-grid">
+                      <span>{{ chineseDigits.millions }}</span> 佰
+                      <span>{{ chineseDigits.hundredThousands }}</span> 拾
+                      <span>{{ chineseDigits.tenThousands }}</span> 萬
+                      <span>{{ chineseDigits.thousands }}</span> 仟
+                      <span>{{ chineseDigits.hundreds }}</span> 佰
+                      <span>{{ chineseDigits.tens }}</span> 拾
+                      <span>{{ chineseDigits.ones }}</span> 元整
+                    </div>
+                  </td>
+                </tr>
+                <!-- 底部農民資料 -->
+                <tr>
+                  <td class="f-lbl f-lh1">農(漁、牧)民姓名</td>
+                  <td class="f-val f-bold f-text-center f-pos-rel">
+                    蔡鎮遠
+                    <span class="f-seal-placeholder">蓋章</span>
+                  </td>
+                  <td class="f-lbl f-lh1" colspan="2">國民統一身分證編號</td>
+                  <td class="f-val f-bold f-text-center" colspan="4">F129940801</td>
+                </tr>
+                <tr>
+                  <td class="f-lbl">住 址</td>
+                  <td class="f-val" colspan="7">桃園市桃園區</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 附註法條聲明 -->
+            <div class="f-statement">
+              本收據之農民身分確實無誤，若有不實者願依法受罰[cite: 1]。
+            </div>
+
+            <div class="f-footer-note">
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1]。
             </div>
           </div>
         </div>
@@ -1259,6 +1470,7 @@ const formOrder = ref({
   quick_pot: '未使用',
   cost: 600,
   price: 2500,
+  note: '',
   card_status: '未製作',
   receipt_status: '未列印',
   shipped_status: '未出貨',
@@ -1270,14 +1482,13 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (所有客群全面開放盆器與快捷盆)
+// 1. 訂單模組
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
   if (data) orderList.value = data
 }
 
-// 自動計算訂單售價
 const calcOrderPrice = () => {
   const s = Number(formOrder.value.stalks) || 0
   const u = Number(formOrder.value.unit_price) || 0
@@ -1312,6 +1523,7 @@ const startEditOrder = (ord) => {
     quick_pot: hasQuick ? '使用快捷盆 (70)' : '未使用',
     cost: Number(ord.cost) || 0,
     price: Number(ord.price) || 0,
+    note: ord.note || '',
     card_status: ord.card_status || '未製作',
     receipt_status: ord.receipt_status || '未列印',
     shipped_status: ord.shipped_status || '未出貨',
@@ -1339,6 +1551,7 @@ const cancelEditOrder = () => {
     quick_pot: '未使用',
     cost: 600,
     price: 2500,
+    note: '',
     card_status: '未製作',
     receipt_status: '未列印',
     shipped_status: '未出貨',
@@ -1355,7 +1568,6 @@ const saveOrder = async () => {
     ? `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵 (單價${formOrder.value.unit_price}元)`
     : `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵`
 
-  // 忠實記錄盆器與快捷盆
   const finalPotStr = formOrder.value.pot + (formOrder.value.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
 
   const payload = {
@@ -1367,6 +1579,7 @@ const saveOrder = async () => {
     pot: finalPotStr,
     cost: formOrder.value.cost,
     price: formOrder.value.price,
+    note: formOrder.value.note,
     card_status: formOrder.value.card_status,
     receipt_status: formOrder.value.receipt_status,
     shipped_status: formOrder.value.shipped_status,
@@ -1443,7 +1656,6 @@ const statementOrders = computed(() => {
 
     if (statementPeriod.value === 'lastMonth') {
       const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      const lastDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
       return orderDate >= firstDay && orderDate <= lastMonthEnd
     }
@@ -1522,7 +1734,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (自動帶入 + 各項自由修改)
+// 3. A5 橫式簽收單
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1553,7 +1765,7 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
     receiptForm.value.item = `${ord.spec} 【盆器：${ord.pot}】`
     receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
-    receiptForm.value.notes = '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
+    receiptForm.value.notes = ord.note ? `備註/統編：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
   }
 }
 
@@ -1582,7 +1794,100 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 進貨與庫存
+// 4. 農民收據 (自動代入 + 欄位自由修改 + A5 自適應縮放)
+// ==========================================
+const farmerReceiptViewportRef = ref(null)
+const farmerZoom = ref(1)
+const selectedFarmerOrderId = ref('')
+
+const farmerReceipt = ref({
+  year: '115',
+  month: '09',
+  day: '03',
+  buyerName: '永全證券股份有限公司',
+  taxId: '12345678',
+  buyerAddress: '桃園市桃園區縣府路 82 號',
+  itemName: '蘭花禮盆',
+  spec: '特級蝴蝶蘭',
+  qty: '1 盆',
+  unitPrice: '2,500',
+  totalAmount: 2500,
+  note: ''
+})
+
+const chineseDigits = ref({
+  millions: '零',
+  hundredThousands: '零',
+  tenThousands: '零',
+  thousands: '貳',
+  hundreds: '伍',
+  tens: '零',
+  ones: '零'
+})
+
+const digitMap = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
+
+const updateChineseAmount = () => {
+  const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
+  const padded = amt.toString().padStart(7, '0')
+  const digits = padded.split('').map(d => digitMap[Number(d)])
+  chineseDigits.value = {
+    millions: digits[0],
+    hundredThousands: digits[1],
+    tenThousands: digits[2],
+    thousands: digits[3],
+    hundreds: digits[4],
+    tens: digits[5],
+    ones: digits[6]
+  }
+}
+
+const onSelectFarmerReceiptOrder = () => {
+  if (!selectedFarmerOrderId.value) return
+  const ord = orderList.value.find(o => o.id === selectedFarmerOrderId.value)
+  if (ord) {
+    const d = new Date(ord.expected_date || ord.order_date)
+    farmerReceipt.value.year = (d.getFullYear() - 1911).toString()
+    farmerReceipt.value.month = (d.getMonth() + 1).toString().padStart(2, '0')
+    farmerReceipt.value.day = d.getDate().toString().padStart(2, '0')
+
+    farmerReceipt.value.buyerName = ord.customer
+
+    const combinedStr = `${ord.note || ''} ${ord.customer || ''}`
+    const taxMatch = combinedStr.match(/\b\d{8}\b/)
+    farmerReceipt.value.taxId = taxMatch ? taxMatch[0] : (ord.note || '')
+
+    const cust = customers.value.find(c => c.name === ord.customer)
+    farmerReceipt.value.buyerAddress = cust?.line_note || '桃園市'
+
+    farmerReceipt.value.itemName = '蝴蝶蘭花禮'
+    farmerReceipt.value.spec = ord.spec || '特級蘭花'
+    farmerReceipt.value.qty = '1 盆'
+    farmerReceipt.value.unitPrice = Number(ord.price).toLocaleString()
+    farmerReceipt.value.totalAmount = Number(ord.price) || 0
+    farmerReceipt.value.note = ord.id
+
+    updateChineseAmount()
+  }
+}
+
+const autoFitFarmerReceipt = () => {
+  if (!farmerReceiptViewportRef.value) return
+  const availWidth = Math.max(farmerReceiptViewportRef.value.clientWidth - 28, 280)
+  farmerZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.35), 1.0)
+}
+
+const fillFarmerReceiptFromOrder = (ord) => {
+  selectedFarmerOrderId.value = ord.id
+  onSelectFarmerReceiptOrder()
+  currentTab.value = 'farmer_receipt'
+  nextTick(() => autoFitFarmerReceipt())
+}
+
+const printFarmerReceipt = () => window.print()
+
+// ==========================================
+// 5. 進貨與庫存
 // ==========================================
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
@@ -1689,7 +1994,7 @@ const saveInventory = async () => {
 }
 
 // ==========================================
-// 5. 客戶資料庫
+// 6. 客戶資料庫
 // ==========================================
 const loadCustomers = async () => {
   const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
@@ -1741,7 +2046,7 @@ const saveCustomer = async () => {
 }
 
 // ==========================================
-// 6. 蘭花品種庫 (照片上傳)
+// 7. 蘭花品種庫
 // ==========================================
 const loadOrchids = async () => {
   const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
@@ -1825,7 +2130,7 @@ const saveOrchid = async () => {
 }
 
 // ==========================================
-// 7. 退貨管理
+// 8. 退貨管理
 // ==========================================
 const loadReturns = async () => {
   const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
@@ -1909,6 +2214,7 @@ const exportOrdersToExcel = () => {
     '預估成本': o.cost,
     '訂單售價': o.price,
     '利潤': o.price - o.cost,
+    '訂單備註/統編': o.note || '',
     '賀卡狀態': o.card_status || '未製作',
     '簽收單狀態': o.receipt_status || '未列印',
     '下單日期': o.order_date,
@@ -1923,7 +2229,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 8. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2072,9 +2378,12 @@ const printCouplet = () => window.print()
 onMounted(() => {
   autoFitZoom()
   autoFitReceipt()
+  autoFitFarmerReceipt()
+  updateChineseAmount()
   window.addEventListener('resize', () => {
     autoFitZoom()
     autoFitReceipt()
+    autoFitFarmerReceipt()
   })
   loadOrchids()
   loadCustomers()
@@ -2173,7 +2482,7 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 狀態徽章與照片 */
+/* 狀態徽章 */
 .select-status { font-weight: bold; padding: 4px 6px; border-radius: 4px; }
 .select-status.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 .select-status.green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
@@ -2181,7 +2490,7 @@ input, select, textarea {
 
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 700px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 750px; }
 .data-table th { background: #f8fafc; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
 .data-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 .action-cell { white-space: nowrap; }
@@ -2197,6 +2506,7 @@ input, select, textarea {
 .edit-btn { background: #3b82f6; color: white; }
 .del-btn { background: #ef4444; color: white; }
 .print-btn { background: #f59e0b; color: white; font-weight: bold; font-size: 12px; }
+.farmer-btn { background: #8b5cf6; color: white; font-weight: bold; font-size: 12px; }
 
 .text-red { color: #dc2626; }
 .text-blue { color: #2563eb; }
@@ -2207,26 +2517,20 @@ input, select, textarea {
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
 
-/* 蘭花品種照片上傳與預覽 */
+/* 蘭花品種照片上傳 */
 .photo-preview-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #f8fafc;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px dashed #cbd5e1;
+  display: flex; align-items: center; gap: 12px; background: #f8fafc;
+  padding: 8px 12px; border-radius: 6px; border: 1px dashed #cbd5e1;
 }
 .preview-label { font-size: 12px; font-weight: bold; color: #475569; }
 .preview-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
 .remove-photo-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 
 .photo-col { width: 60px; text-align: center; }
-.table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.15s; }
-.table-orchid-img:hover { transform: scale(1.1); }
+.table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
-/* 照片燈箱 Modal */
+/* 照片燈箱 */
 .image-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.65); display: flex; justify-content: center; align-items: center;
@@ -2240,7 +2544,7 @@ input, select, textarea {
 .close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
 .image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
 
-/* 簽收單控制面板 */
+/* 簽收單與收據控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .control-panel {
   width: 380px; background: white; padding: 16px;
@@ -2309,7 +2613,7 @@ input, select, textarea {
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* A5 橫式簽收單 (由左至右) */
+/* A5 橫式簽收單 */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 38px 45px;
@@ -2340,6 +2644,139 @@ input, select, textarea {
 }
 .sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
 .sign-box-area { flex: 1; display: flex; justify-content: center; align-items: center; color: #94a3b8; font-size: 13px; min-height: 48px; }
+
+/* ====================================================
+   農民出售農產品收據 (完全一模一樣復刻空白收據 A5 橫式)
+   ==================================================== */
+.farmer-scaler-container { position: relative; }
+.farmer-receipt-sheet {
+  width: 794px;
+  height: 560px;
+  background: #ffffff;
+  padding: 30px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: "DFKai-SB", "BiauKai", serif;
+  color: #000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.f-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 6px;
+}
+.f-main-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-align: center;
+}
+.f-date-wrap {
+  align-self: flex-end;
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+.f-date-wrap span {
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+  border-bottom: 1px solid #000;
+}
+
+.f-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  font-size: 14px;
+}
+.f-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+  height: 26px;
+}
+.f-lbl {
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.f-val {
+  padding-left: 8px !important;
+}
+
+.f-col-header td {
+  text-align: center;
+  font-weight: bold;
+  height: 24px;
+}
+.f-col-name { width: 25%; }
+.f-col-spec { width: 16%; }
+.f-col-qty { width: 10%; }
+.f-col-price { width: 14%; }
+.f-col-total { width: 18%; }
+.f-col-note { width: 17%; }
+
+.f-item-row td { height: 28px; }
+.f-empty-row td { height: 26px; }
+.f-amount-td { padding: 4px 10px !important; }
+.f-chinese-amount-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 15px;
+  font-weight: bold;
+}
+.f-chinese-amount-grid span {
+  font-size: 16px;
+  color: #1e3a8a;
+  min-width: 22px;
+  text-align: center;
+  display: inline-block;
+}
+
+.f-text-center { text-align: center; }
+.f-text-right { text-align: right; }
+.f-bold { font-weight: bold; }
+.f-pr { padding-right: 12px !important; }
+.f-lh1 { line-height: 1.2; }
+.f-pos-rel { position: relative; }
+
+.f-seal-placeholder {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px dashed #dc2626;
+  color: #dc2626;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.f-statement {
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: 1px;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.f-footer-note {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #222;
+  margin-top: 2px;
+  text-align: justify;
+}
+
 .print-action-btn {
   width: 100%; padding: 12px; background: #16a34a; color: white;
   border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
@@ -2354,12 +2791,12 @@ input, select, textarea {
 }
 
 @media print {
-  @page { size: auto; margin: 0; }
+  @page { size: A5 landscape; margin: 0; }
   body, html, .main-wrapper { margin: 0 !important; padding: 0 !important; background: white !important; }
   .no-print { display: none !important; }
   .canvas-viewport, .receipt-preview-area { padding: 0 !important; background: white !important; overflow: visible !important; }
-  .card-scaler-container, .receipt-scaler-container { width: auto !important; height: auto !important; }
+  .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { width: auto !important; height: auto !important; }
   .card-board { position: relative !important; transform: none !important; box-shadow: none !important; }
-  .a5-landscape-sheet { position: relative !important; transform: none !important; box-shadow: none !important; width: 210mm !important; height: 148mm !important; }
+  .a5-landscape-sheet, .farmer-receipt-sheet { position: relative !important; transform: none !important; box-shadow: none !important; width: 210mm !important; height: 148mm !important; }
 }
 </style>
