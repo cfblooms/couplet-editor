@@ -86,60 +86,45 @@
                 </datalist>
               </div>
 
-              <!-- 批發規格 -->
-              <template v-if="formOrder.cust_type === '批發'">
-                <div class="field">
-                  <label>株數 (棵)</label>
-                  <input v-model.number="formOrder.batch_qty" type="number" min="1" />
-                </div>
-                <div class="field">
-                  <label>每棵單價 (元)</label>
-                  <input v-model.number="formOrder.batch_price" type="number" min="0" />
-                </div>
-              </template>
-              <!-- 零售 / 花店規格 -->
-              <template v-else>
-                <div class="field">
-                  <label>株數 (棵)</label>
-                  <input v-model.number="formOrder.stalks" type="number" min="1" />
-                </div>
-                <div class="field">
-                  <label>使用盆器</label>
-                  <select v-model="formOrder.pot">
-                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                    <option value="無盆">無盆</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>快捷盆選擇</label>
-                  <select v-model="formOrder.quick_pot">
-                    <option value="未使用">未使用快捷盆</option>
-                    <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
-                  </select>
-                </div>
-              </template>
-
+              <!-- 株數與單價 -->
               <div class="field">
-                <label>預估成本 (元)</label>
-                <input v-model.number="formOrder.cost" type="number" min="0" />
+                <label>株數 (棵)</label>
+                <input v-model.number="formOrder.stalks" type="number" min="1" @input="calcOrderPrice" />
               </div>
               <div class="field">
+                <label>每棵單價 (元，選填自動乘算)</label>
+                <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" placeholder="單株價格" />
+              </div>
+
+              <!-- 盆器選擇（所有客群皆可選） -->
+              <div class="field">
+                <label>使用盆器</label>
+                <select v-model="formOrder.pot">
+                  <option value="桌上盆 (100)">桌上盆 (成本100)</option>
+                  <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                  <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                  <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                  <option value="無盆">無盆 (裸株/自備盆)</option>
+                </select>
+              </div>
+
+              <!-- 快捷盆選擇 -->
+              <div class="field">
+                <label>快捷盆選擇</label>
+                <select v-model="formOrder.quick_pot">
+                  <option value="未使用">未使用快捷盆</option>
+                  <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>預估總成本 (元)</label>
+                <input v-model.number="formOrder.cost" type="number" min="0" placeholder="花材與盆器成本" />
+              </div>
+
+              <div class="field">
                 <label>訂單總售價 (元)</label>
-                <input 
-                  v-if="formOrder.cust_type === '批發'" 
-                  :value="formOrder.batch_qty * formOrder.batch_price" 
-                  type="text" 
-                  disabled 
-                />
-                <input 
-                  v-else 
-                  v-model.number="formOrder.price" 
-                  type="number" 
-                  min="0" 
-                />
+                <input v-model.number="formOrder.price" type="number" min="0" placeholder="訂單金額" />
               </div>
 
               <div class="field">
@@ -207,7 +192,7 @@
                     <th>週期</th>
                     <th>電話</th>
                     <th>品項規格</th>
-                    <th>盆器與快捷盆</th>
+                    <th>選用盆器</th>
                     <th>售價</th>
                     <th>賀卡</th>
                     <th>簽收單</th>
@@ -223,7 +208,7 @@
                     <td><span class="badge badge-purple">{{ ord.billing_cycle || '每單結' }}</span></td>
                     <td>{{ ord.phone }}</td>
                     <td>{{ ord.spec }}</td>
-                    <td>{{ ord.pot }}</td>
+                    <td><b>{{ ord.pot }}</b></td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
                     <td>
                       <select 
@@ -344,8 +329,8 @@
                     <th>單號</th>
                     <th>下單日</th>
                     <th>客戶名稱</th>
-                    <th>品項與規格細節</th>
-                    <th>盆器</th>
+                    <th>品項規格</th>
+                    <th>選用盆器</th>
                     <th>金額</th>
                     <th>賀卡</th>
                     <th>簽收單</th>
@@ -385,7 +370,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：進貨與庫存 (株數、單株價格、總成本) ================= -->
+        <!-- ================= 模組：進貨與庫存 ================= -->
         <section v-if="subTab === 'inventory'" class="tab-pane">
           <div v-if="editingInvId" class="edit-banner">
             <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
@@ -460,19 +445,14 @@
                 </div>
               </template>
 
-              <!-- 進貨株數 -->
               <div class="field">
                 <label>進貨株數 (棵/個)</label>
                 <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
               </div>
-
-              <!-- 單株價格 -->
               <div class="field">
                 <label>單株價格 (元)</label>
                 <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" placeholder="每棵/個單價" />
               </div>
-
-              <!-- 總進貨成本 -->
               <div class="field">
                 <label>總成本 (元，自動計算)</label>
                 <input v-model.number="formInv.cost" type="number" min="0" placeholder="株數 × 單株價格" />
@@ -625,7 +605,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：蘭花品種庫 (支援照片上傳與縮圖預覽) ================= -->
+        <!-- ================= 模組：蘭花品種庫 ================= -->
         <section v-if="subTab === 'orchid'" class="tab-pane">
           <div v-if="editingOrchidId" class="edit-banner">
             <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
@@ -649,7 +629,6 @@
               </div>
             </div>
 
-            <!-- 照片預覽區 -->
             <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
               <div class="preview-label">照片預覽：</div>
               <img :src="formOrchid.photo_url" class="preview-thumb" alt="品種照片預覽" />
@@ -806,7 +785,7 @@
       </div>
     </div>
 
-    <!-- 照片放大彈出燈箱 -->
+    <!-- 照片放大燈箱 -->
     <div v-if="activeModalPhoto" class="image-modal-overlay" @click="activeModalPhoto = null">
       <div class="image-modal-content" @click.stop>
         <div class="image-modal-header">
@@ -1041,7 +1020,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (依單號代入 + 欄位自由修改) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1085,7 +1064,7 @@
           />
         </div>
 
-        <!-- 自由修改專區 (代入後隨時可修改) -->
+        <!-- 自由修改專區 -->
         <div class="panel-section">
           <label class="section-title">✏️ 簽收單內容確認與修改：</label>
           
@@ -1236,7 +1215,6 @@ const editingCustId = ref(null)
 const editingOrchidId = ref(null)
 const editingRetId = ref(null)
 
-// 蘭花品種照片放大燈箱
 const activeModalPhoto = ref(null)
 const activeModalTitle = ref('')
 const openLargePhoto = (url, name) => {
@@ -1275,13 +1253,12 @@ const formOrder = ref({
   billing_cycle: '每單結',
   phone: '0912-345678',
   orchid_name: '',
-  batch_qty: 50,
-  batch_price: 250,
   stalks: 10,
+  unit_price: 250,
   pot: '桌上盆 (100)',
   quick_pot: '未使用',
   cost: 600,
-  price: 1500,
+  price: 2500,
   card_status: '未製作',
   receipt_status: '未列印',
   shipped_status: '未出貨',
@@ -1293,11 +1270,20 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (盆器、快捷盆與狀態)
+// 1. 訂單模組 (所有客群全面開放盆器與快捷盆)
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
   if (data) orderList.value = data
+}
+
+// 自動計算訂單售價
+const calcOrderPrice = () => {
+  const s = Number(formOrder.value.stalks) || 0
+  const u = Number(formOrder.value.unit_price) || 0
+  if (u > 0) {
+    formOrder.value.price = s * u
+  }
 }
 
 const onOrderCustSelect = () => {
@@ -1320,9 +1306,8 @@ const startEditOrder = (ord) => {
     billing_cycle: ord.billing_cycle || '每單結',
     phone: ord.phone || '',
     orchid_name: ord.spec ? ord.spec.split('|')[0].trim() : '',
-    batch_qty: 50,
-    batch_price: 250,
     stalks: 10,
+    unit_price: 250,
     pot: cleanPot || '桌上盆 (100)',
     quick_pot: hasQuick ? '使用快捷盆 (70)' : '未使用',
     cost: Number(ord.cost) || 0,
@@ -1348,13 +1333,12 @@ const cancelEditOrder = () => {
     billing_cycle: '每單結',
     phone: '0912-345678',
     orchid_name: '',
-    batch_qty: 50,
-    batch_price: 250,
     stalks: 10,
+    unit_price: 250,
     pot: '桌上盆 (100)',
     quick_pot: '未使用',
     cost: 600,
-    price: 1500,
+    price: 2500,
     card_status: '未製作',
     receipt_status: '未列印',
     shipped_status: '未出貨',
@@ -1366,15 +1350,13 @@ const cancelEditOrder = () => {
 
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
-  const isWholesale = formOrder.value.cust_type === '批發'
-  const specStr = isWholesale 
-    ? `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.batch_qty}棵 (單價${formOrder.value.batch_price}元)`
+  
+  const specStr = formOrder.value.unit_price > 0
+    ? `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵 (單價${formOrder.value.unit_price}元)`
     : `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵`
-  const finalPrice = isWholesale ? (formOrder.value.batch_qty * formOrder.value.batch_price) : formOrder.value.price
 
-  const finalPotStr = isWholesale 
-    ? '批發免盆' 
-    : (formOrder.value.pot + (formOrder.value.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : ''))
+  // 忠實記錄盆器與快捷盆
+  const finalPotStr = formOrder.value.pot + (formOrder.value.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
 
   const payload = {
     cust_type: formOrder.value.cust_type,
@@ -1384,7 +1366,7 @@ const saveOrder = async () => {
     spec: specStr,
     pot: finalPotStr,
     cost: formOrder.value.cost,
-    price: finalPrice,
+    price: formOrder.value.price,
     card_status: formOrder.value.card_status,
     receipt_status: formOrder.value.receipt_status,
     shipped_status: formOrder.value.shipped_status,
@@ -1461,8 +1443,9 @@ const statementOrders = computed(() => {
 
     if (statementPeriod.value === 'lastMonth') {
       const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
-      return orderDate >= firstDay && orderDate <= lastDay
+      const lastDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+      return orderDate >= firstDay && orderDate <= lastMonthEnd
     }
     return true
   })
@@ -1599,14 +1582,13 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 進貨與庫存 (進貨株數、單株價格、總成本連動)
+// 4. 進貨與庫存
 // ==========================================
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
   if (data) inventoryList.value = data
 }
 
-// 株數 × 單價 = 總成本
 const calcInvCost = () => {
   const qty = Number(formInv.value.qty) || 0
   const unit = Number(formInv.value.unit_cost) || 0
@@ -1759,14 +1741,13 @@ const saveCustomer = async () => {
 }
 
 // ==========================================
-// 6. 蘭花品種庫 (照片壓縮上傳處理)
+// 6. 蘭花品種庫 (照片上傳)
 // ==========================================
 const loadOrchids = async () => {
   const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
   if (data) orchids.value = data
 }
 
-// 圖片壓縮為輕量 Base64，直接寫入 Supabase 資料表
 const onPhotoFileChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
@@ -1793,7 +1774,6 @@ const onPhotoFileChange = (e) => {
       canvas.height = height
       const ctx = canvas.getContext('2d')
       ctx.drawImage(img, 0, 0, width, height)
-      // 壓縮為優質 JPEG，直接存放
       const compressed = canvas.toDataURL('image/jpeg', 0.75)
       formOrchid.value.photo_url = compressed
     }
