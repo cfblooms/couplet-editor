@@ -28,21 +28,20 @@
       </div>
     </header>
 
-    <!-- ================= 模式 1：蘭花管理系統 (五大模組) ================= -->
+    <!-- ================= 模式 1：蘭花管理系統 ================= -->
     <div v-if="currentTab === 'manage'" class="manage-container no-print">
       <nav class="sub-nav">
         <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
         <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
         <button :class="{ active: subTab === 'inventory' }" @click="subTab = 'inventory'">📦 3. 進貨與庫存</button>
         <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
-        <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種</button>
+        <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
         <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
       </nav>
 
       <div class="manage-content">
         <!-- ================= 模組：訂單與帳務 ================= -->
         <section v-if="subTab === 'order'" class="tab-pane">
-          <!-- 編輯提示橫條 -->
           <div v-if="editingOrderId" class="edit-banner">
             <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
             <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
@@ -87,7 +86,7 @@
                 </datalist>
               </div>
 
-              <!-- 批發規格 (批發株數已改為株數) -->
+              <!-- 批發規格 -->
               <template v-if="formOrder.cust_type === '批發'">
                 <div class="field">
                   <label>株數 (棵)</label>
@@ -107,11 +106,18 @@
                 <div class="field">
                   <label>使用盆器</label>
                   <select v-model="formOrder.pot">
-                    <option value="桌上盆 (100)">桌上盆 (100)</option>
-                    <option value="落地盆-喪 (100)">落地盆-喪 (100)</option>
-                    <option value="落地盆-喜 (200)">落地盆-喜 (200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (280)</option>
+                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
+                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
                     <option value="無盆">無盆</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>快捷盆選擇</label>
+                  <select v-model="formOrder.quick_pot">
+                    <option value="未使用">未使用快捷盆</option>
+                    <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
                   </select>
                 </div>
               </template>
@@ -201,7 +207,7 @@
                     <th>週期</th>
                     <th>電話</th>
                     <th>品項規格</th>
-                    <th>盆器</th>
+                    <th>盆器與快捷盆</th>
                     <th>售價</th>
                     <th>賀卡</th>
                     <th>簽收單</th>
@@ -219,7 +225,6 @@
                     <td>{{ ord.spec }}</td>
                     <td>{{ ord.pot }}</td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
-                    <!-- 賀卡狀態 -->
                     <td>
                       <select 
                         v-model="ord.card_status" 
@@ -231,7 +236,6 @@
                         <option value="免製作">免製作</option>
                       </select>
                     </td>
-                    <!-- 簽收單狀態 -->
                     <td>
                       <select 
                         v-model="ord.receipt_status" 
@@ -242,14 +246,12 @@
                         <option value="已列印">已列印</option>
                       </select>
                     </td>
-                    <!-- 出貨狀態 -->
                     <td>
                       <select v-model="ord.shipped_status" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)">
                         <option value="未出貨">未出貨</option>
                         <option value="已出貨">已出貨</option>
                       </select>
                     </td>
-                    <!-- 收款狀態 -->
                     <td>
                       <select v-model="ord.payment_status" @change="updateOrderField(ord, 'payment_status', ord.payment_status)">
                         <option value="未結">未結</option>
@@ -258,7 +260,7 @@
                     </td>
                     <td class="action-cell">
                       <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
-                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="直接依單號帶入 A5 簽收單">🖨️ 轉簽收單</button>
+                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 轉簽收單</button>
                       <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
                     </td>
                   </tr>
@@ -301,7 +303,6 @@
               </div>
             </div>
 
-            <!-- 統計看版 -->
             <div class="statement-summary-cards mt-3">
               <div class="sum-card red-card">
                 <div class="sum-label">對帳總金額</div>
@@ -317,7 +318,6 @@
               </div>
             </div>
 
-            <!-- 操作列 -->
             <div class="statement-actions mt-3">
               <button class="line-btn" @click="copyLineStatement">
                 📋 一鍵複製 LINE 對帳明細
@@ -385,7 +385,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：進貨與庫存 ================= -->
+        <!-- ================= 模組：進貨與庫存 (株數、單株價格、總成本) ================= -->
         <section v-if="subTab === 'inventory'" class="tab-pane">
           <div v-if="editingInvId" class="edit-banner">
             <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
@@ -452,21 +452,32 @@
                   <label>盆器類型</label>
                   <select v-model="formInv.pot_type" @change="onPotTypeChange">
                     <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                    <option value="落地盆-喪 (100)">落地盆-喪 (100)</option>
-                    <option value="落地盆-喜 (200)">落地盆-喜 (200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (280)</option>
+                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                    <option value="快捷盆 (70)">快捷盆 (成本70)</option>
                   </select>
                 </div>
               </template>
 
+              <!-- 進貨株數 -->
               <div class="field">
-                <label>進貨數量</label>
-                <input v-model.number="formInv.qty" type="number" min="1" />
+                <label>進貨株數 (棵/個)</label>
+                <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
               </div>
+
+              <!-- 單株價格 -->
               <div class="field">
-                <label>總成本 (元)</label>
-                <input v-model.number="formInv.cost" type="number" min="0" />
+                <label>單株價格 (元)</label>
+                <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" placeholder="每棵/個單價" />
               </div>
+
+              <!-- 總進貨成本 -->
+              <div class="field">
+                <label>總成本 (元，自動計算)</label>
+                <input v-model.number="formInv.cost" type="number" min="0" placeholder="株數 × 單株價格" />
+              </div>
+
               <div class="field">
                 <label>供應商 / 花農</label>
                 <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
@@ -497,7 +508,8 @@
                     <th>類別</th>
                     <th>品項名稱</th>
                     <th>規格</th>
-                    <th>進貨數</th>
+                    <th>進貨株數</th>
+                    <th>單株價格</th>
                     <th>總成本</th>
                     <th>供應商</th>
                     <th>日期</th>
@@ -510,8 +522,9 @@
                     <td><span class="badge">{{ inv.category }}</span></td>
                     <td><b>{{ inv.item_name }}</b></td>
                     <td>{{ inv.spec }}</td>
-                    <td>{{ inv.qty }}</td>
-                    <td>${{ inv.cost }}</td>
+                    <td><b>{{ inv.qty }} 棵/個</b></td>
+                    <td class="text-blue">${{ inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0) }}</td>
+                    <td class="text-red"><b>${{ inv.cost }}</b></td>
                     <td>{{ inv.supplier }}</td>
                     <td>{{ inv.date }}</td>
                     <td class="action-cell">
@@ -519,7 +532,7 @@
                       <button class="mini-btn del-btn" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
                     </td>
                   </tr>
-                  <tr v-if="inventoryList.length === 0"><td colspan="9" class="text-center">尚無進貨資料</td></tr>
+                  <tr v-if="inventoryList.length === 0"><td colspan="10" class="text-center">尚無進貨資料</td></tr>
                 </tbody>
               </table>
             </div>
@@ -562,8 +575,8 @@
                 <input v-model="formCust.phone" type="text" placeholder="0912-345678" />
               </div>
               <div class="field">
-                <label>預設送達地址 / 備註</label>
-                <input v-model="formCust.line_note" type="text" placeholder="常用送達地址 (開單時自動帶入簽收單)" />
+                <label>常用送達地址 / 備註</label>
+                <input v-model="formCust.line_note" type="text" placeholder="常用送達地址 (開單將自動填入簽收單)" />
               </div>
             </div>
 
@@ -612,7 +625,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：蘭花品種庫 ================= -->
+        <!-- ================= 模組：蘭花品種庫 (支援照片上傳與縮圖預覽) ================= -->
         <section v-if="subTab === 'orchid'" class="tab-pane">
           <div v-if="editingOrchidId" class="edit-banner">
             <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
@@ -623,14 +636,26 @@
             <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
             <div class="form-grid">
               <div class="field">
-                <label>品種名稱 (例: 大辣椒、V3)</label>
+                <label>品種名稱 (例: 大辣椒、V3、滿天紅)</label>
                 <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
               </div>
               <div class="field">
                 <label>特色說明</label>
-                <input v-model="formOrchid.note" type="text" placeholder="品種特色說明" />
+                <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
+              </div>
+              <div class="field">
+                <label>品種照片 (點選拍照或上傳檔案)</label>
+                <input type="file" accept="image/*" @change="onPhotoFileChange" />
               </div>
             </div>
+
+            <!-- 照片預覽區 -->
+            <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
+              <div class="preview-label">照片預覽：</div>
+              <img :src="formOrchid.photo_url" class="preview-thumb" alt="品種照片預覽" />
+              <button type="button" class="remove-photo-btn" @click="formOrchid.photo_url = ''">✕ 移除照片</button>
+            </div>
+
             <div class="btn-action-row mt-2">
               <button class="primary-btn" @click="saveOrchid">
                 {{ editingOrchidId ? '確認更新品種' : '儲存至品種庫' }}
@@ -648,6 +673,7 @@
                 <thead>
                   <tr>
                     <th>編號</th>
+                    <th>花照</th>
                     <th>品種名稱</th>
                     <th>特色說明</th>
                     <th>操作</th>
@@ -656,6 +682,16 @@
                 <tbody>
                   <tr v-for="item in orchids" :key="item.id">
                     <td>{{ item.id }}</td>
+                    <td class="photo-col">
+                      <img 
+                        v-if="item.photo_url" 
+                        :src="item.photo_url" 
+                        class="table-orchid-img" 
+                        @click="openLargePhoto(item.photo_url, item.name)"
+                        title="點擊查看大圖" 
+                      />
+                      <span v-else class="no-photo-badge">無照片</span>
+                    </td>
                     <td><b>{{ item.name }}</b></td>
                     <td>{{ item.note }}</td>
                     <td class="action-cell">
@@ -663,7 +699,7 @@
                       <button class="mini-btn del-btn" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️</button>
                     </td>
                   </tr>
-                  <tr v-if="orchids.length === 0"><td colspan="4" class="text-center">尚無品種資料</td></tr>
+                  <tr v-if="orchids.length === 0"><td colspan="5" class="text-center">尚無品種資料</td></tr>
                 </tbody>
               </table>
             </div>
@@ -767,6 +803,17 @@
             </div>
           </div>
         </section>
+      </div>
+    </div>
+
+    <!-- 照片放大彈出燈箱 -->
+    <div v-if="activeModalPhoto" class="image-modal-overlay" @click="activeModalPhoto = null">
+      <div class="image-modal-content" @click.stop>
+        <div class="image-modal-header">
+          <span>🌸 {{ activeModalTitle }}</span>
+          <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
+        </div>
+        <img :src="activeModalPhoto" class="image-modal-img" alt="放大照片" />
       </div>
     </div>
 
@@ -994,15 +1041,15 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (完全免打字・單號全自動帶入) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (依單號代入 + 欄位自由修改) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
-        <h2>📋 橫式 A5 簽收單（依單號自動生成）</h2>
+        <h2>📋 橫式 A5 簽收單管理</h2>
 
         <!-- 依單號自動帶入 -->
         <div class="panel-section highlight-panel">
-          <label class="section-title">選擇要列印的訂單編號：</label>
-          <select v-model="selectedOrderId" class="full-input bold-select">
+          <label class="section-title">依訂單編號快速帶入：</label>
+          <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
             <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
             <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
               【{{ ord.id }}】{{ ord.customer }} - {{ ord.spec }} [{{ ord.receipt_status || '未列印' }}]
@@ -1010,7 +1057,7 @@
           </select>
         </div>
 
-        <!-- 花店店名切換 -->
+        <!-- 花店店名設定 -->
         <div class="panel-section">
           <label class="section-title">抬頭花店名稱：</label>
           <div class="btn-group">
@@ -1038,42 +1085,52 @@
           />
         </div>
 
-        <!-- 送達地址微調 -->
+        <!-- 自由修改專區 (代入後隨時可修改) -->
         <div class="panel-section">
-          <label class="section-title">送達地址確認 (自動讀取客戶庫)：</label>
-          <input 
-            type="text" 
-            v-model="receiptAddressOverride" 
-            class="full-input" 
-            placeholder="地址自動帶入，亦可在此臨時微調" 
-          />
-        </div>
+          <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+          
+          <div class="form-group">
+            <label>收件單位 / 聯絡人 / 電話：</label>
+            <input type="text" v-model="receiptForm.recipient" placeholder="例: 宏達實業 總經理室 (0912-345678)" />
+          </div>
 
-        <!-- 當前訂單狀態展示 -->
-        <div v-if="activeReceiptOrder" class="panel-section order-quick-info">
-          <div><b>當前單號：</b>{{ activeReceiptOrder.id }}</div>
-          <div><b>訂購客戶：</b>{{ activeReceiptOrder.customer }} ({{ activeReceiptOrder.phone || '無電話' }})</div>
-          <div><b>預定送達：</b>{{ activeReceiptOrder.expected_date }}</div>
-          <div>
-            <b>簽收單狀態：</b>
-            <span :class="activeReceiptOrder.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
-              {{ activeReceiptOrder.receipt_status || '未列印' }}
-            </span>
+          <div class="form-group">
+            <label>送達地址：</label>
+            <input type="text" v-model="receiptForm.address" placeholder="例: 桃園市桃園區縣府路 82 號 1 樓" />
+          </div>
+
+          <div class="form-group">
+            <label>送達日期：</label>
+            <input type="text" v-model="receiptForm.deliveryDate" placeholder="例: 115-09-03 送達" />
+          </div>
+
+          <div class="form-group">
+            <label>花禮品項規格與盆器：</label>
+            <textarea v-model="receiptForm.item" rows="2" placeholder="花禮品項與盆器規格"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>致贈單位 / 祝賀詞：</label>
+            <input type="text" v-model="receiptForm.giver" placeholder="例: 敬領 誌慶 / 宸豐蘭藝 敬製" />
+          </div>
+
+          <div class="form-group">
+            <label>備註說明：</label>
+            <textarea v-model="receiptForm.notes" rows="2" placeholder="備註或交付注意事項"></textarea>
           </div>
         </div>
 
-        <hr />
         <button 
           type="button" 
           class="print-action-btn" 
-          :disabled="!activeReceiptOrder"
+          :disabled="!receiptForm.recipient && !selectedOrderId"
           @click="printReceiptAndMarkDone"
         >
-          🖨️ 一鍵列印 A5 簽收單 (自動標記已列印)
+          🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
         </button>
       </div>
 
-      <!-- 右側預覽區 -->
+      <!-- 右側預覽區 (A5 橫式) -->
       <div class="receipt-preview-area" ref="receiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
@@ -1083,7 +1140,6 @@
         </div>
 
         <div 
-          v-if="activeReceiptOrder"
           class="receipt-scaler-container"
           :style="{
             width: (794 * receiptZoom) + 'px',
@@ -1097,40 +1153,43 @@
               transformOrigin: 'top left'
             }"
           >
+            <!-- 頂部標頭 -->
             <div class="sheet-header">
               <div class="shop-name-title">{{ displayShopName }}</div>
               <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
               <div class="header-meta">
-                <div><b>訂單編號：</b>{{ activeReceiptOrder.id }}</div>
-                <div><b>送達日期：</b>{{ activeReceiptOrder.expected_date }} 送達</div>
+                <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場直接開單' }}</div>
+                <div><b>送達日期：</b>{{ receiptForm.deliveryDate || '依約定送達' }}</div>
               </div>
             </div>
 
+            <!-- 表格內容 -->
             <table class="receipt-table">
               <tbody>
                 <tr>
                   <td class="lbl">收件單位/人</td>
-                  <td class="val val-bold">{{ activeReceiptOrder.customer }} ({{ activeReceiptOrder.phone || '無電話' }})</td>
+                  <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
                   <td class="lbl">送達地址</td>
-                  <td class="val">{{ currentResolvedAddress || '同訂購人地址 / 門市取貨' }}</td>
+                  <td class="val">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
                 </tr>
                 <tr>
                   <td class="lbl">花禮品項</td>
                   <td class="val val-highlight" colspan="3">
-                    {{ activeReceiptOrder.spec }} 【盆器：{{ activeReceiptOrder.pot }}】
+                    {{ receiptForm.item || '—' }}
                   </td>
                 </tr>
                 <tr>
                   <td class="lbl">致贈/賀詞</td>
-                  <td class="val" colspan="3">敬領 誌慶 / {{ displayShopName }} 敬製</td>
+                  <td class="val" colspan="3">{{ receiptForm.giver || '敬領 誌慶 / 宸豐蘭藝 敬製' }}</td>
                 </tr>
                 <tr>
                   <td class="lbl">備註說明</td>
-                  <td class="val" colspan="3">花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！</td>
+                  <td class="val" colspan="3">{{ receiptForm.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！' }}</td>
                 </tr>
               </tbody>
             </table>
 
+            <!-- 底部簽收欄位 -->
             <div class="sheet-footer">
               <div class="footer-left">
                 <div>送貨司機 / 經手人：______________</div>
@@ -1142,12 +1201,6 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <div v-else class="no-order-selected no-print">
-          <div class="empty-icon">📄</div>
-          <div class="empty-text">請由左上方選擇「訂單編號」，或至訂單列表點擊「🖨️ 轉簽收單」</div>
-          <div class="empty-sub">系統將自動抓取單號、客戶、電話、地址與品項，100% 免手動輸入！</div>
         </div>
       </div>
     </div>
@@ -1183,7 +1236,15 @@ const editingCustId = ref(null)
 const editingOrchidId = ref(null)
 const editingRetId = ref(null)
 
-const formOrchid = ref({ name: '', note: '標準優良品種' })
+// 蘭花品種照片放大燈箱
+const activeModalPhoto = ref(null)
+const activeModalTitle = ref('')
+const openLargePhoto = (url, name) => {
+  activeModalPhoto.value = url
+  activeModalTitle.value = name
+}
+
+const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
   category: '蘭花',
@@ -1194,6 +1255,7 @@ const formInv = ref({
   spec_height: '中',
   pot_type: '桌上盆 (100)',
   qty: 10,
+  unit_cost: 100,
   cost: 1000,
   supplier: '某某花農',
   date: new Date().toISOString().split('T')[0]
@@ -1217,6 +1279,7 @@ const formOrder = ref({
   batch_price: 250,
   stalks: 10,
   pot: '桌上盆 (100)',
+  quick_pot: '未使用',
   cost: 600,
   price: 1500,
   card_status: '未製作',
@@ -1230,7 +1293,7 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (含簽收單狀態)
+// 1. 訂單模組 (盆器、快捷盆與狀態)
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1248,6 +1311,9 @@ const onOrderCustSelect = () => {
 
 const startEditOrder = (ord) => {
   editingOrderId.value = ord.id
+  const hasQuick = (ord.pot || '').includes('快捷盆')
+  const cleanPot = (ord.pot || '').replace(/\s*\+\s*快捷盆/, '').trim()
+
   formOrder.value = {
     cust_type: ord.cust_type || '批發',
     customer: ord.customer || '',
@@ -1257,7 +1323,8 @@ const startEditOrder = (ord) => {
     batch_qty: 50,
     batch_price: 250,
     stalks: 10,
-    pot: ord.pot || '桌上盆 (100)',
+    pot: cleanPot || '桌上盆 (100)',
+    quick_pot: hasQuick ? '使用快捷盆 (70)' : '未使用',
     cost: Number(ord.cost) || 0,
     price: Number(ord.price) || 0,
     card_status: ord.card_status || '未製作',
@@ -1285,6 +1352,7 @@ const cancelEditOrder = () => {
     batch_price: 250,
     stalks: 10,
     pot: '桌上盆 (100)',
+    quick_pot: '未使用',
     cost: 600,
     price: 1500,
     card_status: '未製作',
@@ -1299,11 +1367,14 @@ const cancelEditOrder = () => {
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   const isWholesale = formOrder.value.cust_type === '批發'
-  // 去除「批發」字樣，統一顯示為株數與單價
   const specStr = isWholesale 
     ? `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.batch_qty}棵 (單價${formOrder.value.batch_price}元)`
     : `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵`
   const finalPrice = isWholesale ? (formOrder.value.batch_qty * formOrder.value.batch_price) : formOrder.value.price
+
+  const finalPotStr = isWholesale 
+    ? '批發免盆' 
+    : (formOrder.value.pot + (formOrder.value.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : ''))
 
   const payload = {
     cust_type: formOrder.value.cust_type,
@@ -1311,7 +1382,7 @@ const saveOrder = async () => {
     billing_cycle: formOrder.value.billing_cycle,
     phone: formOrder.value.phone,
     spec: specStr,
-    pot: isWholesale ? '批發免盆' : formOrder.value.pot,
+    pot: finalPotStr,
     cost: formOrder.value.cost,
     price: finalPrice,
     card_status: formOrder.value.card_status,
@@ -1468,7 +1539,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (依單號純自動生成)
+// 3. A5 橫式簽收單 (自動帶入 + 各項自由修改)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1477,30 +1548,31 @@ const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸�
 const receiptViewportRef = ref(null)
 const receiptZoom = ref(1)
 const selectedOrderId = ref('')
-const receiptAddressOverride = ref('')
 
-const activeReceiptOrder = computed(() => {
-  return orderList.value.find(o => o.id === selectedOrderId.value) || null
+const receiptForm = ref({
+  orderId: '',
+  deliveryDate: '115-09-03 送達',
+  recipient: '永全證券 陳柏榮總經理 (0912-345678)',
+  address: '桃園市桃園區縣府路 82 號 1 樓',
+  item: '特級蝴蝶蘭大辣椒 | 10棵 【盆器：落地陶瓷盆-喜 (200) + 快捷盆】',
+  giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
+  notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
 
-const currentResolvedAddress = computed(() => {
-  if (receiptAddressOverride.value) return receiptAddressOverride.value
-  if (!activeReceiptOrder.value) return ''
-  const matchedCust = customers.value.find(c => c.name === activeReceiptOrder.value.customer)
-  return matchedCust ? (matchedCust.line_note || '') : ''
-})
-
-watch(selectedOrderId, (newId) => {
-  if (!newId) {
-    receiptAddressOverride.value = ''
-    return
-  }
-  const ord = orderList.value.find(o => o.id === newId)
+const onSelectReceiptOrder = () => {
+  if (!selectedOrderId.value) return
+  const ord = orderList.value.find(o => o.id === selectedOrderId.value)
   if (ord) {
     const cust = customers.value.find(c => c.name === ord.customer)
-    receiptAddressOverride.value = cust?.line_note || ''
+    receiptForm.value.orderId = ord.id
+    receiptForm.value.deliveryDate = `${ord.expected_date} 送達`
+    receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
+    receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
+    receiptForm.value.item = `${ord.spec} 【盆器：${ord.pot}】`
+    receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
+    receiptForm.value.notes = '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
   }
-})
+}
 
 const autoFitReceipt = () => {
   if (!receiptViewportRef.value) return
@@ -1510,32 +1582,53 @@ const autoFitReceipt = () => {
 
 const fillReceiptFromOrder = (ord) => {
   selectedOrderId.value = ord.id
+  onSelectReceiptOrder()
   currentTab.value = 'receipt'
   nextTick(() => autoFitReceipt())
 }
 
 const printReceiptAndMarkDone = async () => {
-  if (!activeReceiptOrder.value) return
-  await updateOrderField(activeReceiptOrder.value, 'receipt_status', '已列印')
-  activeReceiptOrder.value.receipt_status = '已列印'
+  if (selectedOrderId.value) {
+    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+    if (ord) {
+      await updateOrderField(ord, 'receipt_status', '已列印')
+      ord.receipt_status = '已列印'
+    }
+  }
   window.print()
 }
 
 // ==========================================
-// 4. 進貨與庫存
+// 4. 進貨與庫存 (進貨株數、單株價格、總成本連動)
 // ==========================================
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
   if (data) inventoryList.value = data
 }
 
+// 株數 × 單價 = 總成本
+const calcInvCost = () => {
+  const qty = Number(formInv.value.qty) || 0
+  const unit = Number(formInv.value.unit_cost) || 0
+  formInv.value.cost = qty * unit
+}
+
 const onPotTypeChange = () => {
-  const potCostMap = { '桌上盆 (100)': 100, '落地盆-喪 (100)': 100, '落地盆-喜 (200)': 200, '羅馬盆 (280)': 280 }
-  formInv.value.cost = (potCostMap[formInv.value.pot_type] || 100) * formInv.value.qty
+  const potCostMap = {
+    '桌上盆 (100)': 100,
+    '落地盆陶瓷-喪 (100)': 100,
+    '落地陶瓷盆-喜 (200)': 200,
+    '羅馬盆 (280)': 280,
+    '快捷盆 (70)': 70
+  }
+  const unit = potCostMap[formInv.value.pot_type] || 100
+  formInv.value.unit_cost = unit
+  calcInvCost()
 }
 
 const startEditInv = (inv) => {
   editingInvId.value = inv.id
+  const calculatedUnit = inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0)
   formInv.value = {
     category: inv.category,
     item_name: inv.item_name,
@@ -1545,6 +1638,7 @@ const startEditInv = (inv) => {
     spec_height: '中',
     pot_type: '桌上盆 (100)',
     qty: inv.qty,
+    unit_cost: calculatedUnit,
     cost: inv.cost,
     supplier: inv.supplier,
     date: inv.date
@@ -1565,6 +1659,7 @@ const cancelEditInv = () => {
     spec_height: '中',
     pot_type: '桌上盆 (100)',
     qty: 10,
+    unit_cost: 100,
     cost: 1000,
     supplier: '某某花農',
     date: new Date().toISOString().split('T')[0]
@@ -1584,6 +1679,7 @@ const saveInventory = async () => {
     item_name: itemName,
     spec: specDesc,
     qty: formInv.value.qty,
+    unit_cost: formInv.value.unit_cost,
     cost: formInv.value.cost,
     supplier: formInv.value.supplier,
     date: formInv.value.date
@@ -1663,23 +1759,66 @@ const saveCustomer = async () => {
 }
 
 // ==========================================
-// 6. 蘭花品種與退貨模組
+// 6. 蘭花品種庫 (照片壓縮上傳處理)
 // ==========================================
 const loadOrchids = async () => {
   const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
   if (data) orchids.value = data
 }
+
+// 圖片壓縮為輕量 Base64，直接寫入 Supabase 資料表
+const onPhotoFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const maxDim = 800
+      let width = img.width
+      let height = img.height
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      // 壓縮為優質 JPEG，直接存放
+      const compressed = canvas.toDataURL('image/jpeg', 0.75)
+      formOrchid.value.photo_url = compressed
+    }
+    img.src = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
 const startEditOrchid = (item) => {
   editingOrchidId.value = item.id
-  formOrchid.value = { name: item.name, note: item.note || '' }
+  formOrchid.value = { 
+    name: item.name, 
+    note: item.note || '',
+    photo_url: item.photo_url || ''
+  }
   nextTick(() => {
     document.getElementById('orchid-form-box')?.scrollIntoView({ behavior: 'smooth' })
   })
 }
+
 const cancelEditOrchid = () => {
   editingOrchidId.value = null
-  formOrchid.value = { name: '', note: '標準優良品種' }
+  formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
 }
+
 const saveOrchid = async () => {
   if (!formOrchid.value.name) return alert('請輸入品種名稱！')
   const payload = { ...formOrchid.value }
@@ -1689,6 +1828,8 @@ const saveOrchid = async () => {
       alert('品種修改成功！')
       cancelEditOrchid()
       loadOrchids()
+    } else {
+      alert('修改失敗：' + error.message)
     }
   } else {
     const newId = 'DB' + Date.now().toString().slice(-5)
@@ -1697,10 +1838,15 @@ const saveOrchid = async () => {
       alert('品種新增成功！')
       cancelEditOrchid()
       loadOrchids()
+    } else {
+      alert('新增失敗：' + error.message)
     }
   }
 }
 
+// ==========================================
+// 7. 退貨管理
+// ==========================================
 const loadReturns = async () => {
   const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
   if (data) returnList.value = data
@@ -1779,7 +1925,7 @@ const exportOrdersToExcel = () => {
     '結帳週期': o.billing_cycle || '每單結',
     '聯絡電話': o.phone,
     '品種與規格': o.spec,
-    '盆器類型': o.pot,
+    '盆器與快捷盆': o.pot,
     '預估成本': o.cost,
     '訂單售價': o.price,
     '利潤': o.price - o.cost,
@@ -1797,7 +1943,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 7. 花卡 / 輓聯編輯器
+// 8. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2047,7 +2193,7 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 狀態下拉選單與徽章 */
+/* 狀態徽章與照片 */
 .select-status { font-weight: bold; padding: 4px 6px; border-radius: 4px; }
 .select-status.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 .select-status.green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
@@ -2057,7 +2203,7 @@ input, select, textarea {
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 700px; }
 .data-table th { background: #f8fafc; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
-.data-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+.data-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 .action-cell { white-space: nowrap; }
 
 .badge { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
@@ -2081,6 +2227,39 @@ input, select, textarea {
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
 
+/* 蘭花品種照片上傳與預覽 */
+.photo-preview-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+}
+.preview-label { font-size: 12px; font-weight: bold; color: #475569; }
+.preview-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+
+.photo-col { width: 60px; text-align: center; }
+.table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.15s; }
+.table-orchid-img:hover { transform: scale(1.1); }
+.no-photo-badge { font-size: 11px; color: #94a3b8; }
+
+/* 照片燈箱 Modal */
+.image-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.65); display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+}
+.image-modal-content {
+  background: white; border-radius: 12px; padding: 16px; max-width: 90vw; max-height: 90vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; }
+.close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+.image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
+
 /* 簽收單控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .control-panel {
@@ -2090,11 +2269,10 @@ input, select, textarea {
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
-.order-quick-info { font-size: 13px; line-height: 1.8; color: #1e293b; }
 
 .section-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; }
 .form-group { margin-bottom: 10px; }
-.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #334155; }
 .bottom-input-group { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .line-num { font-size: 12px; font-weight: bold; color: #64748b; width: 38px; }
 .form-row, .btn-group { display: flex; gap: 6px; }
@@ -2151,7 +2329,7 @@ input, select, textarea {
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* A5 橫式簽收單 */
+/* A5 橫式簽收單 (由左至右) */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 38px 45px;
@@ -2187,14 +2365,6 @@ input, select, textarea {
   border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-.no-order-selected {
-  margin-top: 60px; text-align: center; background: white;
-  padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); max-width: 480px;
-}
-.empty-icon { font-size: 48px; margin-bottom: 12px; }
-.empty-text { font-size: 16px; font-weight: bold; color: #1e293b; margin-bottom: 8px; }
-.empty-sub { font-size: 13px; color: #64748b; }
 
 @media (max-width: 768px) {
   .app-container, .receipt-container { flex-direction: column; overflow-y: auto; }
