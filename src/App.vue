@@ -47,7 +47,7 @@
       </nav>
 
       <div class="manage-content">
-        <!-- ================= 模組：訂單與帳務 ================= -->
+        <!-- 模組：訂單與帳務 -->
         <section v-if="subTab === 'order'" class="tab-pane">
           <div v-if="editingOrderId" class="edit-banner">
             <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
@@ -292,7 +292,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：客戶未結對帳專區 ================= -->
+        <!-- 客戶未結對帳專區 -->
         <section v-if="subTab === 'statement'" class="tab-pane">
           <div class="card-box">
             <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -409,7 +409,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：進貨與庫存 ================= -->
+        <!-- 進貨與庫存 -->
         <section v-if="subTab === 'inventory'" class="tab-pane">
           <div v-if="editingInvId" class="edit-banner">
             <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
@@ -560,7 +560,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：客戶資料庫 ================= -->
+        <!-- 客戶資料庫 -->
         <section v-if="subTab === 'customer'" class="tab-pane">
           <div v-if="editingCustId" class="edit-banner">
             <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
@@ -646,7 +646,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：蘭花品種庫 ================= -->
+        <!-- 蘭花品種庫 -->
         <section v-if="subTab === 'orchid'" class="tab-pane">
           <div v-if="editingOrchidId" class="edit-banner">
             <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
@@ -726,7 +726,7 @@
           </div>
         </section>
 
-        <!-- ================= 模組：退貨管理區 ================= -->
+        <!-- 退貨管理區 -->
         <section v-if="subTab === 'return'" class="tab-pane">
           <div v-if="editingRetId" class="edit-banner">
             <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
@@ -1218,7 +1218,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (100% 精準復刻會計憑證) ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 精準復刻原圖排版與大寫對齊) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1380,29 +1380,28 @@
                 <tr class="f-item-row f-empty-row">
                   <td colspan="2"></td><td></td><td></td><td></td><td colspan="2"></td><td></td>
                 </tr>
-                <!-- 合計大寫金額 -->
+                <!-- 合計大寫金額 (完美修復對齊) -->
                 <tr>
                   <td class="f-lbl">合計新台幣<br>(中文大寫)</td>
                   <td colspan="7" class="f-amount-td">
-                    <div class="f-chinese-amount-grid">
-                      <span>拾</span> <span>萬</span> <span>仟</span> <span>佰</span> <span>拾</span> <span>元</span> <span>角</span> <span>分</span>
-                    </div>
-                    <div class="f-chinese-amount-values">
-                      <span>{{ chineseDigits.hundredThousands }}</span>
-                      <span>{{ chineseDigits.tenThousands }}</span>
-                      <span>{{ chineseDigits.thousands }}</span>
-                      <span>{{ chineseDigits.hundreds }}</span>
-                      <span>{{ chineseDigits.tens }}</span>
-                      <span>{{ chineseDigits.ones }}</span>
+                    <div class="f-amount-layout">
+                      <div class="f-amount-col"><span>拾</span><b>{{ chineseDigits.hundredThousands }}</b></div>
+                      <div class="f-amount-col"><span>萬</span><b>{{ chineseDigits.tenThousands }}</b></div>
+                      <div class="f-amount-col"><span>仟</span><b>{{ chineseDigits.thousands }}</b></div>
+                      <div class="f-amount-col"><span>佰</span><b>{{ chineseDigits.hundreds }}</b></div>
+                      <div class="f-amount-col"><span>拾</span><b>{{ chineseDigits.tens }}</b></div>
+                      <div class="f-amount-col"><span>元</span><b>{{ chineseDigits.ones }}</b></div>
+                      <div class="f-amount-col"><span>角</span><b>零</b></div>
+                      <div class="f-amount-col"><span>分</span><b>零</b></div>
                     </div>
                   </td>
                 </tr>
-                <!-- 底部農民資料 (與圖片完全對齊) -->
+                <!-- 底部農民資料 (蔡鎮遠旁邊留白蓋章) -->
                 <tr>
                   <td class="f-lbl f-lh1">農（漁、牧）民姓名</td>
-                  <td class="f-val f-bold f-text-center f-pos-rel">
-                    蔡鎮遠
-                    <span class="f-seal-box">蓋章</span>
+                  <td class="f-val f-bold f-text-center f-farmer-name-cell">
+                    <span>蔡鎮遠</span>
+                    <span class="f-seal-space">蓋章</span>
                   </td>
                   <td class="f-lbl f-lh1" colspan="2">國民統一身分證編號</td>
                   <td class="f-val f-bold f-text-center" colspan="4">F129940801</td>
@@ -1512,7 +1511,7 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (含統編與開收據狀態)
+// 1. 訂單模組
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1864,7 +1863,7 @@ const digitMap = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌',
 
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
-  const padded = amt.toString().padStart(6, '0')
+  const padded = amt.toString().padStart(6, '0') // 6位對應 拾萬 萬 仟 佰 拾 元
   const digits = padded.split('').map(d => digitMap[Number(d)])
   chineseDigits.value = {
     hundredThousands: digits[0],
@@ -2301,7 +2300,7 @@ const funeralPhrases = {
   f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
   m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
   m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
-  m_0_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
   m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
 }
 const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
@@ -2688,7 +2687,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (完全擬真重構版)
+   農民出售農產品收據 (完美修復中文大寫與蓋章排版)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -2787,29 +2786,36 @@ input, select, textarea {
 
 .f-item-row td { height: 26px; }
 .f-empty-row td { height: 24px; }
-.f-amount-td { padding: 3px 8px !important; }
+.f-amount-td { padding: 2px 6px !important; }
 
-.f-chinese-amount-grid {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  font-size: 13px;
-  font-weight: bold;
-  border-bottom: 1px dotted #666;
-  padding-bottom: 2px;
-}
-.f-chinese-amount-values {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  font-size: 15px;
-  font-weight: bold;
-  color: #1e3a8a;
-  padding-top: 2px;
-}
-.f-chinese-amount-values span {
-  min-width: 28px;
+/* 完美對齊中文大寫金額表格 */
+.f-amount-layout {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
   text-align: center;
+  font-weight: bold;
+}
+.f-amount-col {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #000;
+  font-size: 12px;
+}
+.f-amount-col:last-child {
+  border-right: none;
+}
+.f-amount-col span {
+  background: #f1f5f9;
+  border-bottom: 1px solid #000;
+  font-size: 11px;
+  color: #334155;
+  padding: 1px 0;
+}
+.f-amount-col b {
+  font-size: 16px;
+  color: #1e3a8a;
+  padding: 2px 0;
 }
 
 .f-text-center { text-align: center; }
@@ -2817,16 +2823,21 @@ input, select, textarea {
 .f-bold { font-weight: bold; }
 .f-pr { padding-right: 10px !important; }
 .f-lh1 { line-height: 1.2; }
-.f-pos-rel { position: relative; }
 
-.f-seal-box {
+/* 蔡鎮遠旁邊的蓋章空格 */
+.f-farmer-name-cell {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.f-seal-space {
   display: inline-block;
   border: 1px dashed #dc2626;
   color: #dc2626;
   font-size: 11px;
-  padding: 1px 8px;
+  padding: 2px 12px;
   border-radius: 3px;
-  margin-left: 12px;
+  letter-spacing: 2px;
 }
 
 .f-statement {
