@@ -1213,7 +1213,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (住址整大格無分割線) ================= -->
+    <!-- ================= 模式 4：農民收據 (住址單一大格無格線，整齊無多餘框) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1256,7 +1256,7 @@
           </div>
 
           <div class="form-group">
-            <label>住址 (右側一大格完整顯示)：</label>
+            <label>住址 (右側單一大格完整顯示)：</label>
             <input type="text" v-model="farmerReceipt.buyerAddress" />
           </div>
 
@@ -1308,7 +1308,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (完全一模一樣復刻圖片結構，住址整大格) -->
+      <!-- 右側預覽區 (完全獨立欄位網格，絕無垂直線貫穿住址) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1331,7 +1331,7 @@
               transformOrigin: 'top left'
             }"
           >
-            <!-- 標題與日期 (日期往下微調增加間距) -->
+            <!-- 標題與日期 -->
             <div class="f-header">
               <div class="f-title-wrap">
                 <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
@@ -1341,78 +1341,99 @@
               </div>
             </div>
 
-            <!-- 主表格 (住址整大格合併，無分割線) -->
-            <table class="f-table">
-              <tbody>
-                <tr>
-                  <td class="f-lbl f-w-head">購貨商號名稱</td>
-                  <td class="f-val f-buyer-val">{{ farmerReceipt.buyerName }}</td>
-                  <!-- 住址：跨兩列高度的直書大標籤 -->
-                  <td class="f-lbl f-w-addr" rowspan="2">住<br><br>址</td>
-                  <!-- 地址填寫區：跨兩列高度的單一完整大框 -->
-                  <td class="f-val f-big-addr-cell" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
-                </tr>
-                <tr>
-                  <td class="f-lbl">統一編號</td>
-                  <td class="f-val f-tax-clean">{{ farmerReceipt.taxId }}</td>
-                </tr>
-                <tr class="f-col-header">
-                  <td class="f-col-name">品 名</td>
-                  <td class="f-col-spec">規 格</td>
-                  <td class="f-col-qty">數 量</td>
-                  <td class="f-col-price">單 價</td>
-                  <td class="f-col-amt">金 額</td>
-                  <td class="f-col-note">備 註</td>
-                </tr>
-                <!-- 項目行 -->
-                <tr class="f-item-row">
-                  <td class="f-text-center f-bold">{{ farmerReceipt.itemName }}</td>
-                  <td class="f-text-center">{{ farmerReceipt.spec }}</td>
-                  <td class="f-text-center">{{ farmerReceipt.qty }}</td>
-                  <td class="f-text-center">{{ farmerReceipt.unitPrice }}</td>
-                  <td class="f-text-right f-bold f-pr">${{ farmerReceipt.totalAmount }}</td>
-                  <td class="f-text-center">{{ farmerReceipt.note }}</td>
-                </tr>
-                <!-- 空白行 1 -->
-                <tr class="f-item-row f-empty-row">
-                  <td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <!-- 空白行 2 -->
-                <tr class="f-item-row f-empty-row">
-                  <td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <!-- 合計大寫金額 (單一行排開) -->
-                <tr>
-                  <td class="f-lbl">合計新台幣(中文大寫):</td>
-                  <td colspan="5" class="f-amount-td">
-                    <div class="f-chinese-amount-line">
-                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
-                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
-                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
-                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.ones }}</span> 元
-                      <span class="d-val">零</span> 角
-                      <span class="d-val">零</span> 分
-                    </div>
-                  </td>
-                </tr>
-                <!-- 底部農民資料 (第一列：農民姓名蔡鎮遠直接橫寫留白印章空間) -->
-                <tr>
-                  <td class="f-lbl f-lh1">農（漁、牧）民姓名</td>
-                  <td class="f-val f-farmer-clean-cell" colspan="5">
-                    <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  </td>
-                </tr>
-                <!-- 底部農民資料 (第二列：住址與統一身分證編號皆為橫向單行) -->
-                <tr>
-                  <td class="f-lbl f-lh1">住 址</td>
-                  <td class="f-val" colspan="2"></td>
-                  <td class="f-lbl f-lh1">國民統一身分證編號</td>
-                  <td class="f-val f-bold f-text-center" colspan="2">F129940801</td>
-                </tr>
-              </tbody>
-            </table>
+            <!-- 主表格 (採用純淨 Flex 網格架構，徹底杜絕貫穿線與多餘格子) -->
+            <div class="f-receipt-grid-table">
+              <!-- 第 1 區塊：購貨商號 + 統編 + 右側單一大格住址 -->
+              <div class="f-grid-row f-row-top">
+                <div class="f-col-buyer-group">
+                  <div class="f-sub-row">
+                    <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
+                    <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
+                  </div>
+                  <div class="f-sub-row">
+                    <div class="f-grid-lbl f-w-head">統一編號</div>
+                    <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
+                  </div>
+                </div>
+                <!-- 垂直置中的住址標籤 -->
+                <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
+                <!-- 單一大格住址填寫區，無任何直橫線截斷 -->
+                <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
+              </div>
+
+              <!-- 第 2 區塊：品名 規格 數量 單價 金額 備註 表頭 -->
+              <div class="f-grid-row f-header-row">
+                <div class="f-grid-lbl col-p-name">品 名</div>
+                <div class="f-grid-lbl col-p-spec">規 格</div>
+                <div class="f-grid-lbl col-p-qty">數 量</div>
+                <div class="f-grid-lbl col-p-price">單 價</div>
+                <div class="f-grid-lbl col-p-amt">金 額</div>
+                <div class="f-grid-lbl col-p-note">備 註</div>
+              </div>
+
+              <!-- 第 3 區塊：資料項目列 -->
+              <div class="f-grid-row f-data-row">
+                <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
+                <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
+                <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
+                <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">${{ farmerReceipt.totalAmount }}</div>
+                <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
+              </div>
+
+              <!-- 空白列 1 -->
+              <div class="f-grid-row f-data-row f-empty-row">
+                <div class="f-grid-val col-p-name"></div>
+                <div class="f-grid-val col-p-spec"></div>
+                <div class="f-grid-val col-p-qty"></div>
+                <div class="f-grid-val col-p-price"></div>
+                <div class="f-grid-val col-p-amt"></div>
+                <div class="f-grid-val col-p-note"></div>
+              </div>
+
+              <!-- 空白列 2 -->
+              <div class="f-grid-row f-data-row f-empty-row">
+                <div class="f-grid-val col-p-name"></div>
+                <div class="f-grid-val col-p-spec"></div>
+                <div class="f-grid-val col-p-qty"></div>
+                <div class="f-grid-val col-p-price"></div>
+                <div class="f-grid-val col-p-amt"></div>
+                <div class="f-grid-val col-p-note"></div>
+              </div>
+
+              <!-- 第 4 區塊：中文大寫金額單一行 -->
+              <div class="f-grid-row f-amount-row">
+                <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
+                <div class="f-grid-val f-amount-val-cell">
+                  <div class="f-chinese-amount-line">
+                    <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
+                    <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
+                    <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
+                    <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
+                    <span class="d-val">{{ chineseDigits.tens }}</span> 拾
+                    <span class="d-val">{{ chineseDigits.ones }}</span> 元
+                    <span class="d-val">零</span> 角
+                    <span class="d-val">零</span> 分
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第 5 區塊：農民姓名蔡鎮遠（橫式無小框） -->
+              <div class="f-grid-row f-farmer-info-row">
+                <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
+                <div class="f-grid-val f-farmer-clean-cell f-flex-1">
+                  <span class="f-farmer-name-clean">蔡鎮遠</span>
+                </div>
+              </div>
+
+              <!-- 第 6 區塊：住址與統一身分證編號（標準單行橫式） -->
+              <div class="f-grid-row f-id-addr-row">
+                <div class="f-grid-lbl f-w-head">住 址</div>
+                <div class="f-grid-val f-flex-1"></div>
+                <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
+                <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
+              </div>
+            </div>
 
             <!-- 附註法條聲明 -->
             <div class="f-statement">
@@ -1834,7 +1855,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (住址一大格)
+// 4. 農民收據 (排版結構獨立無貫穿線)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -2792,14 +2813,14 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (住址整大格，無分割線)
+   農民出售農產品收據 (全新無貫穿線獨立 Flex-Grid 表格架構)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px;
   height: 560px;
   background: #ffffff;
-  padding: 22px 35px;
+  padding: 24px 35px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -2812,13 +2833,12 @@ input, select, textarea {
   left: 0;
 }
 
-/* 標題與日期 (往下增加間距) */
 .f-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .f-main-title {
   font-size: 24px;
@@ -2839,40 +2859,76 @@ input, select, textarea {
   border-bottom: 1px solid #000;
 }
 
-.f-table {
-  width: 100%;
-  border-collapse: collapse;
+/* 獨立外框網格 */
+.f-receipt-grid-table {
   border: 2px solid #000;
+  display: flex;
+  flex-direction: column;
   font-size: 13.5px;
 }
-.f-table td {
-  border: 1px solid #000;
-  padding: 4px 6px;
-  height: 25px;
+
+.f-grid-row {
+  display: flex;
+  border-bottom: 1px solid #000;
+  min-height: 26px;
 }
-.f-lbl {
-  text-align: center;
+.f-grid-row:last-child {
+  border-bottom: none;
+}
+
+.f-grid-lbl {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-weight: bold;
   letter-spacing: 2px;
-}
-.f-val {
-  padding-left: 8px !important;
+  text-align: center;
+  border-right: 1px solid #000;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.f-w-head { width: 18%; }
-.f-w-addr { width: 6%; text-align: center; line-height: 1.4; font-weight: bold; }
-.f-buyer-val { width: 44%; }
+.f-grid-val {
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  border-right: 1px solid #000;
+  box-sizing: border-box;
+}
+.f-grid-val:last-child {
+  border-right: none;
+}
 
-/* 住址單一挑高大格：整大格呈現，無任何分割線 */
-.f-big-addr-cell {
-  width: 32%;
-  vertical-align: middle;
-  padding: 6px 12px !important;
+.f-flex-1 { flex: 1; }
+
+/* 頂部區塊 */
+.f-row-top { min-height: 54px; }
+.f-col-buyer-group {
+  display: flex;
+  flex-direction: column;
+  width: 58%;
+  border-right: 1px solid #000;
+}
+.f-sub-row {
+  display: flex;
+  flex: 1;
+  border-bottom: 1px solid #000;
+}
+.f-sub-row:last-child {
+  border-bottom: none;
+}
+
+.f-w-head { width: 140px; }
+.f-w-addr-tag { width: 34px; line-height: 1.3; }
+.f-full-addr-box {
+  flex: 1;
+  padding: 8px 12px;
   font-size: 14px;
   line-height: 1.5;
+  border-right: none !important;
 }
 
-/* 統一編號：整格統一顯示，無內部垂直格線 */
 .f-tax-clean {
   font-size: 16px;
   font-weight: bold;
@@ -2880,27 +2936,37 @@ input, select, textarea {
   color: #1e3a8a;
 }
 
-.f-col-header td {
-  text-align: center;
+/* 品項表頭與資料列寬度分配 */
+.col-p-name { width: 25%; }
+.col-p-spec { width: 16%; }
+.col-p-qty  { width: 10%; }
+.col-p-price{ width: 14%; }
+.col-p-amt  { width: 18%; }
+.col-p-note { width: 17%; border-right: none !important; }
+
+.f-header-row {
   font-weight: bold;
+  height: 25px;
+}
+.f-data-row {
+  height: 26px;
+}
+.f-empty-row {
   height: 24px;
 }
-.f-col-name { width: 25%; }
-.f-col-spec { width: 16%; }
-.f-col-qty { width: 10%; }
-.f-col-price { width: 14%; }
-.f-col-amt { width: 18%; }
-.f-col-note { width: 17%; }
 
-.f-item-row td { height: 26px; }
-.f-empty-row td { height: 24px; }
-.f-amount-td { padding: 4px 10px !important; }
-
-/* 大寫金額單一行 */
+/* 中文大寫列 */
+.f-w-total-lbl { width: 170px; }
+.f-amount-val-cell {
+  flex: 1;
+  border-right: none !important;
+  padding: 2px 10px;
+}
 .f-chinese-amount-line {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  width: 100%;
   font-size: 15px;
   font-weight: bold;
 }
@@ -2908,18 +2974,12 @@ input, select, textarea {
   color: #1e3a8a;
   min-width: 24px;
   text-align: center;
-  display: inline-block;
   font-size: 16px;
 }
 
-.f-text-center { text-align: center; }
-.f-text-right { text-align: right; }
-.f-bold { font-weight: bold; }
-.f-pr { padding-right: 12px !important; }
-.f-lh1 { line-height: 1.2; }
-
-/* 蔡鎮遠姓名橫式，無小框與印章提示 */
+/* 農民資訊列 */
 .f-farmer-clean-cell {
+  border-right: none !important;
   padding-left: 24px !important;
 }
 .f-farmer-name-clean {
@@ -2927,6 +2987,14 @@ input, select, textarea {
   letter-spacing: 6px;
   font-weight: bold;
 }
+
+.f-w-id-lbl { width: 180px; }
+.f-w-id-val { width: 180px; border-right: none !important; }
+
+.f-text-center { justify-content: center; text-align: center; }
+.f-text-right { justify-content: flex-end; text-align: right; }
+.f-bold { font-weight: bold; }
+.f-pr { padding-right: 12px !important; }
 
 .f-statement {
   font-size: 11.5px;
