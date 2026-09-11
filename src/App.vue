@@ -503,6 +503,7 @@
                 <label>供應商 / 花農</label>
                 <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
               </div>
+
               <div class="field">
                 <label>進貨日期</label>
                 <input v-model="formInv.date" type="date" />
@@ -1213,7 +1214,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (住址單一大格無格線，整齊無多餘框) ================= -->
+    <!-- ================= 模式 4：農民收據 (中文大寫單行・住址一大格・日期位置優化無底線) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1256,7 +1257,7 @@
           </div>
 
           <div class="form-group">
-            <label>住址 (右側單一大格完整顯示)：</label>
+            <label>住址 (整大格顯示)：</label>
             <input type="text" v-model="farmerReceipt.buyerAddress" />
           </div>
 
@@ -1308,7 +1309,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (完全獨立欄位網格，絕無垂直線貫穿住址) -->
+      <!-- 右側預覽區 (完全對齊A5全滿比例，結構穩固) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1331,17 +1332,17 @@
               transformOrigin: 'top left'
             }"
           >
-            <!-- 標題與日期 -->
+            <!-- 標題與日期 (日期往下微調增加間距，數字下方無底線) -->
             <div class="f-header">
               <div class="f-title-wrap">
                 <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
               </div>
               <div class="f-date-wrap">
-                中華民國 <span>{{ farmerReceipt.year }}</span> 年 <span>{{ farmerReceipt.month }}</span> 月 <span>{{ farmerReceipt.day }}</span> 日
+                中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
               </div>
             </div>
 
-            <!-- 主表格 (採用純淨 Flex 網格架構，徹底杜絕貫穿線與多餘格子) -->
+            <!-- 主表格架構 (大尺寸 A5 適配) -->
             <div class="f-receipt-grid-table">
               <!-- 第 1 區塊：購貨商號 + 統編 + 右側單一大格住址 -->
               <div class="f-grid-row f-row-top">
@@ -1357,7 +1358,7 @@
                 </div>
                 <!-- 垂直置中的住址標籤 -->
                 <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
-                <!-- 單一大格住址填寫區，無任何直橫線截斷 -->
+                <!-- 單一大格住址填寫區，無任何多餘垂直線 -->
                 <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
               </div>
 
@@ -1401,7 +1402,7 @@
                 <div class="f-grid-val col-p-note"></div>
               </div>
 
-              <!-- 第 4 區塊：中文大寫金額單一行 -->
+              <!-- 第 4 區塊：合計新台幣(中文大寫): 單一行完整排開 -->
               <div class="f-grid-row f-amount-row">
                 <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                 <div class="f-grid-val f-amount-val-cell">
@@ -1418,7 +1419,7 @@
                 </div>
               </div>
 
-              <!-- 第 5 區塊：農民姓名蔡鎮遠（橫式無小框） -->
+              <!-- 第 5 區塊：農民姓名蔡鎮遠（橫式無小框，空間寬大） -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-clean-cell f-flex-1">
@@ -1855,7 +1856,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (排版結構獨立無貫穿線)
+// 4. 農民收據 (住址單一大格無格線，整齊無多餘框)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1965,23 +1966,23 @@ const exportFarmerReceiptImage = () => {
 
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#000000'
-  ctx.strokeRect(40, 95, 714, 370)
+  ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
   ctx.font = `bold 14px ${fontFam}`
-  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 125)
-  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 155)
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
-  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 195)
-  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 235)
-  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 285)
-  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 50, 335)
-  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 50, 365)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
+  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
+  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 365)
   
   ctx.font = `11px ${fontFam}`
-  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 50, 405)
+  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
   ctx.font = `9.5px ${fontFam}`
-  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 50, 430)
+  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
 
   const link = document.createElement('a')
   link.download = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
@@ -2717,7 +2718,7 @@ input, select, textarea {
 .close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
 .image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
 
-/* 簽收單與收據控制面板 */
+/* 控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .control-panel {
   width: 380px; background: white; padding: 16px;
@@ -2746,7 +2747,7 @@ input, select, textarea {
 }
 .reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; }
 
-/* 畫布視窗與自適應 */
+/* 畫布視窗 */
 .canvas-viewport, .receipt-preview-area {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   overflow: auto; padding: 16px; position: relative; background-color: #cbd5e1;
@@ -2813,14 +2814,14 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (全新無貫穿線獨立 Flex-Grid 表格架構)
+   農民出售農產品收據 (A5 滿版放大優化)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px;
   height: 560px;
   background: #ffffff;
-  padding: 24px 35px;
+  padding: 18px 28px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -2833,44 +2834,39 @@ input, select, textarea {
   left: 0;
 }
 
+/* 標題與日期 (往下增加間距，無底線純淨文字) */
 .f-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .f-main-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   text-align: center;
 }
 .f-date-wrap {
   align-self: flex-end;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 2px;
-  margin-top: 8px;
-}
-.f-date-wrap span {
-  display: inline-block;
-  min-width: 26px;
-  text-align: center;
-  border-bottom: 1px solid #000;
+  margin-top: 10px; /* 往下微調距離 */
 }
 
-/* 獨立外框網格 */
+/* 獨立外框網格：滿版等比擴大 */
 .f-receipt-grid-table {
   border: 2px solid #000;
   display: flex;
   flex-direction: column;
-  font-size: 13.5px;
+  font-size: 14.5px;
 }
 
 .f-grid-row {
   display: flex;
   border-bottom: 1px solid #000;
-  min-height: 26px;
+  min-height: 29px;
 }
 .f-grid-row:last-child {
   border-bottom: none;
@@ -2884,7 +2880,7 @@ input, select, textarea {
   letter-spacing: 2px;
   text-align: center;
   border-right: 1px solid #000;
-  padding: 2px 4px;
+  padding: 3px 5px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -2892,7 +2888,7 @@ input, select, textarea {
 .f-grid-val {
   display: flex;
   align-items: center;
-  padding-left: 8px;
+  padding-left: 10px;
   border-right: 1px solid #000;
   box-sizing: border-box;
 }
@@ -2903,7 +2899,7 @@ input, select, textarea {
 .f-flex-1 { flex: 1; }
 
 /* 頂部區塊 */
-.f-row-top { min-height: 54px; }
+.f-row-top { min-height: 62px; }
 .f-col-buyer-group {
   display: flex;
   flex-direction: column;
@@ -2919,18 +2915,18 @@ input, select, textarea {
   border-bottom: none;
 }
 
-.f-w-head { width: 140px; }
-.f-w-addr-tag { width: 34px; line-height: 1.3; }
+.f-w-head { width: 145px; }
+.f-w-addr-tag { width: 36px; line-height: 1.4; }
 .f-full-addr-box {
   flex: 1;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.5;
   border-right: none !important;
 }
 
 .f-tax-clean {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: bold;
   letter-spacing: 3px;
   color: #1e3a8a;
@@ -2946,50 +2942,54 @@ input, select, textarea {
 
 .f-header-row {
   font-weight: bold;
-  height: 25px;
+  height: 28px;
 }
 .f-data-row {
-  height: 26px;
+  height: 30px;
 }
 .f-empty-row {
-  height: 24px;
+  height: 28px;
 }
 
-/* 中文大寫列 */
-.f-w-total-lbl { width: 170px; }
+/* 中文大寫列：單一行排開完整顯示 */
+.f-w-total-lbl { 
+  width: 195px; 
+  white-space: nowrap; 
+  font-size: 14.5px;
+}
 .f-amount-val-cell {
   flex: 1;
   border-right: none !important;
-  padding: 2px 10px;
+  padding: 3px 12px;
 }
 .f-chinese-amount-line {
   display: flex;
   align-items: center;
   justify-content: space-around;
   width: 100%;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
 }
 .f-chinese-amount-line .d-val {
   color: #1e3a8a;
-  min-width: 24px;
+  min-width: 26px;
   text-align: center;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 /* 農民資訊列 */
 .f-farmer-clean-cell {
   border-right: none !important;
-  padding-left: 24px !important;
+  padding-left: 28px !important;
 }
 .f-farmer-name-clean {
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: 6px;
   font-weight: bold;
 }
 
-.f-w-id-lbl { width: 180px; }
-.f-w-id-val { width: 180px; border-right: none !important; }
+.f-w-id-lbl { width: 190px; }
+.f-w-id-val { width: 190px; border-right: none !important; }
 
 .f-text-center { justify-content: center; text-align: center; }
 .f-text-right { justify-content: flex-end; text-align: right; }
@@ -2997,18 +2997,18 @@ input, select, textarea {
 .f-pr { padding-right: 12px !important; }
 
 .f-statement {
-  font-size: 11.5px;
+  font-size: 12px;
   text-align: center;
   letter-spacing: 1px;
   font-weight: bold;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .f-footer-note {
-  font-size: 9.5px;
-  line-height: 1.35;
+  font-size: 10px;
+  line-height: 1.4;
   color: #222;
-  margin-top: 3px;
+  margin-top: 4px;
   text-align: justify;
 }
 
