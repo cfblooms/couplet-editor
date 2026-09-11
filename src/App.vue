@@ -837,7 +837,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4 比例，修復列印與新增產生圖片) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (已移除角落灰色括號) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -982,7 +982,7 @@
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
       </div>
 
-      <!-- 右側畫布視窗 -->
+      <!-- 右側畫布視窗 (無灰色直角括號) -->
       <div class="canvas-viewport" ref="viewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
@@ -1010,12 +1010,7 @@
               transformOrigin: 'top left'
             }"
           >
-            <template v-if="isVertical">
-              <div class="crop-mark top-left"></div>
-              <div class="crop-mark top-right"></div>
-              <div class="crop-mark bottom-left"></div>
-              <div class="crop-mark bottom-right"></div>
-            </template>
+            <!-- 灰色角落括號已全部移除 -->
 
             <div 
               v-if="upperText.trim()"
@@ -1220,7 +1215,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (蔡鎮遠橫式、大寫金額單行、加空白住址欄) ================= -->
+    <!-- ================= 模式 4：農民收據 (嚴格依照空白收據最新格式復刻) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1300,14 +1295,22 @@
 
         <button 
           type="button" 
-          class="print-action-btn" 
+          class="line-action-btn mt-2" 
+          @click="exportFarmerReceiptImage"
+        >
+          📷 生成收據圖片傳 LINE
+        </button>
+
+        <button 
+          type="button" 
+          class="print-action-btn mt-2" 
           @click="printFarmerReceipt"
         >
           🖨️ 列印農民收據
         </button>
       </div>
 
-      <!-- 右側預覽區 (完全一模一樣復刻原圖) -->
+      <!-- 右側預覽區 (完全忠實復刻空白農民收據) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1333,82 +1336,103 @@
             <!-- 標題與日期 -->
             <div class="f-header">
               <div class="f-title-wrap">
-                <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+                <div class="f-main-title">農(漁、牧)民出售農(漁、牧)產品收據</div>
               </div>
               <div class="f-date-wrap">
                 中華民國 <span>{{ farmerReceipt.year }}</span> 年 <span>{{ farmerReceipt.month }}</span> 月 <span>{{ farmerReceipt.day }}</span> 日
               </div>
             </div>
 
-            <!-- 主表格 (完全對齊圖片格式) -->
+            <!-- 主表格 (完全對齊空白農民收據) -->
             <table class="f-table">
               <tbody>
                 <tr>
-                  <td class="f-lbl f-w1">購貨商號名稱</td>
-                  <td class="f-val" colspan="3">{{ farmerReceipt.buyerName }}</td>
-                  <td class="f-lbl f-w3">住 址</td>
-                  <td class="f-val" colspan="3">{{ farmerReceipt.buyerAddress }}</td>
+                  <td class="f-lbl f-w-head">購貨商號名稱</td>
+                  <td class="f-val f-buyer-val">{{ farmerReceipt.buyerName }}</td>
+                  <td class="f-lbl f-w-addr" rowspan="2">住<br><br>址</td>
+                  <td class="f-val f-addr-val" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
                 </tr>
                 <tr>
                   <td class="f-lbl">統一編號</td>
-                  <td class="f-val" colspan="7">
+                  <td class="f-val">
                     <div class="tax-id-boxes">
                       <span v-for="(char, idx) in paddedTaxId" :key="idx" class="tax-box">{{ char }}</span>
                     </div>
                   </td>
                 </tr>
                 <tr class="f-col-header">
-                  <td class="f-col-name" colspan="2">品 名</td>
+                  <td class="f-col-name">品 名</td>
                   <td class="f-col-spec">規 格</td>
                   <td class="f-col-qty">數 量</td>
                   <td class="f-col-price">單 價</td>
-                  <td class="f-col-total" colspan="2">金 額</td>
+                  <td class="f-col-amt-wrap" colspan="2">
+                    <div class="f-amt-title">金 額</div>
+                    <div class="f-amt-sub-grid">
+                      <span>百</span><span>十</span><span>萬</span><span>千</span><span>百</span><span>十</span><span>元</span><span>角</span><span>分</span>
+                    </div>
+                  </td>
                   <td class="f-col-note">備 註</td>
                 </tr>
                 <!-- 項目行 -->
                 <tr class="f-item-row">
-                  <td colspan="2" class="f-text-center f-bold">{{ farmerReceipt.itemName }}</td>
+                  <td class="f-text-center f-bold">{{ farmerReceipt.itemName }}</td>
                   <td class="f-text-center">{{ farmerReceipt.spec }}</td>
                   <td class="f-text-center">{{ farmerReceipt.qty }}</td>
                   <td class="f-text-center">{{ farmerReceipt.unitPrice }}</td>
-                  <td colspan="2" class="f-text-right f-bold f-pr">${{ farmerReceipt.totalAmount }}</td>
+                  <td colspan="2" class="f-grid-amount-td">
+                    <div class="f-amt-sub-grid f-amt-data-grid">
+                      <span v-for="(v, i) in amountGridDigits" :key="i">{{ v }}</span>
+                    </div>
+                  </td>
                   <td class="f-text-center">{{ farmerReceipt.note }}</td>
                 </tr>
                 <!-- 空白行 1 -->
                 <tr class="f-item-row f-empty-row">
-                  <td colspan="2"></td><td></td><td></td><td></td><td colspan="2"></td><td></td>
+                  <td></td><td></td><td></td><td></td>
+                  <td colspan="2">
+                    <div class="f-amt-sub-grid f-amt-data-grid">
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                  </td>
+                  <td></td>
                 </tr>
                 <!-- 空白行 2 -->
                 <tr class="f-item-row f-empty-row">
-                  <td colspan="2"></td><td></td><td></td><td></td><td colspan="2"></td><td></td>
+                  <td></td><td></td><td></td><td></td>
+                  <td colspan="2">
+                    <div class="f-amt-sub-grid f-amt-data-grid">
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                  </td>
+                  <td></td>
                 </tr>
-                <!-- 合計大寫金額 (單一行排開) -->
+                <!-- 合計大寫金額 -->
                 <tr>
-                  <td class="f-lbl">合計新台幣<br>(中文大寫)</td>
-                  <td colspan="7" class="f-amount-td">
-                    <div class="f-single-line-amount">
-                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> <span class="d-unit">拾</span>
-                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> <span class="d-unit">萬</span>
-                      <span class="d-val">{{ chineseDigits.thousands }}</span> <span class="d-unit">仟</span>
-                      <span class="d-val">{{ chineseDigits.hundreds }}</span> <span class="d-unit">佰</span>
-                      <span class="d-val">{{ chineseDigits.tens }}</span> <span class="d-unit">拾</span>
-                      <span class="d-val">{{ chineseDigits.ones }}</span> <span class="d-unit">元</span>
-                      <span class="d-val">零</span> <span class="d-unit">角</span>
-                      <span class="d-val">零</span> <span class="d-unit">分</span>
+                  <td class="f-lbl">合計新台幣(中文大寫):</td>
+                  <td colspan="6" class="f-amount-td">
+                    <div class="f-chinese-amount-line">
+                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
+                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
+                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
+                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.ones }}</span> 元
+                      <span class="d-val">零</span> 角
+                      <span class="d-val">零</span> 分
                     </div>
                   </td>
                 </tr>
-                <!-- 底部農民資料 (蔡鎮遠橫式 + 蓋章 + 前方加空白住址欄) -->
+                <!-- 底部農民資料 (完全對齊空白農民收據) -->
                 <tr>
-                  <td class="f-lbl f-lh1">農（漁、牧）民姓名</td>
-                  <td class="f-val f-farmer-horizontal-cell">
-                    <span class="f-name-text">蔡鎮遠</span>
-                    <span class="f-seal-box">蓋章</span>
+                  <td class="f-lbl f-lh1">農(漁、牧)民姓名</td>
+                  <td class="f-farmer-cell">
+                    <span class="f-farmer-name">蔡鎮遠</span>
+                    <span class="f-farmer-seal">蓋章</span>
                   </td>
-                  <td class="f-lbl f-lh1">住 址</td>
-                  <td class="f-val"></td>
+                  <td class="f-lbl f-w-addr" rowspan="2">住<br><br>址</td>
+                  <td class="f-val" rowspan="2"></td>
                   <td class="f-lbl f-lh1" colspan="2">國民統一身分證編號</td>
-                  <td class="f-val f-bold f-text-center" colspan="2">F129940801</td>
+                  <td class="f-val f-bold f-text-center">F129940801</td>
                 </tr>
               </tbody>
             </table>
@@ -1419,7 +1443,7 @@
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              <b>附註：</b>依據財政部 68.11.2台財稅第三七六六五號函：自68年11月16日起，凡農民出售其本身所生產、補獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
             </div>
           </div>
         </div>
@@ -1515,7 +1539,7 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (含統編與開收據狀態)
+// 1. 訂單模組
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1833,7 +1857,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (大寫金額單行 + 蔡鎮遠橫式 + 加空白住址)
+// 4. 農民收據 (100% 擬真空白收據)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1879,9 +1903,19 @@ const updateChineseAmount = () => {
   }
 }
 
+// 統編 8 格
 const paddedTaxId = computed(() => {
   const raw = (farmerReceipt.value.taxId || '').padEnd(8, ' ').split('')
   return raw.slice(0, 8)
+})
+
+// 金額表格九格拆解 (百、十、萬、千、百、十、元、角、分)
+const amountGridDigits = computed(() => {
+  const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
+  const str = amt.toString().padStart(7, ' ') // 到百萬
+  const chars = str.split('')
+  // 7 位元整數 + 0角 + 0分
+  return [chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], '0', '0']
 })
 
 const onSelectFarmerReceiptOrder = () => {
@@ -1924,6 +1958,61 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 
 const printFarmerReceipt = () => window.print()
+
+// 農民收據產生圖片並下載傳 LINE
+const exportFarmerReceiptImage = () => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 794 * 2
+  canvas.height = 560 * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  // 繪製白色底
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, 794, 560)
+
+  // 標楷體字體
+  const fontFam = '"DFKai-SB", "BiauKai", "Kaiti", serif'
+  ctx.fillStyle = '#000000'
+
+  // 標題
+  ctx.font = `bold 24px ${fontFam}`
+  ctx.textAlign = 'center'
+  ctx.fillText('農(漁、牧)民出售農(漁、牧)產品收據', 397, 45)
+
+  // 日期
+  ctx.font = `14px ${fontFam}`
+  ctx.textAlign = 'right'
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 750, 75)
+
+  // 繪製表格外框
+  ctx.lineWidth = 1.5
+  ctx.strokeStyle = '#000000'
+  ctx.strokeRect(40, 85, 714, 380)
+
+  // 簡單文字與表格渲染
+  ctx.textAlign = 'left'
+  ctx.font = `bold 14px ${fontFam}`
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 110)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 140)
+  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 400, 110)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 180)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 220)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 270)
+  ctx.fillText(`農(漁、牧)民姓名：蔡鎮遠 【蓋章】    國民統一身分證編號：F129940801`, 50, 330)
+  
+  ctx.font = `11px ${fontFam}`
+  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 50, 390)
+  ctx.font = `9.5px ${fontFam}`
+  ctx.fillText(`附註：依據財政部 68.11.2台財稅第三七六六五號函：自68年11月16日起，凡農民出售其本身所生產、補獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 50, 420)
+
+  // 下載
+  const link = document.createElement('a')
+  link.download = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+  alert('✅ 農民收據圖片已生成並下載！可直接在 LINE 傳送給客戶！')
+}
 
 // ==========================================
 // 5. 進貨與庫存
@@ -2270,7 +2359,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (支援圖片生成傳 LINE 與列印修復)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2415,52 +2504,29 @@ const onCardCategoryChange = () => {
 }
 const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
 
-// 列印花卡
 const printCouplet = () => {
   window.print()
 }
 
-// 產生高畫質花卡圖檔並下載（傳 LINE 給客戶確認）
+// 產生花卡高畫質圖片並下載 (傳 LINE 給客戶)
 const exportCoupletImage = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 560 : 792
   const height = isVertical.value ? 792 : 560
-  canvas.width = width * 2 // 2倍高畫質
+  canvas.width = width * 2
   canvas.height = height * 2
   const ctx = canvas.getContext('2d')
   ctx.scale(2, 2)
 
-  // 填底色
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
-  // 若為慶賀橫式花卡加入外框裝飾
   if (!isVertical.value && cardCategory.value === 'celebration') {
     ctx.lineWidth = 10
     ctx.strokeStyle = '#fce7f3'
     ctx.strokeRect(5, 5, width - 10, height - 10)
   }
 
-  // 繪製裁切標記
-  if (isVertical.value) {
-    ctx.strokeStyle = '#94a3b8'
-    ctx.lineWidth = 1
-    const marks = [
-      [15, 27, 15, 15, 27, 15],
-      [width - 27, 15, width - 15, 15, width - 15, 27],
-      [15, height - 27, 15, height - 15, 27, height - 15],
-      [width - 27, height - 15, width - 15, height - 15, width - 15, height - 27]
-    ]
-    marks.forEach(m => {
-      ctx.beginPath()
-      ctx.moveTo(m[0], m[1])
-      ctx.lineTo(m[2], m[3])
-      ctx.lineTo(m[4], m[5])
-      ctx.stroke()
-    })
-  }
-
-  // 設定繪製文字方法
   ctx.fillStyle = '#000000'
   const fontFam = '"DFKai-SB", "BiauKai", "Kaiti", serif'
 
@@ -2480,7 +2546,6 @@ const exportCoupletImage = () => {
     }
   }
 
-  // 繪製上款、中款、下款各格與敬詞
   drawTextItem(upperText.value, layout.value.upper, isVertical.value)
   drawTextItem(middleText.value, layout.value.middle, isVertical.value)
 
@@ -2492,12 +2557,11 @@ const exportCoupletImage = () => {
 
   drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
 
-  // 匯出圖檔並下載
   const link = document.createElement('a')
   link.download = `花卡預覽_${new Date().toISOString().split('T')[0]}.png`
   link.href = canvas.toDataURL('image/png')
   link.click()
-  alert('✅ 花卡圖片已生成並下載！您可以直接用 LINE 傳給客戶確認！')
+  alert('✅ 花卡圖片已生成並下載！可以直接使用 LINE 傳送給客戶確認！')
 }
 
 onMounted(() => {
@@ -2674,7 +2738,7 @@ input, select, textarea {
 .close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
 .image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
 
-/* 控制面板 */
+/* 簽收單與收據控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .control-panel {
   width: 380px; background: white; padding: 16px;
@@ -2718,7 +2782,7 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* A4 卡片 */
+/* A4 卡片 (無角落灰色標記) */
 .card-scaler-container { position: relative; }
 .card-board { background: #fff; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; }
 .card-board.mode-vertical { width: 560px; height: 792px; font-family: "DFKai-SB", "BiauKai", serif; }
@@ -2728,12 +2792,6 @@ input, select, textarea {
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 4px; }
 .card-board.mode-horizontal .middle-box { letter-spacing: 12px; font-weight: 900; }
 .card-board.style-floral { border: 10px solid #fce7f3; }
-
-.crop-mark { position: absolute; width: 12px; height: 12px; border-color: #94a3b8; border-style: solid; }
-.crop-mark.top-left { top: 15px; left: 15px; border-width: 1px 0 0 1px; }
-.crop-mark.top-right { top: 15px; right: 15px; border-width: 1px 1px 0 0; }
-.crop-mark.bottom-left { bottom: 15px; left: 15px; border-width: 0 0 1px 1px; }
-.crop-mark.bottom-right { bottom: 15px; right: 15px; border-width: 0 1px 1px 0; }
 
 .text-box { position: absolute; cursor: move; font-weight: bold; padding: 3px 5px; white-space: nowrap; line-height: 1.2; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
@@ -2776,7 +2834,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (精準排版修復)
+   農民出售農產品收據 (最新空白收據版型擬真重構)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -2801,23 +2859,23 @@ input, select, textarea {
   flex-direction: column;
   align-items: center;
   position: relative;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .f-main-title {
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 900;
   letter-spacing: 4px;
   text-align: center;
 }
 .f-date-wrap {
   align-self: flex-end;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 2px;
   margin-top: 2px;
 }
 .f-date-wrap span {
   display: inline-block;
-  min-width: 26px;
+  min-width: 28px;
   text-align: center;
   border-bottom: 1px solid #000;
 }
@@ -2826,7 +2884,7 @@ input, select, textarea {
   width: 100%;
   border-collapse: collapse;
   border: 2px solid #000;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 .f-table td {
   border: 1px solid #000;
@@ -2839,16 +2897,18 @@ input, select, textarea {
   letter-spacing: 1px;
 }
 .f-val {
-  padding-left: 6px !important;
+  padding-left: 8px !important;
 }
 
-.f-w1 { width: 17%; }
-.f-w3 { width: 10%; }
+.f-w-head { width: 18%; }
+.f-w-addr { width: 6%; text-align: center; line-height: 1.4; }
+.f-buyer-val { width: 44%; }
+.f-addr-val { width: 32%; }
 
 .tax-id-boxes {
   display: flex;
   height: 100%;
-  width: 280px;
+  width: 260px;
 }
 .tax-box {
   flex: 1;
@@ -2856,6 +2916,7 @@ input, select, textarea {
   text-align: center;
   font-weight: bold;
   line-height: 22px;
+  font-size: 15px;
 }
 .tax-box:last-child {
   border-right: none;
@@ -2864,36 +2925,61 @@ input, select, textarea {
 .f-col-header td {
   text-align: center;
   font-weight: bold;
-  height: 23px;
+  padding: 0;
 }
-.f-col-name { width: 25%; }
+.f-col-name { width: 22%; height: 38px; }
 .f-col-spec { width: 16%; }
-.f-col-qty { width: 10%; }
-.f-col-price { width: 14%; }
-.f-col-total { width: 18%; }
-.f-col-note { width: 17%; }
+.f-col-qty { width: 8%; }
+.f-col-price { width: 12%; }
+.f-col-amt-wrap { width: 28%; padding: 0 !important; }
+.f-col-note { width: 14%; }
+
+.f-amt-title {
+  border-bottom: 1px solid #000;
+  padding: 2px 0;
+  text-align: center;
+}
+.f-amt-sub-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  text-align: center;
+  font-size: 11px;
+  font-weight: normal;
+}
+.f-amt-sub-grid span {
+  border-right: 1px solid #000;
+  padding: 2px 0;
+}
+.f-amt-sub-grid span:last-child {
+  border-right: none;
+}
+.f-amt-data-grid span {
+  font-weight: bold;
+  font-size: 14px;
+  color: #1e3a8a;
+  height: 24px;
+  line-height: 24px;
+}
 
 .f-item-row td { height: 26px; }
 .f-empty-row td { height: 24px; }
-.f-amount-td { padding: 4px 10px !important; }
+.f-grid-amount-td { padding: 0 !important; }
 
-/* 大寫金額單一行排列 */
-.f-single-line-amount {
+/* 中文大寫單一行 */
+.f-amount-td { padding: 4px 10px !important; }
+.f-chinese-amount-line {
   display: flex;
   align-items: center;
   justify-content: space-around;
   font-size: 15px;
   font-weight: bold;
 }
-.f-single-line-amount .d-val {
+.f-chinese-amount-line .d-val {
   color: #1e3a8a;
   min-width: 24px;
   text-align: center;
   display: inline-block;
   font-size: 16px;
-}
-.f-single-line-amount .d-unit {
-  color: #000;
 }
 
 .f-text-center { text-align: center; }
@@ -2902,24 +2988,25 @@ input, select, textarea {
 .f-pr { padding-right: 10px !important; }
 .f-lh1 { line-height: 1.2; }
 
-/* 蔡鎮遠橫式與蓋章 */
-.f-farmer-horizontal-cell {
+/* 農民簽章與姓名排版 */
+.f-farmer-cell {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px !important;
+  padding: 0 12px !important;
 }
-.f-name-text {
-  font-size: 15px;
-  letter-spacing: 2px;
+.f-farmer-name {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 4px;
 }
-.f-seal-box {
+.f-farmer-seal {
   border: 1px dashed #dc2626;
   color: #dc2626;
   font-size: 11px;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 3px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .f-statement {
@@ -2927,14 +3014,14 @@ input, select, textarea {
   text-align: center;
   letter-spacing: 1px;
   font-weight: bold;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .f-footer-note {
   font-size: 9.5px;
-  line-height: 1.35;
+  line-height: 1.4;
   color: #222;
-  margin-top: 2px;
+  margin-top: 3px;
   text-align: justify;
 }
 
@@ -2951,9 +3038,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px; }
 }
 
-/* ====================================================
-   全域精確列印樣式 (修復花卡看不到與確保A4/A5輸出)
-   ==================================================== */
+/* 全域精準列印樣式 (修復花卡列印空白問題) */
 @media print {
   @page { size: auto; margin: 0; }
   body, html, .main-wrapper { 
@@ -2978,7 +3063,6 @@ input, select, textarea {
     position: static !important;
   }
   
-  /* 花卡列印完整顯現修復 */
   .card-board { 
     position: relative !important; 
     transform: none !important; 
