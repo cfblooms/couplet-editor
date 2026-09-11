@@ -1213,7 +1213,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (100% 依照指示全新排版) ================= -->
+    <!-- ================= 模式 4：農民收據 (住址整大格無分割線) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1256,7 +1256,7 @@
           </div>
 
           <div class="form-group">
-            <label>住址：</label>
+            <label>住址 (右側一大格完整顯示)：</label>
             <input type="text" v-model="farmerReceipt.buyerAddress" />
           </div>
 
@@ -1308,7 +1308,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (完全一模一樣復刻圖片結構) -->
+      <!-- 右側預覽區 (完全一模一樣復刻圖片結構，住址整大格) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1341,14 +1341,16 @@
               </div>
             </div>
 
-            <!-- 主表格 (住址後無格線、蔡鎮遠橫向無小框) -->
+            <!-- 主表格 (住址整大格合併，無分割線) -->
             <table class="f-table">
               <tbody>
                 <tr>
                   <td class="f-lbl f-w-head">購貨商號名稱</td>
                   <td class="f-val f-buyer-val">{{ farmerReceipt.buyerName }}</td>
+                  <!-- 住址：跨兩列高度的直書大標籤 -->
                   <td class="f-lbl f-w-addr" rowspan="2">住<br><br>址</td>
-                  <td class="f-val f-addr-clean-val" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
+                  <!-- 地址填寫區：跨兩列高度的單一完整大框 -->
+                  <td class="f-val f-big-addr-cell" rowspan="2">{{ farmerReceipt.buyerAddress }}</td>
                 </tr>
                 <tr>
                   <td class="f-lbl">統一編號</td>
@@ -1412,7 +1414,7 @@
               </tbody>
             </table>
 
-            <!-- 附註法條聲明 (已移除括號引用字樣) -->
+            <!-- 附註法條聲明 -->
             <div class="f-statement">
               本收據之農民身分確實無誤，若有不實者願依法受罰。
             </div>
@@ -1832,7 +1834,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (嚴格依照使用者指示修改)
+// 4. 農民收據 (住址一大格)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1919,7 +1921,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
-// 農民收據產生圖片並下載 (傳 LINE 給客戶)
 const exportFarmerReceiptImage = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -1949,7 +1950,7 @@ const exportFarmerReceiptImage = () => {
   ctx.font = `bold 14px ${fontFam}`
   ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 125)
   ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 155)
-  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 125)
+  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
   ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 195)
   ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 235)
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 285)
@@ -2791,7 +2792,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (完全依照指示精準復刻)
+   農民出售農產品收據 (住址整大格，無分割線)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -2829,7 +2830,7 @@ input, select, textarea {
   align-self: flex-end;
   font-size: 14px;
   letter-spacing: 2px;
-  margin-top: 8px; /* 往下微調距離 */
+  margin-top: 8px;
 }
 .f-date-wrap span {
   display: inline-block;
@@ -2861,7 +2862,15 @@ input, select, textarea {
 .f-w-head { width: 18%; }
 .f-w-addr { width: 6%; text-align: center; line-height: 1.4; font-weight: bold; }
 .f-buyer-val { width: 44%; }
-.f-addr-clean-val { width: 32%; }
+
+/* 住址單一挑高大格：整大格呈現，無任何分割線 */
+.f-big-addr-cell {
+  width: 32%;
+  vertical-align: middle;
+  padding: 6px 12px !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
 /* 統一編號：整格統一顯示，無內部垂直格線 */
 .f-tax-clean {
