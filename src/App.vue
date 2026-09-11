@@ -131,13 +131,11 @@
                 <input v-model.number="formOrder.price" type="number" min="0" />
               </div>
 
-              <!-- 獨立統一編號欄位 -->
               <div class="field">
                 <label>統一編號 (8碼)</label>
                 <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
               </div>
 
-              <!-- 開收據與否欄位 -->
               <div class="field">
                 <label>是否開收據</label>
                 <select v-model="formOrder.need_receipt" class="bold-select-field">
@@ -742,7 +740,7 @@
                 <label>退貨類型</label>
                 <select v-model="formRet.return_type">
                   <option value="退給花農">1. 我們向花農退貨 (退給供應商)</option>
-                  <option value="客戶退回">2. 批發商向我們退貨 (客戶退回)</option>
+                  <option value="批發商向我們退貨">2. 批發商向我們退貨 (客戶退回)</option>
                 </select>
               </div>
               <div class="field">
@@ -1220,7 +1218,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (100% 精準復刻會計憑證排版) ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 精準復刻會計憑證) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1414,11 +1412,11 @@
 
             <!-- 附註法條聲明 -->
             <div class="f-statement">
-              本收據之農民身分確實無誤，若有不實者願依法受罰[cite: 1]。
+              本收據之農民身分確實無誤，若有不實者願依法受罰。
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1]。
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 2]。
             </div>
           </div>
         </div>
@@ -2303,7 +2301,7 @@ const funeralPhrases = {
   f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
   m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
   m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
-  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_0_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
   m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
 }
 const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
