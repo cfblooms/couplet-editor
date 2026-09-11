@@ -131,9 +131,24 @@
                 <input v-model.number="formOrder.price" type="number" min="0" />
               </div>
 
+              <!-- 獨立統一編號欄位 -->
               <div class="field">
-                <label>訂單備註 / 統一編號</label>
-                <input v-model="formOrder.note" type="text" placeholder="例: 統編: 12345678" />
+                <label>統一編號 (8碼)</label>
+                <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
+              </div>
+
+              <!-- 開收據與否欄位 -->
+              <div class="field">
+                <label>是否開收據</label>
+                <select v-model="formOrder.need_receipt" class="bold-select-field">
+                  <option value="不需收據">不需收據</option>
+                  <option value="需開收據">需開收據</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>訂單其他備註</label>
+                <input v-model="formOrder.note" type="text" placeholder="送貨注意事項" />
               </div>
 
               <div class="field">
@@ -198,11 +213,12 @@
                   <tr>
                     <th>單號</th>
                     <th>客戶名稱</th>
-                    <th>備註/統編</th>
+                    <th>統一編號</th>
+                    <th>開收據</th>
                     <th>週期</th>
                     <th>電話</th>
                     <th>品項規格</th>
-                    <th>選用盆器</th>
+                    <th>盆器</th>
                     <th>售價</th>
                     <th>賀卡</th>
                     <th>簽收單</th>
@@ -215,7 +231,17 @@
                   <tr v-for="ord in orderList" :key="ord.id">
                     <td><b>{{ ord.id }}</b></td>
                     <td>{{ ord.customer }}</td>
-                    <td>{{ ord.note || '—' }}</td>
+                    <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
+                    <td>
+                      <select 
+                        v-model="ord.need_receipt" 
+                        :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
+                        @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
+                      >
+                        <option value="不需收據">不需收據</option>
+                        <option value="需開收據">需開收據</option>
+                      </select>
+                    </td>
                     <td><span class="badge badge-purple">{{ ord.billing_cycle || '每單結' }}</span></td>
                     <td>{{ ord.phone }}</td>
                     <td>{{ ord.spec }}</td>
@@ -261,14 +287,14 @@
                       <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
                     </td>
                   </tr>
-                  <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
+                  <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ================= 模組：客戶未結帳款對帳專區 ================= -->
+        <!-- ================= 模組：客戶未結對帳專區 ================= -->
         <section v-if="subTab === 'statement'" class="tab-pane">
           <div class="card-box">
             <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -341,7 +367,8 @@
                     <th>單號</th>
                     <th>下單日</th>
                     <th>客戶名稱</th>
-                    <th>備註/統編</th>
+                    <th>統編</th>
+                    <th>開收據</th>
                     <th>品項規格</th>
                     <th>金額</th>
                     <th>賀卡</th>
@@ -355,7 +382,8 @@
                     <td><b>{{ ord.id }}</b></td>
                     <td>{{ ord.order_date }}</td>
                     <td>{{ ord.customer }}</td>
-                    <td>{{ ord.note || '—' }}</td>
+                    <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
+                    <td>{{ ord.need_receipt || '不需收據' }}</td>
                     <td>{{ ord.spec }}</td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
                     <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
@@ -375,7 +403,7 @@
                     </td>
                   </tr>
                   <tr v-if="statementOrders.length === 0">
-                    <td colspan="10" class="text-center py-4 text-gray">符合條件的訂單為 0 筆</td>
+                    <td colspan="11" class="text-center py-4 text-gray">符合條件的訂單為 0 筆</td>
                   </tr>
                 </tbody>
               </table>
@@ -714,7 +742,7 @@
                 <label>退貨類型</label>
                 <select v-model="formRet.return_type">
                   <option value="退給花農">1. 我們向花農退貨 (退給供應商)</option>
-                  <option value="批發商向我們退貨">2. 批發商向我們退貨 (客戶退回)</option>
+                  <option value="客戶退回">2. 批發商向我們退貨 (客戶退回)</option>
                 </select>
               </div>
               <div class="field">
@@ -1035,7 +1063,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (已刪除右下角請簽名提示) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1192,7 +1220,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (100% 擬真復刻原始收據格式) ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 精準復刻會計憑證排版) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1202,7 +1230,7 @@
           <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
             <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
             <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-              【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (備註: {{ ord.note || '無' }})
+              【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (統編: {{ ord.tax_id || '無' }})
             </option>
           </select>
         </div>
@@ -1230,8 +1258,8 @@
           </div>
 
           <div class="form-group">
-            <label>統一編號：</label>
-            <input type="text" v-model="farmerReceipt.taxId" />
+            <label>統一編號 (8碼)：</label>
+            <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
           </div>
 
           <div class="form-group">
@@ -1279,7 +1307,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (完全一模一樣復刻空白收據) -->
+      <!-- 右側預覽區 (完全一模一樣復刻原圖) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1317,7 +1345,7 @@
               <tbody>
                 <tr>
                   <td class="f-lbl f-w1">購貨商號名稱</td>
-                  <td class="f-val f-w2" colspan="3">{{ farmerReceipt.buyerName }}</td>
+                  <td class="f-val" colspan="3">{{ farmerReceipt.buyerName }}</td>
                   <td class="f-lbl f-w3">住 址</td>
                   <td class="f-val" colspan="3">{{ farmerReceipt.buyerAddress }}</td>
                 </tr>
@@ -1371,24 +1399,22 @@
                     </div>
                   </td>
                 </tr>
-                <!-- 底部農民資料 -->
+                <!-- 底部農民資料 (與圖片完全對齊) -->
                 <tr>
                   <td class="f-lbl f-lh1">農（漁、牧）民姓名</td>
                   <td class="f-val f-bold f-text-center f-pos-rel">
                     蔡鎮遠
-                    <span class="f-seal-placeholder">蓋章</span>
+                    <span class="f-seal-box">蓋章</span>
                   </td>
-                  <td class="f-lbl f-lh1" colspan="2">住 址</td>
-                  <td class="f-val" colspan="2">桃園市桃園區</td>
-                  <td class="f-lbl f-lh1">國民統一身分證編號</td>
-                  <td class="f-val f-bold f-text-center">F129940801</td>
+                  <td class="f-lbl f-lh1" colspan="2">國民統一身分證編號</td>
+                  <td class="f-val f-bold f-text-center" colspan="4">F129940801</td>
                 </tr>
               </tbody>
             </table>
 
             <!-- 附註法條聲明 -->
             <div class="f-statement">
-              本收據之農民身分確實無誤，若有不實者願依法受罰。
+              本收據之農民身分確實無誤，若有不實者願依法受罰[cite: 1]。
             </div>
 
             <div class="f-footer-note">
@@ -1474,6 +1500,8 @@ const formOrder = ref({
   quick_pot: '未使用',
   cost: 600,
   price: 2500,
+  tax_id: '',
+  need_receipt: '不需收據',
   note: '',
   card_status: '未製作',
   receipt_status: '未列印',
@@ -1486,7 +1514,7 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組
+// 1. 訂單模組 (含統編與開收據狀態)
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1527,6 +1555,8 @@ const startEditOrder = (ord) => {
     quick_pot: hasQuick ? '使用快捷盆 (70)' : '未使用',
     cost: Number(ord.cost) || 0,
     price: Number(ord.price) || 0,
+    tax_id: ord.tax_id || '',
+    need_receipt: ord.need_receipt || '不需收據',
     note: ord.note || '',
     card_status: ord.card_status || '未製作',
     receipt_status: ord.receipt_status || '未列印',
@@ -1555,6 +1585,8 @@ const cancelEditOrder = () => {
     quick_pot: '未使用',
     cost: 600,
     price: 2500,
+    tax_id: '',
+    need_receipt: '不需收據',
     note: '',
     card_status: '未製作',
     receipt_status: '未列印',
@@ -1583,6 +1615,8 @@ const saveOrder = async () => {
     pot: finalPotStr,
     cost: formOrder.value.cost,
     price: formOrder.value.price,
+    tax_id: formOrder.value.tax_id,
+    need_receipt: formOrder.value.need_receipt,
     note: formOrder.value.note,
     card_status: formOrder.value.card_status,
     receipt_status: formOrder.value.receipt_status,
@@ -1832,7 +1866,7 @@ const digitMap = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌',
 
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
-  const padded = amt.toString().padStart(6, '0') // 6位對應 拾萬 萬 仟 佰 拾 元
+  const padded = amt.toString().padStart(6, '0')
   const digits = padded.split('').map(d => digitMap[Number(d)])
   chineseDigits.value = {
     hundredThousands: digits[0],
@@ -1844,7 +1878,6 @@ const updateChineseAmount = () => {
   }
 }
 
-// 統編 8 格拆解
 const paddedTaxId = computed(() => {
   const raw = (farmerReceipt.value.taxId || '').padEnd(8, ' ').split('')
   return raw.slice(0, 8)
@@ -1860,10 +1893,7 @@ const onSelectFarmerReceiptOrder = () => {
     farmerReceipt.value.day = d.getDate().toString().padStart(2, '0')
 
     farmerReceipt.value.buyerName = ord.customer
-
-    const combinedStr = `${ord.note || ''} ${ord.customer || ''}`
-    const taxMatch = combinedStr.match(/\b\d{8}\b/)
-    farmerReceipt.value.taxId = taxMatch ? taxMatch[0] : (ord.note || '')
+    farmerReceipt.value.taxId = ord.tax_id || ''
 
     const cust = customers.value.find(c => c.name === ord.customer)
     farmerReceipt.value.buyerAddress = cust?.line_note || '桃園市'
@@ -2222,7 +2252,9 @@ const exportOrdersToExcel = () => {
     '預估成本': o.cost,
     '訂單售價': o.price,
     '利潤': o.price - o.cost,
-    '訂單備註/統編': o.note || '',
+    '統一編號': o.tax_id || '',
+    '開收據與否': o.need_receipt || '不需收據',
+    '訂單備註': o.note || '',
     '賀卡狀態': o.card_status || '未製作',
     '簽收單狀態': o.receipt_status || '未列印',
     '下單日期': o.order_date,
@@ -2467,6 +2499,9 @@ input, select, textarea {
   border-radius: 6px; font-size: 13px; box-sizing: border-box;
 }
 
+.bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
+.text-purple { color: #7e22ce; }
+
 .btn-action-row { display: flex; gap: 8px; }
 .primary-btn { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .secondary-btn { background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
@@ -2503,11 +2538,12 @@ input, select, textarea {
 .data-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 .action-cell { white-space: nowrap; }
 
-.badge { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+.badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
-.badge-red { background: #fee2e2; color: #dc2626; font-weight: bold; }
-.badge-orange { background: #ffedd5; color: #c2410c; font-weight: bold; }
-.badge-green { background: #dcfce7; color: #16a34a; font-weight: bold; }
+.badge-red { background: #fee2e2; color: #dc2626; }
+.badge-orange { background: #ffedd5; color: #c2410c; }
+.badge-green { background: #dcfce7; color: #16a34a; }
+.badge-gray { background: #f1f5f9; color: #64748b; }
 .status-tag { font-size: 12px; font-weight: bold; }
 
 .mini-btn { border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; }
@@ -2621,7 +2657,7 @@ input, select, textarea {
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* A5 橫式簽收單 (由左至右) */
+/* A5 橫式簽收單 */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 38px 45px;
@@ -2654,7 +2690,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (完全對齊圖片排版與 A5 比例)
+   農民出售農產品收據 (完全擬真重構版)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -2720,9 +2756,13 @@ input, select, textarea {
   padding-left: 6px !important;
 }
 
+.f-w1 { width: 17%; }
+.f-w3 { width: 12%; }
+
 .tax-id-boxes {
   display: flex;
   height: 100%;
+  width: 280px;
 }
 .tax-box {
   flex: 1;
@@ -2781,16 +2821,14 @@ input, select, textarea {
 .f-lh1 { line-height: 1.2; }
 .f-pos-rel { position: relative; }
 
-.f-seal-placeholder {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.f-seal-box {
+  display: inline-block;
   border: 1px dashed #dc2626;
   color: #dc2626;
   font-size: 11px;
-  padding: 1px 4px;
+  padding: 1px 8px;
   border-radius: 3px;
+  margin-left: 12px;
 }
 
 .f-statement {
