@@ -884,23 +884,23 @@
           </select>
         </div>
 
-        <!-- 喪禮設定 -->
+        <!-- 喪禮設定 (加入「敬悼」選項) -->
         <template v-if="cardCategory === 'funeral'">
           <div class="panel-section">
             <label class="section-title">上款稱謂組合：</label>
             <div class="form-row">
               <select v-model="funeralUpperFormat" @change="buildFuneralUpper">
-                <option value="X媽X老夫人">X媽X老夫人</option>
-                <option value="X媽X夫人">X媽X夫人</option>
-                <option value="X公X老先生">X公X老先生</option>
-                <option value="X公X先生">X公X先生</option>
-                <option value="X女士">X女士</option>
-                <option value="X先生">X先生</option>
+                <option value="敬悼 X媽X老夫人">敬悼 X媽X老夫人</option>
+                <option value="敬悼 X媽X夫人">敬悼 X媽X夫人</option>
+                <option value="敬悼 X公X老先生">敬悼 X公X老先生</option>
+                <option value="敬悼 X公X先生">敬悼 X公X先生</option>
+                <option value="敬悼 X女士">敬悼 X女士</option>
+                <option value="敬悼 X先生">敬悼 X先生</option>
                 <option value="custom">自行輸入</option>
               </select>
               <select v-model="funeralUpperSuffix" @change="buildFuneralUpper">
-                <option value="仙逝">仙逝</option>
                 <option value="千古">千古</option>
+                <option value="仙逝">仙逝</option>
                 <option value="靈前">靈前</option>
                 <option value="冥前">冥前</option>
                 <option value="便覽">便覽</option>
@@ -1870,7 +1870,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據 (住址整大格無分割線，中文大寫單行)
+// 4. 農民收據
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1980,23 +1980,23 @@ const exportFarmerReceiptImage = () => {
 
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#000000'
-  ctx.strokeRect(40, 95, 714, 370)
+  ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
   ctx.font = `bold 14px ${fontFam}`
-  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 50, 125)
-  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 50, 155)
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
-  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 50, 195)
-  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 50, 235)
-  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 50, 285)
-  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 50, 335)
-  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 50, 365)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
+  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
+  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 365)
   
   ctx.font = `11px ${fontFam}`
-  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 50, 405)
+  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
   ctx.font = `9.5px ${fontFam}`
-  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 50, 430)
+  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
 
   const link = document.createElement('a')
   link.download = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
@@ -2352,14 +2352,13 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (字體與粗細控制，含華康楷書與正顏楷體)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
 const zoomLevel = ref(1)
 const viewportRef = ref(null)
 
-// 字體與粗細
 const cardFontFamily = ref('kai')
 const cardFontWeight = ref('700')
 
@@ -2391,7 +2390,7 @@ const getPlaceholder = (idx) => [
   '第 6 格（自訂）'
 ][idx]
 
-const funeralUpperFormat = ref('X媽X老夫人')
+const funeralUpperFormat = ref('敬悼 X媽X老夫人')
 const funeralUpperSuffix = ref('千古')
 const gender = ref('female')
 const ageStage = ref('f_over80')
@@ -2416,7 +2415,7 @@ const celebPhrases = {
 }
 const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
 
-const upperText = ref('陳媽李老夫人 仙逝')
+const upperText = ref('敬悼 陳媽李老夫人 千古')
 const middleText = ref('母儀千古')
 const suffixText = ref('敬輓')
 
@@ -2521,7 +2520,6 @@ const printCouplet = () => {
   window.print()
 }
 
-// 產生花卡高畫質圖片並下載 (自動渲染選取之字型與字重)
 const exportCoupletImage = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 560 : 792
@@ -2856,14 +2854,14 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (完全依照指示精準復刻)
+   農民出售農產品收據 (A5 滿版放大優化)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px;
   height: 560px;
   background: #ffffff;
-  padding: 22px 35px;
+  padding: 18px 28px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
