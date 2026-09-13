@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (媽字縮小 20 級) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (窄邊界 1.27cm 虛框，傳 LINE 隱藏虛框) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1004,8 +1004,9 @@
         </div>
 
         <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
+        <!-- 免下載直接傳 LINE / 複製 -->
         <button type="button" class="line-action-btn mt-2" @click="shareCoupletToLineDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-        <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
+        <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯 (1.27cm 邊界)</button>
       </div>
 
       <!-- 右側畫布視窗 -->
@@ -1038,6 +1039,9 @@
               fontWeight: cardFontWeight
             }"
           >
+            <!-- 1.27cm 窄邊界列印定位虛線框 (傳 LINE 圖片時自動忽略) -->
+            <div class="narrow-margin-dashed-guide"></div>
+
             <!-- 上款 (媽字大小等於上款設定大小減 20 級) -->
             <div 
               v-if="upperText.trim()"
@@ -1185,7 +1189,7 @@
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-          <button type="button" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          <button type="fit-btn" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1251,7 +1255,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 (蔡鎮遠後方直接蓋上紅色印章) ================= -->
+    <!-- ================= 模式 4：農民收據 ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1346,7 +1350,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (蔡鎮遠名字右方直接蓋上印章) -->
+      <!-- 右側預覽區 -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1446,12 +1450,10 @@
                 </div>
               </div>
 
-              <!-- 農民姓名 + 後方直接蓋上真實印章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 印章圖片直接渲染在名字後方 -->
                   <img :src="caiStampBase64" class="cai-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -1469,7 +1471,7 @@
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1, 2, 3]。
             </div>
           </div>
         </div>
@@ -1483,7 +1485,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
-// 蔡鎮遠專屬印章 (已去背透明 PNG 向量規格嵌入)
+// 蔡鎮遠印章
 const caiStampBase64 = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect x="6" y="6" width="148" height="148" rx="14" fill="none" stroke="%23dc2626" stroke-width="7"/><text x="114" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">蔡</text><text x="46" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">鎮</text><text x="46" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">遠</text><text x="114" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="46" font-weight="900" fill="%23dc2626" text-anchor="middle">印</text></svg>'
 
 // ----------------- Supabase 連線 -----------------
@@ -2011,7 +2013,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
-// 產生花卡高畫質圖片 (免下載傳 LINE / 剪貼簿複製)
+// 產生花卡高畫質圖片 (免下載傳 LINE / 剪貼簿複製，絕不繪製虛框)
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -2021,6 +2023,7 @@ const shareCoupletToLineDirect = () => {
   const ctx = canvas.getContext('2d')
   ctx.scale(2, 2)
 
+  // 乾淨白底，不畫任何虛框線
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
@@ -2077,7 +2080,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片 (帶上蔡鎮遠印章圖檔)
+// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2113,7 +2116,6 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
-  // 在 Canvas 上同時繪製印章
   const stampImg = new Image()
   stampImg.onload = () => {
     ctx.drawImage(stampImg, 260, 310, 48, 48)
@@ -2440,8 +2442,6 @@ const saveReturn = async () => {
       alert('退貨紀錄儲存成功！')
       cancelEditRet()
       loadReturns()
-    } else {
-      alert('新增失敗：' + error.message)
     }
   }
 }
@@ -2905,9 +2905,15 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* 標準 A4 卡片 */
+/* 標準 A4 卡片 (794x1123，對應 210mm x 297mm) */
 .card-scaler-container { position: relative; }
-.card-board { background: #fff; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; }
+.card-board { 
+  background: #fff; 
+  position: absolute; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18); 
+  user-select: none; 
+  touch-action: none; 
+}
 .card-board.mode-vertical { width: 794px; height: 1123px; }
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
 .card-board.mode-vertical .middle-box { letter-spacing: 20px; }
@@ -2915,6 +2921,17 @@ input, select, textarea {
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .card-board.mode-horizontal .middle-box { letter-spacing: 16px; }
 .card-board.style-floral { border: 12px solid #fce7f3; }
+
+/* 1.27cm (約 48px) 窄邊界定位虛線框 */
+.narrow-margin-dashed-guide {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  right: 48px;
+  bottom: 48px;
+  border: 1px dashed #cbd5e1;
+  pointer-events: none;
+}
 
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
@@ -2957,7 +2974,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (蔡鎮遠名後直接蓋印章)
+   農民出售農產品收據
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -3108,7 +3125,6 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與後方印章排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3165,11 +3181,13 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px; }
 }
 
-/* 全域精準列印樣式 */
+/* ====================================================
+   全域精準列印樣式 (標準 A4 窄邊界 12.7mm 對齊)
+   ==================================================== */
 @media print {
   @page { 
     size: A4 portrait; 
-    margin: 0; 
+    margin: 12.7mm; /* 窄邊界四邊 1.27cm */
   }
   body, html, .main-wrapper { 
     margin: 0 !important; 
@@ -3184,25 +3202,22 @@ input, select, textarea {
     padding: 0 !important; 
     background: white !important; 
     overflow: visible !important; 
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
   }
   
   .card-scaler-container { 
-    width: 210mm !important; 
-    height: 297mm !important; 
-    position: relative !important;
+    width: 100% !important; 
+    height: 100% !important; 
+    position: static !important;
   }
   
+  /* 花卡列印：滿版居中，顯示 1.27cm 邊界虛框 */
   .card-board.mode-vertical { 
-    position: absolute !important; 
-    top: 0 !important;
-    left: 0 !important;
-    width: 210mm !important; 
-    height: 297mm !important; 
+    position: relative !important; 
+    width: 100% !important; 
+    height: 100% !important; 
     transform: none !important; 
     box-shadow: none !important; 
     margin: 0 !important;
@@ -3212,11 +3227,9 @@ input, select, textarea {
   }
 
   .card-board.mode-horizontal {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 297mm !important;
-    height: 210mm !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
     transform: none !important;
     box-shadow: none !important;
     margin: 0 !important;
@@ -3226,6 +3239,12 @@ input, select, textarea {
 
   .card-board * {
     visibility: visible !important;
+  }
+
+  /* 列印時印出 1.27cm 虛線定位框 */
+  .narrow-margin-dashed-guide {
+    display: block !important;
+    border: 1px dashed #94a3b8 !important;
   }
 
   .a5-landscape-sheet, .farmer-receipt-sheet { 
