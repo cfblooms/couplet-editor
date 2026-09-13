@@ -503,7 +503,6 @@
                 <label>供應商 / 花農</label>
                 <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
               </div>
-
               <div class="field">
                 <label>進貨日期</label>
                 <input v-model="formInv.date" type="date" />
@@ -838,7 +837,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (列印完整顯現 + 100% 完整滾動至底部) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (字體上限放寬至 300px) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1008,7 +1007,7 @@
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯 (1.27cm 邊界)</button>
       </div>
 
-      <!-- 右側畫布視窗：具備充足底部留白，100% 也能完整看到底部 -->
+      <!-- 右側畫布視窗 -->
       <div class="canvas-viewport" ref="viewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
@@ -2149,7 +2148,7 @@ const exportCoupletImage = shareCoupletToLineDirect
 const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
 
 // ==========================================
-// 5. 進貨與庫存
+// 5. 進貨與庫存 (自動日期流水單號)
 // ==========================================
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
@@ -2257,7 +2256,7 @@ const saveInventory = async () => {
 }
 
 // ==========================================
-// 6. 客戶資料庫
+// 6. 客戶資料庫 (自動日期流水編號)
 // ==========================================
 const loadCustomers = async () => {
   const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
@@ -2309,7 +2308,7 @@ const saveCustomer = async () => {
 }
 
 // ==========================================
-// 7. 蘭花品種庫
+// 7. 蘭花品種庫 (自動日期流水編號)
 // ==========================================
 const loadOrchids = async () => {
   const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
@@ -2393,7 +2392,7 @@ const saveOrchid = async () => {
 }
 
 // ==========================================
-// 8. 退貨管理
+// 8. 退貨管理 (自動日期流水編號)
 // ==========================================
 const loadReturns = async () => {
   const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
@@ -2498,11 +2497,11 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器 (字體上限放寬至 300px)
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
-const zoomLevel = ref(0.7) // 預設舒適縮放比，同時能點選 100%
+const zoomLevel = ref(0.7)
 const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
@@ -2573,11 +2572,13 @@ const parsedUpperTokens = computed(() => {
   }))
 })
 
+// 媽字大小：上款大小減 20 級
 const maFontSize = computed(() => {
   const baseSize = layout.value.upper?.size || 40
   return Math.max(12, baseSize - 20)
 })
 
+// 標準 A4 寬高：直式 794x1123，橫式 1123x794
 const defaultVertical = {
   upper:    { x: 620, y: 120, size: 40 },
   middle:   { x: 330, y: 220, size: 84 },
@@ -2662,7 +2663,8 @@ const onPointerMove = (e) => {
     layout.value[activeKey].x = Math.round(originX + dx)
     layout.value[activeKey].y = Math.round(originY + dy)
   } else if (currentAction === 'resize') {
-    layout.value[activeKey].size = Math.max(14, Math.min(130, Math.round(originSize + (dx + dy) / 3)))
+    // 上限放寬到 300px，讓中款常用語等文字可大幅拉大
+    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
   }
 }
 const onPointerUp = () => {
@@ -2687,11 +2689,79 @@ const onCardCategoryChange = () => {
 }
 const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
 
-// 列印花卡：強制保證列印對話框彈出時 DOM 繪製完成
 const printCouplet = () => {
   nextTick(() => {
     window.print()
   })
+}
+
+// 產生花卡高畫質圖片並下載 (自動將「媽」字以小字輸出)
+const exportCoupletImage = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+  const targetWeight = cardFontWeight.value
+
+  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
+    if (!text) return
+    ctx.textBaseline = 'top'
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
+
+  const link = document.createElement('a')
+  link.download = `花卡預覽_${new Date().toISOString().split('T')[0]}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+  alert('✅ 花卡圖片已生成並下載！可以直接使用 LINE 傳送給客戶確認！')
 }
 
 onMounted(() => {
@@ -2932,7 +3002,7 @@ input, select, textarea {
 }
 .reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; }
 
-/* 畫布視窗與自適應：具備充足底部留白，可順暢滾動看見完整 A4 底 */
+/* 畫布視窗與自適應 */
 .canvas-viewport {
   flex: 1; 
   display: flex; 
@@ -3245,7 +3315,7 @@ input, select, textarea {
 }
 
 /* ====================================================
-   全域精準列印樣式 (徹底修復預覽空白與保證滿版列印)
+   全域精準列印樣式 (標準 A4 窄邊界 12.7mm 對齊)
    ==================================================== */
 @media print {
   @page { 
@@ -3283,11 +3353,10 @@ input, select, textarea {
     padding: 0 !important;
   }
   
-  /* 花卡列印：確保在列印視窗中實體存在，且不被 scale 限制 */
   #card-print-target { 
     position: relative !important; 
-    width: 184.6mm !important; /* 210mm - 25.4mm (12.7mm x 2) */
-    height: 271.6mm !important; /* 297mm - 25.4mm (12.7mm x 2) */
+    width: 184.6mm !important; /* 210mm - 25.4mm */
+    height: 271.6mm !important; /* 297mm - 25.4mm */
     transform: none !important; 
     box-shadow: none !important; 
     margin: 0 auto !important;
