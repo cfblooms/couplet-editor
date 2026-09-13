@@ -838,8 +838,8 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (跨平台正楷支援) ================= -->
-    <div v-else-if="currentTab === 'couplet'" class="app-container">
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (列印完整顯現 + 100% 完整滾動至底部) ================= -->
+    <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
@@ -1008,13 +1008,14 @@
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯 (1.27cm 邊界)</button>
       </div>
 
-      <!-- 右側畫布視窗 -->
+      <!-- 右側畫布視窗：具備充足底部留白，100% 也能完整看到底部 -->
       <div class="canvas-viewport" ref="viewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-          <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合手機螢幕</button>
+          <button type="button" class="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
+          <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
         </div>
 
         <div 
@@ -1038,8 +1039,10 @@
               fontWeight: cardFontWeight
             }"
           >
+            <!-- 1.27cm 窄邊界虛線定位框 -->
             <div class="narrow-margin-dashed-guide"></div>
 
+            <!-- 上款 -->
             <div 
               v-if="upperText.trim()"
               class="text-box upper-box"
@@ -1056,6 +1059,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
+            <!-- 中款 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1066,6 +1070,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
             </div>
 
+            <!-- 下款 -->
             <template v-for="(item, idx) in bottomLines" :key="'bottom-' + idx">
               <div 
                 v-if="item.text.trim()"
@@ -1078,6 +1083,7 @@
               </div>
             </template>
 
+            <!-- 敬詞 -->
             <div 
               v-if="suffixText.trim()"
               class="text-box suffix-box"
@@ -1465,7 +1471,7 @@
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1, 2]。
             </div>
           </div>
         </div>
@@ -1513,8 +1519,7 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 產生「當日日期 + 流水號」核心邏輯
-// 例：OR-20260914-01
+// 產生「當日日期 + 流水號」
 const generateDateSeqId = (prefix, existingList) => {
   const now = new Date()
   const y = now.getFullYear()
@@ -1523,7 +1528,6 @@ const generateDateSeqId = (prefix, existingList) => {
   const dateStr = `${y}${m}${d}`
   const targetPrefix = `${prefix}-${dateStr}-`
 
-  // 搜尋清單中今天已經建立幾筆
   const todayItems = existingList.filter(item => String(item.id || '').startsWith(targetPrefix))
   const nextSeq = todayItems.length + 1
   return `${targetPrefix}${String(nextSeq).padStart(2, '0')}`
@@ -1580,7 +1584,7 @@ const formOrder = ref({
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組 (自動日期流水單號)
+// 1. 訂單模組
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1702,7 +1706,6 @@ const saveOrder = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 日期 + 序號格式：OR-YYYYMMDD-01
     const newId = generateDateSeqId('OR', orderList.value)
     const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2024,6 +2027,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
+// 產生花卡高畫質圖片 (免下載傳 LINE / 剪貼簿複製，絕不繪製虛框)
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -2089,6 +2093,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
+// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2144,7 +2149,7 @@ const exportCoupletImage = shareCoupletToLineDirect
 const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
 
 // ==========================================
-// 5. 進貨與庫存 (自動日期流水單號)
+// 5. 進貨與庫存
 // ==========================================
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
@@ -2239,7 +2244,6 @@ const saveInventory = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 日期 + 序號格式：IN-YYYYMMDD-01
     const newId = generateDateSeqId('IN', inventoryList.value)
     const { error } = await supabase.from('inventory').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2253,7 +2257,7 @@ const saveInventory = async () => {
 }
 
 // ==========================================
-// 6. 客戶資料庫 (自動日期流水編號)
+// 6. 客戶資料庫
 // ==========================================
 const loadCustomers = async () => {
   const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
@@ -2292,7 +2296,6 @@ const saveCustomer = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 日期 + 序號格式：CU-YYYYMMDD-01
     const newId = generateDateSeqId('CU', customers.value)
     const { error } = await supabase.from('customers').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2306,7 +2309,7 @@ const saveCustomer = async () => {
 }
 
 // ==========================================
-// 7. 蘭花品種庫 (自動日期流水編號)
+// 7. 蘭花品種庫
 // ==========================================
 const loadOrchids = async () => {
   const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
@@ -2377,7 +2380,6 @@ const saveOrchid = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 日期 + 序號格式：FL-YYYYMMDD-01
     const newId = generateDateSeqId('FL', orchids.value)
     const { error } = await supabase.from('orchids').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2391,7 +2393,7 @@ const saveOrchid = async () => {
 }
 
 // ==========================================
-// 8. 退貨管理 (自動日期流水編號)
+// 8. 退貨管理
 // ==========================================
 const loadReturns = async () => {
   const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
@@ -2447,7 +2449,6 @@ const saveReturn = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 日期 + 序號格式：RT-YYYYMMDD-01
     const newId = generateDateSeqId('RT', returnList.value)
     const { error } = await supabase.from('returns').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2497,17 +2498,16 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (字體全平台適配)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
-const zoomLevel = ref(1)
+const zoomLevel = ref(0.7) // 預設舒適縮放比，同時能點選 100%
 const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
 const cardFontWeight = ref('700')
 
-// 擴充字型清單，全平台皆可支援（含 iOS / iPadOS / Android 雲端正楷體回退）
 const fontMapping = {
   kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif',
   fangsong: '"DFPFangSong-B5", "DFPKai-B5", "FangSong", "STFangsong", "華康仿宋體", "仿宋", serif',
@@ -2633,7 +2633,7 @@ const getUpperBoxStyle = () => {
 
 const autoFitZoom = () => {
   if (!viewportRef.value) return
-  const availableWidth = Math.max(viewportRef.value.clientWidth - 28, 280)
+  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
   const cardWidth = isVertical.value ? 794 : 1123
   zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
 }
@@ -2687,12 +2687,14 @@ const onCardCategoryChange = () => {
 }
 const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
 
+// 列印花卡：強制保證列印對話框彈出時 DOM 繪製完成
 const printCouplet = () => {
-  window.print()
+  nextTick(() => {
+    window.print()
+  })
 }
 
 onMounted(() => {
-  // 自動載入跨平台繁體楷書 WebFont (解決手機、iPad、平板無法顯示標楷體的問題)
   if (!document.getElementById('cns11643-tw-kai-font')) {
     const style = document.createElement('style')
     style.id = 'cns11643-tw-kai-font'
@@ -2709,7 +2711,6 @@ onMounted(() => {
     document.head.appendChild(style)
   }
 
-  // 自動載入思源宋體 Google Web Font
   if (!document.getElementById('noto-serif-tc-font')) {
     const link = document.createElement('link')
     link.id = 'noto-serif-tc-font'
@@ -2898,6 +2899,12 @@ input, select, textarea {
 
 /* 簽收單與收據控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
+.couplet-screen-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 52px);
+}
 .control-panel {
   width: 380px; background: white; padding: 16px;
   box-shadow: 2px 0 10px rgba(0,0,0,0.06); overflow-y: auto; flex-shrink: 0;
@@ -2925,8 +2932,19 @@ input, select, textarea {
 }
 .reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; }
 
-/* 畫布視窗與自適應 */
-.canvas-viewport, .receipt-preview-area {
+/* 畫布視窗與自適應：具備充足底部留白，可順暢滾動看見完整 A4 底 */
+.canvas-viewport {
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
+  overflow: auto; 
+  padding: 20px 20px 80px 20px; 
+  position: relative; 
+  background-color: #cbd5e1;
+  -webkit-overflow-scrolling: touch;
+}
+.receipt-preview-area {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   overflow: auto; padding: 16px; position: relative; background-color: #cbd5e1;
   -webkit-overflow-scrolling: touch;
@@ -2940,8 +2958,12 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* 標準 A4 卡片 */
-.card-scaler-container { position: relative; }
+/* 標準 A4 卡片 (794x1123，對應 210mm x 297mm) */
+.card-scaler-container { 
+  position: relative; 
+  margin-bottom: 40px; 
+  flex-shrink: 0;
+}
 .card-board { 
   background: #fff; 
   position: absolute; 
@@ -3216,68 +3238,66 @@ input, select, textarea {
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
 @media (max-width: 768px) {
-  .app-container, .receipt-container { flex-direction: column; overflow-y: auto; }
+  .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
   .control-panel { width: 100%; max-height: 46vh; }
   .form-grid { grid-template-columns: 1fr; }
-  .canvas-viewport, .receipt-preview-area { padding: 12px 6px; }
+  .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
 /* ====================================================
-   全域精準列印樣式 (標準 A4 窄邊界 12.7mm 對齊)
+   全域精準列印樣式 (徹底修復預覽空白與保證滿版列印)
    ==================================================== */
 @media print {
   @page { 
     size: A4 portrait; 
     margin: 12.7mm;
   }
-  body, html, .main-wrapper { 
+  
+  html, body, .main-wrapper, .couplet-screen-wrapper { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    height: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
     overflow: visible !important;
+    display: block !important;
   }
+  
   .no-print { display: none !important; }
   
   .canvas-viewport, .receipt-preview-area { 
     padding: 0 !important; 
+    margin: 0 !important;
     background: white !important; 
     overflow: visible !important; 
     display: block !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
   }
   
   .card-scaler-container { 
     width: 100% !important; 
     height: 100% !important; 
     position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
-  .card-board.mode-vertical { 
+  /* 花卡列印：確保在列印視窗中實體存在，且不被 scale 限制 */
+  #card-print-target { 
     position: relative !important; 
-    width: 100% !important; 
-    height: 100% !important; 
+    width: 184.6mm !important; /* 210mm - 25.4mm (12.7mm x 2) */
+    height: 271.6mm !important; /* 297mm - 25.4mm (12.7mm x 2) */
     transform: none !important; 
     box-shadow: none !important; 
-    margin: 0 !important;
+    margin: 0 auto !important;
     display: block !important;
     visibility: visible !important;
+    page-break-inside: avoid !important;
     page-break-after: avoid !important;
   }
 
-  .card-board.mode-horizontal {
-    position: relative !important;
-    width: 100% !important;
-    height: 100% !important;
-    transform: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-    display: block !important;
-    visibility: visible !important;
-  }
-
-  .card-board * {
+  #card-print-target * {
     visibility: visible !important;
   }
 
