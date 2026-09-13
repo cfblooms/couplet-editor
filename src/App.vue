@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (完整擴充華康楷書與正顏楷體) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (媽字縮小 20 級) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -869,7 +869,7 @@
         </div>
 
         <div class="form-group">
-          <label>版面模式 (標準 A4)：</label>
+          <label>版面模式 (標準 A4 21.0 × 29.7 cm)：</label>
           <div class="btn-group">
             <button type="button" :class="{ active: isVertical }" @click="switchOrientation(true)">直式 (傳統輓聯)</button>
             <button type="button" :class="{ active: !isVertical }" @click="switchOrientation(false)">橫式 (現代花卡)</button>
@@ -884,7 +884,7 @@
           </select>
         </div>
 
-        <!-- 喪禮設定 (加入「敬悼」選項) -->
+        <!-- 喪禮設定 -->
         <template v-if="cardCategory === 'funeral'">
           <div class="panel-section">
             <label class="section-title">上款稱謂組合：</label>
@@ -1020,8 +1020,8 @@
         <div 
           class="card-scaler-container" 
           :style="{
-            width: (isVertical ? 560 : 792) * zoomLevel + 'px',
-            height: (isVertical ? 792 : 560) * zoomLevel + 'px'
+            width: (isVertical ? 794 : 1123) * zoomLevel + 'px',
+            height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
           }"
         >
           <div 
@@ -1038,16 +1038,24 @@
               fontWeight: cardFontWeight
             }"
           >
+            <!-- 上款 (媽字大小等於上款設定大小減 20 級) -->
             <div 
               v-if="upperText.trim()"
               class="text-box upper-box"
-              :style="getStyle('upper')"
+              :style="getUpperBoxStyle()"
               @pointerdown="startMove($event, 'upper')"
             >
-              <span>{{ upperText }}</span>
+              <span 
+                v-for="(token, tIdx) in parsedUpperTokens" 
+                :key="tIdx" 
+                :style="token.isSmall ? { fontSize: maFontSize + 'px' } : {}"
+              >
+                {{ token.char }}
+              </span>
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
+            <!-- 中款 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1058,6 +1066,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
             </div>
 
+            <!-- 下款 -->
             <template v-for="(item, idx) in bottomLines" :key="'bottom-' + idx">
               <div 
                 v-if="item.text.trim()"
@@ -1070,6 +1079,7 @@
               </div>
             </template>
 
+            <!-- 敬詞 -->
             <div 
               v-if="suffixText.trim()"
               class="text-box suffix-box"
@@ -1456,7 +1466,7 @@
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1, 2, 3]。
             </div>
           </div>
         </div>
@@ -2352,7 +2362,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器 (媽字縮小 20 級)
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2419,27 +2429,43 @@ const upperText = ref('敬悼 陳媽李老夫人 千古')
 const middleText = ref('母儀千古')
 const suffixText = ref('敬輓')
 
+// 解析上款字串標記
+const parsedUpperTokens = computed(() => {
+  const chars = upperText.value.split('')
+  return chars.map(char => ({
+    char,
+    isSmall: char === '媽'
+  }))
+})
+
+// 「媽」字大小：比上款基準字體小 20 級 (如果上款 80，媽就是 60；最低不小於 12)
+const maFontSize = computed(() => {
+  const baseSize = layout.value.upper?.size || 40
+  return Math.max(12, baseSize - 20)
+})
+
+// 標準 A4 寬高：直式 794x1123，橫式 1123x794
 const defaultVertical = {
-  upper:    { x: 440, y: 65,  size: 30 },
-  middle:   { x: 230, y: 140, size: 66 },
-  bottom_0: { x: 105, y: 350, size: 22 },
-  bottom_1: { x: 105, y: 460, size: 26 },
-  bottom_2: { x: 65,  y: 350, size: 22 },
-  bottom_3: { x: 65,  y: 460, size: 24 },
-  bottom_4: { x: 25,  y: 350, size: 22 },
-  bottom_5: { x: 25,  y: 460, size: 22 },
-  suffix:   { x: 105, y: 620, size: 24 }
+  upper:    { x: 620, y: 120, size: 40 },
+  middle:   { x: 330, y: 220, size: 84 },
+  bottom_0: { x: 155, y: 520, size: 30 },
+  bottom_1: { x: 155, y: 680, size: 36 },
+  bottom_2: { x: 95,  y: 520, size: 30 },
+  bottom_3: { x: 95,  y: 680, size: 32 },
+  bottom_4: { x: 40,  y: 520, size: 30 },
+  bottom_5: { x: 40,  y: 680, size: 30 },
+  suffix:   { x: 155, y: 920, size: 34 }
 }
 const defaultHorizontal = {
-  upper:    { x: 140, y: 65,  size: 28 },
-  middle:   { x: 160, y: 180, size: 58 },
-  bottom_0: { x: 240, y: 280, size: 20 },
-  bottom_1: { x: 240, y: 320, size: 22 },
-  bottom_2: { x: 240, y: 360, size: 20 },
-  bottom_3: { x: 240, y: 400, size: 20 },
-  bottom_4: { x: 240, y: 440, size: 20 },
-  bottom_5: { x: 240, y: 480, size: 20 },
-  suffix:   { x: 440, y: 340, size: 24 }
+  upper:    { x: 180, y: 100, size: 36 },
+  middle:   { x: 220, y: 260, size: 76 },
+  bottom_0: { x: 340, y: 400, size: 28 },
+  bottom_1: { x: 340, y: 460, size: 32 },
+  bottom_2: { x: 340, y: 520, size: 28 },
+  bottom_3: { x: 340, y: 580, size: 28 },
+  bottom_4: { x: 340, y: 640, size: 28 },
+  bottom_5: { x: 340, y: 700, size: 28 },
+  suffix:   { x: 620, y: 490, size: 34 }
 }
 const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
 
@@ -2451,8 +2477,9 @@ const switchOrientation = (vertical) => {
 const resetPositions = () => {
   layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
 }
+
 const getStyle = (key) => {
-  const item = layout.value[key] || { x: 50, y: 50, size: 22 }
+  const item = layout.value[key] || { x: 50, y: 50, size: 30 }
   return { 
     left: `${item.x}px`, 
     top: `${item.y}px`, 
@@ -2460,16 +2487,28 @@ const getStyle = (key) => {
     fontWeight: cardFontWeight.value
   }
 }
+
+// 上款外框專用樣式
+const getUpperBoxStyle = () => {
+  const item = layout.value.upper || { x: 620, y: 120, size: 40 }
+  return {
+    left: `${item.x}px`,
+    top: `${item.y}px`,
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
 const autoFitZoom = () => {
   if (!viewportRef.value) return
   const availableWidth = Math.max(viewportRef.value.clientWidth - 28, 280)
-  const cardWidth = isVertical.value ? 560 : 792
-  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.35), 1.0)
+  const cardWidth = isVertical.value ? 794 : 1123
+  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
 }
 
 let activeKey = null
 let currentAction = null
-let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 24
+let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
 
 const startMove = (e, key) => {
   activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
@@ -2491,7 +2530,7 @@ const onPointerMove = (e) => {
     layout.value[activeKey].x = Math.round(originX + dx)
     layout.value[activeKey].y = Math.round(originY + dy)
   } else if (currentAction === 'resize') {
-    layout.value[activeKey].size = Math.max(14, Math.min(120, Math.round(originSize + (dx + dy) / 3)))
+    layout.value[activeKey].size = Math.max(14, Math.min(130, Math.round(originSize + (dx + dy) / 3)))
   }
 }
 const onPointerUp = () => {
@@ -2520,10 +2559,11 @@ const printCouplet = () => {
   window.print()
 }
 
+// 產生花卡高畫質圖片並下載 (精確減 20 級輸出「媽」字)
 const exportCoupletImage = () => {
   const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 560 : 792
-  const height = isVertical.value ? 792 : 560
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
   canvas.width = width * 2
   canvas.height = height * 2
   const ctx = canvas.getContext('2d')
@@ -2533,32 +2573,46 @@ const exportCoupletImage = () => {
   ctx.fillRect(0, 0, width, height)
 
   if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 10
+    ctx.lineWidth = 12
     ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(5, 5, width - 10, height - 10)
+    ctx.strokeRect(6, 6, width - 12, height - 12)
   }
 
   ctx.fillStyle = '#000000'
   const targetFontFamily = activeCssFontFamily.value
   const targetWeight = cardFontWeight.value
 
-  const drawTextItem = (text, item, isVertMode) => {
+  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
     if (!text) return
-    ctx.font = `${targetWeight} ${item.size}px ${targetFontFamily}`
     ctx.textBaseline = 'top'
     if (isVertMode) {
       let currentY = item.y
       const chars = text.split('')
       chars.forEach(char => {
-        ctx.fillText(char, item.x, currentY)
-        currentY += item.size + 6
+        const isMa = isUpper && char === '媽'
+        // 媽字大小減 20 級
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
       })
     } else {
-      ctx.fillText(text, item.x, item.y)
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        // 媽字大小減 20 級
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
     }
   }
 
-  drawTextItem(upperText.value, layout.value.upper, isVertical.value)
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
   drawTextItem(middleText.value, layout.value.middle, isVertical.value)
 
   bottomLines.value.forEach((item, idx) => {
@@ -2802,18 +2856,18 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* A4 卡片 */
+/* 標準 A4 卡片 */
 .card-scaler-container { position: relative; }
 .card-board { background: #fff; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; }
-.card-board.mode-vertical { width: 560px; height: 792px; }
-.card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 6px; }
-.card-board.mode-vertical .middle-box { letter-spacing: 14px; }
-.card-board.mode-horizontal { width: 792px; height: 560px; }
-.card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 4px; }
-.card-board.mode-horizontal .middle-box { letter-spacing: 12px; }
-.card-board.style-floral { border: 10px solid #fce7f3; }
+.card-board.mode-vertical { width: 794px; height: 1123px; }
+.card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
+.card-board.mode-vertical .middle-box { letter-spacing: 20px; }
+.card-board.mode-horizontal { width: 1123px; height: 794px; }
+.card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
+.card-board.mode-horizontal .middle-box { letter-spacing: 16px; }
+.card-board.style-floral { border: 12px solid #fce7f3; }
 
-.text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.2; color: #000; }
+.text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
   position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
@@ -2854,7 +2908,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據 (A5 滿版放大優化)
+   農民出售農產品收據
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -2874,7 +2928,6 @@ input, select, textarea {
   left: 0;
 }
 
-/* 標題與日期 (往下增加間距，無底線純淨文字) */
 .f-header {
   display: flex;
   flex-direction: column;
@@ -2895,7 +2948,6 @@ input, select, textarea {
   margin-top: 10px;
 }
 
-/* 獨立外框網格：滿版等比擴大 */
 .f-receipt-grid-table {
   border: 2px solid #000;
   display: flex;
@@ -2938,7 +2990,6 @@ input, select, textarea {
 
 .f-flex-1 { flex: 1; }
 
-/* 頂部區塊 */
 .f-row-top { min-height: 62px; }
 .f-col-buyer-group {
   display: flex;
@@ -2972,7 +3023,6 @@ input, select, textarea {
   color: #1e3a8a;
 }
 
-/* 品項表頭與資料列寬度分配 */
 .col-p-name { width: 25%; }
 .col-p-spec { width: 16%; }
 .col-p-qty  { width: 10%; }
@@ -2980,18 +3030,10 @@ input, select, textarea {
 .col-p-amt  { width: 18%; }
 .col-p-note { width: 17%; border-right: none !important; }
 
-.f-header-row {
-  font-weight: bold;
-  height: 28px;
-}
-.f-data-row {
-  height: 30px;
-}
-.f-empty-row {
-  height: 28px;
-}
+.f-header-row { font-weight: bold; height: 28px; }
+.f-data-row { height: 30px; }
+.f-empty-row { height: 28px; }
 
-/* 中文大寫列：單一行排開完整顯示 */
 .f-w-total-lbl { 
   width: 195px; 
   white-space: nowrap; 
@@ -3017,7 +3059,6 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 農民資訊列 */
 .f-farmer-clean-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3065,14 +3106,19 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px; }
 }
 
-/* 全域精準列印樣式 */
+/* ====================================================
+   全域精準列印樣式 (標準 A4 滿版 210mm x 297mm)
+   ==================================================== */
 @media print {
-  @page { size: auto; margin: 0; }
+  @page { 
+    size: A4 portrait; 
+    margin: 0; 
+  }
   body, html, .main-wrapper { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    height: auto !important;
+    height: 100% !important;
     overflow: visible !important;
   }
   .no-print { display: none !important; }
@@ -3081,23 +3127,47 @@ input, select, textarea {
     padding: 0 !important; 
     background: white !important; 
     overflow: visible !important; 
-    display: block !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100vw !important;
+    height: 100vh !important;
   }
   
-  .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { 
-    width: 100% !important; 
-    height: auto !important; 
-    position: static !important;
+  .card-scaler-container { 
+    width: 210mm !important; 
+    height: 297mm !important; 
+    position: relative !important;
   }
   
-  .card-board { 
-    position: relative !important; 
+  /* 花卡列印滿版 A4 */
+  .card-board.mode-vertical { 
+    position: absolute !important; 
+    top: 0 !important;
+    left: 0 !important;
+    width: 210mm !important; 
+    height: 297mm !important; 
     transform: none !important; 
     box-shadow: none !important; 
-    margin: 0 auto !important;
+    margin: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    page-break-after: avoid !important;
+  }
+
+  .card-board.mode-horizontal {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    transform: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
     display: block !important;
     visibility: visible !important;
   }
+
   .card-board * {
     visibility: visible !important;
   }
