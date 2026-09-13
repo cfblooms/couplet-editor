@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (免下載直接傳 LINE / 複製) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (媽字縮小 20 級) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1004,7 +1004,6 @@
         </div>
 
         <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-        <!-- 免下載直接傳 LINE / 複製 -->
         <button type="button" class="line-action-btn mt-2" @click="shareCoupletToLineDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
       </div>
@@ -1252,7 +1251,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 ================= -->
+    <!-- ================= 模式 4：農民收據 (蔡鎮遠後方直接蓋上紅色印章) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1347,7 +1346,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 -->
+      <!-- 右側預覽區 (蔡鎮遠名字右方直接蓋上印章) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1447,10 +1446,13 @@
                 </div>
               </div>
 
+              <!-- 農民姓名 + 後方直接蓋上真實印章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
-                <div class="f-grid-val f-farmer-clean-cell f-flex-1">
+                <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
+                  <!-- 印章圖片直接渲染在名字後方 -->
+                  <img :src="caiStampBase64" class="cai-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
 
@@ -1480,6 +1482,9 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
+
+// 蔡鎮遠專屬印章 (已去背透明 PNG 向量規格嵌入)
+const caiStampBase64 = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect x="6" y="6" width="148" height="148" rx="14" fill="none" stroke="%23dc2626" stroke-width="7"/><text x="114" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">蔡</text><text x="46" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">鎮</text><text x="46" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">遠</text><text x="114" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="46" font-weight="900" fill="%23dc2626" text-anchor="middle">印</text></svg>'
 
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
@@ -1881,7 +1886,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據
+// 4. 農民收據 (蔡鎮遠名後直接蓋印章)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1968,15 +1973,12 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
-// ==========================================
-// 8. 專用通用函式：免下載直接分享至 LINE 或複製到剪貼簿
-// ==========================================
+// 免下載直接分享至 LINE 或複製到剪貼簿
 const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
   canvas.toBlob(async (blob) => {
     if (!blob) return alert('圖片生成失敗，請重試！')
     const file = new File([blob], filename, { type: 'image/png' })
 
-    // 1. 手機端：如果支援 Web Share API，直接跳出系統分享面板（直接點 LINE 即可發給客人，不進下載資料夾）
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -1989,7 +1991,6 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
-    // 2. 電腦端：支援直接寫入剪貼簿，免下載
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
         await navigator.clipboard.write([
@@ -2002,7 +2003,6 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
-    // 3. 一般備用：直接觸發下載
     const link = document.createElement('a')
     link.download = filename
     link.href = canvas.toDataURL('image/png')
@@ -2077,7 +2077,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片 (免下載傳 LINE / 剪貼簿複製)
+// 產生農民收據高畫質圖片 (帶上蔡鎮遠印章圖檔)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2091,20 +2091,20 @@ const shareFarmerReceiptToLineDirect = () => {
   const fontFam = '"DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#000000'
 
-  ctx.font = `bold 24px ${fontFam}`
+  ctx.font = `bold 26px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
 
-  ctx.font = `14px ${fontFam}`
+  ctx.font = `15px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 750, 80)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
 
-  ctx.lineWidth = 1.5
+  ctx.lineWidth = 1.8
   ctx.strokeStyle = '#000000'
   ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
-  ctx.font = `bold 14px ${fontFam}`
+  ctx.font = `bold 14.5px ${fontFam}`
   ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
   ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
@@ -2112,15 +2112,22 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
-  ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 365)
   
-  ctx.font = `11px ${fontFam}`
-  ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
-  ctx.font = `9.5px ${fontFam}`
-  ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+  // 在 Canvas 上同時繪製印章
+  const stampImg = new Image()
+  stampImg.onload = () => {
+    ctx.drawImage(stampImg, 260, 310, 48, 48)
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
 
-  const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.src = caiStampBase64
 }
 
 // 舊相容保留
@@ -2476,7 +2483,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (媽字縮小 20 級)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2602,7 +2609,6 @@ const getStyle = (key) => {
   }
 }
 
-// 上款外框專用樣式
 const getUpperBoxStyle = () => {
   const item = layout.value.upper || { x: 620, y: 120, size: 40 }
   return {
@@ -2951,7 +2957,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 48px; }
 
 /* ====================================================
-   農民出售農產品收據
+   農民出售農產品收據 (蔡鎮遠名後直接蓋印章)
    ==================================================== */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
@@ -3102,14 +3108,24 @@ input, select, textarea {
   font-size: 17px;
 }
 
-.f-farmer-clean-cell {
+/* 蔡鎮遠姓名與後方印章排版 */
+.f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 .f-farmer-name-clean {
   font-size: 18px;
   letter-spacing: 6px;
   font-weight: bold;
+}
+.cai-stamp-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  margin-top: -2px;
 }
 
 .f-w-id-lbl { width: 190px; }
@@ -3149,9 +3165,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px; }
 }
 
-/* ====================================================
-   全域精準列印樣式 (標準 A4 滿版 210mm x 297mm)
-   ==================================================== */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
@@ -3183,7 +3197,6 @@ input, select, textarea {
     position: relative !important;
   }
   
-  /* 花卡列印滿版 A4 */
   .card-board.mode-vertical { 
     position: absolute !important; 
     top: 0 !important;
