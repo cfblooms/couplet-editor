@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (媽字縮小 20 級) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (免下載直接傳 LINE / 複製) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1004,7 +1004,8 @@
         </div>
 
         <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-        <button type="button" class="line-action-btn mt-2" @click="exportCoupletImage">📷 生成花卡圖片傳 LINE</button>
+        <!-- 免下載直接傳 LINE / 複製 -->
+        <button type="button" class="line-action-btn mt-2" @click="shareCoupletToLineDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
       </div>
 
@@ -1332,9 +1333,9 @@
         <button 
           type="button" 
           class="line-action-btn mt-2" 
-          @click="exportFarmerReceiptImage"
+          @click="shareFarmerReceiptToLineDirect"
         >
-          📷 生成收據圖片傳 LINE
+          💬 直接傳送 / 複製收據給客人 (免下載)
         </button>
 
         <button 
@@ -1466,7 +1467,7 @@
             </div>
 
             <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人[cite: 1, 2, 3]。
+              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
             </div>
           </div>
         </div>
@@ -1967,7 +1968,117 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
-const exportFarmerReceiptImage = () => {
+// ==========================================
+// 8. 專用通用函式：免下載直接分享至 LINE 或複製到剪貼簿
+// ==========================================
+const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
+  canvas.toBlob(async (blob) => {
+    if (!blob) return alert('圖片生成失敗，請重試！')
+    const file = new File([blob], filename, { type: 'image/png' })
+
+    // 1. 手機端：如果支援 Web Share API，直接跳出系統分享面板（直接點 LINE 即可發給客人，不進下載資料夾）
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          files: [file]
+        })
+        return
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error('Share failed', err)
+      }
+    }
+
+    // 2. 電腦端：支援直接寫入剪貼簿，免下載
+    if (navigator.clipboard && navigator.clipboard.write) {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ])
+        alert(`✅ ${successMsg}\n\n已直接複製到您的電腦剪貼簿！請直接開啟 LINE 聊天室按 Ctrl + V (Mac 按 Cmd + V) 貼上即可傳送！`)
+        return
+      } catch (err) {
+        console.warn('Clipboard write failed, fallback to download', err)
+      }
+    }
+
+    // 3. 一般備用：直接觸發下載
+    const link = document.createElement('a')
+    link.download = filename
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    alert(`✅ ${successMsg} 已自動下載，請開啟 LINE 傳送給客戶！`)
+  }, 'image/png')
+}
+
+// 產生花卡高畫質圖片 (免下載傳 LINE / 剪貼簿複製)
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+  const targetWeight = cardFontWeight.value
+
+  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
+    if (!text) return
+    ctx.textBaseline = 'top'
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
+
+// 產生農民收據高畫質圖片 (免下載傳 LINE / 剪貼簿複製)
+const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
   canvas.height = 560 * 2
@@ -2008,12 +2119,13 @@ const exportFarmerReceiptImage = () => {
   ctx.font = `9.5px ${fontFam}`
   ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
 
-  const link = document.createElement('a')
-  link.download = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
-  link.href = canvas.toDataURL('image/png')
-  link.click()
-  alert('✅ 農民收據圖片已生成並下載！可直接在 LINE 傳送給客戶！')
+  const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
 }
+
+// 舊相容保留
+const exportCoupletImage = shareCoupletToLineDirect
+const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
 
 // ==========================================
 // 5. 進貨與庫存
@@ -2321,6 +2433,8 @@ const saveReturn = async () => {
       alert('退貨紀錄儲存成功！')
       cancelEditRet()
       loadReturns()
+    } else {
+      alert('新增失敗：' + error.message)
     }
   }
 }
@@ -2557,77 +2671,6 @@ const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.v
 
 const printCouplet = () => {
   window.print()
-}
-
-// 產生花卡高畫質圖片並下載 (精確減 20 級輸出「媽」字)
-const exportCoupletImage = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
-
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
-
-  ctx.fillStyle = '#000000'
-  const targetFontFamily = activeCssFontFamily.value
-  const targetWeight = cardFontWeight.value
-
-  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
-    if (!text) return
-    ctx.textBaseline = 'top'
-    if (isVertMode) {
-      let currentY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        // 媽字大小減 20 級
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        ctx.fillText(char, item.x + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = item.x
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        // 媽字大小減 20 級
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        ctx.fillText(char, currentX, item.y + offsetY)
-        currentX += curSize + 4
-      })
-    }
-  }
-
-  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
-
-  const link = document.createElement('a')
-  link.download = `花卡預覽_${new Date().toISOString().split('T')[0]}.png`
-  link.href = canvas.toDataURL('image/png')
-  link.click()
-  alert('✅ 花卡圖片已生成並下載！可以直接使用 LINE 傳送給客戶確認！')
 }
 
 onMounted(() => {
