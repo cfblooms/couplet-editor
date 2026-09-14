@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (純淨無虛框 + 1:1 列印比例) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1347,7 +1347,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 -->
+      <!-- 右側預覽區 (使用真實蔡鎮遠蓋章圖片) -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1447,11 +1447,13 @@
                 </div>
               </div>
 
+              <!-- 蔡鎮遠姓名與真實蓋章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <img :src="caiStampBase64" class="cai-stamp-img" alt="蔡鎮遠印章" />
+                  <!-- 直接讀取 public 資料夾內的真實印章圖片 -->
+                  <img src="/cai-seal.png" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
 
@@ -1481,9 +1483,6 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
-
-// 蔡鎮遠印章
-const caiStampBase64 = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect x="6" y="6" width="148" height="148" rx="14" fill="none" stroke="%23dc2626" stroke-width="7"/><text x="114" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">蔡</text><text x="46" y="66" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">鎮</text><text x="46" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="48" font-weight="900" fill="%23dc2626" text-anchor="middle">遠</text><text x="114" y="126" font-family="DFKai-SB,BiauKai,serif" font-size="46" font-weight="900" fill="%23dc2626" text-anchor="middle">印</text></svg>'
 
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
@@ -1516,6 +1515,7 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
+// 產生「當日日期 + 流水號」
 const generateDateSeqId = (prefix, existingList) => {
   const now = new Date()
   const y = now.getFullYear()
@@ -2089,7 +2089,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片
+// 產生農民收據高畫質圖片 (使用真實蔡鎮遠印章圖片)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2125,9 +2125,13 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
+  // 載入真實印章圖片
   const stampImg = new Image()
+  stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
-    ctx.drawImage(stampImg, 260, 310, 48, 48)
+    // 繪製印章圖片
+    ctx.drawImage(stampImg, 260, 305, 50, 50)
+
     ctx.font = `14.5px ${fontFam}`
     ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
     ctx.font = `11px ${fontFam}`
@@ -2138,7 +2142,19 @@ const shareFarmerReceiptToLineDirect = () => {
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
     shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   }
-  stampImg.src = caiStampBase64
+  stampImg.onerror = () => {
+    // 備援處理
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.src = '/cai-seal.png'
 }
 
 const exportCoupletImage = shareCoupletToLineDirect
@@ -3172,6 +3188,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
+/* 蔡鎮遠姓名與真實蓋章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3184,11 +3201,11 @@ input, select, textarea {
   letter-spacing: 6px;
   font-weight: bold;
 }
-.cai-stamp-img {
-  width: 44px;
-  height: 44px;
+.cai-real-stamp-img {
+  width: 46px;
+  height: 46px;
   object-fit: contain;
-  margin-top: -2px;
+  mix-blend-mode: multiply; /* 自然融入紙張背景 */
 }
 
 .f-w-id-lbl { width: 190px; }
@@ -3229,12 +3246,12 @@ input, select, textarea {
 }
 
 /* ====================================================
-   全域精準列印樣式 (實體 A4 1:1 比例輸出，徹底根治縮小50%)
+   全域精準列印樣式 (純淨 A4 1:1 列印)
    ==================================================== */
 @media print {
   @page { 
     size: A4 portrait; 
-    margin: 0 !important; /* 邊界設為 0，避免瀏覽器做二次縮小 */
+    margin: 0 !important;
   }
   
   html, body, .main-wrapper, .couplet-screen-wrapper { 
@@ -3262,12 +3279,11 @@ input, select, textarea {
   .card-scaler-container { 
     width: 210mm !important; 
     height: 297mm !important; 
-    position: relative !important;
+    position: static !important;
     margin: 0 !important;
     padding: 0 !important;
   }
   
-  /* 直式花卡：1:1 滿版對齊 A4 實體規格 */
   #card-print-target.mode-vertical { 
     position: absolute !important; 
     top: 0 !important;
@@ -3283,7 +3299,6 @@ input, select, textarea {
     page-break-after: avoid !important;
   }
 
-  /* 橫式花卡 */
   #card-print-target.mode-horizontal {
     position: absolute !important;
     top: 0 !important;
@@ -3301,7 +3316,6 @@ input, select, textarea {
     visibility: visible !important;
   }
 
-  /* A5 簽收單與農民收據依然保持 A5 尺寸 */
   .a5-landscape-sheet, .farmer-receipt-sheet { 
     position: relative !important; 
     transform: none !important; 
