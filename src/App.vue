@@ -47,7 +47,7 @@
       </nav>
 
       <div class="manage-content">
-        <!-- 模組：訂單與帳務 -->
+        <!-- 模組 1：訂單與帳務 -->
         <section v-if="subTab === 'order'" class="tab-pane">
           <div v-if="editingOrderId" class="edit-banner">
             <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
@@ -292,7 +292,7 @@
           </div>
         </section>
 
-        <!-- 客戶未結對帳專區 -->
+        <!-- 模組 2：客戶未結對帳專區 -->
         <section v-if="subTab === 'statement'" class="tab-pane">
           <div class="card-box">
             <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -401,7 +401,7 @@
           </div>
         </section>
 
-        <!-- 進貨與庫存 -->
+        <!-- 模組 3：進貨與庫存 -->
         <section v-if="subTab === 'inventory'" class="tab-pane">
           <div v-if="editingInvId" class="edit-banner">
             <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
@@ -552,7 +552,7 @@
           </div>
         </section>
 
-        <!-- 客戶資料庫 -->
+        <!-- 模組 4：客戶資料庫 -->
         <section v-if="subTab === 'customer'" class="tab-pane">
           <div v-if="editingCustId" class="edit-banner">
             <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
@@ -638,7 +638,7 @@
           </div>
         </section>
 
-        <!-- 蘭花品種庫 -->
+        <!-- 模組 5：蘭花品種庫 -->
         <section v-if="subTab === 'orchid'" class="tab-pane">
           <div v-if="editingOrchidId" class="edit-banner">
             <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
@@ -718,7 +718,7 @@
           </div>
         </section>
 
-        <!-- 退貨管理區 -->
+        <!-- 模組 6：退貨管理區 -->
         <section v-if="subTab === 'return'" class="tab-pane">
           <div v-if="editingRetId" class="edit-banner">
             <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
@@ -749,11 +749,15 @@
               </div>
               <div class="field">
                 <label>不良株數 (棵)</label>
-                <input v-model.number="formRet.qty" type="number" min="1" />
+                <input v-model.number="formRet.qty" type="number" min="1" @input="calcRetTotal" />
               </div>
               <div class="field">
                 <label>每棵單價 (元)</label>
-                <input v-model.number="formRet.unit_price" type="number" min="0" />
+                <input v-model.number="formRet.unit_price" type="number" min="0" @input="calcRetTotal" />
+              </div>
+              <div class="field">
+                <label>總損益金額 (元)</label>
+                <input v-model.number="formRet.total_amount" type="number" min="0" />
               </div>
               <div class="field">
                 <label>處理日期</label>
@@ -825,7 +829,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4 1:1 精準輸出) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -996,7 +1000,7 @@
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-          <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
+          <button type="button" class="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
           <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
         </div>
 
@@ -1038,7 +1042,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 -->
+            <!-- 中款 (字體大小上限支援至 300px) -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1077,7 +1081,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (品項規格：特選蘭花 1盆、2盆、3盆) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1234,7 +1238,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 讀取您 public/cai-seal.png 的真實印章) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1422,19 +1426,17 @@
                     <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
                     <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
                     <span class="d-val">{{ chineseDigits.tens }}</span> 拾
-                    <span class="d-val">{{ chineseDigits.ones }}</span> 元
-                    <span class="d-val">零</span> 角
-                    <span class="d-val">零</span> 分
+                    <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
                   </div>
                 </div>
               </div>
 
-              <!-- 蔡鎮遠姓名與您放在 public/cai-seal.png 的真實印章圖片 -->
+              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 直接讀取 public 資料夾內的 cai-seal.png -->
+                  <!-- 讀取真實印章圖片 -->
                   <img src="/cai-seal.png" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -1497,7 +1499,7 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 核心函式：強制解析品名為「品種名 X盆」，徹底濾掉棵數與盆器成本
+// 核心過濾函式：只顯示「品種名稱 X盆」
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
@@ -1554,6 +1556,7 @@ const formRet = ref({
   target_item: '',
   qty: 2,
   unit_price: 150,
+  total_amount: 300,
   date: new Date().toISOString().split('T')[0],
   reason: '運送碰撞 / 開花不良'
 })
@@ -1831,7 +1834,6 @@ const exportStatementExcel = () => {
 
 const batchMarkPaid = async () => {
   if (!confirm(`確定要將這 ${statementOrders.value.length} 筆訂單一次全部標記為「已結」嗎？`)) return
-  // 已修正此處語法筆誤
   const ids = statementOrders.value.map(o => o.id)
   const { error } = await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
   if (!error) {
@@ -1843,7 +1845,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單
+// 3. A5 橫式簽收單 (品項規格：特選蘭花 1盆)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1911,7 +1913,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據
+// 4. 農民收據 (100% 採用您放入 public 的真實印章)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1943,6 +1945,7 @@ const chineseDigits = ref({
 
 const digitMap = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
 
+// 【修正此處數值索引缺失 Bug】
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
   const padded = amt.toString().padStart(6, '0')
@@ -2137,6 +2140,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
+  // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
@@ -2164,9 +2168,6 @@ const shareFarmerReceiptToLineDirect = () => {
   }
   stampImg.src = '/cai-seal.png'
 }
-
-const exportCoupletImage = shareCoupletToLineDirect
-const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
 
 // ==========================================
 // 5. 進貨與庫存
@@ -2419,6 +2420,13 @@ const loadReturns = async () => {
   const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
   if (data) returnList.value = data
 }
+
+const calcRetTotal = () => {
+  const q = Number(formRet.value.qty) || 0
+  const u = Number(formRet.value.unit_price) || 0
+  formRet.value.total_amount = q * u
+}
+
 const startEditRet = (ret) => {
   editingRetId.value = ret.id
   formRet.value = {
@@ -2427,6 +2435,7 @@ const startEditRet = (ret) => {
     target_item: ret.target_item,
     qty: ret.qty,
     unit_price: ret.unit_price,
+    total_amount: ret.total_amount,
     date: ret.date,
     reason: ret.reason
   }
@@ -2434,6 +2443,7 @@ const startEditRet = (ret) => {
     document.getElementById('return-form-box')?.scrollIntoView({ behavior: 'smooth' })
   })
 }
+
 const cancelEditRet = () => {
   editingRetId.value = null
   formRet.value = {
@@ -2442,10 +2452,12 @@ const cancelEditRet = () => {
     target_item: '',
     qty: 2,
     unit_price: 150,
+    total_amount: 300,
     date: new Date().toISOString().split('T')[0],
     reason: '運送碰撞 / 開花不良'
   }
 }
+
 const saveReturn = async () => {
   if (!formRet.value.party_name) return alert('請輸入對象名稱！')
   const total = formRet.value.qty * formRet.value.unit_price
