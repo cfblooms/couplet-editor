@@ -838,7 +838,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (字體上限放寬至 300px) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (純淨無虛框 + 1:1 列印比例) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -1039,7 +1039,7 @@
               fontWeight: cardFontWeight
             }"
           >
-            <!-- 媽字大小小 20 級上款 -->
+            <!-- 上款 (媽字縮小20級) -->
             <div 
               v-if="upperText.trim()"
               class="text-box upper-box"
@@ -1056,7 +1056,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 (可手動拖曳至 300px 大小) -->
+            <!-- 中款 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1937,8 +1937,8 @@ const updateChineseAmount = () => {
   const digits = padded.split('').map(d => digitMap[Number(d)])
   chineseDigits.value = {
     hundredThousands: digits[0],
-    tenThousands: digits,
-    thousands: digits,
+    tenThousands: digits[1],
+    thousands: digits[2],
     hundreds: digits[3],
     tens: digits[4],
     ones: digits[5]
@@ -2023,7 +2023,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
-// 產生花卡高畫質圖片 (絕不繪製虛框)
+// 產生花卡高畫質圖片
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -2451,6 +2451,8 @@ const saveReturn = async () => {
       alert(`退貨紀錄儲存成功！單號：${newId}`)
       cancelEditRet()
       loadReturns()
+    } else {
+      alert('新增失敗：' + error.message)
     }
   }
 }
@@ -2572,6 +2574,7 @@ const maFontSize = computed(() => {
   return Math.max(12, baseSize - 20)
 })
 
+// 標準 A4 寬高：直式 794x1123，橫式 1123x794
 const defaultVertical = {
   upper:    { x: 620, y: 120, size: 40 },
   middle:   { x: 330, y: 220, size: 84 },
@@ -2671,13 +2674,6 @@ const buildFuneralUpper = () => {
 }
 const buildCelebrationUpper = () => {
   if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
-}
-const onCardCategoryChange = () => {
-  if (cardCategory.value === 'funeral') {
-    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
-  } else {
-    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
-  }
 }
 const onCardCategoryChange = () => {
   if (cardCategory.value === 'funeral') {
@@ -2958,7 +2954,7 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* 標準 A4 卡片 */
+/* 標準 A4 卡片 (794x1123，對應 210mm x 297mm) */
 .card-scaler-container { 
   position: relative; 
   margin-bottom: 40px; 
@@ -2978,16 +2974,6 @@ input, select, textarea {
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .card-board.mode-horizontal .middle-box { letter-spacing: 16px; }
 .card-board.style-floral { border: 12px solid #fce7f3; }
-
-.narrow-margin-dashed-guide {
-  position: absolute;
-  top: 48px;
-  left: 48px;
-  right: 48px;
-  bottom: 48px;
-  border: 1px dashed #cbd5e1;
-  pointer-events: none;
-}
 
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
@@ -3243,20 +3229,20 @@ input, select, textarea {
 }
 
 /* ====================================================
-   全域精準列印樣式 (標準 A4 窄邊界 12.7mm 對齊)
+   全域精準列印樣式 (實體 A4 1:1 比例輸出，徹底根治縮小50%)
    ==================================================== */
 @media print {
   @page { 
     size: A4 portrait; 
-    margin: 12.7mm;
+    margin: 0 !important; /* 邊界設為 0，避免瀏覽器做二次縮小 */
   }
   
   html, body, .main-wrapper, .couplet-screen-wrapper { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    height: auto !important;
-    min-height: 100% !important;
+    width: 210mm !important;
+    height: 297mm !important;
     overflow: visible !important;
     display: block !important;
   }
@@ -3269,40 +3255,53 @@ input, select, textarea {
     background: white !important; 
     overflow: visible !important; 
     display: block !important;
-    width: 100% !important;
-    height: auto !important;
+    width: 210mm !important;
+    height: 297mm !important;
   }
   
   .card-scaler-container { 
-    width: 100% !important; 
-    height: 100% !important; 
-    position: static !important;
+    width: 210mm !important; 
+    height: 297mm !important; 
+    position: relative !important;
     margin: 0 !important;
     padding: 0 !important;
   }
   
-  #card-print-target { 
-    position: relative !important; 
-    width: 184.6mm !important; /* 210mm - 25.4mm */
-    height: 271.6mm !important; /* 297mm - 25.4mm */
+  /* 直式花卡：1:1 滿版對齊 A4 實體規格 */
+  #card-print-target.mode-vertical { 
+    position: absolute !important; 
+    top: 0 !important;
+    left: 0 !important;
+    width: 210mm !important; 
+    height: 297mm !important; 
     transform: none !important; 
     box-shadow: none !important; 
-    margin: 0 auto !important;
+    margin: 0 !important;
     display: block !important;
     visibility: visible !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
   }
 
+  /* 橫式花卡 */
+  #card-print-target.mode-horizontal {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    transform: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
   #card-print-target * {
     visibility: visible !important;
   }
 
-  .narrow-margin-dashed-guide {
-    display: block !important;
-    border: 1px dashed #94a3b8 !important;
-  }
-
+  /* A5 簽收單與農民收據依然保持 A5 尺寸 */
   .a5-landscape-sheet, .farmer-receipt-sheet { 
     position: relative !important; 
     transform: none !important; 
