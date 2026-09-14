@@ -1095,7 +1095,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡明：幾盆) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1156,8 +1156,8 @@
           </div>
 
           <div class="form-group">
-            <label>花禮品項規格 (幾盆)：</label>
-            <input type="text" v-model="receiptForm.item" placeholder="例：特級蘭花 壹盆" />
+            <label>花禮品項規格與盆器：</label>
+            <textarea v-model="receiptForm.item" rows="2"></textarea>
           </div>
 
           <div class="form-group">
@@ -1186,7 +1186,7 @@
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-          <button type="fit-btn" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          <button type="button" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1222,9 +1222,8 @@
                 </tr>
                 <tr>
                   <td class="lbl">花禮品項</td>
-                  <!-- 單純俐落顯示「特級蘭花 壹盆」等格式 -->
                   <td class="val val-highlight" colspan="3">
-                    {{ receiptForm.item || '特級蘭花 壹盆' }}
+                    {{ receiptForm.item || '—' }}
                   </td>
                 </tr>
                 <tr>
@@ -1354,7 +1353,7 @@
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
-          <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+          <button type="button" class="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1448,12 +1447,12 @@
                 </div>
               </div>
 
-              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
+              <!-- 蔡鎮遠姓名與真實蓋章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 蔡鎮遠真實印章圖片 -->
+                  <!-- 直接讀取 public 資料夾內的真實印章圖片 -->
                   <img src="/cai-seal.png" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -1840,7 +1839,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (品項簡明：特級蘭花 幾盆)
+// 3. A5 橫式簽收單
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1855,13 +1854,10 @@ const receiptForm = ref({
   deliveryDate: '115-09-03 送達',
   recipient: '永全證券 陳柏榮總經理 (0912-345678)',
   address: '桃園市桃園區縣府路 82 號 1 樓',
-  item: '特級蘭花 壹盆',
+  item: '特級蝴蝶蘭大辣椒 | 10棵 【盆器：落地陶瓷盆-喜 (200) + 快捷盆】',
   giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
-
-// 中文大寫數字轉換輔助
-const chineseNums = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖', '拾']
 
 const onSelectReceiptOrder = () => {
   if (!selectedOrderId.value) return
@@ -1872,19 +1868,9 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.deliveryDate = `${ord.expected_date} 送達`
     receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
     receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
-    
-    // 【修改處】：不帶詳細規格與盆器成本，統一簡潔顯示「特級蘭花 幾盆」
-    let potCount = 1
-    // 如果規格或備註有提到多盆可自動偵測，預設為壹盆
-    if (ord.note && ord.note.includes('盆')) {
-      const match = ord.note.match(/(\d+)\s*盆/)
-      if (match) potCount = parseInt(match[1]) || 1
-    }
-    const potCountStr = chineseNums[potCount] || `${potCount}`
-    receiptForm.value.item = `特級蘭花 ${potCountStr}盆`
-    
+    receiptForm.value.item = `${ord.spec} 【盆器：${ord.pot}】`
     receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
-    receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
+    receiptForm.value.notes = ord.note ? `備註/統編：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
   }
 }
 
@@ -1975,7 +1961,7 @@ const onSelectFarmerReceiptOrder = () => {
     farmerReceipt.value.buyerAddress = cust?.line_note || '桃園市'
 
     farmerReceipt.value.itemName = '蝴蝶蘭花禮'
-    farmerReceipt.value.spec = ord.spec ? ord.spec.split('|')[0].trim() : '特級蘭花'
+    farmerReceipt.value.spec = ord.spec || '特級蘭花'
     farmerReceipt.value.qty = '1 盆'
     farmerReceipt.value.unitPrice = Number(ord.price).toLocaleString()
     farmerReceipt.value.totalAmount = Number(ord.price) || 0
@@ -2103,7 +2089,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片 (使用您上傳的真實蔡鎮遠印章圖)
+// 產生農民收據高畫質圖片 (使用真實蔡鎮遠印章圖片)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2139,11 +2125,13 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
-  // 讀取真實印章圖檔
+  // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
+    // 繪製印章圖片
     ctx.drawImage(stampImg, 260, 305, 50, 50)
+
     ctx.font = `14.5px ${fontFam}`
     ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
     ctx.font = `11px ${fontFam}`
@@ -2155,6 +2143,7 @@ const shareFarmerReceiptToLineDirect = () => {
     shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   }
   stampImg.onerror = () => {
+    // 備援處理
     ctx.font = `14.5px ${fontFam}`
     ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
     ctx.font = `11px ${fontFam}`
@@ -3213,10 +3202,10 @@ input, select, textarea {
   font-weight: bold;
 }
 .cai-real-stamp-img {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: multiply; /* 自然融入紙張背景 */
 }
 
 .f-w-id-lbl { width: 190px; }
@@ -3257,7 +3246,7 @@ input, select, textarea {
 }
 
 /* ====================================================
-   全域精準列印樣式
+   全域精準列印樣式 (純淨 A4 1:1 列印)
    ==================================================== */
 @media print {
   @page { 
