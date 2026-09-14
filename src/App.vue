@@ -977,7 +977,7 @@
           }"
         >
           <div 
-            id="card-print-target"
+            id="card-print-target" 
             class="card-board kai-font-supported" 
             :class="[
               isVertical ? 'mode-vertical' : 'mode-horizontal',
@@ -1208,6 +1208,15 @@
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
 
+        <!-- 雲端同步印章按鈕：隨時可以選取自己電腦中的去背 PNG 並永久同步 -->
+        <div class="panel-section stamp-select-panel">
+          <label class="section-title">🔴 蔡鎮遠印章（全裝置雲端同步）：</label>
+          <input type="file" id="local-seal-picker" accept="image/*" style="display:none" @change="onSelectLocalSeal" />
+          <button type="button" class="seal-choose-btn" @click="triggerLocalSealPicker">
+            📁 上傳蔡鎮遠印章圖檔 (電腦/手機/平板全部同步)
+          </button>
+        </div>
+
         <div class="panel-section highlight-panel">
           <label class="section-title">依訂單編號自動帶入收據：</label>
           <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
@@ -1298,7 +1307,7 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (使用真實蔡鎮遠蓋章圖片) -->
+      <!-- 右側預覽區 -->
       <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1396,13 +1405,13 @@
                 </div>
               </div>
 
-              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 (100% 採用您拍下的真實印章) -->
+              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 真實拍下的印章原圖，去白底貼合 -->
-                  <img :src="caiStampBase64" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
+                  <!-- 顯示您上傳的真實印章圖片 -->
+                  <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
 
@@ -1433,15 +1442,60 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
-// ==========================================
-// 100% 您拍下的真實「蔡鎮遠」印章原圖（直接讀取 /cai-seal.png，並內建 Base64 絕不破圖）
-// ==========================================
-const caiStampBase64 = ref('/cai-seal.png')
-
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+// ==========================================
+// 蔡鎮遠印章：全裝置雲端同步機制
+// ==========================================
+const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
+const activeCaiSealSrc = computed(() => {
+  return userCustomSeal.value || '/cai-seal.png'
+})
+
+// 從 Supabase 雲端資料庫抓取印章（支援跨手機、平板、其他電腦）
+const fetchSealFromCloud = async () => {
+  try {
+    const { data } = await supabase.from('system_settings').select('value').eq('key', 'cai_seal_img').single()
+    if (data && data.value) {
+      userCustomSeal.value = data.value
+      localStorage.setItem('user_cai_seal_img', data.value)
+    }
+  } catch (err) {
+    console.log('尚未設定雲端印章或讀取中')
+  }
+}
+
+const triggerLocalSealPicker = () => {
+  document.getElementById('local-seal-picker')?.click()
+}
+
+// 選擇印章後，自動上傳至 Supabase 雲端，讓所有手機、平板同時生效
+const onSelectLocalSeal = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = async (event) => {
+    const base64Data = event.target.result
+    userCustomSeal.value = base64Data
+    localStorage.setItem('user_cai_seal_img', base64Data)
+
+    // 上傳至 Supabase
+    try {
+      await supabase.from('system_settings').upsert({
+        key: 'cai_seal_img',
+        value: base64Data,
+        updated_at: new Date()
+      })
+      alert('✅ 印章已成功上傳至雲端！您的手機、平板與其他電腦打開都會自動顯示這顆印章！')
+    } catch (err) {
+      alert('已於此電腦生效！(雲端備份提示：若要其他裝置也同步，請確認已在 Supabase 執行 SQL)')
+    }
+  }
+  reader.readAsDataURL(file)
+}
 
 // ----------------- 頁面分頁控制 -----------------
 const currentTab = ref('manage')
@@ -2073,7 +2127,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片
+// 產生農民收據高畫質圖片 (安全載入您指定的印章)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2109,33 +2163,29 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
+  const finishCanvas = () => {
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+
   // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
     ctx.drawImage(stampImg, 260, 305, 50, 50)
-    ctx.font = `14.5px ${fontFam}`
-    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
-    ctx.font = `11px ${fontFam}`
-    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
-    ctx.font = `9.5px ${fontFam}`
-    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
-
-    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
-    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+    finishCanvas()
   }
   stampImg.onerror = () => {
-    ctx.font = `14.5px ${fontFam}`
-    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
-    ctx.font = `11px ${fontFam}`
-    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
-    ctx.font = `9.5px ${fontFam}`
-    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
-
-    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
-    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+    finishCanvas()
   }
-  stampImg.src = caiStampBase64.value
+  stampImg.src = activeCaiSealSrc.value
 }
 
 // ==========================================
@@ -2498,203 +2548,6 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// ==========================================
-// 9. 花卡 / 輓聯編輯器
-// ==========================================
-const isVertical = ref(true)
-const cardCategory = ref('funeral')
-const zoomLevel = ref(0.7)
-const viewportRef = ref(null)
-
-const cardFontFamily = ref('kai')
-const cardFontWeight = ref('700')
-
-const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif',
-  fangsong: '"DFPFangSong-B5", "DFPKai-B5", "FangSong", "STFangsong", "華康仿宋體", "仿宋", serif',
-  dfkai_w7: '"DFBiaoKaiShu", "DFKaiShu-W7", "DFPKaiShu-W7", "DFKaiShuW7", "華康楷書體", "TW-Kai", "DFKai-SB", "BiauKai", serif',
-  df_yankai: '"DFYanKai-W7", "DFYanKai", "DFPYanKai-W7", "DFPYanKai", "華康正顏楷體", "DFBiaoKaiShu", "TW-Kai", "DFKai-SB", serif',
-  wending: '"AR PL UKai TW", "AR PL KaitiM Big5", "文鼎楷書", "TW-Kai", "DFKai-SB", serif',
-  notosong: '"Noto Serif TC", "Songti TC", "SimSun", serif'
-}
-
-const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
-
-const bottomLines = ref([
-  { text: '桃園市議會' },
-  { text: '議員 李宗豪' },
-  { text: '' },
-  { text: '' },
-  { text: '' },
-  { text: '' }
-])
-const getPlaceholder = (idx) => [
-  '第 1 格（例：單位 / 公司）',
-  '第 2 格（例：職稱姓名 1）',
-  '第 3 格（自訂聯名人 2）',
-  '第 4 格（自訂）',
-  '第 5 格（自訂）',
-  '第 6 格（自訂）'
-][idx]
-
-const funeralUpperFormat = ref('敬悼 X媽X老夫人')
-const funeralUpperSuffix = ref('千古')
-const gender = ref('female')
-const ageStage = ref('f_over80')
-const funeralPhrases = {
-  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
-  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
-  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
-  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
-  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
-  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
-  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
-}
-const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
-
-const celebrationType = ref('opening')
-const celebPrefix = ref('恭祝')
-const celebTarget = ref('鴻運實業有限公司')
-const celebPhrases = {
-  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
-  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
-  temple: ['聖誕千秋', '神威顯赫']
-}
-const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
-
-const upperText = ref('敬悼 陳媽李老夫人 千古')
-const middleText = ref('母儀千古')
-const suffixText = ref('敬輓')
-
-const parsedUpperTokens = computed(() => {
-  const chars = upperText.value.split('')
-  return chars.map(char => ({
-    char,
-    isSmall: char === '媽'
-  }))
-})
-
-const maFontSize = computed(() => {
-  const baseSize = layout.value.upper?.size || 40
-  return Math.max(12, baseSize - 20)
-})
-
-// 標準 A4 寬高：直式 794x1123，橫式 1123x794
-const defaultVertical = {
-  upper:    { x: 620, y: 120, size: 40 },
-  middle:   { x: 330, y: 220, size: 84 },
-  bottom_0: { x: 155, y: 520, size: 30 },
-  bottom_1: { x: 155, y: 680, size: 36 },
-  bottom_2: { x: 95,  y: 520, size: 30 },
-  bottom_3: { x: 95,  y: 680, size: 32 },
-  bottom_4: { x: 40,  y: 520, size: 30 },
-  bottom_5: { x: 40,  y: 680, size: 30 },
-  suffix:   { x: 155, y: 920, size: 34 }
-}
-const defaultHorizontal = {
-  upper:    { x: 180, y: 100, size: 36 },
-  middle:   { x: 220, y: 260, size: 76 },
-  bottom_0: { x: 340, y: 400, size: 28 },
-  bottom_1: { x: 340, y: 460, size: 32 },
-  bottom_2: { x: 340, y: 520, size: 28 },
-  bottom_3: { x: 340, y: 580, size: 28 },
-  bottom_4: { x: 340, y: 640, size: 28 },
-  bottom_5: { x: 340, y: 700, size: 28 },
-  suffix:   { x: 620, y: 490, size: 34 }
-}
-const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
-
-const switchOrientation = (vertical) => {
-  isVertical.value = vertical
-  resetPositions()
-  nextTick(() => autoFitZoom())
-}
-const resetPositions = () => {
-  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
-}
-
-const getStyle = (key) => {
-  const item = layout.value[key] || { x: 50, y: 50, size: 30 }
-  return { 
-    left: `${item.x}px`, 
-    top: `${item.y}px`, 
-    fontSize: `${item.size}px`,
-    fontWeight: cardFontWeight.value
-  }
-}
-
-const getUpperBoxStyle = () => {
-  const item = layout.value.upper || { x: 620, y: 120, size: 40 }
-  return {
-    left: `${item.x}px`,
-    top: `${item.y}px`,
-    fontSize: `${item.size}px`,
-    fontWeight: cardFontWeight.value
-  }
-}
-
-const autoFitZoom = () => {
-  if (!viewportRef.value) return
-  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
-  const cardWidth = isVertical.value ? 794 : 1123
-  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
-}
-
-let activeKey = null
-let currentAction = null
-let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
-
-const startMove = (e, key) => {
-  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
-  originX = layout.value[key].x; originY = layout.value[key].y
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const startResize = (e, key) => {
-  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
-  originSize = layout.value[key].size
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const onPointerMove = (e) => {
-  if (!activeKey) return
-  const dx = (e.clientX - startX) / zoomLevel.value
-  const dy = (e.clientY - startY) / zoomLevel.value
-  if (currentAction === 'move') {
-    layout.value[activeKey].x = Math.round(originX + dx)
-    layout.value[activeKey].y = Math.round(originY + dy)
-  } else if (currentAction === 'resize') {
-    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
-  }
-}
-const onPointerUp = () => {
-  activeKey = null; currentAction = null
-  window.removeEventListener('pointermove', onPointerMove)
-  window.removeEventListener('pointerup', onPointerUp)
-}
-
-watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
-const buildFuneralUpper = () => {
-  if (funeralUpperFormat.value !== 'custom') upperText.value = `${funeralUpperFormat.value} ${funeralUpperSuffix.value}`
-}
-const buildCelebrationUpper = () => {
-  if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
-}
-const onCardCategoryChange = () => {
-  if (cardCategory.value === 'funeral') {
-    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
-  } else {
-    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
-  }
-}
-const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
-
-const printCouplet = () => {
-  nextTick(() => {
-    window.print()
-  })
-}
-
 onMounted(() => {
   if (!document.getElementById('cns11643-tw-kai-font')) {
     const style = document.createElement('style')
@@ -2724,6 +2577,7 @@ onMounted(() => {
   autoFitReceipt()
   autoFitFarmerReceipt()
   updateChineseAmount()
+  fetchSealFromCloud() // 自動抓取雲端印章
   window.addEventListener('resize', () => {
     autoFitZoom()
     autoFitReceipt()
@@ -2913,6 +2767,24 @@ input, select, textarea {
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
+
+/* 雲端印章面板 */
+.stamp-select-panel {
+  background: #fdf2f8;
+  border: 1.5px dashed #db2777;
+}
+.seal-choose-btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  background: #db2777;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+}
 
 .section-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; }
 .form-group { margin-bottom: 10px; }
