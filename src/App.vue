@@ -1039,7 +1039,7 @@
               fontWeight: cardFontWeight
             }"
           >
-            <!-- 上款 -->
+            <!-- 上款 (媽字縮小20級) -->
             <div 
               v-if="upperText.trim()"
               class="text-box upper-box"
@@ -1095,7 +1095,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡化為「幾盆」) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡明：幾盆) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1156,8 +1156,8 @@
           </div>
 
           <div class="form-group">
-            <label>花禮品項規格 (只寫幾盆)：</label>
-            <input type="text" v-model="receiptForm.item" placeholder="例：蝴蝶蘭花禮 壹盆" />
+            <label>花禮品項規格 (幾盆)：</label>
+            <input type="text" v-model="receiptForm.item" placeholder="例：特級蘭花 壹盆" />
           </div>
 
           <div class="form-group">
@@ -1186,7 +1186,7 @@
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-          <button type="button" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          <button type="fit-btn" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1222,9 +1222,9 @@
                 </tr>
                 <tr>
                   <td class="lbl">花禮品項</td>
-                  <!-- 精簡乾淨呈現：例「蝴蝶蘭花禮 壹盆」 -->
+                  <!-- 單純俐落顯示「特級蘭花 壹盆」等格式 -->
                   <td class="val val-highlight" colspan="3">
-                    {{ receiptForm.item || '蝴蝶蘭花禮 壹盆' }}
+                    {{ receiptForm.item || '特級蘭花 壹盆' }}
                   </td>
                 </tr>
                 <tr>
@@ -1354,7 +1354,7 @@
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
-          <button type="button" class="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+          <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1840,7 +1840,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (品項簡明：幾盆)
+// 3. A5 橫式簽收單 (品項簡明：特級蘭花 幾盆)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1855,10 +1855,13 @@ const receiptForm = ref({
   deliveryDate: '115-09-03 送達',
   recipient: '永全證券 陳柏榮總經理 (0912-345678)',
   address: '桃園市桃園區縣府路 82 號 1 樓',
-  item: '蝴蝶蘭花禮 壹盆',
+  item: '特級蘭花 壹盆',
   giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
+
+// 中文大寫數字轉換輔助
+const chineseNums = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖', '拾']
 
 const onSelectReceiptOrder = () => {
   if (!selectedOrderId.value) return
@@ -1870,15 +1873,15 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
     receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
     
-    // 只保留簡潔幾盆，去除詳細株數與盆器成本
-    let simpleName = '蝴蝶蘭花禮'
-    if (ord.spec) {
-      const rawFirst = ord.spec.split('|')[0].trim()
-      if (rawFirst && rawFirst !== '特選蘭花') {
-        simpleName = rawFirst.includes('蝴蝶蘭') ? rawFirst : `蝴蝶蘭${rawFirst}`
-      }
+    // 【修改處】：不帶詳細規格與盆器成本，統一簡潔顯示「特級蘭花 幾盆」
+    let potCount = 1
+    // 如果規格或備註有提到多盆可自動偵測，預設為壹盆
+    if (ord.note && ord.note.includes('盆')) {
+      const match = ord.note.match(/(\d+)\s*盆/)
+      if (match) potCount = parseInt(match[1]) || 1
     }
-    receiptForm.value.item = `${simpleName} 壹盆`
+    const potCountStr = chineseNums[potCount] || `${potCount}`
+    receiptForm.value.item = `特級蘭花 ${potCountStr}盆`
     
     receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
     receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
@@ -3254,7 +3257,7 @@ input, select, textarea {
 }
 
 /* ====================================================
-   全域精準列印樣式 (純淨 A4 1:1 列印)
+   全域精準列印樣式
    ==================================================== */
 @media print {
   @page { 
