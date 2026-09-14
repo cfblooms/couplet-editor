@@ -47,7 +47,6 @@
       </nav>
 
       <div class="manage-content">
-        <!-- 模組：訂單與帳務 -->
         <section v-if="subTab === 'order'" class="tab-pane">
           <div v-if="editingOrderId" class="edit-banner">
             <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
@@ -198,7 +197,6 @@
             </div>
           </div>
 
-          <!-- 訂單總覽清單 -->
           <div class="card-box mt-3">
             <div class="table-header-action">
               <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -209,7 +207,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號 (日期+序號)</th>
+                    <th>單號</th>
                     <th>客戶名稱</th>
                     <th>統一編號</th>
                     <th>開收據</th>
@@ -369,8 +367,6 @@
                     <th>開收據</th>
                     <th>品項規格</th>
                     <th>金額</th>
-                    <th>花卡</th>
-                    <th>簽收單</th>
                     <th>收款狀態</th>
                     <th>操作</th>
                   </tr>
@@ -384,12 +380,6 @@
                     <td>{{ ord.need_receipt || '不需收據' }}</td>
                     <td>{{ ord.spec }}</td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
-                    <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
-                    <td>
-                      <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
-                        {{ ord.receipt_status || '未列印' }}
-                      </span>
-                    </td>
                     <td>
                       <span :class="ord.payment_status === '未結' ? 'badge badge-red' : 'badge badge-green'">
                         {{ ord.payment_status }}
@@ -401,7 +391,7 @@
                     </td>
                   </tr>
                   <tr v-if="statementOrders.length === 0">
-                    <td colspan="11" class="text-center py-4 text-gray">符合條件的訂單為 0 筆</td>
+                    <td colspan="9" class="text-center py-4 text-gray">符合條件的訂單為 0 筆</td>
                   </tr>
                 </tbody>
               </table>
@@ -503,7 +493,6 @@
                 <label>供應商 / 花農</label>
                 <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
               </div>
-
               <div class="field">
                 <label>進貨日期</label>
                 <input v-model="formInv.date" type="date" />
@@ -526,11 +515,11 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>編號 (日期+序號)</th>
+                    <th>編號</th>
                     <th>類別</th>
                     <th>品項名稱</th>
                     <th>規格</th>
-                    <th>進貨數量/株數</th>
+                    <th>數量/株數</th>
                     <th>單價</th>
                     <th>總成本</th>
                     <th>供應商</th>
@@ -598,7 +587,7 @@
               </div>
               <div class="field">
                 <label>常用送達地址 / 備註</label>
-                <input v-model="formCust.line_note" type="text" placeholder="常用送達地址 (開單將自動填入簽收單)" />
+                <input v-model="formCust.line_note" type="text" placeholder="常用送達地址" />
               </div>
             </div>
 
@@ -658,7 +647,7 @@
             <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
             <div class="form-grid">
               <div class="field">
-                <label>品種名稱 (例: 大辣椒、V3、滿天紅)</label>
+                <label>品種名稱</label>
                 <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
               </div>
               <div class="field">
@@ -666,7 +655,7 @@
                 <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
               </div>
               <div class="field">
-                <label>品種照片 (點選拍照或上傳檔案)</label>
+                <label>品種照片</label>
                 <input type="file" accept="image/*" @change="onPhotoFileChange" />
               </div>
             </div>
@@ -740,8 +729,8 @@
               <div class="field">
                 <label>退貨類型</label>
                 <select v-model="formRet.return_type">
-                  <option value="退給花農">1. 我們向花農退貨 (退給供應商)</option>
-                  <option value="批發商向我們退貨">2. 批發商向我們退貨 (客戶退回)</option>
+                  <option value="退給花農">1. 我們向花農退貨</option>
+                  <option value="批發商向我們退貨">2. 批發商向我們退貨</option>
                 </select>
               </div>
               <div class="field">
@@ -763,10 +752,6 @@
               <div class="field">
                 <label>每棵單價 (元)</label>
                 <input v-model.number="formRet.unit_price" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>總損益金額</label>
-                <input :value="formRet.qty * formRet.unit_price" type="text" disabled />
               </div>
               <div class="field">
                 <label>處理日期</label>
@@ -843,7 +828,6 @@
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
-        <!-- 字體與粗細設定 -->
         <div class="panel-section">
           <label class="section-title">字體與粗細設定：</label>
           <div class="form-group">
@@ -884,7 +868,6 @@
           </select>
         </div>
 
-        <!-- 喪禮設定 -->
         <template v-if="cardCategory === 'funeral'">
           <div class="panel-section">
             <label class="section-title">上款稱謂組合：</label>
@@ -945,7 +928,6 @@
           </div>
         </template>
 
-        <!-- 慶賀設定 -->
         <template v-else>
           <div class="panel-section">
             <label class="section-title">慶賀細項：</label>
@@ -981,7 +963,6 @@
           </div>
         </template>
 
-        <!-- 下款 6 格設定 -->
         <div class="panel-section">
           <label class="section-title">下款設定（共 6 格自由填寫，空白不印出）：</label>
           <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
@@ -1008,7 +989,6 @@
         <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
       </div>
 
-      <!-- 右側畫布視窗 -->
       <div class="canvas-viewport" ref="viewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
@@ -1039,7 +1019,7 @@
               fontWeight: cardFontWeight
             }"
           >
-            <!-- 上款 (媽字縮小20級) -->
+            <!-- 上款 -->
             <div 
               v-if="upperText.trim()"
               class="text-box upper-box"
@@ -1095,7 +1075,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡明：幾盆) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡明：特級蘭花 幾盆) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1222,7 +1202,6 @@
                 </tr>
                 <tr>
                   <td class="lbl">花禮品項</td>
-                  <!-- 單純俐落顯示「特級蘭花 壹盆」等格式 -->
                   <td class="val val-highlight" colspan="3">
                     {{ receiptForm.item || '特級蘭花 壹盆' }}
                   </td>
@@ -1253,7 +1232,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 4：農民收據 ================= -->
+    <!-- ================= 模式 4：農民收據 (100% 讀取您上傳的真實印章) ================= -->
     <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
@@ -1448,12 +1427,12 @@
                 </div>
               </div>
 
-              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
+              <!-- 蔡鎮遠姓名與您放在 public/cai-seal.png 的真實印章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 蔡鎮遠真實印章圖片 -->
+                  <!-- 直接讀取 public 資料夾內的 cai-seal.png -->
                   <img src="/cai-seal.png" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -1860,7 +1839,6 @@ const receiptForm = ref({
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
 
-// 中文大寫數字轉換輔助
 const chineseNums = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖', '拾']
 
 const onSelectReceiptOrder = () => {
@@ -1873,9 +1851,8 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
     receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
     
-    // 【修改處】：不帶詳細規格與盆器成本，統一簡潔顯示「特級蘭花 幾盆」
+    // 嚴格簡化品項名稱，不帶任何技術或成本細節
     let potCount = 1
-    // 如果規格或備註有提到多盆可自動偵測，預設為壹盆
     if (ord.note && ord.note.includes('盆')) {
       const match = ord.note.match(/(\d+)\s*盆/)
       if (match) potCount = parseInt(match[1]) || 1
@@ -2103,7 +2080,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片 (使用您上傳的真實蔡鎮遠印章圖)
+// 產生農民收據高畫質圖片 (使用您放在 public 的真實蔡鎮遠印章圖)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2139,7 +2116,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
-  // 讀取真實印章圖檔
+  // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
@@ -2717,6 +2694,488 @@ const printCouplet = () => {
   })
 }
 
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+  const targetWeight = cardFontWeight.value
+
+  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
+    if (!text) return
+    ctx.textBaseline = 'top'
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
+
+// 產生農民收據高畫質圖片 (使用您放在 public 的真實蔡鎮遠印章圖)
+const shareFarmerReceiptToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 794 * 2
+  canvas.height = 560 * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, 794, 560)
+
+  const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
+  ctx.fillStyle = '#000000'
+
+  ctx.font = `bold 26px ${fontFam}`
+  ctx.textAlign = 'center'
+  ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
+
+  ctx.font = `15px ${fontFam}`
+  ctx.textAlign = 'right'
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
+
+  ctx.lineWidth = 1.8
+  ctx.strokeStyle = '#000000'
+  ctx.strokeRect(30, 95, 734, 380)
+
+  ctx.textAlign = 'left'
+  ctx.font = `bold 14.5px ${fontFam}`
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
+  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
+  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
+  
+  // 載入真實印章圖片並繪製
+  const stampImg = new Image()
+  stampImg.crossOrigin = 'anonymous'
+  stampImg.onload = () => {
+    ctx.drawImage(stampImg, 260, 305, 50, 50)
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.onerror = () => {
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.src = '/cai-seal.png'
+}
+
+const exportCoupletImage = shareCoupletToLineDirect
+const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
+
+// ==========================================
+// 5. 進貨與庫存
+// ==========================================
+const loadInventory = async () => {
+  const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
+  if (data) inventoryList.value = data
+}
+
+const calcInvCost = () => {
+  const qty = Number(formInv.value.qty) || 0
+  const unit = Number(formInv.value.unit_cost) || 0
+  formInv.value.cost = qty * unit
+}
+
+const onPotTypeChange = () => {
+  const potCostMap = {
+    '桌上盆 (100)': 100,
+    '落地盆陶瓷-喪 (100)': 100,
+    '落地陶瓷盆-喜 (200)': 200,
+    '羅馬盆 (280)': 280,
+    '快捷盆 (70)': 70
+  }
+  const unit = potCostMap[formInv.value.pot_type] || 100
+  formInv.value.unit_cost = unit
+  calcInvCost()
+}
+
+const startEditInv = (inv) => {
+  editingInvId.value = inv.id
+  const calculatedUnit = inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0)
+  formInv.value = {
+    category: inv.category,
+    item_name: inv.item_name,
+    spec_spike: '單梗',
+    spec_color: '紅',
+    spec_size: '大',
+    spec_height: '中',
+    pot_type: '桌上盆 (100)',
+    qty: inv.qty,
+    unit_cost: calculatedUnit,
+    cost: inv.cost,
+    supplier: inv.supplier,
+    date: inv.date
+  }
+  nextTick(() => {
+    document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditInv = () => {
+  editingInvId.value = null
+  formInv.value = {
+    category: '蘭花',
+    item_name: '',
+    spec_spike: '單梗',
+    spec_color: '紅',
+    spec_size: '大',
+    spec_height: '中',
+    pot_type: '桌上盆 (100)',
+    qty: 10,
+    unit_cost: 100,
+    cost: 1000,
+    supplier: '某某花農',
+    date: new Date().toISOString().split('T')[0]
+  }
+}
+
+const saveInventory = async () => {
+  const isFlower = formInv.value.category === '蘭花'
+  const itemName = isFlower ? formInv.value.item_name : formInv.value.pot_type.split(' ')[0]
+  if (!itemName) return alert('請輸入品項名稱！')
+  const specDesc = isFlower 
+    ? `規格:${formInv.value.spec_spike} | 顏色:${formInv.value.spec_color} | 大小:${formInv.value.spec_size} | 高矮:${formInv.value.spec_height}`
+    : '固定規格'
+
+  const payload = {
+    category: formInv.value.category,
+    item_name: itemName,
+    spec: specDesc,
+    qty: formInv.value.qty,
+    unit_cost: formInv.value.unit_cost,
+    cost: formInv.value.cost,
+    supplier: formInv.value.supplier,
+    date: formInv.value.date
+  }
+
+  if (editingInvId.value) {
+    const { error } = await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
+    if (!error) {
+      alert(`進貨紀錄 ${editingInvId.value} 修改成功！`)
+      cancelEditInv()
+      loadInventory()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('IN', inventoryList.value)
+    const { error } = await supabase.from('inventory').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`進貨紀錄新增成功！編號：${newId}`)
+      cancelEditInv()
+      loadInventory()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 6. 客戶資料庫
+// ==========================================
+const loadCustomers = async () => {
+  const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
+  if (data) customers.value = data
+}
+
+const startEditCust = (c) => {
+  editingCustId.value = c.id
+  formCust.value = {
+    name: c.name,
+    type: c.type || '批發商',
+    billing_cycle: c.billing_cycle || '每單結',
+    phone: c.phone || '',
+    line_note: c.line_note || ''
+  }
+  nextTick(() => {
+    document.getElementById('cust-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditCust = () => {
+  editingCustId.value = null
+  formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
+}
+
+const saveCustomer = async () => {
+  if (!formCust.value.name) return alert('請輸入客戶名稱！')
+  const payload = { ...formCust.value }
+  if (editingCustId.value) {
+    const { error } = await supabase.from('customers').update(payload).eq('id', editingCustId.value)
+    if (!error) {
+      alert(`客戶 ${editingCustId.value} 修改成功！`)
+      cancelEditCust()
+      loadCustomers()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('CU', customers.value)
+    const { error } = await supabase.from('customers').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`客戶建立成功！編號：${newId}`)
+      cancelEditCust()
+      loadCustomers()
+    } else {
+      alert('建立失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 7. 蘭花品種庫
+// ==========================================
+const loadOrchids = async () => {
+  const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
+  if (data) orchids.value = data
+}
+
+const onPhotoFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const maxDim = 800
+      let width = img.width
+      let height = img.height
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      const compressed = canvas.toDataURL('image/jpeg', 0.75)
+      formOrchid.value.photo_url = compressed
+    }
+    img.src = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const startEditOrchid = (item) => {
+  editingOrchidId.value = item.id
+  formOrchid.value = { 
+    name: item.name, 
+    note: item.note || '',
+    photo_url: item.photo_url || ''
+  }
+  nextTick(() => {
+    document.getElementById('orchid-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditOrchid = () => {
+  editingOrchidId.value = null
+  formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
+}
+
+const saveOrchid = async () => {
+  if (!formOrchid.value.name) return alert('請輸入品種名稱！')
+  const payload = { ...formOrchid.value }
+  if (editingOrchidId.value) {
+    const { error } = await supabase.from('orchids').update(payload).eq('id', editingOrchidId.value)
+    if (!error) {
+      alert('品種修改成功！')
+      cancelEditOrchid()
+      loadOrchids()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('FL', orchids.value)
+    const { error } = await supabase.from('orchids').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`品種新增成功！編號：${newId}`)
+      cancelEditOrchid()
+      loadOrchids()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 8. 退貨管理
+// ==========================================
+const loadReturns = async () => {
+  const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
+  if (data) returnList.value = data
+}
+const startEditRet = (ret) => {
+  editingRetId.value = ret.id
+  formRet.value = {
+    return_type: ret.return_type,
+    party_name: ret.party_name,
+    target_item: ret.target_item,
+    qty: ret.qty,
+    unit_price: ret.unit_price,
+    date: ret.date,
+    reason: ret.reason
+  }
+  nextTick(() => {
+    document.getElementById('return-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+const cancelEditRet = () => {
+  editingRetId.value = null
+  formRet.value = {
+    return_type: '退給花農',
+    party_name: '',
+    target_item: '',
+    qty: 2,
+    unit_price: 150,
+    date: new Date().toISOString().split('T')[0],
+    reason: '運送碰撞 / 開花不良'
+  }
+}
+const saveReturn = async () => {
+  if (!formRet.value.party_name) return alert('請輸入對象名稱！')
+  const total = formRet.value.qty * formRet.value.unit_price
+  const payload = {
+    return_type: formRet.value.return_type,
+    party_name: formRet.value.party_name,
+    target_item: formRet.value.target_item,
+    qty: formRet.value.qty,
+    unit_price: formRet.value.unit_price,
+    total_amount: total,
+    date: formRet.value.date,
+    reason: formRet.value.reason
+  }
+  if (editingRetId.value) {
+    const { error } = await supabase.from('returns').update(payload).eq('id', editingRetId.value)
+    if (!error) {
+      alert('退貨紀錄修改成功！')
+      cancelEditRet()
+      loadReturns()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('RT', returnList.value)
+    const { error } = await supabase.from('returns').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`退貨紀錄儲存成功！單號：${newId}`)
+      cancelEditRet()
+      loadReturns()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+const deleteItem = async (table, id, reloadFn) => {
+  if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
+  const { error } = await supabase.from(table).delete().eq('id', id)
+  if (!error) reloadFn()
+}
+
+// 匯出全部訂單 Excel
+const exportOrdersToExcel = () => {
+  if (orderList.value.length === 0) return alert('目前尚無訂單可供匯出！')
+  const exportData = orderList.value.map(o => ({
+    '訂單編號': o.id,
+    '客戶名稱': o.customer,
+    '客戶類型': o.cust_type,
+    '結帳週期': o.billing_cycle || '每單結',
+    '聯絡電話': o.phone,
+    '品種與規格': o.spec,
+    '盆器與快捷盆': o.pot,
+    '預估成本': o.cost,
+    '訂單售價': o.price,
+    '利潤': o.price - o.cost,
+    '統一編號': o.tax_id || '',
+    '開收據與否': o.need_receipt || '不需收據',
+    '訂單備註': o.note || '',
+    '花卡狀態': o.card_status || '未製作',
+    '簽收單狀態': o.receipt_status || '未列印',
+    '下單日期': o.order_date,
+    '預計送達': o.expected_date,
+    '出貨狀態': o.shipped_status,
+    '收款狀態': o.payment_status
+  }))
+  const worksheet = XLSX.utils.json_to_sheet(exportData)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, '蘭花訂單總表')
+  XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
 onMounted(() => {
   if (!document.getElementById('cns11643-tw-kai-font')) {
     const style = document.createElement('style')
@@ -3199,7 +3658,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 */
+/* 蔡鎮遠姓名與真實印章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3216,7 +3675,7 @@ input, select, textarea {
   width: 48px;
   height: 48px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: multiply; /* 自動去白底融入表格 */
 }
 
 .f-w-id-lbl { width: 190px; }
@@ -3256,9 +3715,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* ====================================================
-   全域精準列印樣式
-   ==================================================== */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
