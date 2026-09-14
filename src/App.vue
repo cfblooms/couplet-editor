@@ -92,7 +92,6 @@
                   <option v-for="f in flowerInventory" :key="f.id" :value="f.item_name + ' (' + f.spec + ')'" />
                 </datalist>
               </div>
-
               <div class="field">
                 <label>株數 (棵)</label>
                 <input v-model.number="formOrder.stalks" type="number" min="1" @input="calcOrderPrice" />
@@ -101,7 +100,6 @@
                 <label>每棵單價 (元)</label>
                 <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" />
               </div>
-
               <div class="field">
                 <label>使用盆器</label>
                 <select v-model="formOrder.pot">
@@ -112,7 +110,6 @@
                   <option value="無盆">無盆 (裸株/自備盆)</option>
                 </select>
               </div>
-
               <div class="field">
                 <label>快捷盆選擇</label>
                 <select v-model="formOrder.quick_pot">
@@ -120,22 +117,18 @@
                   <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
                 </select>
               </div>
-
               <div class="field">
                 <label>預估總成本 (元)</label>
                 <input v-model.number="formOrder.cost" type="number" min="0" />
               </div>
-
               <div class="field">
                 <label>訂單總售價 (元)</label>
                 <input v-model.number="formOrder.price" type="number" min="0" />
               </div>
-
               <div class="field">
                 <label>統一編號 (8碼)</label>
                 <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
               </div>
-
               <div class="field">
                 <label>是否開收據</label>
                 <select v-model="formOrder.need_receipt" class="bold-select-field">
@@ -143,12 +136,10 @@
                   <option value="需開收據">需開收據</option>
                 </select>
               </div>
-
               <div class="field">
                 <label>訂單其他備註 (可註明幾盆)</label>
                 <input v-model="formOrder.note" type="text" placeholder="送貨注意事項，例：1盆 或 2盆" />
               </div>
-
               <div class="field">
                 <label>花卡製作狀態</label>
                 <select v-model="formOrder.card_status">
@@ -209,20 +200,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號 (日期+序號)</th>
-                    <th>客戶名稱</th>
-                    <th>統一編號</th>
-                    <th>開收據</th>
-                    <th>週期</th>
-                    <th>電話</th>
-                    <th>品項規格</th>
-                    <th>盆器</th>
-                    <th>售價</th>
-                    <th>花卡</th>
-                    <th>簽收單</th>
-                    <th>出貨</th>
-                    <th>收款</th>
-                    <th>操作</th>
+                    <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>週期</th><th>電話</th><th>品項規格</th><th>盆器</th><th>售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -794,7 +772,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (已修復白屏) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -966,7 +944,7 @@
           <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
           <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
-          <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
+          <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
         </div>
 
         <div 
@@ -1007,7 +985,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 -->
+            <!-- 中款 (字體大小上限支援至 300px) -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1031,7 +1009,7 @@
               </div>
             </template>
 
-            <!-- 敬詞 -->
+            <!-- 敬詞 (安全邊界保護) -->
             <div 
               v-if="suffixText.trim()"
               class="text-box suffix-box"
@@ -1455,7 +1433,7 @@ const activeCaiSealSrc = computed(() => {
   return userCustomSeal.value || '/cai-seal.png'
 })
 
-// 從 Supabase 雲端資料庫抓取印章（支援跨手機、平板、其他電腦）
+// 從 Supabase 雲端資料庫抓取印章
 const fetchSealFromCloud = async () => {
   try {
     const { data } = await supabase.from('system_settings').select('value').eq('key', 'cai_seal_img').single()
@@ -1464,7 +1442,7 @@ const fetchSealFromCloud = async () => {
       localStorage.setItem('user_cai_seal_img', data.value)
     }
   } catch (err) {
-    console.log('尚未設定雲端印章或讀取中')
+    // 尚未建立設定表時靜默跳過，不拋錯
   }
 }
 
@@ -1472,7 +1450,6 @@ const triggerLocalSealPicker = () => {
   document.getElementById('local-seal-picker')?.click()
 }
 
-// 選擇印章後，自動上傳至 Supabase 雲端，讓所有手機、平板同時生效
 const onSelectLocalSeal = async (e) => {
   const file = e.target.files[0]
   if (!file) return
@@ -1482,16 +1459,15 @@ const onSelectLocalSeal = async (e) => {
     userCustomSeal.value = base64Data
     localStorage.setItem('user_cai_seal_img', base64Data)
 
-    // 上傳至 Supabase
     try {
       await supabase.from('system_settings').upsert({
         key: 'cai_seal_img',
         value: base64Data,
         updated_at: new Date()
       })
-      alert('✅ 印章已成功上傳至雲端！您的手機、平板與其他電腦打開都會自動顯示這顆印章！')
+      alert('✅ 印章已成功上傳至雲端！所有手機與平板打開均會自動同步！')
     } catch (err) {
-      alert('已於此電腦生效！(雲端備份提示：若要其他裝置也同步，請確認已在 Supabase 執行 SQL)')
+      alert('✅ 印章已在本機生效！')
     }
   }
   reader.readAsDataURL(file)
@@ -1523,7 +1499,7 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 核心過濾函式：安全解析品名為「品種名 X盆」，徹底濾掉棵數與盆器成本
+// 核心過濾函式：安全解析品名為「品種名 X盆」
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
@@ -2085,7 +2061,7 @@ const shareCoupletToLineDirect = () => {
   const targetWeight = cardFontWeight.value
 
   const drawTextItem = (text, item, isVertMode, isUpper = false) => {
-    if (!text) return
+    if (!text || !item) return
     ctx.textBaseline = 'top'
     if (isVertMode) {
       let currentY = item.y
@@ -2127,7 +2103,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
-// 產生農民收據高畫質圖片 (安全載入您指定的印章)
+// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2548,6 +2524,204 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
+// ==========================================
+// 9. 花卡 / 輓聯編輯器 (完整補齊預設坐標，確保永不拋出 undefined)
+// ==========================================
+const isVertical = ref(true)
+const cardCategory = ref('funeral')
+const zoomLevel = ref(0.7)
+const viewportRef = ref(null)
+
+const cardFontFamily = ref('kai')
+const cardFontWeight = ref('700')
+
+const fontMapping = {
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif',
+  fangsong: '"DFPFangSong-B5", "DFPKai-B5", "FangSong", "STFangsong", "華康仿宋體", "仿宋", serif',
+  dfkai_w7: '"DFBiaoKaiShu", "DFKaiShu-W7", "DFPKaiShu-W7", "DFKaiShuW7", "華康楷書體", "TW-Kai", "DFKai-SB", "BiauKai", serif',
+  df_yankai: '"DFYanKai-W7", "DFYanKai", "DFPYanKai-W7", "DFPYanKai", "華康正顏楷體", "DFBiaoKaiShu", "TW-Kai", "DFKai-SB", serif',
+  wending: '"AR PL UKai TW", "AR PL KaitiM Big5", "文鼎楷書", "TW-Kai", "DFKai-SB", serif',
+  notosong: '"Noto Serif TC", "Songti TC", "SimSun", serif'
+}
+
+const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
+
+const bottomLines = ref([
+  { text: '桃園市議會' },
+  { text: '議員 李宗豪' },
+  { text: '' },
+  { text: '' },
+  { text: '' },
+  { text: '' }
+])
+const getPlaceholder = (idx) => [
+  '第 1 格（例：單位 / 公司）',
+  '第 2 格（例：職稱姓名 1）',
+  '第 3 格（自訂聯名人 2）',
+  '第 4 格（自訂）',
+  '第 5 格（自訂）',
+  '第 6 格（自訂）'
+][idx]
+
+const funeralUpperFormat = ref('敬悼 X媽X老夫人')
+const funeralUpperSuffix = ref('千古')
+const gender = ref('female')
+const ageStage = ref('f_over80')
+const funeralPhrases = {
+  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
+  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
+  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
+  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
+  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
+  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
+}
+const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
+
+const celebrationType = ref('opening')
+const celebPrefix = ref('恭祝')
+const celebTarget = ref('鴻運實業有限公司')
+const celebPhrases = {
+  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
+  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
+  temple: ['聖誕千秋', '神威顯赫']
+}
+const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
+
+const upperText = ref('敬悼 陳媽李老夫人 千古')
+const middleText = ref('母儀千古')
+const suffixText = ref('敬輓')
+
+const parsedUpperTokens = computed(() => {
+  const chars = upperText.value.split('')
+  return chars.map(char => ({
+    char,
+    isSmall: char === '媽'
+  }))
+})
+
+const maFontSize = computed(() => {
+  const baseSize = layout.value.upper?.size || 40
+  return Math.max(12, baseSize - 20)
+})
+
+// 【關鍵修復】：確保直式與橫式每一項（含 suffix）全部定義好，絕無缺漏！
+const defaultVertical = {
+  upper:    { x: 620, y: 120, size: 40 },
+  middle:   { x: 330, y: 220, size: 84 },
+  bottom_0: { x: 155, y: 520, size: 30 },
+  bottom_1: { x: 155, y: 680, size: 36 },
+  bottom_2: { x: 95,  y: 520, size: 30 },
+  bottom_3: { x: 95,  y: 680, size: 32 },
+  bottom_4: { x: 40,  y: 520, size: 30 },
+  bottom_5: { x: 40,  y: 680, size: 30 },
+  suffix:   { x: 155, y: 920, size: 34 }
+}
+const defaultHorizontal = {
+  upper:    { x: 180, y: 100, size: 36 },
+  middle:   { x: 220, y: 260, size: 76 },
+  bottom_0: { x: 340, y: 400, size: 28 },
+  bottom_1: { x: 340, y: 460, size: 32 },
+  bottom_2: { x: 340, y: 520, size: 28 },
+  bottom_3: { x: 340, y: 580, size: 28 },
+  bottom_4: { x: 340, y: 640, size: 28 },
+  bottom_5: { x: 340, y: 700, size: 28 },
+  suffix:   { x: 620, y: 490, size: 34 }
+}
+const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
+
+const switchOrientation = (vertical) => {
+  isVertical.value = vertical
+  resetPositions()
+  nextTick(() => autoFitZoom())
+}
+const resetPositions = () => {
+  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
+}
+
+// 【關鍵修復】：加入絕對安全防禦，若任何 key 未找到，回傳預設坐標，保證絕不拋出 TypeError！
+const getStyle = (key) => {
+  const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
+  return { 
+    left: `${item.x}px`, 
+    top: `${item.y}px`, 
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const getUpperBoxStyle = () => {
+  const item = (layout.value && layout.value.upper) ? layout.value.upper : { x: 620, y: 120, size: 40 }
+  return {
+    left: `${item.x}px`,
+    top: `${item.y}px`,
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const autoFitZoom = () => {
+  if (!viewportRef.value) return
+  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
+  const cardWidth = isVertical.value ? 794 : 1123
+  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
+}
+
+let activeKey = null
+let currentAction = null
+let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
+
+const startMove = (e, key) => {
+  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
+  originX = layout.value[key].x; originY = layout.value[key].y
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const startResize = (e, key) => {
+  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
+  originSize = layout.value[key].size
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const onPointerMove = (e) => {
+  if (!activeKey || !layout.value[activeKey]) return
+  const dx = (e.clientX - startX) / zoomLevel.value
+  const dy = (e.clientY - startY) / zoomLevel.value
+  if (currentAction === 'move') {
+    layout.value[activeKey].x = Math.round(originX + dx)
+    layout.value[activeKey].y = Math.round(originY + dy)
+  } else if (currentAction === 'resize') {
+    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
+  }
+}
+const onPointerUp = () => {
+  activeKey = null; currentAction = null
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+}
+
+watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
+const buildFuneralUpper = () => {
+  if (funeralUpperFormat.value !== 'custom') upperText.value = `${funeralUpperFormat.value} ${funeralUpperSuffix.value}`
+}
+const buildCelebrationUpper = () => {
+  if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
+}
+const onCardCategoryChange = () => {
+  if (cardCategory.value === 'funeral') {
+    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
+  } else {
+    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
+  }
+}
+const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
+
+const printCouplet = () => {
+  nextTick(() => {
+    window.print()
+  })
+}
+
 onMounted(() => {
   if (!document.getElementById('cns11643-tw-kai-font')) {
     const style = document.createElement('style')
@@ -2577,7 +2751,7 @@ onMounted(() => {
   autoFitReceipt()
   autoFitFarmerReceipt()
   updateChineseAmount()
-  fetchSealFromCloud() // 自動抓取雲端印章
+  fetchSealFromCloud()
   window.addEventListener('resize', () => {
     autoFitZoom()
     autoFitReceipt()
@@ -3049,7 +3223,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 (100% 採用您拍下的真實印章) */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3063,10 +3237,10 @@ input, select, textarea {
   font-weight: bold;
 }
 .cai-real-stamp-img {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
-  mix-blend-mode: multiply; /* 自然濾除白底，保留紅色印泥筆觸 */
+  mix-blend-mode: multiply;
 }
 
 .f-w-id-lbl { width: 190px; }
@@ -3106,9 +3280,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* ====================================================
-   全域精準列印樣式 (純淨 A4 1:1 列印)
-   ==================================================== */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
