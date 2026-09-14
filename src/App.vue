@@ -92,6 +92,7 @@
                   <option v-for="f in flowerInventory" :key="f.id" :value="f.item_name + ' (' + f.spec + ')'" />
                 </datalist>
               </div>
+
               <div class="field">
                 <label>株數 (棵)</label>
                 <input v-model.number="formOrder.stalks" type="number" min="1" @input="calcOrderPrice" />
@@ -100,6 +101,7 @@
                 <label>每棵單價 (元)</label>
                 <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" />
               </div>
+
               <div class="field">
                 <label>使用盆器</label>
                 <select v-model="formOrder.pot">
@@ -110,6 +112,7 @@
                   <option value="無盆">無盆 (裸株/自備盆)</option>
                 </select>
               </div>
+
               <div class="field">
                 <label>快捷盆選擇</label>
                 <select v-model="formOrder.quick_pot">
@@ -117,18 +120,22 @@
                   <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
                 </select>
               </div>
+
               <div class="field">
                 <label>預估總成本 (元)</label>
                 <input v-model.number="formOrder.cost" type="number" min="0" />
               </div>
+
               <div class="field">
                 <label>訂單總售價 (元)</label>
                 <input v-model.number="formOrder.price" type="number" min="0" />
               </div>
+
               <div class="field">
                 <label>統一編號 (8碼)</label>
                 <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
               </div>
+
               <div class="field">
                 <label>是否開收據</label>
                 <select v-model="formOrder.need_receipt" class="bold-select-field">
@@ -136,10 +143,12 @@
                   <option value="需開收據">需開收據</option>
                 </select>
               </div>
+
               <div class="field">
                 <label>訂單其他備註 (可註明幾盆)</label>
                 <input v-model="formOrder.note" type="text" placeholder="送貨注意事項，例：1盆 或 2盆" />
               </div>
+
               <div class="field">
                 <label>花卡製作狀態</label>
                 <select v-model="formOrder.card_status">
@@ -200,9 +209,9 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號</th>
+                    <th>單號 (日期+序號)</th>
                     <th>客戶名稱</th>
-                    <th>統編</th>
+                    <th>統一編號</th>
                     <th>開收據</th>
                     <th>週期</th>
                     <th>電話</th>
@@ -768,6 +777,17 @@
       </div>
     </div>
 
+    <!-- 照片放大燈箱 -->
+    <div v-if="activeModalPhoto" class="image-modal-overlay" @click="activeModalPhoto = null">
+      <div class="image-modal-content" @click.stop>
+        <div class="image-modal-header">
+          <span>🌸 {{ activeModalTitle }}</span>
+          <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
+        </div>
+        <img :src="activeModalPhoto" class="image-modal-img" alt="放大照片" />
+      </div>
+    </div>
+
     <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
@@ -981,7 +1001,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 -->
+            <!-- 中款 (字體大小上限支援至 300px) -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1438,13 +1458,13 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 核心過濾函式：只顯示「品種名稱 X盆」
+// 核心過濾函式：安全解析品名為「品種名 X盆」，徹底濾掉棵數與盆器成本
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
   let flowerName = '特選蘭花'
   if (ord.spec) {
-    const rawFirst = ord.spec.split('|')[0].trim()
+    const rawFirst = String(ord.spec).split('|')[0].trim()
     const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim()
     if (cleanName) flowerName = cleanName
   }
@@ -1468,7 +1488,7 @@ const generateDateSeqId = (prefix, existingList) => {
   const dateStr = `${y}${m}${d}`
   const targetPrefix = `${prefix}-${dateStr}-`
 
-  const todayItems = existingList.filter(item => String(item.id || '').startsWith(targetPrefix))
+  const todayItems = (existingList || []).filter(item => String(item.id || '').startsWith(targetPrefix))
   const nextSeq = todayItems.length + 1
   return `${targetPrefix}${String(nextSeq).padStart(2, '0')}`
 }
@@ -1784,7 +1804,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單
+// 3. A5 橫式簽收單 (品項規格：特選蘭花 1盆)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1852,7 +1872,7 @@ const printReceiptAndMarkDone = async () => {
 }
 
 // ==========================================
-// 4. 農民收據
+// 4. 農民收據 (100% 採用您放入 public 的真實印章)
 // ==========================================
 const farmerReceiptViewportRef = ref(null)
 const farmerZoom = ref(1)
@@ -1976,6 +1996,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
+// 產生花卡高畫質圖片
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -2041,6 +2062,7 @@ const shareCoupletToLineDirect = () => {
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
+// 產生農民收據高畫質圖片 (使用您放在 public 的真實蔡鎮遠印章圖)
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2076,6 +2098,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
+  // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
@@ -2398,14 +2421,14 @@ const cancelEditRet = () => {
 
 const saveReturn = async () => {
   if (!formRet.value.party_name) return alert('請輸入對象名稱！')
-  const total = formRet.value.qty * formRet.value.unit_price
+  calcRetTotal()
   const payload = {
     return_type: formRet.value.return_type,
     party_name: formRet.value.party_name,
     target_item: formRet.value.target_item,
     qty: formRet.value.qty,
     unit_price: formRet.value.unit_price,
-    total_amount: total,
+    total_amount: formRet.value.total_amount,
     date: formRet.value.date,
     reason: formRet.value.reason
   }
