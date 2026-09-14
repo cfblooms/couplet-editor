@@ -47,7 +47,6 @@
       </nav>
 
       <div class="manage-content">
-        <!-- 模組：訂單與帳務 -->
         <section v-if="subTab === 'order'" class="tab-pane">
           <div v-if="editingOrderId" class="edit-banner">
             <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
@@ -1077,7 +1076,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (依訂單顯示：特選蘭花 1盆、2盆) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡化：特選蘭花 1盆、2盆、3盆) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1087,7 +1086,7 @@
           <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
             <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
             <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-              【{{ ord.id }}】{{ ord.customer }} - {{ ord.spec }} [{{ ord.receipt_status || '未列印' }}]
+              【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
             </option>
           </select>
         </div>
@@ -1139,6 +1138,7 @@
 
           <div class="form-group">
             <label>花禮品項規格 (幾盆)：</label>
+            <!-- 綁定乾淨的幾盆字串 -->
             <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆" />
           </div>
 
@@ -1168,7 +1168,7 @@
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-          <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          <button type="fit-btn" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
         </div>
 
         <div 
@@ -1204,7 +1204,7 @@
                 </tr>
                 <tr>
                   <td class="lbl">花禮品項</td>
-                  <!-- 按照訂單顯示：特選蘭花 1盆、2盆、3盆 -->
+                  <!-- 簽收單紙張上顯示純粹的「特選蘭花 1盆」 -->
                   <td class="val val-highlight" colspan="3">
                     {{ receiptForm.item || '特選蘭花 1盆' }}
                   </td>
@@ -1496,6 +1496,30 @@ const activeModalTitle = ref('')
 const openLargePhoto = (url, name) => {
   activeModalPhoto.value = url
   activeModalTitle.value = name
+}
+
+// 核心函式：強制解析品名為「品種名 X盆」，徹底濾掉棵數與盆器成本
+const formatSimpleItemName = (ord) => {
+  if (!ord) return '特選蘭花 1盆'
+
+  // 1. 抓取品種名稱（去掉 | 之後的所有株數與單價）
+  let flowerName = '特選蘭花'
+  if (ord.spec) {
+    const rawFirst = ord.spec.split('|')[0].trim()
+    // 去掉括號與多餘文字
+    const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim()
+    if (cleanName) flowerName = cleanName
+  }
+
+  // 2. 判斷盆數：優先檢查訂單備註或品項規格中是否有「數字+盆」
+  let potCount = 1
+  const searchStr = `${ord.note || ''} ${ord.spec || ''}`
+  const potMatch = searchStr.match(/(\d+)\s*盆/)
+  if (potMatch) {
+    potCount = parseInt(potMatch[1]) || 1
+  }
+
+  return `${flowerName} ${potCount}盆`
 }
 
 // 產生「當日日期 + 流水號」
@@ -1822,7 +1846,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (依訂單自動顯示：特選蘭花 1盆、2盆、3盆)
+// 3. A5 橫式簽收單 (徹底簡化品名)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1837,11 +1861,12 @@ const receiptForm = ref({
   deliveryDate: '115-09-03 送達',
   recipient: '永全證券 陳柏榮總經理 (0912-345678)',
   address: '桃園市桃園區縣府路 82 號 1 樓',
-  item: '特選蘭花 1盆',
+  item: '特選蘭花 1盆', // 預設即為純粹的幾盆格式
   giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
 
+// 下拉選單選擇時填入
 const onSelectReceiptOrder = () => {
   if (!selectedOrderId.value) return
   const ord = orderList.value.find(o => o.id === selectedOrderId.value)
@@ -1852,23 +1877,8 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
     receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
     
-    // 1. 抓取品種名稱 (例如：特選蘭花、大辣椒、滿天紅等)
-    let flowerName = '特選蘭花'
-    if (ord.spec) {
-      const rawFirst = ord.spec.split('|')[0].trim()
-      if (rawFirst) flowerName = rawFirst
-    }
-
-    // 2. 判斷盆數：從訂單備註或品項中尋找「X盆」，如果沒有寫，預設為「1盆」
-    let potCount = 1
-    const combinedText = `${ord.note || ''} ${ord.spec || ''}`
-    const match = combinedText.match(/(\d+)\s*盆/)
-    if (match) {
-      potCount = parseInt(match[1]) || 1
-    }
-
-    // 3. 組合出最簡潔的品項：例「特選蘭花 1盆」或「特選蘭花 2盆」
-    receiptForm.value.item = `${flowerName} ${potCount}盆`
+    // 【核心邏輯】：直接調用 formatSimpleItemName 徹底過濾
+    receiptForm.value.item = formatSimpleItemName(ord)
     
     receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
     receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
@@ -1881,9 +1891,21 @@ const autoFitReceipt = () => {
   receiptZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.35), 1.0)
 }
 
+// 點擊列表「🖨️ 簽收單」按鈕時填入
 const fillReceiptFromOrder = (ord) => {
   selectedOrderId.value = ord.id
-  onSelectReceiptOrder()
+  const cust = customers.value.find(c => c.name === ord.customer)
+  receiptForm.value.orderId = ord.id
+  receiptForm.value.deliveryDate = `${ord.expected_date} 送達`
+  receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
+  receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
+
+  // 【核心邏輯】：在此也強制過濾，確保一鍵帶入時也是純粹的「特選蘭花 1盆」
+  receiptForm.value.item = formatSimpleItemName(ord)
+
+  receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
+  receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
+
   currentTab.value = 'receipt'
   nextTick(() => autoFitReceipt())
 }
@@ -2024,7 +2046,683 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
-// 產生花卡高畫質圖片
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+  const targetWeight = cardFontWeight.value
+
+  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
+    if (!text) return
+    ctx.textBaseline = 'top'
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
+
+const shareFarmerReceiptToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 794 * 2
+  canvas.height = 560 * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, 794, 560)
+
+  const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
+  ctx.fillStyle = '#000000'
+
+  ctx.font = `bold 26px ${fontFam}`
+  ctx.textAlign = 'center'
+  ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
+
+  ctx.font = `15px ${fontFam}`
+  ctx.textAlign = 'right'
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
+
+  ctx.lineWidth = 1.8
+  ctx.strokeStyle = '#000000'
+  ctx.strokeRect(30, 95, 734, 380)
+
+  ctx.textAlign = 'left'
+  ctx.font = `bold 14.5px ${fontFam}`
+  ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
+  ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
+  ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
+  ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
+  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
+  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
+  ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
+  
+  const stampImg = new Image()
+  stampImg.crossOrigin = 'anonymous'
+  stampImg.onload = () => {
+    ctx.drawImage(stampImg, 260, 305, 50, 50)
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.onerror = () => {
+    ctx.font = `14.5px ${fontFam}`
+    ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
+    ctx.font = `11px ${fontFam}`
+    ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
+    ctx.font = `9.5px ${fontFam}`
+    ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
+
+    const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+  }
+  stampImg.src = '/cai-seal.png'
+}
+
+const exportCoupletImage = shareCoupletToLineDirect
+const exportFarmerReceiptImage = shareFarmerReceiptToLineDirect
+
+// ==========================================
+// 5. 進貨與庫存
+// ==========================================
+const loadInventory = async () => {
+  const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
+  if (data) inventoryList.value = data
+}
+
+const calcInvCost = () => {
+  const qty = Number(formInv.value.qty) || 0
+  const unit = Number(formInv.value.unit_cost) || 0
+  formInv.value.cost = qty * unit
+}
+
+const onPotTypeChange = () => {
+  const potCostMap = {
+    '桌上盆 (100)': 100,
+    '落地盆陶瓷-喪 (100)': 100,
+    '落地陶瓷盆-喜 (200)': 200,
+    '羅馬盆 (280)': 280,
+    '快捷盆 (70)': 70
+  }
+  const unit = potCostMap[formInv.value.pot_type] || 100
+  formInv.value.unit_cost = unit
+  calcInvCost()
+}
+
+const startEditInv = (inv) => {
+  editingInvId.value = inv.id
+  const calculatedUnit = inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0)
+  formInv.value = {
+    category: inv.category,
+    item_name: inv.item_name,
+    spec_spike: '單梗',
+    spec_color: '紅',
+    spec_size: '大',
+    spec_height: '中',
+    pot_type: '桌上盆 (100)',
+    qty: inv.qty,
+    unit_cost: calculatedUnit,
+    cost: inv.cost,
+    supplier: inv.supplier,
+    date: inv.date
+  }
+  nextTick(() => {
+    document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditInv = () => {
+  editingInvId.value = null
+  formInv.value = {
+    category: '蘭花',
+    item_name: '',
+    spec_spike: '單梗',
+    spec_color: '紅',
+    spec_size: '大',
+    spec_height: '中',
+    pot_type: '桌上盆 (100)',
+    qty: 10,
+    unit_cost: 100,
+    cost: 1000,
+    supplier: '某某花農',
+    date: new Date().toISOString().split('T')[0]
+  }
+}
+
+const saveInventory = async () => {
+  const isFlower = formInv.value.category === '蘭花'
+  const itemName = isFlower ? formInv.value.item_name : formInv.value.pot_type.split(' ')[0]
+  if (!itemName) return alert('請輸入品項名稱！')
+  const specDesc = isFlower 
+    ? `規格:${formInv.value.spec_spike} | 顏色:${formInv.value.spec_color} | 大小:${formInv.value.spec_size} | 高矮:${formInv.value.spec_height}`
+    : '固定規格'
+
+  const payload = {
+    category: formInv.value.category,
+    item_name: itemName,
+    spec: specDesc,
+    qty: formInv.value.qty,
+    unit_cost: formInv.value.unit_cost,
+    cost: formInv.value.cost,
+    supplier: formInv.value.supplier,
+    date: formInv.value.date
+  }
+
+  if (editingInvId.value) {
+    const { error } = await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
+    if (!error) {
+      alert(`進貨紀錄 ${editingInvId.value} 修改成功！`)
+      cancelEditInv()
+      loadInventory()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('IN', inventoryList.value)
+    const { error } = await supabase.from('inventory').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`進貨紀錄新增成功！編號：${newId}`)
+      cancelEditInv()
+      loadInventory()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 6. 客戶資料庫
+// ==========================================
+const loadCustomers = async () => {
+  const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
+  if (data) customers.value = data
+}
+
+const startEditCust = (c) => {
+  editingCustId.value = c.id
+  formCust.value = {
+    name: c.name,
+    type: c.type || '批發商',
+    billing_cycle: c.billing_cycle || '每單結',
+    phone: c.phone || '',
+    line_note: c.line_note || ''
+  }
+  nextTick(() => {
+    document.getElementById('cust-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditCust = () => {
+  editingCustId.value = null
+  formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
+}
+
+const saveCustomer = async () => {
+  if (!formCust.value.name) return alert('請輸入客戶名稱！')
+  const payload = { ...formCust.value }
+  if (editingCustId.value) {
+    const { error } = await supabase.from('customers').update(payload).eq('id', editingCustId.value)
+    if (!error) {
+      alert(`客戶 ${editingCustId.value} 修改成功！`)
+      cancelEditCust()
+      loadCustomers()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('CU', customers.value)
+    const { error } = await supabase.from('customers').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`客戶建立成功！編號：${newId}`)
+      cancelEditCust()
+      loadCustomers()
+    } else {
+      alert('建立失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 7. 蘭花品種庫
+// ==========================================
+const loadOrchids = async () => {
+  const { data } = await supabase.from('orchids').select('*').order('created_at', { ascending: false })
+  if (data) orchids.value = data
+}
+
+const onPhotoFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const maxDim = 800
+      let width = img.width
+      let height = img.height
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      const compressed = canvas.toDataURL('image/jpeg', 0.75)
+      formOrchid.value.photo_url = compressed
+    }
+    img.src = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const startEditOrchid = (item) => {
+  editingOrchidId.value = item.id
+  formOrchid.value = { 
+    name: item.name, 
+    note: item.note || '',
+    photo_url: item.photo_url || ''
+  }
+  nextTick(() => {
+    document.getElementById('orchid-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+const cancelEditOrchid = () => {
+  editingOrchidId.value = null
+  formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
+}
+
+const saveOrchid = async () => {
+  if (!formOrchid.value.name) return alert('請輸入品種名稱！')
+  const payload = { ...formOrchid.value }
+  if (editingOrchidId.value) {
+    const { error } = await supabase.from('orchids').update(payload).eq('id', editingOrchidId.value)
+    if (!error) {
+      alert('品種修改成功！')
+      cancelEditOrchid()
+      loadOrchids()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('FL', orchids.value)
+    const { error } = await supabase.from('orchids').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`品種新增成功！編號：${newId}`)
+      cancelEditOrchid()
+      loadOrchids()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+// ==========================================
+// 8. 退貨管理
+// ==========================================
+const loadReturns = async () => {
+  const { data } = await supabase.from('returns').select('*').order('created_at', { ascending: false })
+  if (data) returnList.value = data
+}
+const startEditRet = (ret) => {
+  editingRetId.value = ret.id
+  formRet.value = {
+    return_type: ret.return_type,
+    party_name: ret.party_name,
+    target_item: ret.target_item,
+    qty: ret.qty,
+    unit_price: ret.unit_price,
+    date: ret.date,
+    reason: ret.reason
+  }
+  nextTick(() => {
+    document.getElementById('return-form-box')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+const cancelEditRet = () => {
+  editingRetId.value = null
+  formRet.value = {
+    return_type: '退給花農',
+    party_name: '',
+    target_item: '',
+    qty: 2,
+    unit_price: 150,
+    date: new Date().toISOString().split('T')[0],
+    reason: '運送碰撞 / 開花不良'
+  }
+}
+const saveReturn = async () => {
+  if (!formRet.value.party_name) return alert('請輸入對象名稱！')
+  const total = formRet.value.qty * formRet.value.unit_price
+  const payload = {
+    return_type: formRet.value.return_type,
+    party_name: formRet.value.party_name,
+    target_item: formRet.value.target_item,
+    qty: formRet.value.qty,
+    unit_price: formRet.value.unit_price,
+    total_amount: total,
+    date: formRet.value.date,
+    reason: formRet.value.reason
+  }
+  if (editingRetId.value) {
+    const { error } = await supabase.from('returns').update(payload).eq('id', editingRetId.value)
+    if (!error) {
+      alert('退貨紀錄修改成功！')
+      cancelEditRet()
+      loadReturns()
+    } else {
+      alert('修改失敗：' + error.message)
+    }
+  } else {
+    const newId = generateDateSeqId('RT', returnList.value)
+    const { error } = await supabase.from('returns').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`退貨紀錄儲存成功！單號：${newId}`)
+      cancelEditRet()
+      loadReturns()
+    } else {
+      alert('新增失敗：' + error.message)
+    }
+  }
+}
+
+const deleteItem = async (table, id, reloadFn) => {
+  if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
+  const { error } = await supabase.from(table).delete().eq('id', id)
+  if (!error) reloadFn()
+}
+
+// 匯出全部訂單 Excel
+const exportOrdersToExcel = () => {
+  if (orderList.value.length === 0) return alert('目前尚無訂單可供匯出！')
+  const exportData = orderList.value.map(o => ({
+    '訂單編號': o.id,
+    '客戶名稱': o.customer,
+    '客戶類型': o.cust_type,
+    '結帳週期': o.billing_cycle || '每單結',
+    '聯絡電話': o.phone,
+    '品種與規格': o.spec,
+    '盆器與快捷盆': o.pot,
+    '預估成本': o.cost,
+    '訂單售價': o.price,
+    '利潤': o.price - o.cost,
+    '統一編號': o.tax_id || '',
+    '開收據與否': o.need_receipt || '不需收據',
+    '訂單備註': o.note || '',
+    '花卡狀態': o.card_status || '未製作',
+    '簽收單狀態': o.receipt_status || '未列印',
+    '下單日期': o.order_date,
+    '預計送達': o.expected_date,
+    '出貨狀態': o.shipped_status,
+    '收款狀態': o.payment_status
+  }))
+  const worksheet = XLSX.utils.json_to_sheet(exportData)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, '蘭花訂單總表')
+  XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
+// ==========================================
+// 9. 花卡 / 輓聯編輯器
+// ==========================================
+const isVertical = ref(true)
+const cardCategory = ref('funeral')
+const zoomLevel = ref(0.7)
+const viewportRef = ref(null)
+
+const cardFontFamily = ref('kai')
+const cardFontWeight = ref('700')
+
+const fontMapping = {
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif',
+  fangsong: '"DFPFangSong-B5", "DFPKai-B5", "FangSong", "STFangsong", "華康仿宋體", "仿宋", serif',
+  dfkai_w7: '"DFBiaoKaiShu", "DFKaiShu-W7", "DFPKaiShu-W7", "DFKaiShuW7", "華康楷書體", "TW-Kai", "DFKai-SB", "BiauKai", serif',
+  df_yankai: '"DFYanKai-W7", "DFYanKai", "DFPYanKai-W7", "DFPYanKai", "華康正顏楷體", "DFBiaoKaiShu", "TW-Kai", "DFKai-SB", serif',
+  wending: '"AR PL UKai TW", "AR PL KaitiM Big5", "文鼎楷書", "TW-Kai", "DFKai-SB", serif',
+  notosong: '"Noto Serif TC", "Songti TC", "SimSun", serif'
+}
+
+const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
+
+const bottomLines = ref([
+  { text: '桃園市議會' },
+  { text: '議員 李宗豪' },
+  { text: '' },
+  { text: '' },
+  { text: '' },
+  { text: '' }
+])
+const getPlaceholder = (idx) => [
+  '第 1 格（例：單位 / 公司）',
+  '第 2 格（例：職稱姓名 1）',
+  '第 3 格（自訂聯名人 2）',
+  '第 4 格（自訂）',
+  '第 5 格（自訂）',
+  '第 6 格（自訂）'
+][idx]
+
+const funeralUpperFormat = ref('敬悼 X媽X老夫人')
+const funeralUpperSuffix = ref('千古')
+const gender = ref('female')
+const ageStage = ref('f_over80')
+const funeralPhrases = {
+  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
+  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
+  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
+  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
+  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
+  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
+}
+const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
+
+const celebrationType = ref('opening')
+const celebPrefix = ref('恭祝')
+const celebTarget = ref('鴻運實業有限公司')
+const celebPhrases = {
+  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
+  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
+  temple: ['聖誕千秋', '神威顯赫']
+}
+const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
+
+const upperText = ref('敬悼 陳媽李老夫人 千古')
+const middleText = ref('母儀千古')
+const suffixText = ref('敬輓')
+
+const parsedUpperTokens = computed(() => {
+  const chars = upperText.value.split('')
+  return chars.map(char => ({
+    char,
+    isSmall: char === '媽'
+  }))
+})
+
+const maFontSize = computed(() => {
+  const baseSize = layout.value.upper?.size || 40
+  return Math.max(12, baseSize - 20)
+})
+
+// 標準 A4 寬高：直式 794x1123，橫式 1123x794
+const defaultVertical = {
+  upper:    { x: 620, y: 120, size: 40 },
+  middle:   { x: 330, y: 220, size: 84 },
+  bottom_0: { x: 155, y: 520, size: 30 },
+  bottom_1: { x: 155, y: 680, size: 36 },
+  bottom_2: { x: 95,  y: 520, size: 30 },
+  bottom_3: { x: 95,  y: 680, size: 32 },
+  bottom_4: { x: 40,  y: 520, size: 30 },
+  bottom_5: { x: 40,  y: 680, size: 30 },
+  suffix:   { x: 155, y: 920, size: 34 }
+}
+const defaultHorizontal = {
+  upper:    { x: 180, y: 100, size: 36 },
+  middle:   { x: 220, y: 260, size: 76 },
+  bottom_0: { x: 340, y: 400, size: 28 },
+  bottom_1: { x: 340, y: 460, size: 32 },
+  bottom_2: { x: 340, y: 520, size: 28 },
+  bottom_3: { x: 340, y: 580, size: 28 },
+  bottom_4: { x: 340, y: 640, size: 28 },
+  bottom_5: { x: 340, y: 700, size: 28 },
+  suffix:   { x: 620, y: 490, size: 34 }
+}
+const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
+
+const switchOrientation = (vertical) => {
+  isVertical.value = vertical
+  resetPositions()
+  nextTick(() => autoFitZoom())
+}
+const resetPositions = () => {
+  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
+}
+
+const getStyle = (key) => {
+  const item = layout.value[key] || { x: 50, y: 50, size: 30 }
+  return { 
+    left: `${item.x}px`, 
+    top: `${item.y}px`, 
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const getUpperBoxStyle = () => {
+  const item = layout.value.upper || { x: 620, y: 120, size: 40 }
+  return {
+    left: `${item.x}px`,
+    top: `${item.y}px`,
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const autoFitZoom = () => {
+  if (!viewportRef.value) return
+  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
+  const cardWidth = isVertical.value ? 794 : 1123
+  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
+}
+
+let activeKey = null
+let currentAction = null
+let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
+
+const startMove = (e, key) => {
+  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
+  originX = layout.value[key].x; originY = layout.value[key].y
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const startResize = (e, key) => {
+  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
+  originSize = layout.value[key].size
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const onPointerMove = (e) => {
+  if (!activeKey) return
+  const dx = (e.clientX - startX) / zoomLevel.value
+  const dy = (e.clientY - startY) / zoomLevel.value
+  if (currentAction === 'move') {
+    layout.value[activeKey].x = Math.round(originX + dx)
+    layout.value[activeKey].y = Math.round(originY + dy)
+  } else if (currentAction === 'resize') {
+    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
+  }
+}
+const onPointerUp = () => {
+  activeKey = null; currentAction = null
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+}
+
+watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
+const buildFuneralUpper = () => {
+  if (funeralUpperFormat.value !== 'custom') upperText.value = `${funeralUpperFormat.value} ${funeralUpperSuffix.value}`
+}
+const buildCelebrationUpper = () => {
+  if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
+}
+const onCardCategoryChange = () => {
+  if (cardCategory.value === 'funeral') {
+    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
+  } else {
+    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
+  }
+}
+const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
+
+const printCouplet = () => {
+  nextTick(() => {
+    window.print()
+  })
+}
+
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -2771,7 +3469,7 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* 標準 A4 卡片 */
+/* 標準 A4 卡片 (794x1123，對應 210mm x 297mm) */
 .card-scaler-container { 
   position: relative; 
   margin-bottom: 40px; 
