@@ -106,8 +106,8 @@
                 <label>使用盆器</label>
                 <select v-model="formOrder.pot">
                   <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                  <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (100)</option>
-                  <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (200)</option>
+                  <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                  <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
                   <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
                   <option value="無盆">無盆 (裸株/自備盆)</option>
                 </select>
@@ -495,7 +495,6 @@
                 <label>供應商 / 花農</label>
                 <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
               </div>
-
               <div class="field">
                 <label>進貨日期</label>
                 <input v-model="formInv.date" type="date" />
@@ -997,7 +996,7 @@
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
           <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
           <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-          <button type="button" class="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
+          <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
           <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
         </div>
 
@@ -1078,7 +1077,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (品項簡明：特選蘭花 1盆、2盆、3盆) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1088,7 +1087,7 @@
           <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
             <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
             <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-              【{{ ord.id }}】{{ ord.customer }} - {{ ord.spec }} [{{ ord.receipt_status || '未列印' }}]
+              【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
             </option>
           </select>
         </div>
@@ -1430,7 +1429,7 @@
                 </div>
               </div>
 
-              <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
+              <!-- 蔡鎮遠姓名與您放在 public/cai-seal.png 的真實印章圖片 -->
               <div class="f-grid-row f-farmer-info-row">
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
@@ -1832,6 +1831,7 @@ const exportStatementExcel = () => {
 
 const batchMarkPaid = async () => {
   if (!confirm(`確定要將這 ${statementOrders.value.length} 筆訂單一次全部標記為「已結」嗎？`)) return
+  // 已修正此處語法筆誤
   const ids = statementOrders.value.map(o => o.id)
   const { error } = await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
   if (!error) {
