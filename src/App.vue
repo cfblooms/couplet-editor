@@ -56,6 +56,8 @@
 
           <div class="card-box" id="order-form-box">
             <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+            
+            <!-- 客戶基本資訊 -->
             <div class="form-grid">
               <div class="field">
                 <label>客戶類型</label>
@@ -86,46 +88,6 @@
                 <input v-model="formOrder.phone" type="text" placeholder="電話號碼" />
               </div>
               <div class="field">
-                <label>選用蘭花品種</label>
-                <input v-model="formOrder.orchid_name" list="inv-flower-options" placeholder="選擇庫存品種" />
-                <datalist id="inv-flower-options">
-                  <option v-for="f in flowerInventory" :key="f.id" :value="f.item_name + ' (' + f.spec + ')'" />
-                </datalist>
-              </div>
-              <div class="field">
-                <label>株數 (棵)</label>
-                <input v-model.number="formOrder.stalks" type="number" min="1" @input="calcOrderPrice" />
-              </div>
-              <div class="field">
-                <label>每棵單價 (元)</label>
-                <input v-model.number="formOrder.unit_price" type="number" min="0" @input="calcOrderPrice" />
-              </div>
-              <div class="field">
-                <label>使用盆器</label>
-                <select v-model="formOrder.pot">
-                  <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                  <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                  <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                  <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                  <option value="無盆">無盆 (裸株/自備盆)</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>快捷盆選擇</label>
-                <select v-model="formOrder.quick_pot">
-                  <option value="未使用">未使用快捷盆</option>
-                  <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>預估總成本 (元)</label>
-                <input v-model.number="formOrder.cost" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>訂單總售價 (元)</label>
-                <input v-model.number="formOrder.price" type="number" min="0" />
-              </div>
-              <div class="field">
                 <label>統一編號 (8碼)</label>
                 <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
               </div>
@@ -136,9 +98,86 @@
                   <option value="需開收據">需開收據</option>
                 </select>
               </div>
+            </div>
+
+            <!-- 多組花禮規格設定區塊 -->
+            <div class="items-section mt-3">
+              <div class="items-header">
+                <h4>🌸 花禮品項與盆數規格（支援一單多盆、不同株數）</h4>
+                <button type="button" class="add-item-btn" @click="addOrderItemRow">＋ 新增一組花禮規格</button>
+              </div>
+
+              <div 
+                v-for="(item, idx) in formOrder.items" 
+                :key="idx" 
+                class="order-item-card"
+              >
+                <div class="item-card-title">
+                  <span>品項 {{ idx + 1 }}</span>
+                  <button 
+                    v-if="formOrder.items.length > 1" 
+                    type="button" 
+                    class="remove-item-btn" 
+                    @click="removeOrderItemRow(idx)"
+                  >
+                    🗑️ 刪除此組
+                  </button>
+                </div>
+                <div class="item-grid">
+                  <div class="field">
+                    <label>品種名稱</label>
+                    <input v-model="item.orchid_name" list="inv-flower-options" placeholder="例: 特選蘭花、大辣椒" />
+                  </div>
+                  <div class="field highlight-field">
+                    <label>盆數 (幾盆)</label>
+                    <input v-model.number="item.pots_qty" type="number" min="1" @input="calcOrderPrice" />
+                  </div>
+                  <div class="field">
+                    <label>單盆株數 (棵/盆)</label>
+                    <input v-model.number="item.stalks" type="number" min="1" @input="calcOrderPrice" />
+                  </div>
+                  <div class="field">
+                    <label>每棵單價 (元)</label>
+                    <input v-model.number="item.unit_price" type="number" min="0" @input="calcOrderPrice" />
+                  </div>
+                  <div class="field">
+                    <label>使用盆器</label>
+                    <select v-model="item.pot" @change="calcOrderPrice">
+                      <option value="桌上盆 (100)">桌上盆 (成本100)</option>
+                      <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                      <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                      <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                      <option value="無盆">無盆 (裸株/自備盆)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>快捷盆選擇</label>
+                    <select v-model="item.quick_pot" @change="calcOrderPrice">
+                      <option value="未使用">未使用快捷盆</option>
+                      <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 費用與總計資訊 -->
+            <div class="form-grid mt-3">
+              <div class="field highlight-field">
+                <label>額外運費 (元)</label>
+                <input v-model.number="formOrder.shipping_fee" type="number" min="0" @input="calcOrderPrice" placeholder="無運費填 0" />
+              </div>
               <div class="field">
-                <label>訂單其他備註 (可註明幾盆)</label>
-                <input v-model="formOrder.note" type="text" placeholder="送貨注意事項，例：1盆 或 2盆" />
+                <label>預估總成本 (元)</label>
+                <input v-model.number="formOrder.cost" type="number" min="0" />
+              </div>
+              <div class="field">
+                <label>訂單總售價 (含運費)</label>
+                <input v-model.number="formOrder.price" type="number" min="0" class="bold-price-input" />
+              </div>
+              <div class="field">
+                <label>訂單其他備註</label>
+                <input v-model="formOrder.note" type="text" placeholder="送貨注意事項" />
               </div>
               <div class="field">
                 <label>花卡製作狀態</label>
@@ -200,7 +239,19 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>週期</th><th>電話</th><th>品項規格</th><th>盆器</th><th>售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
+                    <th>單號</th>
+                    <th>客戶名稱</th>
+                    <th>統編</th>
+                    <th>開收據</th>
+                    <th>總盆數</th>
+                    <th>規格明細</th>
+                    <th>運費</th>
+                    <th>總售價</th>
+                    <th>花卡</th>
+                    <th>簽收單</th>
+                    <th>出貨</th>
+                    <th>收款</th>
+                    <th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -218,10 +269,9 @@
                         <option value="需開收據">需開收據</option>
                       </select>
                     </td>
-                    <td><span class="badge badge-purple">{{ ord.billing_cycle || '每單結' }}</span></td>
-                    <td>{{ ord.phone }}</td>
+                    <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                     <td>{{ ord.spec }}</td>
-                    <td><b>{{ ord.pot }}</b></td>
+                    <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                     <td class="text-blue"><b>${{ ord.price }}</b></td>
                     <td>
                       <select 
@@ -263,7 +313,7 @@
                       <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
                     </td>
                   </tr>
-                  <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
+                  <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
                 </tbody>
               </table>
             </div>
@@ -340,7 +390,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>品項規格</th><th>金額</th><th>花卡</th><th>簽收單</th><th>收款狀態</th><th>操作</th>
+                    <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>規格明細</th><th>金額</th><th>花卡</th><th>簽收單</th><th>收款狀態</th><th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -772,7 +822,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (已修復白屏) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -985,7 +1035,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 (字體大小上限支援至 300px) -->
+            <!-- 中款 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1009,7 +1059,7 @@
               </div>
             </template>
 
-            <!-- 敬詞 (安全邊界保護) -->
+            <!-- 敬詞 -->
             <div 
               v-if="suffixText.trim()"
               class="text-box suffix-box"
@@ -1024,7 +1074,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (品項規格：特選蘭花 1盆、2盆、3盆) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (依訂單整合多盆規格) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1085,8 +1135,8 @@
           </div>
 
           <div class="form-group">
-            <label>花禮品項規格 (幾盆)：</label>
-            <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆" />
+            <label>花禮品項規格 (幾盆/幾株)：</label>
+            <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 6株 1盆、特選蘭花 10株 2盆 (共3盆)" />
           </div>
 
           <div class="form-group">
@@ -1186,7 +1236,6 @@
       <div class="control-panel no-print">
         <h2>🧾 農民出售農產品收據管理</h2>
 
-        <!-- 雲端同步印章按鈕：隨時可以選取自己電腦中的去背 PNG 並永久同步 -->
         <div class="panel-section stamp-select-panel">
           <label class="section-title">🔴 蔡鎮遠印章（全裝置雲端同步）：</label>
           <input type="file" id="local-seal-picker" accept="image/*" style="display:none" @change="onSelectLocalSeal" />
@@ -1388,7 +1437,6 @@
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 顯示您上傳的真實印章圖片 -->
                   <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -1433,7 +1481,6 @@ const activeCaiSealSrc = computed(() => {
   return userCustomSeal.value || '/cai-seal.png'
 })
 
-// 從 Supabase 雲端資料庫抓取印章
 const fetchSealFromCloud = async () => {
   try {
     const { data } = await supabase.from('system_settings').select('value').eq('key', 'cai_seal_img').single()
@@ -1442,7 +1489,7 @@ const fetchSealFromCloud = async () => {
       localStorage.setItem('user_cai_seal_img', data.value)
     }
   } catch (err) {
-    // 尚未建立設定表時靜默跳過，不拋錯
+    // 尚未建立設定表時靜默跳過
   }
 }
 
@@ -1499,25 +1546,56 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 核心過濾函式：安全解析品名為「品種名 X盆」
+// 核心過濾函式：安全解析品名規格，支援「1盆6株、2盆10株（共3盆）」的簡潔呈現
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
-  let flowerName = '特選蘭花'
-  if (ord.spec) {
-    const rawFirst = String(ord.spec).split('|')[0].trim()
-    const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim()
-    if (cleanName) flowerName = cleanName
+  // 若備註或規格包含 JSON 格式的多品項
+  const specText = String(ord.spec || '')
+  if (specText.includes('盆')) {
+    // 將多個規格組合整理為簡潔中文
+    const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
+    if (parts.length > 0) {
+      const parsedParts = parts.map(p => {
+        const segs = p.split('|')
+        const namePart = segs[0].trim()
+        const stalksMatch = p.match(/(\d+)\s*棵/)
+        const stalks = stalksMatch ? `${stalksMatch[1]}株 ` : ''
+        const potsMatch = namePart.match(/(\d+)\s*盆/)
+        const pots = potsMatch ? `${potsMatch[1]}盆` : '1盆'
+        const cleanName = namePart.replace(/\(\d+盆\)/g, '').replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+        return `${cleanName} ${stalks}${pots}`
+      })
+      const totalPots = getOrderTotalPots(ord)
+      return `${parsedParts.join('、')}（共${totalPots}盆）`
+    }
   }
 
-  let potCount = 1
+  const rawFirst = specText.split('|')[0].trim()
+  const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+  const totalPots = getOrderTotalPots(ord)
+  return `${cleanName} ${totalPots}盆`
+}
+
+// 輔助函式：計算一筆訂單中的全部總盆數
+const getOrderTotalPots = (ord) => {
+  if (!ord) return 1
   const searchStr = `${ord.note || ''} ${ord.spec || ''}`
-  const potMatch = searchStr.match(/(\d+)\s*盆/)
-  if (potMatch) {
-    potCount = parseInt(potMatch[1]) || 1
+  const matches = [...searchStr.matchAll(/(\d+)\s*盆/g)]
+  if (matches.length > 0) {
+    // 加總所有找到的盆數
+    const sum = matches.reduce((total, m) => total + (parseInt(m[1]) || 0), 0)
+    return sum > 0 ? sum : 1
   }
+  return 1
+}
 
-  return `${flowerName} ${potCount}盆`
+// 輔助函式：取得訂單運費
+const getOrderShippingFee = (ord) => {
+  if (!ord) return 0
+  const searchStr = `${ord.note || ''}`
+  const shipMatch = searchStr.match(/運費\s*[:：]?\s*(\d+)/)
+  return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
 // 產生「當日日期 + 流水號」
@@ -1560,16 +1638,16 @@ const formRet = ref({
   date: new Date().toISOString().split('T')[0],
   reason: '運送碰撞 / 開花不良'
 })
+
+// ==========================================
+// 訂單表單：支援多組不同盆數與株數
+// ==========================================
 const formOrder = ref({
   cust_type: '批發',
   customer: '',
   billing_cycle: '每單結',
   phone: '0912-345678',
-  orchid_name: '',
-  stalks: 10,
-  unit_price: 250,
-  pot: '桌上盆 (100)',
-  quick_pot: '未使用',
+  shipping_fee: 0,
   cost: 600,
   price: 2500,
   tax_id: '',
@@ -1580,13 +1658,53 @@ const formOrder = ref({
   shipped_status: '未出貨',
   payment_status: '未結',
   order_date: new Date().toISOString().split('T')[0],
-  expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
+  expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+  // 核心：多組花禮規格陣列
+  items: [
+    {
+      orchid_name: '特選蘭花',
+      pots_qty: 1,
+      stalks: 6,
+      unit_price: 250,
+      pot: '桌上盆 (100)',
+      quick_pot: '未使用'
+    },
+    {
+      orchid_name: '特選蘭花',
+      pots_qty: 2,
+      stalks: 10,
+      unit_price: 250,
+      pot: '落地陶瓷盆-喜 (200)',
+      quick_pot: '未使用'
+    }
+  ]
 })
+
+// 新增一組花禮規格
+const addOrderItemRow = () => {
+  formOrder.value.items.push({
+    orchid_name: '特選蘭花',
+    pots_qty: 1,
+    stalks: 10,
+    unit_price: 250,
+    pot: '桌上盆 (100)',
+    quick_pot: '未使用'
+  })
+  calcOrderPrice()
+}
+
+// 移除特定一組花禮規格
+const removeOrderItemRow = (idx) => {
+  if (formOrder.value.items.length > 1) {
+    formOrder.value.items.splice(idx, 1)
+    calcOrderPrice()
+  }
+}
 
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
-// 1. 訂單模組
+// 1. 訂單模組：自動累加所有規格盆數、售價與成本
 // ==========================================
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
@@ -1594,11 +1712,33 @@ const loadOrders = async () => {
 }
 
 const calcOrderPrice = () => {
-  const s = Number(formOrder.value.stalks) || 0
-  const u = Number(formOrder.value.unit_price) || 0
-  if (u > 0) {
-    formOrder.value.price = s * u
+  let totalPrice = 0
+  let totalCost = 0
+
+  const potCostMap = {
+    '桌上盆 (100)': 100,
+    '落地盆陶瓷-喪 (100)': 100,
+    '落地陶瓷盆-喜 (200)': 200,
+    '羅馬盆 (280)': 280,
+    '無盆': 0
   }
+
+  formOrder.value.items.forEach(item => {
+    const p = Number(item.pots_qty) || 1
+    const s = Number(item.stalks) || 0
+    const u = Number(item.unit_price) || 0
+    totalPrice += (s * u) * p
+
+    const potCost = potCostMap[item.pot] || 0
+    const quickCost = item.quick_pot === '使用快捷盆 (70)' ? 70 : 0
+    const flowerBaseCost = s * 60
+    totalCost += (flowerBaseCost + potCost + quickCost) * p
+  })
+
+  // 加上額外運費
+  const ship = Number(formOrder.value.shipping_fee) || 0
+  formOrder.value.price = totalPrice + ship
+  formOrder.value.cost = totalCost
 }
 
 const onOrderCustSelect = () => {
@@ -1612,19 +1752,45 @@ const onOrderCustSelect = () => {
 
 const startEditOrder = (ord) => {
   editingOrderId.value = ord.id
-  const hasQuick = (ord.pot || '').includes('快捷盆')
-  const cleanPot = (ord.pot || '').replace(/\s*\+\s*快捷盆/, '').trim()
+  
+  // 安全反解 spec 為 items 列表
+  const parsedItems = []
+  const specText = String(ord.spec || '')
+  if (specText.includes(';')) {
+    const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
+    parts.forEach(p => {
+      const stalksMatch = p.match(/(\d+)\s*棵/)
+      const unitMatch = p.match(/單價(\d+)元/)
+      const potsMatch = p.match(/(\d+)\s*盆/)
+      const nameMatch = p.split('(')[0].trim() || '特選蘭花'
+      parsedItems.push({
+        orchid_name: nameMatch,
+        pots_qty: potsMatch ? parseInt(potsMatch[1]) : 1,
+        stalks: stalksMatch ? parseInt(stalksMatch[1]) : 10,
+        unit_price: unitMatch ? parseInt(unitMatch[1]) : 250,
+        pot: (ord.pot || '桌上盆 (100)').replace(/\s*\+\s*快捷盆/, '').trim(),
+        quick_pot: (ord.pot || '').includes('快捷盆') ? '使用快捷盆 (70)' : '未使用'
+      })
+    })
+  }
+
+  if (parsedItems.length === 0) {
+    parsedItems.push({
+      orchid_name: ord.spec ? ord.spec.split('|')[0].replace(/\(.*?\)/g, '').trim() : '特選蘭花',
+      pots_qty: getOrderTotalPots(ord),
+      stalks: 10,
+      unit_price: 250,
+      pot: (ord.pot || '桌上盆 (100)').replace(/\s*\+\s*快捷盆/, '').trim(),
+      quick_pot: (ord.pot || '').includes('快捷盆') ? '使用快捷盆 (70)' : '未使用'
+    })
+  }
 
   formOrder.value = {
     cust_type: ord.cust_type || '批發',
     customer: ord.customer || '',
     billing_cycle: ord.billing_cycle || '每單結',
     phone: ord.phone || '',
-    orchid_name: ord.spec ? ord.spec.split('|')[0].trim() : '',
-    stalks: 10,
-    unit_price: 250,
-    pot: cleanPot || '桌上盆 (100)',
-    quick_pot: hasQuick ? '使用快捷盆 (70)' : '未使用',
+    shipping_fee: getOrderShippingFee(ord),
     cost: Number(ord.cost) || 0,
     price: Number(ord.price) || 0,
     tax_id: ord.tax_id || '',
@@ -1635,8 +1801,10 @@ const startEditOrder = (ord) => {
     shipped_status: ord.shipped_status || '未出貨',
     payment_status: ord.payment_status || '未結',
     order_date: ord.order_date,
-    expected_date: ord.expected_date
+    expected_date: ord.expected_date,
+    items: parsedItems
   }
+
   subTab.value = 'order'
   nextTick(() => {
     document.getElementById('order-form-box')?.scrollIntoView({ behavior: 'smooth' })
@@ -1650,11 +1818,7 @@ const cancelEditOrder = () => {
     customer: '',
     billing_cycle: '每單結',
     phone: '0912-345678',
-    orchid_name: '',
-    stalks: 10,
-    unit_price: 250,
-    pot: '桌上盆 (100)',
-    quick_pot: '未使用',
+    shipping_fee: 0,
     cost: 600,
     price: 2500,
     tax_id: '',
@@ -1665,25 +1829,49 @@ const cancelEditOrder = () => {
     shipped_status: '未出貨',
     payment_status: '未結',
     order_date: new Date().toISOString().split('T')[0],
-    expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
+    expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+    items: [
+      {
+        orchid_name: '特選蘭花',
+        pots_qty: 1,
+        stalks: 6,
+        unit_price: 250,
+        pot: '桌上盆 (100)',
+        quick_pot: '未使用'
+      },
+      {
+        orchid_name: '特選蘭花',
+        pots_qty: 2,
+        stalks: 10,
+        unit_price: 250,
+        pot: '落地陶瓷盆-喜 (200)',
+        quick_pot: '未使用'
+      }
+    ]
   }
 }
 
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
-  const specStr = formOrder.value.unit_price > 0
-    ? `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵 (單價${formOrder.value.unit_price}元)`
-    : `${formOrder.value.orchid_name || '特選蘭花'} | ${formOrder.value.stalks}棵`
+  // 將各組品項轉換為結構化規格字串
+  const specParts = formOrder.value.items.map(item => {
+    const p = Number(item.pots_qty) || 1
+    const s = Number(item.stalks) || 1
+    const u = Number(item.unit_price) || 0
+    return `${item.orchid_name || '特選蘭花'} (${p}盆) | ${s}棵 (單價${u}元)`
+  })
+  const fullSpecStr = specParts.join('; ')
 
-  const finalPotStr = formOrder.value.pot + (formOrder.value.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
+  const mainItem = formOrder.value.items[0] || {}
+  const finalPotStr = (mainItem.pot || '桌上盆 (100)') + (mainItem.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
 
   const payload = {
     cust_type: formOrder.value.cust_type,
     customer: formOrder.value.customer,
     billing_cycle: formOrder.value.billing_cycle,
     phone: formOrder.value.phone,
-    spec: specStr,
+    spec: fullSpecStr,
     pot: finalPotStr,
     cost: formOrder.value.cost,
     price: formOrder.value.price,
@@ -1696,6 +1884,13 @@ const saveOrder = async () => {
     payment_status: formOrder.value.payment_status,
     order_date: formOrder.value.order_date,
     expected_date: formOrder.value.expected_date
+  }
+
+  // 標記運費與總盆數至備註
+  const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
+  const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee}元]`
+  if (!payload.note.includes(metaTag)) {
+    payload.note = payload.note ? `${payload.note} ${metaTag}` : metaTag
   }
 
   if (editingOrderId.value) {
@@ -1800,7 +1995,7 @@ const copyLineStatement = () => {
   text += `--------------------------------\n`
   text += `出貨明細清單：\n`
   statementOrders.value.forEach((o, index) => {
-    text += `${index + 1}. [${o.order_date}] ${o.spec} (${o.pot}) ➔ $${o.price}元 (${o.payment_status})\n`
+    text += `${index + 1}. [${o.order_date}] ${o.spec} ➔ $${o.price}元 (${o.payment_status})\n`
   })
   text += `--------------------------------\n`
   text += `※ 敬請核對帳款，感謝您的支持與惠顧！`
@@ -1820,8 +2015,9 @@ const exportStatementExcel = () => {
     '下單日期': o.order_date,
     '送達日期': o.expected_date,
     '客戶名稱': o.customer,
+    '總盆數': getOrderTotalPots(o),
     '品項與規格': o.spec,
-    '盆器': o.pot,
+    '運費': getOrderShippingFee(o),
     '售價(元)': o.price,
     '出貨狀態': o.shipped_status,
     '收款狀態': o.payment_status
@@ -1845,7 +2041,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (品項規格：特選蘭花 1盆)
+// 3. A5 橫式簽收單
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -1860,7 +2056,7 @@ const receiptForm = ref({
   deliveryDate: '115-09-03 送達',
   recipient: '永全證券 陳柏榮總經理 (0912-345678)',
   address: '桃園市桃園區縣府路 82 號 1 樓',
-  item: '特選蘭花 1盆',
+  item: '特選蘭花 6株 1盆、特選蘭花 10株 2盆（共3盆）',
   giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
@@ -1976,7 +2172,7 @@ const onSelectFarmerReceiptOrder = () => {
 
     farmerReceipt.value.itemName = '蝴蝶蘭花禮'
     farmerReceipt.value.spec = formatSimpleItemName(ord)
-    farmerReceipt.value.qty = '1 盆'
+    farmerReceipt.value.qty = `${getOrderTotalPots(ord)} 盆`
     farmerReceipt.value.unitPrice = Number(ord.price).toLocaleString()
     farmerReceipt.value.totalAmount = Number(ord.price) || 0
     farmerReceipt.value.note = ord.id
@@ -2126,7 +2322,6 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
-  ctx.strokeStyle = '#000000'
   ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
@@ -2151,7 +2346,6 @@ const shareFarmerReceiptToLineDirect = () => {
     shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   }
 
-  // 載入真實印章圖片
   const stampImg = new Image()
   stampImg.crossOrigin = 'anonymous'
   stampImg.onload = () => {
@@ -2503,10 +2697,12 @@ const exportOrdersToExcel = () => {
     '客戶類型': o.cust_type,
     '結帳週期': o.billing_cycle || '每單結',
     '聯絡電話': o.phone,
-    '品種與規格': o.spec,
-    '盆器與快捷盆': o.pot,
+    '總盆數': getOrderTotalPots(o),
+    '品項與規格': o.spec,
+    '盆器': o.pot,
+    '額外運費': getOrderShippingFee(o),
     '預估成本': o.cost,
-    '訂單售價': o.price,
+    '訂單總售價': o.price,
     '利潤': o.price - o.cost,
     '統一編號': o.tax_id || '',
     '開收據與否': o.need_receipt || '不需收據',
@@ -2525,7 +2721,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (完整補齊預設坐標，確保永不拋出 undefined)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2605,7 +2801,6 @@ const maFontSize = computed(() => {
   return Math.max(12, baseSize - 20)
 })
 
-// 【關鍵修復】：確保直式與橫式每一項（含 suffix）全部定義好，絕無缺漏！
 const defaultVertical = {
   upper:    { x: 620, y: 120, size: 40 },
   middle:   { x: 330, y: 220, size: 84 },
@@ -2639,7 +2834,6 @@ const resetPositions = () => {
   layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
 }
 
-// 【關鍵修復】：加入絕對安全防禦，若任何 key 未找到，回傳預設坐標，保證絕不拋出 TypeError！
 const getStyle = (key) => {
   const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
   return { 
@@ -2835,6 +3029,77 @@ input, select, textarea {
   width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
   border-radius: 6px; font-size: 13px; box-sizing: border-box;
 }
+
+/* 多規格花禮卡片設計 */
+.items-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px;
+}
+.items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.items-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: bold;
+}
+.add-item-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+}
+.order-item-card {
+  background: white;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.item-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #3b82f6;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.remove-item-btn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.highlight-field {
+  background-color: #f0fdf4;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+}
+.highlight-field label { color: #15803d; }
+.bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
 
 .bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
 .text-purple { color: #7e22ce; }
@@ -3223,7 +3488,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3237,8 +3502,8 @@ input, select, textarea {
   font-weight: bold;
 }
 .cai-real-stamp-img {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   mix-blend-mode: multiply;
 }
@@ -3280,7 +3545,9 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 */
+/* ====================================================
+   全域精準列印樣式 (純淨 A4 1:1 列印)
+   ==================================================== */
 @media print {
   @page { 
     size: A4 portrait; 
