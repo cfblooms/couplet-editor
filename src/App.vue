@@ -100,12 +100,23 @@
               </div>
             </div>
 
-            <!-- 多組花禮規格設定區塊 -->
+            <!-- 多組花禮規格設定區塊 (可庫存帶入，亦可自由手動輸入) -->
             <div class="items-section mt-3">
               <div class="items-header">
-                <h4>🌸 花禮品項與盆數規格（支援一單多盆、不同株數）</h4>
+                <h4>🌸 花禮品項與盆數規格（支援庫存直接帶入或自由輸入）</h4>
                 <button type="button" class="add-item-btn" @click="addOrderItemRow">＋ 新增一組花禮規格</button>
               </div>
+
+              <!-- 全域蘭花庫存快速選單列表 (datalist) -->
+              <datalist id="inv-flower-select-options">
+                <option 
+                  v-for="f in flowerInventory" 
+                  :key="f.id" 
+                  :value="f.item_name"
+                >
+                  【庫存 {{ f.qty }} 棵】規格: {{ f.spec }} / 成本單價 ${{ f.unit_cost || 0 }}
+                </option>
+              </datalist>
 
               <div 
                 v-for="(item, idx) in formOrder.items" 
@@ -124,9 +135,15 @@
                   </button>
                 </div>
                 <div class="item-grid">
+                  <!-- 品種名稱：可自訂輸入，亦可下拉庫存帶入 -->
                   <div class="field">
-                    <label>品種名稱</label>
-                    <input v-model="item.orchid_name" list="inv-flower-options" placeholder="例: 特選蘭花、大辣椒" />
+                    <label>品種名稱 (可手動輸入或從庫存選取)</label>
+                    <input 
+                      v-model="item.orchid_name" 
+                      list="inv-flower-select-options" 
+                      @change="onFlowerSelectChange(item)"
+                      placeholder="手動輸入或點此選取庫存" 
+                    />
                   </div>
                   <div class="field highlight-field">
                     <label>盆數 (幾盆)</label>
@@ -1074,7 +1091,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (依訂單整合多盆規格) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1550,10 +1567,8 @@ const openLargePhoto = (url, name) => {
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
-  // 若備註或規格包含 JSON 格式的多品項
   const specText = String(ord.spec || '')
-  if (specText.includes('盆')) {
-    // 將多個規格組合整理為簡潔中文
+  if (specText.includes(';')) {
     const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
     if (parts.length > 0) {
       const parsedParts = parts.map(p => {
@@ -1583,7 +1598,6 @@ const getOrderTotalPots = (ord) => {
   const searchStr = `${ord.note || ''} ${ord.spec || ''}`
   const matches = [...searchStr.matchAll(/(\d+)\s*盆/g)]
   if (matches.length > 0) {
-    // 加總所有找到的盆數
     const sum = matches.reduce((total, m) => total + (parseInt(m[1]) || 0), 0)
     return sum > 0 ? sum : 1
   }
@@ -1639,9 +1653,7 @@ const formRet = ref({
   reason: '運送碰撞 / 開花不良'
 })
 
-// ==========================================
-// 訂單表單：支援多組不同盆數與株數
-// ==========================================
+// 訂單表單：支援多組花禮規格
 const formOrder = ref({
   cust_type: '批發',
   customer: '',
@@ -1659,26 +1671,34 @@ const formOrder = ref({
   payment_status: '未結',
   order_date: new Date().toISOString().split('T')[0],
   expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-  // 核心：多組花禮規格陣列
   items: [
     {
       orchid_name: '特選蘭花',
       pots_qty: 1,
-      stalks: 6,
-      unit_price: 250,
-      pot: '桌上盆 (100)',
-      quick_pot: '未使用'
-    },
-    {
-      orchid_name: '特選蘭花',
-      pots_qty: 2,
       stalks: 10,
       unit_price: 250,
-      pot: '落地陶瓷盆-喜 (200)',
+      pot: '桌上盆 (100)',
       quick_pot: '未使用'
     }
   ]
 })
+
+// 庫存選單選取後的智慧帶入
+const onFlowerSelectChange = (item) => {
+  if (!item.orchid_name) return
+  // 查找進貨庫存區中是否有完全相符或包含該名稱的蘭花庫存
+  const matchedInv = inventoryList.value.find(i => 
+    i.category === '蘭花' && i.item_name === item.orchid_name
+  )
+  if (matchedInv) {
+    // 若該庫存有單株建議價格或進貨價，自動建議參考單價
+    const refCost = matchedInv.unit_cost || (matchedInv.qty ? Math.round(matchedInv.cost / matchedInv.qty) : 0)
+    if (refCost > 0 && item.unit_price <= 0) {
+      item.unit_price = Math.round(refCost * 2) // 預設建議售價
+    }
+  }
+  calcOrderPrice()
+}
 
 // 新增一組花禮規格
 const addOrderItemRow = () => {
@@ -1701,6 +1721,7 @@ const removeOrderItemRow = (idx) => {
   }
 }
 
+// 庫存過濾出蘭花品種列表供直接選取
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 // ==========================================
@@ -1753,7 +1774,6 @@ const onOrderCustSelect = () => {
 const startEditOrder = (ord) => {
   editingOrderId.value = ord.id
   
-  // 安全反解 spec 為 items 列表
   const parsedItems = []
   const specText = String(ord.spec || '')
   if (specText.includes(';')) {
@@ -1834,17 +1854,9 @@ const cancelEditOrder = () => {
       {
         orchid_name: '特選蘭花',
         pots_qty: 1,
-        stalks: 6,
-        unit_price: 250,
-        pot: '桌上盆 (100)',
-        quick_pot: '未使用'
-      },
-      {
-        orchid_name: '特選蘭花',
-        pots_qty: 2,
         stalks: 10,
         unit_price: 250,
-        pot: '落地陶瓷盆-喜 (200)',
+        pot: '桌上盆 (100)',
         quick_pot: '未使用'
       }
     ]
@@ -1854,7 +1866,6 @@ const cancelEditOrder = () => {
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
-  // 將各組品項轉換為結構化規格字串
   const specParts = formOrder.value.items.map(item => {
     const p = Number(item.pots_qty) || 1
     const s = Number(item.stalks) || 1
@@ -1886,7 +1897,6 @@ const saveOrder = async () => {
     expected_date: formOrder.value.expected_date
   }
 
-  // 標記運費與總盆數至備註
   const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
   const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee}元]`
   if (!payload.note.includes(metaTag)) {
@@ -2017,6 +2027,7 @@ const exportStatementExcel = () => {
     '客戶名稱': o.customer,
     '總盆數': getOrderTotalPots(o),
     '品項與規格': o.spec,
+    '盆器': o.pot,
     '運費': getOrderShippingFee(o),
     '售價(元)': o.price,
     '出貨狀態': o.shipped_status,
@@ -2056,7 +2067,7 @@ const receiptForm = ref({
   deliveryDate: '115-09-03 送達',
   recipient: '永全證券 陳柏榮總經理 (0912-345678)',
   address: '桃園市桃園區縣府路 82 號 1 樓',
-  item: '特選蘭花 6株 1盆、特選蘭花 10株 2盆（共3盆）',
+  item: '特選蘭花 1盆',
   giver: '敬領 誌慶 / 宸豐蘭藝 敬製',
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
@@ -2322,6 +2333,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
+  ctx.strokeStyle = '#000000'
   ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
