@@ -1171,12 +1171,11 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (線上簽名 ＋ 簽好直接回傳下單人) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
 
-        <!-- 快速帶入 -->
         <div class="panel-section highlight-panel">
           <label class="section-title">依訂單編號快速帶入：</label>
           <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
@@ -1187,7 +1186,6 @@
           </select>
         </div>
 
-        <!-- 現場客戶手機/手寫線上簽名區 -->
         <div class="panel-section live-sign-panel">
           <div class="section-title-with-weight">
             <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
@@ -1269,7 +1267,6 @@
           </div>
         </div>
 
-        <!-- 一鍵傳送給下單客戶（含收件人簽名） -->
         <button 
           type="button" 
           class="line-action-btn mt-2" 
@@ -1288,7 +1285,6 @@
         </button>
       </div>
 
-      <!-- 右側預覽區 (現場簽名會即時顯示於簽名欄) -->
       <div class="receipt-preview-area" ref="receiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
@@ -1616,8 +1612,55 @@ const shareModalTitle = ref('')
 
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2b2ZyamliZGV6Ynl4eG11dG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMzQ2ODMsImV4cCI6MjEwNDcxMDY4M30.di9AXuYBtuSDL1upSKQ48-U0y9PN-TtFEYivmgJgbEQ'
+const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+// ==========================================
+// 蔡鎮遠印章：全裝置雲端同步機制 (修復缺失的 fetchSealFromCloud)
+// ==========================================
+const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
+const activeCaiSealSrc = computed(() => {
+  return userCustomSeal.value || '/cai-seal.png'
+})
+
+const fetchSealFromCloud = async () => {
+  try {
+    const { data } = await supabase.from('system_settings').select('value').eq('key', 'cai_seal_img').single()
+    if (data && data.value) {
+      userCustomSeal.value = data.value
+      localStorage.setItem('user_cai_seal_img', data.value)
+    }
+  } catch (err) {
+    // 尚未建立設定表時靜默跳過
+  }
+}
+
+const triggerLocalSealPicker = () => {
+  document.getElementById('local-seal-picker')?.click()
+}
+
+const onSelectLocalSeal = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = async (event) => {
+    const base64Data = event.target.result
+    userCustomSeal.value = base64Data
+    localStorage.setItem('user_cai_seal_img', base64Data)
+
+    try {
+      await supabase.from('system_settings').upsert({
+        key: 'cai_seal_img',
+        value: base64Data,
+        updated_at: new Date()
+      })
+      showToast('✅ 印章已成功上傳至雲端！所有手機與平板打開均會自動同步！')
+    } catch (err) {
+      showToast('✅ 印章已在本機生效！')
+    }
+  }
+  reader.readAsDataURL(file)
+}
 
 // ----------------- 頁面分頁控制 -----------------
 const currentTab = ref('manage')
@@ -1796,8 +1839,11 @@ const removeOrderItemRow = (idx) => {
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
 const loadOrders = async () => {
-  const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
-  if (data) orderList.value = data
+  const { data } = await supabase.from('orders').select('*')
+  if (data) {
+    // 前端自動依日期由新到舊排序
+    orderList.value = data.sort((a, b) => new Date(b.created_at || b.order_date) - new Date(a.created_at || a.order_date))
+  }
 }
 
 const calcOrderPrice = () => {
@@ -2317,7 +2363,6 @@ const drawWrappedText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) =>
       currentY += lineHeight
       linesCount++
       if (linesCount > maxLines) {
-        // 超過行數加省略號
         ctx.fillText('...', x + maxWidth - 20, currentY - lineHeight)
         return
       }
@@ -2328,7 +2373,7 @@ const drawWrappedText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) =>
   ctx.fillText(line, x, currentY)
 }
 
-// 產生簽收單高畫質圖片供回傳下單客戶（解決文字壓格問題）
+// 產生簽收單高畫質圖片供回傳下單客戶
 const shareReceiptToBuyerDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2342,25 +2387,21 @@ const shareReceiptToBuyerDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  // 抬頭花店名
   ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
-  // 主標題
   ctx.fillStyle = '#dc2626'
   ctx.font = `bold 22px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
-  // 右上角單號與日期
   ctx.fillStyle = '#334155'
   ctx.font = `13px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
 
-  // 頂部分隔線
   ctx.lineWidth = 2.5
   ctx.strokeStyle = '#1e293b'
   ctx.beginPath()
@@ -2368,16 +2409,13 @@ const shareReceiptToBuyerDirect = () => {
   ctx.lineTo(749, 80)
   ctx.stroke()
 
-  // 表格尺寸設定
   const tLeft = 45, tTop = 95, tWidth = 704
   const rowHeight = 75
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#334155'
 
-  // 外框
   ctx.strokeRect(tLeft, tTop, tWidth, rowHeight * 4)
 
-  // 內部橫線
   for (let i = 1; i <= 3; i++) {
     ctx.beginPath()
     ctx.moveTo(tLeft, tTop + rowHeight * i)
@@ -2385,25 +2423,19 @@ const shareReceiptToBuyerDirect = () => {
     ctx.stroke()
   }
 
-  // 垂直分割線 (精確配比，留足空間給收件人與電話)
-  // [標籤 110px] [收件人 260px] [標籤 90px] [地址 244px]
   const col1W = 110
   const col2W = 260
   const col3W = 90
 
   ctx.beginPath()
-  // 第 1 欄右側線 (收件單位/人標籤右側)
   ctx.moveTo(tLeft + col1W, tTop)
   ctx.lineTo(tLeft + col1W, tTop + rowHeight * 4)
-  // 第 2 欄右側線 (收件人內容右側)
   ctx.moveTo(tLeft + col1W + col2W, tTop)
   ctx.lineTo(tLeft + col1W + col2W, tTop + rowHeight)
-  // 第 3 欄右側線 (送達地址標籤右側)
   ctx.moveTo(tLeft + col1W + col2W + col3W, tTop)
   ctx.lineTo(tLeft + col1W + col2W + col3W, tTop + rowHeight)
   ctx.stroke()
 
-  // 標籤欄底色 (灰色)
   ctx.fillStyle = '#f1f5f9'
   ctx.fillRect(tLeft + 1, tTop + 1, col1W - 2, rowHeight - 2)
   ctx.fillRect(tLeft + col1W + col2W + 1, tTop + 1, col3W - 2, rowHeight - 2)
@@ -2411,7 +2443,6 @@ const shareReceiptToBuyerDirect = () => {
   ctx.fillRect(tLeft + 1, tTop + rowHeight * 2 + 1, col1W - 2, rowHeight - 2)
   ctx.fillRect(tLeft + 1, tTop + rowHeight * 3 + 1, col1W - 2, rowHeight - 2)
 
-  // 填寫欄位標籤
   ctx.fillStyle = '#1e293b'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -2422,37 +2453,30 @@ const shareReceiptToBuyerDirect = () => {
   ctx.fillText('致贈/賀詞', tLeft + col1W / 2, tTop + rowHeight * 2.5)
   ctx.fillText('備註說明', tLeft + col1W / 2, tTop + rowHeight * 3.5)
 
-  // 填寫欄位數值 (已套用自動換行，絕不壓到旁邊格子)
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
 
-  // 1. 收件人與電話 (限制在 col2W - 24px 寬度內，太長自動換行，絕不越界)
   ctx.fillStyle = '#0f172a'
   ctx.font = `bold 15px ${fontFam}`
   drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 20, col2W - 24, 22, 2)
 
-  // 2. 送達地址 (限制在右邊格子寬度內自動換行)
   ctx.fillStyle = '#334155'
   ctx.font = `14px ${fontFam}`
   const addrWidth = tWidth - (col1W + col2W + col3W) - 24
   drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 20, addrWidth, 20, 2)
 
-  // 3. 花禮品項
   ctx.fillStyle = '#1e3a8a'
   ctx.font = `bold 16px ${fontFam}`
   drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 26, tWidth - col1W - 24, 24, 2)
 
-  // 4. 致贈/賀詞
   ctx.fillStyle = '#111827'
   ctx.font = `15px ${fontFam}`
   drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 26, tWidth - col1W - 24, 22, 2)
 
-  // 5. 備註說明
   ctx.fillStyle = '#475569'
   ctx.font = `13.5px ${fontFam}`
   drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 26, tWidth - col1W - 24, 20, 2)
 
-  // 底部說明區
   ctx.fillStyle = '#334155'
   ctx.font = `14px ${fontFam}`
   ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
@@ -2460,7 +2484,6 @@ const shareReceiptToBuyerDirect = () => {
   ctx.fillStyle = '#64748b'
   ctx.fillText('※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465)
 
-  // 客戶簽名方框
   const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#475569'
@@ -2474,7 +2497,6 @@ const shareReceiptToBuyerDirect = () => {
   ctx.font = `bold 12px ${fontFam}`
   ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 12)
 
-  // 繪製手寫簽名
   const finishShare = () => {
     const filename = `已簽收單據_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
     shareOrCopyCanvasBlob(canvas, filename, '簽收單據回傳', '已簽名單據準備完成')
@@ -2580,7 +2602,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
-// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -3001,334 +3022,7 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// ==========================================
-// 9. 花卡 / 輓聯編輯器
-// ==========================================
-const isVertical = ref(true)
-const cardCategory = ref('funeral')
-const zoomLevel = ref(0.7)
-const viewportRef = ref(null)
-
-const cardFontFamily = ref('kai')
-
-const upperPrefix = ref('敬悼')
-const upperTarget = ref('陳媽李老夫人')
-const upperSuffix = ref('千古')
-
-const middleText = ref('母儀千古')
-const suffixText = ref('敬輓')
-
-const funeralUpperFormat = ref('X媽X老夫人')
-const celebrationType = ref('opening')
-const celebPrefix = ref('恭祝')
-const celebTarget = ref('鴻運實業有限公司')
-
-const gender = ref('female')
-const ageStage = ref('f_over80')
-
-const weights = ref({
-  upper_prefix: '600',
-  upper_target: '700',
-  upper_suffix: '600',
-  middle: '800',
-  bottom_0: '600',
-  bottom_1: '700',
-  bottom_2: '600',
-  bottom_3: '600',
-  bottom_4: '600',
-  bottom_5: '600',
-  suffix: '700'
-})
-
-const getWeightStyle = (wVal) => {
-  const w = String(wVal || '600')
-  const styles = { fontWeight: w }
-  if (w === '500') {
-    styles.textShadow = '0 0 0.4px #000'
-  } else if (w === '600') {
-    styles.textShadow = '0 0 0.8px #000'
-  } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
-  } else if (w === '800') {
-    styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
-  }
-  return styles
-}
-
-const fontMapping = {
-  kai: '"TW-Kai", "DFKai-SB", "BiauKai", "Kaiti", serif',
-  notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
-  fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
-  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif',
-  systemkai: '"BiauKai", "DFKai-SB", "TW-Kai", serif'
-}
-
-const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
-
-const bottomLines = ref([
-  { text: '桃園市議會' },
-  { text: '議員 李宗豪' },
-  { text: '' },
-  { text: '' },
-  { text: '' },
-  { text: '' }
-])
-const getPlaceholder = (idx) => [
-  '第 1 格（例：單位 / 公司）',
-  '第 2 格（例：職稱姓名 1）',
-  '第 3 格（自訂聯名人 2）',
-  '第 4 格（自訂）',
-  '第 5 格（自訂）',
-  '第 6 格（自訂）'
-][idx]
-
-const funeralPhrases = {
-  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
-  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
-  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
-  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
-  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
-  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
-  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
-}
-const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
-
-const celebPhrases = {
-  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
-  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
-  temple: ['聖誕千秋', '神威顯赫']
-}
-const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
-
-const parsedUpperTargetTokens = computed(() => {
-  const chars = upperTarget.value.split('')
-  return chars.map(char => ({
-    char,
-    isSmall: char === '媽'
-  }))
-})
-
-const maFontSize = computed(() => {
-  const baseSize = layout.value.upper_target?.size || 40
-  return Math.max(12, baseSize - 20)
-})
-
-const defaultVertical = {
-  upper_prefix: { x: 620, y: 100, size: 36 },
-  upper_target: { x: 620, y: 220, size: 42 },
-  upper_suffix: { x: 620, y: 720, size: 36 },
-  middle:       { x: 330, y: 220, size: 84 },
-  bottom_0:     { x: 155, y: 520, size: 30 },
-  bottom_1:     { x: 155, y: 680, size: 36 },
-  bottom_2:     { x: 95,  y: 520, size: 30 },
-  bottom_3:     { x: 95,  y: 680, size: 32 },
-  bottom_4:     { x: 40,  y: 520, size: 30 },
-  bottom_5:     { x: 40,  y: 680, size: 30 },
-  suffix:       { x: 155, y: 920, size: 34 }
-}
-
-const defaultHorizontal = {
-  upper_prefix: { x: 120, y: 90,  size: 34 },
-  upper_target: { x: 230, y: 90,  size: 38 },
-  upper_suffix: { x: 600, y: 90,  size: 34 },
-  middle:       { x: 220, y: 260, size: 76 },
-  bottom_0:     { x: 340, y: 400, size: 28 },
-  bottom_1:     { x: 340, y: 460, size: 32 },
-  bottom_2:     { x: 340, y: 520, size: 28 },
-  bottom_3:     { x: 340, y: 580, size: 28 },
-  bottom_4:     { x: 340, y: 640, size: 28 },
-  bottom_5:     { x: 340, y: 700, size: 28 },
-  suffix:       { x: 620, y: 490, size: 34 }
-}
-
-const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
-
-const switchOrientation = (vertical) => {
-  isVertical.value = vertical
-  resetPositions()
-  nextTick(() => autoFitZoom())
-}
-const resetPositions = () => {
-  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
-}
-
-const getStyle = (key) => {
-  const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
-  const weight = weights.value[key] || '600'
-  return { 
-    left: `${item.x}px`, 
-    top: `${item.y}px`, 
-    fontSize: `${item.size}px`,
-    ...getWeightStyle(weight)
-  }
-}
-
-const getUpperTargetBoxStyle = () => {
-  const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 620, y: 220, size: 42 }
-  const weight = weights.value.upper_target || '700'
-  return {
-    left: `${item.x}px`,
-    top: `${item.y}px`,
-    fontSize: `${item.size}px`,
-    ...getWeightStyle(weight)
-  }
-}
-
-const autoFitZoom = () => {
-  if (!viewportRef.value) return
-  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
-  const cardWidth = isVertical.value ? 794 : 1123
-  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
-}
-
-let activeKey = null
-let currentAction = null
-let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
-
-const startMove = (e, key) => {
-  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
-  originX = layout.value[key].x; originY = layout.value[key].y
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const startResize = (e, key) => {
-  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
-  originSize = layout.value[key].size
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const onPointerMove = (e) => {
-  if (!activeKey || !layout.value[activeKey]) return
-  const dx = (e.clientX - startX) / zoomLevel.value
-  const dy = (e.clientY - startY) / zoomLevel.value
-  if (currentAction === 'move') {
-    layout.value[activeKey].x = Math.round(originX + dx)
-    layout.value[activeKey].y = Math.round(originY + dy)
-  } else if (currentAction === 'resize') {
-    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
-  }
-}
-const onPointerUp = () => {
-  activeKey = null; currentAction = null
-  window.removeEventListener('pointermove', onPointerMove)
-  window.removeEventListener('pointerup', onPointerUp)
-}
-
-watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
-
-const onFuneralFormatChange = () => {
-  if (funeralUpperFormat.value !== 'custom') {
-    upperTarget.value = funeralUpperFormat.value
-  }
-}
-
-const onCardCategoryChange = () => {
-  if (cardCategory.value === 'funeral') {
-    upperPrefix.value = '敬悼'
-    upperSuffix.value = '千古'
-    suffixText.value = '敬輓'
-    middleText.value = currentFuneralPhrases.value[0] || '母儀千古'
-  } else {
-    upperPrefix.value = '恭祝'
-    upperSuffix.value = '誌慶'
-    suffixText.value = '敬賀'
-    middleText.value = currentCelebPhrases.value[0] || '開幕誌慶'
-  }
-}
-const onCelebrationTypeChange = () => {
-  middleText.value = currentCelebPhrases.value[0] || ''
-}
-
-const printCouplet = () => {
-  nextTick(() => {
-    window.print()
-  })
-}
-
-// 產生花卡高畫質圖片
-const shareCoupletToLineDirect = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
-
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
-
-  ctx.fillStyle = '#000000'
-  const targetFontFamily = activeCssFontFamily.value
-
-  const drawTextItem = (text, item, isVertMode, weightVal, isUpperTarget = false) => {
-    if (!text || !item) return
-    ctx.textBaseline = 'top'
-    const w = String(weightVal || '600')
-    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
-    const sWidth = strokeWidthMap[w] || 0.8
-
-    if (isVertMode) {
-      let currentY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpperTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, item.x + offsetX, currentY)
-        }
-        ctx.fillText(char, item.x + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = item.x
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpperTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, currentX, item.y + offsetY)
-        }
-        ctx.fillText(char, currentX, item.y + offsetY)
-        currentX += curSize + 4
-      })
-    }
-  }
-
-  drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
-  drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
-  drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
-
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
-}
-
-// 雲端字型預載入
+// 雲端字型預載入與資料載入
 onMounted(() => {
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
@@ -4018,7 +3712,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -4075,7 +3769,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 (純淨 A4 1:1 列印) */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
