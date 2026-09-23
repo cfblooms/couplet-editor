@@ -35,7 +35,7 @@
       </div>
     </header>
 
-    <!-- 浮動提示橫條 (取代會中斷剪貼簿的系統 alert) -->
+    <!-- 浮動提示橫條 -->
     <div v-if="toastMessage" class="floating-toast no-print">
       {{ toastMessage }}
     </div>
@@ -841,31 +841,21 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (每個格子獨立粗細控制) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
+        <!-- 全域字體選單 -->
         <div class="panel-section">
-          <label class="section-title">字體與粗細設定：</label>
+          <label class="section-title">字體選擇：</label>
           <div class="form-group">
-            <label>選擇字體 (手機/平板/電腦均完美支援)：</label>
-            <select v-model="cardFontFamily">
+            <select v-model="cardFontFamily" class="full-input">
               <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
               <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
               <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
               <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
               <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>文字粗細 (字重)：</label>
-            <select v-model="cardFontWeight">
-              <option value="400">標準 (Regular 400)</option>
-              <option value="500">中等 (Medium 500)</option>
-              <option value="600">半粗體 (Semi-Bold 600)</option>
-              <option value="700">粗體 (Bold 700)</option>
-              <option value="800">特粗體 (Extra-Bold 800)</option>
             </select>
           </div>
         </div>
@@ -886,9 +876,20 @@
           </select>
         </div>
 
-        <template v-if="cardCategory === 'funeral'">
-          <div class="panel-section">
-            <label class="section-title">上款稱謂組合：</label>
+        <!-- 上款獨立設定（文字 ＋ 粗細） -->
+        <div class="panel-section">
+          <div class="section-title-with-weight">
+            <label class="section-title">上款設定：</label>
+            <select v-model="weights.upper" class="mini-weight-select" title="設定上款粗細">
+              <option value="400">400 (標準)</option>
+              <option value="500">500 (中等)</option>
+              <option value="600">600 (半粗)</option>
+              <option value="700">700 (粗體)</option>
+              <option value="800">800 (特粗)</option>
+            </select>
+          </div>
+
+          <template v-if="cardCategory === 'funeral'">
             <div class="form-row">
               <select v-model="funeralUpperFormat" @change="buildFuneralUpper">
                 <option value="敬悼 X媽X老夫人">敬悼 X媽X老夫人</option>
@@ -909,11 +910,40 @@
                 <option value="蓮前">蓮前</option>
               </select>
             </div>
-            <input type="text" v-model="upperText" class="full-input mt-2" placeholder="上款文字" />
+          </template>
+
+          <template v-else>
+            <div class="form-row">
+              <select v-model="celebrationType" @change="onCelebrationTypeChange">
+                <option value="opening">開幕</option>
+                <option value="moving">搬家</option>
+                <option value="temple">宮廟</option>
+              </select>
+              <select v-model="celebPrefix" @change="buildCelebrationUpper">
+                <option value="恭祝">恭祝</option>
+                <option value="恭賀">恭賀</option>
+              </select>
+              <input type="text" v-model="celebTarget" @input="buildCelebrationUpper" placeholder="受禮對象" />
+            </div>
+          </template>
+          
+          <input type="text" v-model="upperText" class="full-input mt-2" placeholder="上款文字" />
+        </div>
+
+        <!-- 中款獨立設定（文字 ＋ 粗細） -->
+        <div class="panel-section">
+          <div class="section-title-with-weight">
+            <label class="section-title">中款詞語：</label>
+            <select v-model="weights.middle" class="mini-weight-select" title="設定中款粗細">
+              <option value="400">400 (標準)</option>
+              <option value="500">500 (中等)</option>
+              <option value="600">600 (半粗)</option>
+              <option value="700">700 (粗體)</option>
+              <option value="800">800 (特粗)</option>
+            </select>
           </div>
 
-          <div class="panel-section">
-            <label class="section-title">中款常用語 (身分與年齡)：</label>
+          <template v-if="cardCategory === 'funeral'">
             <div class="radio-row">
               <label><input type="radio" value="female" v-model="gender" /> 女性</label>
               <label><input type="radio" value="male" v-model="gender" /> 男性</label>
@@ -942,30 +972,9 @@
                 {{ phrase }}
               </button>
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款詞語" />
-          </div>
-        </template>
+          </template>
 
-        <template v-else>
-          <div class="panel-section">
-            <label class="section-title">慶賀細項：</label>
-            <select v-model="celebrationType" class="full-input" @change="onCelebrationTypeChange">
-              <option value="opening">開幕</option>
-              <option value="moving">搬家</option>
-              <option value="temple">宮廟</option>
-            </select>
-            <div class="form-row mt-2">
-              <select v-model="celebPrefix" @change="buildCelebrationUpper">
-                <option value="恭祝">恭祝</option>
-                <option value="恭賀">恭賀</option>
-              </select>
-              <input type="text" v-model="celebTarget" @input="buildCelebrationUpper" placeholder="受禮對象" />
-            </div>
-            <input type="text" v-model="upperText" class="full-input mt-2" placeholder="上款文字" />
-          </div>
-
-          <div class="panel-section">
-            <label class="section-title">中款詞語：</label>
+          <template v-else>
             <div class="tags-container">
               <button 
                 type="button" 
@@ -977,20 +986,38 @@
                 {{ phrase }}
               </button>
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款詞語" />
-          </div>
-        </template>
+          </template>
 
+          <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款詞語" />
+        </div>
+
+        <!-- 下款 6 格獨立設定（每格各別控制粗細） -->
         <div class="panel-section">
-          <label class="section-title">下款設定（共 6 格自由填寫，空白不印出）：</label>
+          <label class="section-title">下款設定（每個格子可個別選擇粗細）：</label>
           <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
             <span class="line-num">格 {{ idx + 1 }}</span>
-            <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" />
+            <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
+            <select v-model="weights['bottom_' + idx]" class="mini-weight-select" title="設定此格粗細">
+              <option value="400">400</option>
+              <option value="500">500</option>
+              <option value="600">600</option>
+              <option value="700">700</option>
+              <option value="800">800</option>
+            </select>
           </div>
 
           <div class="form-group mt-2">
-            <label>結尾敬詞：</label>
-            <select v-model="suffixText">
+            <div class="section-title-with-weight">
+              <label class="section-title">結尾敬詞：</label>
+              <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
+                <option value="400">400 (標準)</option>
+                <option value="500">500 (中等)</option>
+                <option value="600">600 (半粗)</option>
+                <option value="700">700 (粗體)</option>
+                <option value="800">800 (特粗)</option>
+              </select>
+            </div>
+            <select v-model="suffixText" class="full-input">
               <option value="敬輓">敬輓</option>
               <option value="泣輓">泣輓</option>
               <option value="拜輓">拜輓</option>
@@ -1033,8 +1060,7 @@
             :style="{
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'top left',
-              fontFamily: activeCssFontFamily,
-              fontWeight: cardFontWeight
+              fontFamily: activeCssFontFamily
             }"
           >
             <!-- 上款 -->
@@ -1169,7 +1195,6 @@
           </div>
         </div>
 
-        <!-- 升級版 LINE 傳送按鈕 -->
         <button 
           type="button" 
           class="line-action-btn mt-2" 
@@ -1496,7 +1521,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
-// 浮動通知提示 (取代中斷操作的 alert)
+// 浮動通知提示
 const toastMessage = ref('')
 let toastTimer = null
 const showToast = (msg) => {
@@ -2038,7 +2063,8 @@ const exportStatementExcel = () => {
     '客戶名稱': o.customer,
     '總盆數': getOrderTotalPots(o),
     '品項與規格': o.spec,
-    '運費': getOrderShippingFee(o),
+    '盆器': o.pot,
+    '額外運費': getOrderShippingFee(o),
     '售價(元)': o.price,
     '出貨狀態': o.shipped_status,
     '收款狀態': o.payment_status
@@ -2129,13 +2155,12 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 核心多功能圖片傳送函式 (解決電腦版 LINE 無法貼上與中斷問題)
+// 核心多功能圖片傳送函式
 const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
   canvas.toBlob(async (blob) => {
     if (!blob) return alert('圖片生成失敗，請重試！')
     const file = new File([blob], filename, { type: 'image/png' })
 
-    // 手機/平板原生分享通道
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -2148,14 +2173,11 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
-    // 電腦端雙保險通道：自動下載圖檔 + 寫入剪貼簿
-    // 1. 自動觸發下載 (讓使用者可以直接拖曳到 LINE)
     const downloadLink = document.createElement('a')
     downloadLink.download = filename
     downloadLink.href = canvas.toDataURL('image/png')
     downloadLink.click()
 
-    // 2. 寫入剪貼簿 (讓使用者可以直接在 LINE 按 Ctrl + V)
     let copiedToClipboard = false
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
@@ -2164,11 +2186,10 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
         ])
         copiedToClipboard = true
       } catch (err) {
-        console.warn('剪貼簿寫入受阻，已啟用自動下載備案', err)
+        console.warn('剪貼簿寫入受阻', err)
       }
     }
 
-    // 顯示友善不中斷操作的提示
     if (copiedToClipboard) {
       showToast(`📋 ${successMsg}！\n已複製到剪貼簿，並已自動下載圖檔！請在電腦 LINE 聊天室按 Ctrl + V (或直接拖曳圖片) 傳送！`)
     } else {
@@ -2191,25 +2212,21 @@ const shareReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  // 抬頭花店名
   ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
-  // 主標題
   ctx.fillStyle = '#dc2626'
   ctx.font = `bold 22px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
-  // 右上角單號與日期
   ctx.fillStyle = '#334155'
   ctx.font = `13px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
 
-  // 頂部分隔線
   ctx.lineWidth = 2.5
   ctx.strokeStyle = '#1e293b'
   ctx.beginPath()
@@ -2387,72 +2404,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 
 const printFarmerReceipt = () => window.print()
-
-// 產生花卡高畫質圖片
-const shareCoupletToLineDirect = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
-
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
-
-  ctx.fillStyle = '#000000'
-  const targetFontFamily = activeCssFontFamily.value
-  const targetWeight = cardFontWeight.value
-
-  const drawTextItem = (text, item, isVertMode, isUpper = false) => {
-    if (!text || !item) return
-    ctx.textBaseline = 'top'
-    if (isVertMode) {
-      let currentY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        ctx.fillText(char, item.x + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = item.x
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${targetWeight} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        ctx.fillText(char, currentX, item.y + offsetY)
-        currentX += curSize + 4
-      })
-    }
-  }
-
-  drawTextItem(upperText.value, layout.value.upper, isVertical.value, true)
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value)
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value)
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value)
-
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
-}
 
 // 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
@@ -2877,7 +2828,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器 (每個格子支援獨立粗細，400~800肉眼可見差異)
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2885,8 +2836,37 @@ const zoomLevel = ref(0.7)
 const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
-const cardFontWeight = ref('700')
 
+// 每個格子獨立的字重 (預設中款 800特粗，其餘 600半粗/700粗體)
+const weights = ref({
+  upper: '600',
+  middle: '800',
+  bottom_0: '600',
+  bottom_1: '700',
+  bottom_2: '600',
+  bottom_3: '600',
+  bottom_4: '600',
+  bottom_5: '600',
+  suffix: '700'
+})
+
+// 階梯式文字加粗陰影 (解決中文字體無對應字重時看起來完全一樣的問題)
+const getWeightStyle = (wVal) => {
+  const w = String(wVal || '600')
+  const styles = { fontWeight: w }
+  if (w === '500') {
+    styles.textShadow = '0 0 0.4px #000'
+  } else if (w === '600') {
+    styles.textShadow = '0 0 0.8px #000'
+  } else if (w === '700') {
+    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
+  } else if (w === '800') {
+    styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
+  }
+  return styles
+}
+
+// 全平台通用字體
 const fontMapping = {
   kai: '"TW-Kai", "DFKai-SB", "BiauKai", "Kaiti", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -2991,21 +2971,23 @@ const resetPositions = () => {
 
 const getStyle = (key) => {
   const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
+  const weight = weights.value[key] || '600'
   return { 
     left: `${item.x}px`, 
     top: `${item.y}px`, 
     fontSize: `${item.size}px`,
-    fontWeight: cardFontWeight.value
+    ...getWeightStyle(weight)
   }
 }
 
 const getUpperBoxStyle = () => {
   const item = (layout.value && layout.value.upper) ? layout.value.upper : { x: 620, y: 120, size: 40 }
+  const weight = weights.value.upper || '600'
   return {
     left: `${item.x}px`,
     top: `${item.y}px`,
     fontSize: `${item.size}px`,
-    fontWeight: cardFontWeight.value
+    ...getWeightStyle(weight)
   }
 }
 
@@ -3071,6 +3053,88 @@ const printCouplet = () => {
   })
 }
 
+// 產生花卡高畫質圖片 (支援每個格子獨立粗細與描邊)
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+
+  const drawTextItem = (text, item, isVertMode, weightVal, isUpper = false) => {
+    if (!text || !item) return
+    ctx.textBaseline = 'top'
+    const w = String(weightVal || '600')
+    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
+    const sWidth = strokeWidthMap[w] || 0.8
+
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, item.x + offsetX, currentY)
+        }
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, currentX, item.y + offsetY)
+        }
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, weights.value.upper, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
+
+// 雲端字型預載入
 onMounted(() => {
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
@@ -3088,7 +3152,6 @@ onMounted(() => {
         font-family: 'TW-Kai';
         src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
         font-weight: 400;
-        font-style: normal;
         font-display: swap;
       }
     `
@@ -3122,7 +3185,7 @@ onMounted(() => {
   background-color: #f1f5f9;
 }
 
-/* 浮動提示橫條 (不阻擋操作) */
+/* 浮動提示橫條 */
 .floating-toast {
   position: fixed;
   top: 60px;
@@ -3377,12 +3440,33 @@ input, select, textarea {
   height: calc(100vh - 52px);
 }
 .control-panel {
-  width: 380px; background: white; padding: 16px;
+  width: 390px; background: white; padding: 16px;
   box-shadow: 2px 0 10px rgba(0,0,0,0.06); overflow-y: auto; flex-shrink: 0;
 }
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
+
+/* 每個格子獨立粗細選單樣式 */
+.section-title-with-weight {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.mini-weight-select {
+  width: auto !important;
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  color: #1e3a8a !important;
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  border-radius: 4px !important;
+}
+.flex-input {
+  flex: 1;
+}
 
 /* 雲端印章面板 */
 .stamp-select-panel {
