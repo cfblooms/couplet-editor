@@ -40,6 +40,24 @@
       {{ toastMessage }}
     </div>
 
+    <!-- 圖片傳送專用彈窗（可直接右鍵複製或拖進LINE） -->
+    <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
+      <div class="image-modal-content share-preview-modal" @click.stop>
+        <div class="image-modal-header">
+          <span>💬 {{ shareModalTitle }}（可直接按右鍵複製圖片）</span>
+          <button class="close-modal-btn" @click="shareModalImg = ''">✕</button>
+        </div>
+        <div class="share-modal-body">
+          <img :src="shareModalImg" class="share-preview-img" alt="傳送預覽圖" />
+          <div class="share-tips-row">
+            <span>💡 <b>電腦版 LINE 傳送方式：</b></span>
+            <span>1. 剛才已自動下載圖檔，可直接把圖檔<b>拖曳進 LINE</b>。</span>
+            <span>2. 或在此圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 發送。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ================= 模式 1：蘭花管理系統 ================= -->
     <div v-if="currentTab === 'manage'" class="manage-container no-print">
       <nav class="sub-nav">
@@ -841,12 +859,11 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (每個格子獨立粗細控制) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
-        <!-- 全域字體選單 -->
         <div class="panel-section">
           <label class="section-title">字體選擇：</label>
           <div class="form-group">
@@ -876,7 +893,7 @@
           </select>
         </div>
 
-        <!-- 上款獨立設定（文字 ＋ 粗細） -->
+        <!-- 上款獨立設定 -->
         <div class="panel-section">
           <div class="section-title-with-weight">
             <label class="section-title">上款設定：</label>
@@ -930,7 +947,7 @@
           <input type="text" v-model="upperText" class="full-input mt-2" placeholder="上款文字" />
         </div>
 
-        <!-- 中款獨立設定（文字 ＋ 粗細） -->
+        <!-- 中款獨立設定 -->
         <div class="panel-section">
           <div class="section-title-with-weight">
             <label class="section-title">中款詞語：</label>
@@ -991,7 +1008,7 @@
           <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款詞語" />
         </div>
 
-        <!-- 下款 6 格獨立設定（每格各別控制粗細） -->
+        <!-- 下款 6 格獨立粗細設定 -->
         <div class="panel-section">
           <label class="section-title">下款設定（每個格子可個別選擇粗細）：</label>
           <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
@@ -1531,6 +1548,10 @@ const showToast = (msg) => {
     toastMessage.value = ''
   }, 4500)
 }
+
+// 圖片分享專用彈窗
+const shareModalImg = ref('')
+const shareModalTitle = ref('')
 
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
@@ -2155,10 +2176,25 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 核心多功能圖片傳送函式
+// 核心多功能圖片傳送函式 (保證必下載 + 必可貼上 + 彈窗可右鍵複製)
 const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
+  const dataUrl = canvas.toDataURL('image/png')
+
+  // 1. 同步觸發瀏覽器下載 (絕不被攔截)
+  const downloadLink = document.createElement('a')
+  downloadLink.download = filename
+  downloadLink.href = dataUrl
+  document.body.appendChild(downloadLink)
+  downloadLink.click()
+  document.body.removeChild(downloadLink)
+
+  // 2. 開啟預覽彈窗 (可供滑鼠右鍵直接複製)
+  shareModalImg.value = dataUrl
+  shareModalTitle.value = shareTitle
+
+  // 3. 嘗試原生分享 (手機/平板)
   canvas.toBlob(async (blob) => {
-    if (!blob) return alert('圖片生成失敗，請重試！')
+    if (!blob) return
     const file = new File([blob], filename, { type: 'image/png' })
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -2173,28 +2209,20 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
-    const downloadLink = document.createElement('a')
-    downloadLink.download = filename
-    downloadLink.href = canvas.toDataURL('image/png')
-    downloadLink.click()
-
-    let copiedToClipboard = false
+    // 4. 嘗試寫入剪貼簿 (供電腦版 Ctrl + V 貼上)
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': blob })
         ])
-        copiedToClipboard = true
+        showToast(`📋 ${successMsg}！\n已複製到剪貼簿並完成下載！請直接至電腦版 LINE 按 Ctrl + V 貼上發送！`)
+        return
       } catch (err) {
-        console.warn('剪貼簿寫入受阻', err)
+        console.warn('Clipboard write fallback', err)
       }
     }
 
-    if (copiedToClipboard) {
-      showToast(`📋 ${successMsg}！\n已複製到剪貼簿，並已自動下載圖檔！請在電腦 LINE 聊天室按 Ctrl + V (或直接拖曳圖片) 傳送！`)
-    } else {
-      showToast(`📁 ${successMsg}！\n圖檔已自動下載！請直接將圖片拖進電腦版 LINE 聊天室即可傳送！`)
-    }
+    showToast(`📁 ${successMsg}！\n圖檔已下載！請直接拖曳圖片或在此視窗按右鍵「複製圖片」至 LINE 發送！`)
   }, 'image/png')
 }
 
@@ -2212,21 +2240,25 @@ const shareReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
+  // 抬頭花店名
   ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
+  // 主標題
   ctx.fillStyle = '#dc2626'
   ctx.font = `bold 22px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
+  // 右上角單號與日期
   ctx.fillStyle = '#334155'
   ctx.font = `13px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
 
+  // 頂部分隔線
   ctx.lineWidth = 2.5
   ctx.strokeStyle = '#1e293b'
   ctx.beginPath()
@@ -2404,6 +2436,87 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 
 const printFarmerReceipt = () => window.print()
+
+// 產生花卡高畫質圖片
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+
+  const drawTextItem = (text, item, isVertMode, weightVal, isUpper = false) => {
+    if (!text || !item) return
+    ctx.textBaseline = 'top'
+    const w = String(weightVal || '600')
+    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
+    const sWidth = strokeWidthMap[w] || 0.8
+
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, item.x + offsetX, currentY)
+        }
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpper && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, currentX, item.y + offsetY)
+        }
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  drawTextItem(upperText.value, layout.value.upper, isVertical.value, weights.value.upper, true)
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
+
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
+    }
+  })
+
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
 
 // 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
@@ -2828,7 +2941,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (每個格子支援獨立粗細，400~800肉眼可見差異)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2837,7 +2950,6 @@ const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
 
-// 每個格子獨立的字重 (預設中款 800特粗，其餘 600半粗/700粗體)
 const weights = ref({
   upper: '600',
   middle: '800',
@@ -2850,7 +2962,6 @@ const weights = ref({
   suffix: '700'
 })
 
-// 階梯式文字加粗陰影 (解決中文字體無對應字重時看起來完全一樣的問題)
 const getWeightStyle = (wVal) => {
   const w = String(wVal || '600')
   const styles = { fontWeight: w }
@@ -2866,7 +2977,6 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 全平台通用字體
 const fontMapping = {
   kai: '"TW-Kai", "DFKai-SB", "BiauKai", "Kaiti", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -3053,87 +3163,6 @@ const printCouplet = () => {
   })
 }
 
-// 產生花卡高畫質圖片 (支援每個格子獨立粗細與描邊)
-const shareCoupletToLineDirect = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
-
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
-
-  ctx.fillStyle = '#000000'
-  const targetFontFamily = activeCssFontFamily.value
-
-  const drawTextItem = (text, item, isVertMode, weightVal, isUpper = false) => {
-    if (!text || !item) return
-    ctx.textBaseline = 'top'
-    const w = String(weightVal || '600')
-    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
-    const sWidth = strokeWidthMap[w] || 0.8
-
-    if (isVertMode) {
-      let currentY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, item.x + offsetX, currentY)
-        }
-        ctx.fillText(char, item.x + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = item.x
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, currentX, item.y + offsetY)
-        }
-        ctx.fillText(char, currentX, item.y + offsetY)
-        currentX += curSize + 4
-      })
-    }
-  }
-
-  drawTextItem(upperText.value, layout.value.upper, isVertical.value, weights.value.upper, true)
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
-
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
-}
-
 // 雲端字型預載入
 onMounted(() => {
   if (!document.getElementById('google-noto-fonts-cdn')) {
@@ -3206,6 +3235,38 @@ onMounted(() => {
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+/* 圖片傳送專用彈窗 */
+.share-preview-modal {
+  max-width: 680px !important;
+  width: 90vw !important;
+}
+.share-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.share-preview-img {
+  max-width: 100%;
+  max-height: 55vh;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.share-tips-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 跨平台書法正楷字體類別 */
@@ -3555,7 +3616,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
+  position: absolute right: -7px; bottom: -7px; width: 17px; height: 17px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 11px;
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
@@ -3749,7 +3810,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
