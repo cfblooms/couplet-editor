@@ -1,694 +1,732 @@
 <template>
   <div class="main-wrapper">
-    <!-- 頂端主導覽列 -->
-    <header class="no-print top-nav">
-      <div class="nav-title">🌸 宸豐蘭藝</div>
-      <div class="nav-tabs">
-        <button 
-          type="button" 
-          :class="{ active: currentTab === 'manage' }" 
-          @click="currentTab = 'manage'"
-        >
-          💼 蘭花庫存・客戶・訂單管理
-        </button>
-        <button 
-          type="button" 
-          :class="{ active: currentTab === 'couplet' }" 
-          @click="currentTab = 'couplet'"
-        >
-          🎴 花卡 / 輓聯編輯器 (A4)
-        </button>
-        <button 
-          type="button" 
-          :class="{ active: currentTab === 'receipt' }" 
-          @click="currentTab = 'receipt'"
-        >
-          📄 訂單 A5 簽收單 (支援線上簽名)
-        </button>
-        <button 
-          type="button" 
-          :class="{ active: currentTab === 'farmer_receipt' }" 
-          @click="currentTab = 'farmer_receipt'"
-        >
-          🧾 農民收據
-        </button>
-      </div>
-    </header>
-
-    <!-- 浮動提示橫條 -->
-    <div v-if="toastMessage" class="floating-toast no-print">
-      {{ toastMessage }}
-    </div>
-
-    <!-- 圖片傳送專用彈窗 -->
-    <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
-      <div class="image-modal-content share-preview-modal" @click.stop>
-        <div class="image-modal-header">
-          <span>💬 {{ shareModalTitle }}（可直接按右鍵複製圖片）</span>
-          <button class="close-modal-btn" @click="shareModalImg = ''">✕</button>
+    <!-- ================= 內部安全通行碼驗證畫面 ================= -->
+    <div v-if="!isAuthenticated" class="auth-lock-overlay">
+      <div class="auth-lock-card">
+        <div class="lock-icon">🔒</div>
+        <h2>宸豐蘭藝・內部管理系統</h2>
+        <p class="lock-subtitle">本系統僅限內部工作人員使用，請輸入管理密碼</p>
+        
+        <div class="lock-form" @keyup.enter="handleLogin">
+          <input 
+            type="password" 
+            v-model="inputPasscode" 
+            placeholder="請輸入內部通行密碼" 
+            class="lock-input"
+            autofocus
+          />
+          <button type="button" class="lock-btn" @click="handleLogin">
+            驗證並進入系統 ➔
+          </button>
         </div>
-        <div class="share-modal-body">
-          <img :src="shareModalImg" class="share-preview-img" alt="傳送預覽圖" />
-          <div class="share-tips-row">
-            <span>💡 <b>傳送給訂購人方式：</b></span>
-            <span>1. 已自動下載圖檔，可直接將圖檔<b>傳送至 LINE</b>。</span>
-            <span>2. 電腦版可在圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 聊天室按 <b>Ctrl + V</b> 發送。</span>
-          </div>
+        <div v-if="authError" class="lock-error-text">
+          ⚠️ 密碼錯誤，請重新輸入！
+        </div>
+        <div class="lock-tip">
+          💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
         </div>
       </div>
     </div>
 
-    <!-- ================= 模式 1：蘭花管理系統 ================= -->
-    <div v-if="currentTab === 'manage'" class="manage-container no-print">
-      <nav class="sub-nav">
-        <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
-        <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
-        <button :class="{ active: subTab === 'inventory' }" @click="subTab = 'inventory'">📦 3. 進貨與庫存</button>
-        <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
-        <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
-        <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
-      </nav>
+    <!-- ================= 系統主畫面（通過驗證才渲染） ================= -->
+    <template v-else>
+      <!-- 頂端主導覽列 -->
+      <header class="no-print top-nav">
+        <div class="nav-title">🌸 宸豐蘭藝</div>
+        <div class="nav-tabs">
+          <button 
+            type="button" 
+            :class="{ active: currentTab === 'manage' }" 
+            @click="currentTab = 'manage'"
+          >
+            💼 蘭花庫存・客戶・訂單管理
+          </button>
+          <button 
+            type="button" 
+            :class="{ active: currentTab === 'couplet' }" 
+            @click="currentTab = 'couplet'"
+          >
+            🎴 花卡 / 輓聯編輯器 (A4)
+          </button>
+          <button 
+            type="button" 
+            :class="{ active: currentTab === 'receipt' }" 
+            @click="currentTab = 'receipt'"
+          >
+            📄 訂單 A5 簽收單 (支援線上簽名)
+          </button>
+          <button 
+            type="button" 
+            :class="{ active: currentTab === 'farmer_receipt' }" 
+            @click="currentTab = 'farmer_receipt'"
+          >
+            🧾 農民收據
+          </button>
+          <button 
+            type="button" 
+            class="logout-nav-btn" 
+            @click="handleLogout"
+            title="登出並鎖定系統"
+          >
+            🔒 登出
+          </button>
+        </div>
+      </header>
 
-      <div class="manage-content">
-        <!-- 模組 1：訂單與帳務 -->
-        <section v-if="subTab === 'order'" class="tab-pane">
-          <div v-if="editingOrderId" class="edit-banner">
-            <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
-            <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
+      <!-- 浮動提示橫條 -->
+      <div v-if="toastMessage" class="floating-toast no-print">
+        {{ toastMessage }}
+      </div>
+
+      <!-- 圖片傳送專用彈窗 -->
+      <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
+        <div class="image-modal-content share-preview-modal" @click.stop>
+          <div class="image-modal-header">
+            <span>💬 {{ shareModalTitle }}（可直接按右鍵複製圖片）</span>
+            <button class="close-modal-btn" @click="shareModalImg = ''">✕</button>
           </div>
+          <div class="share-modal-body">
+            <img :src="shareModalImg" class="share-preview-img" alt="傳送預覽圖" />
+            <div class="share-tips-row">
+              <span>💡 <b>傳送給訂購人方式：</b></span>
+              <span>1. 已自動下載圖檔，可直接將圖檔<b>傳送至 LINE</b>。</span>
+              <span>2. 電腦版可在圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 聊天室按 <b>Ctrl + V</b> 發送。</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div class="card-box" id="order-form-box">
-            <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
-            
-            <div class="form-grid">
-              <div class="field">
-                <label>客戶類型</label>
-                <select v-model="formOrder.cust_type">
-                  <option value="批發">批發</option>
-                  <option value="零售">零售</option>
-                  <option value="花店">花店</option>
-                  <option value="個人">個人</option>
-                </select>
+      <!-- ================= 模式 1：蘭花管理系統 ================= -->
+      <div v-if="currentTab === 'manage'" class="manage-container no-print">
+        <nav class="sub-nav">
+          <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
+          <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
+          <button :class="{ active: subTab === 'inventory' }" @click="subTab = 'inventory'">📦 3. 進貨與庫存</button>
+          <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
+          <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
+          <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
+        </nav>
+
+        <div class="manage-content">
+          <!-- 模組 1：訂單與帳務 -->
+          <section v-if="subTab === 'order'" class="tab-pane">
+            <div v-if="editingOrderId" class="edit-banner">
+              <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
+              <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
+            </div>
+
+            <div class="card-box" id="order-form-box">
+              <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+              
+              <div class="form-grid">
+                <div class="field">
+                  <label>客戶類型</label>
+                  <select v-model="formOrder.cust_type">
+                    <option value="批發">批發</option>
+                    <option value="零售">零售</option>
+                    <option value="花店">花店</option>
+                    <option value="個人">個人</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>訂購人 / 公司行號</label>
+                  <input v-model="formOrder.customer" list="cust-options" @change="onOrderCustSelect" placeholder="輸入或選擇客戶" />
+                  <datalist id="cust-options">
+                    <option v-for="c in customers" :key="c.id" :value="c.name" />
+                  </datalist>
+                </div>
+                <div class="field">
+                  <label>結帳週期</label>
+                  <select v-model="formOrder.billing_cycle">
+                    <option value="每單結">每單結 (現結)</option>
+                    <option value="週結">週結</option>
+                    <option value="月結">月結</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>聯絡電話</label>
+                  <input v-model="formOrder.phone" type="text" placeholder="電話號碼" />
+                </div>
+                <div class="field">
+                  <label>統一編號 (8碼)</label>
+                  <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
+                </div>
+                <div class="field">
+                  <label>是否開收據</label>
+                  <select v-model="formOrder.need_receipt" class="bold-select-field">
+                    <option value="不需收據">不需收據</option>
+                    <option value="需開收據">需開收據</option>
+                  </select>
+                </div>
               </div>
-              <div class="field">
-                <label>訂購人 / 公司行號</label>
-                <input v-model="formOrder.customer" list="cust-options" @change="onOrderCustSelect" placeholder="輸入或選擇客戶" />
-                <datalist id="cust-options">
-                  <option v-for="c in customers" :key="c.id" :value="c.name" />
+
+              <!-- 多組花禮規格設定區塊 -->
+              <div class="items-section mt-3">
+                <div class="items-header">
+                  <h4>🌸 花禮品項與盆數規格（支援庫存帶入或自由輸入）</h4>
+                  <button type="button" class="add-item-btn" @click="addOrderItemRow">＋ 新增一組花禮規格</button>
+                </div>
+
+                <datalist id="inv-flower-select-options">
+                  <option 
+                    v-for="f in flowerInventory" 
+                    :key="f.id" 
+                    :value="f.item_name"
+                  >
+                    【庫存 {{ f.qty }} 棵】規格: {{ f.spec }} / 成本單價 ${{ f.unit_cost || 0 }}
+                  </option>
                 </datalist>
+
+                <div 
+                  v-for="(item, idx) in formOrder.items" 
+                  :key="idx" 
+                  class="order-item-card"
+                >
+                  <div class="item-card-title">
+                    <span>品項 {{ idx + 1 }}</span>
+                    <button 
+                      v-if="formOrder.items.length > 1" 
+                      type="button" 
+                      class="remove-item-btn" 
+                      @click="removeOrderItemRow(idx)"
+                    >
+                      🗑️ 刪除此組
+                    </button>
+                  </div>
+                  <div class="item-grid">
+                    <div class="field">
+                      <label>品種名稱</label>
+                      <input 
+                        v-model="item.orchid_name" 
+                        list="inv-flower-select-options" 
+                        @change="onFlowerSelectChange(item)"
+                        placeholder="手動輸入或選取庫存" 
+                      />
+                    </div>
+                    <div class="field highlight-field">
+                      <label>盆數 (幾盆)</label>
+                      <input v-model.number="item.pots_qty" type="number" min="1" @input="calcOrderPrice" />
+                    </div>
+                    <div class="field">
+                      <label>單盆株數 (棵/盆)</label>
+                      <input v-model.number="item.stalks" type="number" min="1" @input="calcOrderPrice" />
+                    </div>
+                    <div class="field">
+                      <label>每棵單價 (元)</label>
+                      <input v-model.number="item.unit_price" type="number" min="0" @input="calcOrderPrice" />
+                    </div>
+                    <div class="field">
+                      <label>使用盆器</label>
+                      <select v-model="item.pot" @change="calcOrderPrice">
+                        <option value="桌上盆 (100)">桌上盆 (成本100)</option>
+                        <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                        <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                        <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                        <option value="無盆">無盆 (裸株/自備盆)</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>快捷盆選擇</label>
+                      <select v-model="item.quick_pot" @change="calcOrderPrice">
+                        <option value="未使用">未使用快捷盆</option>
+                        <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="field">
-                <label>結帳週期</label>
-                <select v-model="formOrder.billing_cycle">
-                  <option value="每單結">每單結 (現結)</option>
-                  <option value="週結">週結</option>
-                  <option value="月結">月結</option>
-                </select>
+
+              <!-- 費用與總計資訊 -->
+              <div class="form-grid mt-3">
+                <div class="field highlight-field">
+                  <label>額外運費 (元)</label>
+                  <input v-model.number="formOrder.shipping_fee" type="number" min="0" @input="calcOrderPrice" placeholder="無運費填 0" />
+                </div>
+                <div class="field">
+                  <label>預估總成本 (元)</label>
+                  <input v-model.number="formOrder.cost" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>訂單總售價 (含運費)</label>
+                  <input v-model.number="formOrder.price" type="number" min="0" class="bold-price-input" />
+                </div>
+                <div class="field">
+                  <label>訂單其他備註</label>
+                  <input v-model="formOrder.note" type="text" placeholder="送貨注意事項" />
+                </div>
+                <div class="field">
+                  <label>花卡製作狀態</label>
+                  <select v-model="formOrder.card_status">
+                    <option value="未製作">未製作</option>
+                    <option value="已製作">已製作</option>
+                    <option value="免製作">免製作</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>簽收單列印狀態</label>
+                  <select v-model="formOrder.receipt_status">
+                    <option value="未列印">未列印</option>
+                    <option value="已列印">已列印</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>出貨狀態</label>
+                  <select v-model="formOrder.shipped_status">
+                    <option value="未出貨">未出貨</option>
+                    <option value="已出貨">已出貨</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>收款狀態</label>
+                  <select v-model="formOrder.payment_status">
+                    <option value="未結">未結</option>
+                    <option value="已結">已結</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>下單日期</label>
+                  <input v-model="formOrder.order_date" type="date" />
+                </div>
+                <div class="field">
+                  <label>預計出貨/送達日</label>
+                  <input v-model="formOrder.expected_date" type="date" />
+                </div>
               </div>
-              <div class="field">
-                <label>聯絡電話</label>
-                <input v-model="formOrder.phone" type="text" placeholder="電話號碼" />
-              </div>
-              <div class="field">
-                <label>統一編號 (8碼)</label>
-                <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
-              </div>
-              <div class="field">
-                <label>是否開收據</label>
-                <select v-model="formOrder.need_receipt" class="bold-select-field">
-                  <option value="不需收據">不需收據</option>
-                  <option value="需開收據">需開收據</option>
-                </select>
+
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveOrder">
+                  {{ editingOrderId ? '確認更新此訂單' : '確認建立訂單' }}
+                </button>
+                <button v-if="editingOrderId" class="secondary-btn" @click="cancelEditOrder">
+                  取消
+                </button>
               </div>
             </div>
 
-            <!-- 多組花禮規格設定區塊 -->
-            <div class="items-section mt-3">
-              <div class="items-header">
-                <h4>🌸 花禮品項與盆數規格（支援庫存帶入或自由輸入）</h4>
-                <button type="button" class="add-item-btn" @click="addOrderItemRow">＋ 新增一組花禮規格</button>
+            <!-- 訂單總覽清單 -->
+            <div class="card-box mt-3">
+              <div class="table-header-action">
+                <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
+                <button class="excel-btn" @click="exportOrdersToExcel">📊 下載全訂單 Excel 報表</button>
               </div>
 
-              <datalist id="inv-flower-select-options">
-                <option 
-                  v-for="f in flowerInventory" 
-                  :key="f.id" 
-                  :value="f.item_name"
-                >
-                  【庫存 {{ f.qty }} 棵】規格: {{ f.spec }} / 成本單價 ${{ f.unit_cost || 0 }}
-                </option>
-              </datalist>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ord in orderList" :key="ord.id">
+                      <td><b>{{ ord.id }}</b></td>
+                      <td>{{ ord.customer }}</td>
+                      <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
+                      <td>
+                        <select 
+                          v-model="ord.need_receipt" 
+                          :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
+                          @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
+                        >
+                          <option value="不需收據">不需收據</option>
+                          <option value="需開收據">需開收據</option>
+                        </select>
+                      </td>
+                      <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
+                      <td>{{ ord.spec }}</td>
+                      <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
+                      <td class="text-blue"><b>${{ ord.price }}</b></td>
+                      <td>
+                        <select 
+                          v-model="ord.card_status" 
+                          :class="getCardStatusClass(ord.card_status)"
+                          @change="updateOrderField(ord, 'card_status', ord.card_status)"
+                        >
+                          <option value="未製作">未製作</option>
+                          <option value="已製作">已製作</option>
+                          <option value="免製作">免製作</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select 
+                          v-model="ord.receipt_status" 
+                          :class="ord.receipt_status === '已列印' ? 'select-status green' : 'select-status orange'"
+                          @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
+                        >
+                          <option value="未列印">未列印</option>
+                          <option value="已列印">已列印</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="ord.shipped_status" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)">
+                          <option value="未出貨">未出貨</option>
+                          <option value="已出貨">已出貨</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="ord.payment_status" @change="updateOrderField(ord, 'payment_status', ord.payment_status)">
+                          <option value="未結">未結</option>
+                          <option value="已結">已結</option>
+                        </select>
+                      </td>
+                      <td class="action-cell">
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
+                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
+                        <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
+                        <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
+                      </td>
+                    </tr>
+                    <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
 
-              <div 
-                v-for="(item, idx) in formOrder.items" 
-                :key="idx" 
-                class="order-item-card"
-              >
-                <div class="item-card-title">
-                  <span>品項 {{ idx + 1 }}</span>
-                  <button 
-                    v-if="formOrder.items.length > 1" 
-                    type="button" 
-                    class="remove-item-btn" 
-                    @click="removeOrderItemRow(idx)"
-                  >
-                    🗑️ 刪除此組
-                  </button>
+          <!-- 模組 2：客戶未結對帳專區 -->
+          <section v-if="subTab === 'statement'" class="tab-pane">
+            <div class="card-box">
+              <h3>📊 客戶未結帳款彙整與對帳</h3>
+              <div class="statement-filter-grid">
+                <div class="field">
+                  <label>選擇對帳客戶：</label>
+                  <select v-model="statementCustomer">
+                    <option value="">-- 請選擇客戶 (全部未結) --</option>
+                    <option v-for="c in customers" :key="c.id" :value="c.name">
+                      {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
+                    </option>
+                  </select>
                 </div>
-                <div class="item-grid">
+                <div class="field">
+                  <label>統計期間：</label>
+                  <select v-model="statementPeriod">
+                    <option value="all">全部歷史未結</option>
+                    <option value="thisWeek">本週 (週一至週日)</option>
+                    <option value="thisMonth">本月 (1日至今)</option>
+                    <option value="lastMonth">上月全月</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>收款狀態篩選：</label>
+                  <select v-model="statementPaymentFilter">
+                    <option value="未結">僅顯示未結帳款 (對帳用)</option>
+                    <option value="all">顯示全部 (含已結)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="statement-summary-cards mt-3">
+                <div class="sum-card red-card">
+                  <div class="sum-label">對帳總金額</div>
+                  <div class="sum-value">${{ statementTotalAmount.toLocaleString() }} 元</div>
+                </div>
+                <div class="sum-card blue-card">
+                  <div class="sum-label">訂單筆數</div>
+                  <div class="sum-value">{{ statementOrders.length }} 筆</div>
+                </div>
+                <div class="sum-card green-card">
+                  <div class="sum-label">客戶週期 / 類別</div>
+                  <div class="sum-value font-medium">{{ currentCustomerInfoText }}</div>
+                </div>
+              </div>
+
+              <div class="statement-actions mt-3">
+                <button class="line-btn" @click="copyLineStatement">
+                  📋 一鍵複製 LINE 對帳明細
+                </button>
+                <button class="excel-btn" @click="exportStatementExcel">
+                  📊 下載客戶對帳單 Excel
+                </button>
+                <button 
+                  v-if="statementOrders.length > 0 && statementPaymentFilter === '未結'"
+                  class="batch-pay-btn" 
+                  @click="batchMarkPaid"
+                >
+                  ✅ 一鍵將此清單標記為「已結清」
+                </button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
+              <h3>📑 對帳單訂單明細 ({{ statementOrders.length }} 筆)</h3>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>規格明細</th><th>金額</th><th>花卡</th><th>簽收單</th><th>收款狀態</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ord in statementOrders" :key="ord.id">
+                      <td><b>{{ ord.id }}</b></td>
+                      <td>{{ ord.order_date }}</td>
+                      <td>{{ ord.customer }}</td>
+                      <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
+                      <td>{{ ord.need_receipt || '不需收據' }}</td>
+                      <td>{{ ord.spec }}</td>
+                      <td class="text-blue"><b>${{ ord.price }}</b></td>
+                      <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
+                      <td>
+                        <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
+                          {{ ord.receipt_status || '未列印' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span :class="ord.payment_status === '未結' ? 'badge badge-red' : 'badge badge-green'">
+                          {{ ord.payment_status }}
+                        </span>
+                      </td>
+                      <td>
+                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                        <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- 模組 3：進貨與庫存 -->
+          <section v-if="subTab === 'inventory'" class="tab-pane">
+            <div v-if="editingInvId" class="edit-banner">
+              <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
+              <button class="cancel-edit-btn" @click="cancelEditInv">✕ 取消修改</button>
+            </div>
+
+            <div class="card-box" id="inv-form-box">
+              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label>進貨類別</label>
+                  <select v-model="formInv.category">
+                    <option value="蘭花">蘭花</option>
+                    <option value="陶瓷盆">陶瓷盆</option>
+                  </select>
+                </div>
+
+                <template v-if="formInv.category === '蘭花'">
                   <div class="field">
-                    <label>品種名稱</label>
-                    <input 
-                      v-model="item.orchid_name" 
-                      list="inv-flower-select-options" 
-                      @change="onFlowerSelectChange(item)"
-                      placeholder="手動輸入或選取庫存" 
-                    />
-                  </div>
-                  <div class="field highlight-field">
-                    <label>盆數 (幾盆)</label>
-                    <input v-model.number="item.pots_qty" type="number" min="1" @input="calcOrderPrice" />
+                    <label>蘭花品種名稱</label>
+                    <input v-model="formInv.item_name" list="orchid-options" placeholder="選擇或自行輸入" />
+                    <datalist id="orchid-options">
+                      <option v-for="o in orchids" :key="o.id" :value="o.name" />
+                    </datalist>
                   </div>
                   <div class="field">
-                    <label>單盆株數 (棵/盆)</label>
-                    <input v-model.number="item.stalks" type="number" min="1" @input="calcOrderPrice" />
+                    <label>梗數規格</label>
+                    <select v-model="formInv.spec_spike">
+                      <option value="單梗">單梗</option>
+                      <option value="雙梗">雙梗</option>
+                      <option value="多梗">多梗</option>
+                    </select>
                   </div>
                   <div class="field">
-                    <label>每棵單價 (元)</label>
-                    <input v-model.number="item.unit_price" type="number" min="0" @input="calcOrderPrice" />
+                    <label>花色</label>
+                    <select v-model="formInv.spec_color">
+                      <option value="紅">紅</option>
+                      <option value="白">白</option>
+                      <option value="粉">粉</option>
+                      <option value="黃">黃</option>
+                      <option value="其他">其他</option>
+                    </select>
                   </div>
                   <div class="field">
-                    <label>使用盆器</label>
-                    <select v-model="item.pot" @change="calcOrderPrice">
+                    <label>花朵大小</label>
+                    <select v-model="formInv.spec_size">
+                      <option value="大">大</option>
+                      <option value="中">中</option>
+                      <option value="小">小</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>株高規格</label>
+                    <select v-model="formInv.spec_height">
+                      <option value="高">高</option>
+                      <option value="中">中</option>
+                      <option value="矮">矮</option>
+                    </select>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <div class="field">
+                    <label>盆器類型</label>
+                    <select v-model="formInv.pot_type" @change="onPotTypeChange">
                       <option value="桌上盆 (100)">桌上盆 (成本100)</option>
                       <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
                       <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
                       <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                      <option value="無盆">無盆 (裸株/自備盆)</option>
+                      <option value="快捷盆 (70)">快捷盆 (成本70)</option>
                     </select>
                   </div>
-                  <div class="field">
-                    <label>快捷盆選擇</label>
-                    <select v-model="item.quick_pot" @change="calcOrderPrice">
-                      <option value="未使用">未使用快捷盆</option>
-                      <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+                </template>
 
-            <!-- 費用與總計資訊 -->
-            <div class="form-grid mt-3">
-              <div class="field highlight-field">
-                <label>額外運費 (元)</label>
-                <input v-model.number="formOrder.shipping_fee" type="number" min="0" @input="calcOrderPrice" placeholder="無運費填 0" />
-              </div>
-              <div class="field">
-                <label>預估總成本 (元)</label>
-                <input v-model.number="formOrder.cost" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>訂單總售價 (含運費)</label>
-                <input v-model.number="formOrder.price" type="number" min="0" class="bold-price-input" />
-              </div>
-              <div class="field">
-                <label>訂單其他備註</label>
-                <input v-model="formOrder.note" type="text" placeholder="送貨注意事項" />
-              </div>
-              <div class="field">
-                <label>花卡製作狀態</label>
-                <select v-model="formOrder.card_status">
-                  <option value="未製作">未製作</option>
-                  <option value="已製作">已製作</option>
-                  <option value="免製作">免製作</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>簽收單列印狀態</label>
-                <select v-model="formOrder.receipt_status">
-                  <option value="未列印">未列印</option>
-                  <option value="已列印">已列印</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>出貨狀態</label>
-                <select v-model="formOrder.shipped_status">
-                  <option value="未出貨">未出貨</option>
-                  <option value="已出貨">已出貨</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>收款狀態</label>
-                <select v-model="formOrder.payment_status">
-                  <option value="未結">未結</option>
-                  <option value="已結">已結</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>下單日期</label>
-                <input v-model="formOrder.order_date" type="date" />
-              </div>
-              <div class="field">
-                <label>預計出貨/送達日</label>
-                <input v-model="formOrder.expected_date" type="date" />
-              </div>
-            </div>
-
-            <div class="btn-action-row mt-2">
-              <button class="primary-btn" @click="saveOrder">
-                {{ editingOrderId ? '確認更新此訂單' : '確認建立訂單' }}
-              </button>
-              <button v-if="editingOrderId" class="secondary-btn" @click="cancelEditOrder">
-                取消
-              </button>
-            </div>
-          </div>
-
-          <!-- 訂單總覽清單 -->
-          <div class="card-box mt-3">
-            <div class="table-header-action">
-              <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
-              <button class="excel-btn" @click="exportOrdersToExcel">📊 下載全訂單 Excel 報表</button>
-            </div>
-
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="ord in orderList" :key="ord.id">
-                    <td><b>{{ ord.id }}</b></td>
-                    <td>{{ ord.customer }}</td>
-                    <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
-                    <td>
-                      <select 
-                        v-model="ord.need_receipt" 
-                        :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
-                        @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
-                      >
-                        <option value="不需收據">不需收據</option>
-                        <option value="需開收據">需開收據</option>
-                      </select>
-                    </td>
-                    <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
-                    <td>{{ ord.spec }}</td>
-                    <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
-                    <td class="text-blue"><b>${{ ord.price }}</b></td>
-                    <td>
-                      <select 
-                        v-model="ord.card_status" 
-                        :class="getCardStatusClass(ord.card_status)"
-                        @change="updateOrderField(ord, 'card_status', ord.card_status)"
-                      >
-                        <option value="未製作">未製作</option>
-                        <option value="已製作">已製作</option>
-                        <option value="免製作">免製作</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select 
-                        v-model="ord.receipt_status" 
-                        :class="ord.receipt_status === '已列印' ? 'select-status green' : 'select-status orange'"
-                        @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
-                      >
-                        <option value="未列印">未列印</option>
-                        <option value="已列印">已列印</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select v-model="ord.shipped_status" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)">
-                        <option value="未出貨">未出貨</option>
-                        <option value="已出貨">已出貨</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select v-model="ord.payment_status" @change="updateOrderField(ord, 'payment_status', ord.payment_status)">
-                        <option value="未結">未結</option>
-                        <option value="已結">已結</option>
-                      </select>
-                    </td>
-                    <td class="action-cell">
-                      <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
-                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
-                      <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
-                      <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
-                    </td>
-                  </tr>
-                  <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- 模組 2：客戶未結對帳專區 -->
-        <section v-if="subTab === 'statement'" class="tab-pane">
-          <div class="card-box">
-            <h3>📊 客戶未結帳款彙整與對帳</h3>
-            <div class="statement-filter-grid">
-              <div class="field">
-                <label>選擇對帳客戶：</label>
-                <select v-model="statementCustomer">
-                  <option value="">-- 請選擇客戶 (全部未結) --</option>
-                  <option v-for="c in customers" :key="c.id" :value="c.name">
-                    {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
-                  </option>
-                </select>
-              </div>
-              <div class="field">
-                <label>統計期間：</label>
-                <select v-model="statementPeriod">
-                  <option value="all">全部歷史未結</option>
-                  <option value="thisWeek">本週 (週一至週日)</option>
-                  <option value="thisMonth">本月 (1日至今)</option>
-                  <option value="lastMonth">上月全月</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>收款狀態篩選：</label>
-                <select v-model="statementPaymentFilter">
-                  <option value="未結">僅顯示未結帳款 (對帳用)</option>
-                  <option value="all">顯示全部 (含已結)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="statement-summary-cards mt-3">
-              <div class="sum-card red-card">
-                <div class="sum-label">對帳總金額</div>
-                <div class="sum-value">${{ statementTotalAmount.toLocaleString() }} 元</div>
-              </div>
-              <div class="sum-card blue-card">
-                <div class="sum-label">訂單筆數</div>
-                <div class="sum-value">{{ statementOrders.length }} 筆</div>
-              </div>
-              <div class="sum-card green-card">
-                <div class="sum-label">客戶週期 / 類別</div>
-                <div class="sum-value font-medium">{{ currentCustomerInfoText }}</div>
-              </div>
-            </div>
-
-            <div class="statement-actions mt-3">
-              <button class="line-btn" @click="copyLineStatement">
-                📋 一鍵複製 LINE 對帳明細
-              </button>
-              <button class="excel-btn" @click="exportStatementExcel">
-                📊 下載客戶對帳單 Excel
-              </button>
-              <button 
-                v-if="statementOrders.length > 0 && statementPaymentFilter === '未結'"
-                class="batch-pay-btn" 
-                @click="batchMarkPaid"
-              >
-                ✅ 一鍵將此清單標記為「已結清」
-              </button>
-            </div>
-          </div>
-
-          <div class="card-box mt-3">
-            <h3>📑 對帳單訂單明細 ({{ statementOrders.length }} 筆)</h3>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>規格明細</th><th>金額</th><th>花卡</th><th>簽收單</th><th>收款狀態</th><th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="ord in statementOrders" :key="ord.id">
-                    <td><b>{{ ord.id }}</b></td>
-                    <td>{{ ord.order_date }}</td>
-                    <td>{{ ord.customer }}</td>
-                    <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
-                    <td>{{ ord.need_receipt || '不需收據' }}</td>
-                    <td>{{ ord.spec }}</td>
-                    <td class="text-blue"><b>${{ ord.price }}</b></td>
-                    <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
-                    <td>
-                      <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
-                        {{ ord.receipt_status || '未列印' }}
-                      </span>
-                    </td>
-                    <td>
-                      <span :class="ord.payment_status === '未結' ? 'badge badge-red' : 'badge badge-green'">
-                        {{ ord.payment_status }}
-                      </span>
-                    </td>
-                    <td>
-                      <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                      <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- 模組 3：進貨與庫存 -->
-        <section v-if="subTab === 'inventory'" class="tab-pane">
-          <div v-if="editingInvId" class="edit-banner">
-            <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
-            <button class="cancel-edit-btn" @click="cancelEditInv">✕ 取消修改</button>
-          </div>
-
-          <div class="card-box" id="inv-form-box">
-            <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
-            <div class="form-grid">
-              <div class="field">
-                <label>進貨類別</label>
-                <select v-model="formInv.category">
-                  <option value="蘭花">蘭花</option>
-                  <option value="陶瓷盆">陶瓷盆</option>
-                </select>
-              </div>
-
-              <template v-if="formInv.category === '蘭花'">
                 <div class="field">
-                  <label>蘭花品種名稱</label>
-                  <input v-model="formInv.item_name" list="orchid-options" placeholder="選擇或自行輸入" />
-                  <datalist id="orchid-options">
-                    <option v-for="o in orchids" :key="o.id" :value="o.name" />
-                  </datalist>
+                  <label>{{ formInv.category === '陶瓷盆' ? '進貨數量' : '進貨株數 (棵)' }}</label>
+                  <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
                 </div>
                 <div class="field">
-                  <label>梗數規格</label>
-                  <select v-model="formInv.spec_spike">
-                    <option value="單梗">單梗</option>
-                    <option value="雙梗">雙梗</option>
-                    <option value="多梗">多梗</option>
+                  <label>{{ formInv.category === '陶瓷盆' ? '單個價格 (元)' : '單株價格 (元)' }}</label>
+                  <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
+                </div>
+                <div class="field">
+                  <label>總成本 (元)</label>
+                  <input v-model.number="formInv.cost" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>供應商 / 花農</label>
+                  <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
+                </div>
+                <div class="field">
+                  <label>進貨日期</label>
+                  <input v-model="formInv.date" type="date" />
+                </div>
+              </div>
+
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveInventory">
+                  {{ editingInvId ? '確認更新進貨' : '確認新增進貨' }}
+                </button>
+                <button v-if="editingInvId" class="secondary-btn" @click="cancelEditInv">
+                  取消
+                </button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
+              <h3>📦 現有進貨清單 ({{ inventoryList.length }} 筆)</h3>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="inv in inventoryList" :key="inv.id">
+                      <td><b>{{ inv.id }}</b></td>
+                      <td><span class="badge">{{ inv.category }}</span></td>
+                      <td><b>{{ inv.item_name }}</b></td>
+                      <td>{{ inv.spec }}</td>
+                      <td><b>{{ inv.qty }} {{ inv.category === '陶瓷盆' ? '個' : '棵' }}</b></td>
+                      <td class="text-blue">${{ inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0) }}</td>
+                      <td class="text-red"><b>${{ inv.cost }}</b></td>
+                      <td>{{ inv.supplier }}</td>
+                      <td>{{ inv.date }}</td>
+                      <td class="action-cell">
+                        <button class="mini-btn edit-btn" @click="startEditInv(inv)" title="修改">✏️</button>
+                        <button class="mini-btn del-btn" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- 模組 4：客戶資料庫 -->
+          <section v-if="subTab === 'customer'" class="tab-pane">
+            <div v-if="editingCustId" class="edit-banner">
+              <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
+              <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
+            </div>
+
+            <div class="card-box" id="cust-form-box">
+              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
+              <div class="form-grid">
+                <div class="field">
+                  <label>客戶 / 店鋪名稱</label>
+                  <input v-model="formCust.name" type="text" placeholder="例: 大吉花店、宏達批發" />
+                </div>
+                <div class="field">
+                  <label>客戶類別</label>
+                  <select v-model="formCust.type">
+                    <option value="批發商">批發商</option>
+                    <option value="零售">零售</option>
+                    <option value="花店">花店</option>
+                    <option value="個人">個人</option>
                   </select>
                 </div>
                 <div class="field">
-                  <label>花色</label>
-                  <select v-model="formInv.spec_color">
-                    <option value="紅">紅</option>
-                    <option value="白">白</option>
-                    <option value="粉">粉</option>
-                    <option value="黃">黃</option>
-                    <option value="其他">其他</option>
+                  <label>預設結帳週期</label>
+                  <select v-model="formCust.billing_cycle">
+                    <option value="每單結">每單結 (現結)</option>
+                    <option value="週結">週結</option>
+                    <option value="月結">月結</option>
                   </select>
                 </div>
                 <div class="field">
-                  <label>花朵大小</label>
-                  <select v-model="formInv.spec_size">
-                    <option value="大">大</option>
-                    <option value="中">中</option>
-                    <option value="小">小</option>
-                  </select>
+                  <label>聯絡電話</label>
+                  <input v-model="formCust.phone" type="text" placeholder="0912-345678" />
                 </div>
                 <div class="field">
-                  <label>株高規格</label>
-                  <select v-model="formInv.spec_height">
-                    <option value="高">高</option>
-                    <option value="中">中</option>
-                    <option value="矮">矮</option>
-                  </select>
+                  <label>常用送達地址 / 備註</label>
+                  <input v-model="formCust.line_note" type="text" placeholder="常用送達地址" />
                 </div>
-              </template>
+              </div>
 
-              <template v-else>
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveCustomer">
+                  {{ editingCustId ? '確認更新客戶' : '儲存客戶資料' }}
+                </button>
+                <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">
+                  取消
+                </button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
+              <h3>📋 現有客戶清單 ({{ customers.length }} 位)</h3>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>客戶編號</th><th>名稱</th><th>類別</th><th>結帳週期</th><th>電話</th><th>地址 / 備註</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="c in customers" :key="c.id">
+                      <td><b>{{ c.id }}</b></td>
+                      <td><b>{{ c.name }}</b></td>
+                      <td><span class="badge">{{ c.type }}</span></td>
+                      <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
+                      <td>{{ c.phone }}</td>
+                      <td>{{ c.line_note }}</td>
+                      <td class="action-cell">
+                        <button class="mini-btn edit-btn" @click="startEditCust(c)" title="修改">✏️</button>
+                        <button class="mini-btn del-btn" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- 模組 5：蘭花品種庫 -->
+          <section v-if="subTab === 'orchid'" class="tab-pane">
+            <div v-if="editingOrchidId" class="edit-banner">
+              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
+              <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
+            </div>
+
+            <div class="card-box" id="orchid-form-box">
+              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
+              <div class="form-grid">
                 <div class="field">
-                  <label>盆器類型</label>
-                  <select v-model="formInv.pot_type" @change="onPotTypeChange">
-                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                    <option value="快捷盆 (70)">快捷盆 (成本70)</option>
-                  </select>
+                  <label>品種名稱</label>
+                  <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
                 </div>
-              </template>
-
-              <div class="field">
-                <label>{{ formInv.category === '陶瓷盆' ? '進貨數量' : '進貨株數 (棵)' }}</label>
-                <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
+                <div class="field">
+                  <label>特色說明</label>
+                  <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
+                </div>
+                <div class="field">
+                  <label>品種照片</label>
+                  <input type="file" accept="image/*" @change="onPhotoFileChange" />
+                </div>
               </div>
-              <div class="field">
-                <label>{{ formInv.category === '陶瓷盆' ? '單個價格 (元)' : '單株價格 (元)' }}</label>
-                <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
-              </div>
-              <div class="field">
-                <label>總成本 (元)</label>
-                <input v-model.number="formInv.cost" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>供應商 / 花農</label>
-                <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
-              </div>
-              <div class="field">
-                <label>進貨日期</label>
-                <input v-model="formInv.date" type="date" />
-              </div>
-            </div>
-
-            <div class="btn-action-row mt-2">
-              <button class="primary-btn" @click="saveInventory">
-                {{ editingInvId ? '確認更新進貨' : '確認新增進貨' }}
-              </button>
-              <button v-if="editingInvId" class="secondary-btn" @click="cancelEditInv">
-                取消
-              </button>
-            </div>
-          </div>
-
-          <div class="card-box mt-3">
-            <h3>📦 現有進貨清單 ({{ inventoryList.length }} 筆)</h3>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="inv in inventoryList" :key="inv.id">
-                    <td><b>{{ inv.id }}</b></td>
-                    <td><span class="badge">{{ inv.category }}</span></td>
-                    <td><b>{{ inv.item_name }}</b></td>
-                    <td>{{ inv.spec }}</td>
-                    <td><b>{{ inv.qty }} {{ inv.category === '陶瓷盆' ? '個' : '棵' }}</b></td>
-                    <td class="text-blue">${{ inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0) }}</td>
-                    <td class="text-red"><b>${{ inv.cost }}</b></td>
-                    <td>{{ inv.supplier }}</td>
-                    <td>{{ inv.date }}</td>
-                    <td class="action-cell">
-                      <button class="mini-btn edit-btn" @click="startEditInv(inv)" title="修改">✏️</button>
-                      <button class="mini-btn del-btn" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- 模組 4：客戶資料庫 -->
-        <section v-if="subTab === 'customer'" class="tab-pane">
-          <div v-if="editingCustId" class="edit-banner">
-            <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
-            <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
-          </div>
-
-          <div class="card-box" id="cust-form-box">
-            <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
-            <div class="form-grid">
-              <div class="field">
-                <label>客戶 / 店鋪名稱</label>
-                <input v-model="formCust.name" type="text" placeholder="例: 大吉花店、宏達批發" />
-              </div>
-              <div class="field">
-                <label>客戶類別</label>
-                <select v-model="formCust.type">
-                  <option value="批發商">批發商</option>
-                  <option value="零售">零售</option>
-                  <option value="花店">花店</option>
-                  <option value="個人">個人</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>預設結帳週期</label>
-                <select v-model="formCust.billing_cycle">
-                  <option value="每單結">每單結 (現結)</option>
-                  <option value="週結">週結</option>
-                  <option value="月結">月結</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>聯絡電話</label>
-                <input v-model="formCust.phone" type="text" placeholder="0912-345678" />
-              </div>
-              <div class="field">
-                <label>常用送達地址 / 備註</label>
-                <input v-model="formCust.line_note" type="text" placeholder="常用送達地址" />
-              </div>
-            </div>
-
-            <div class="btn-action-row mt-2">
-              <button class="primary-btn" @click="saveCustomer">
-                {{ editingCustId ? '確認更新客戶' : '儲存客戶資料' }}
-              </button>
-              <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">
-                取消
-              </button>
-            </div>
-          </div>
-
-          <div class="card-box mt-3">
-            <h3>📋 現有客戶清單 ({{ customers.length }} 位)</h3>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>客戶編號</th><th>名稱</th><th>類別</th><th>結帳週期</th><th>電話</th><th>地址 / 備註</th><th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="c in customers" :key="c.id">
-                    <td><b>{{ c.id }}</b></td>
-                    <td><b>{{ c.name }}</b></td>
-                    <td><span class="badge">{{ c.type }}</span></td>
-                    <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
-                    <td>{{ c.phone }}</td>
-                    <td>{{ c.line_note }}</td>
-                    <td class="action-cell">
-                      <button class="mini-btn edit-btn" @click="startEditCust(c)" title="修改">✏️</button>
-                      <button class="mini-btn del-btn" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- 模組 5：蘭花品種庫 -->
-        <section v-if="subTab === 'orchid'" class="tab-pane">
-          <div v-if="editingOrchidId" class="edit-banner">
-            <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
-            <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
-          </div>
-
-          <div class="card-box" id="orchid-form-box">
-            <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
-            <div class="form-grid">
-              <div class="field">
-                <label>品種名稱</label>
-                <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
-              </div>
-              <div class="field">
-                <label>特色說明</label>
-                <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
-              </div>
-              <div class="field">
-                <label>品種照片</label>
-                <input type="file" accept="image/*" @change="onPhotoFileChange" />
-              </div>
-            </div>
 
             <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
               <div class="preview-label">照片預覽：</div>
@@ -1587,6 +1625,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -1596,7 +1635,34 @@ import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
 // ==========================================
-// 1. 浮動提示與視窗縮放（最先定義，保證不報 ReferenceError）
+// 內部通行碼防護設定 (通行碼: cf000725)
+// ==========================================
+const INTERNAL_PASSCODE = 'cf000725'
+const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
+const inputPasscode = ref('')
+const authError = ref(false)
+
+const handleLogin = () => {
+  if (inputPasscode.value.trim() === INTERNAL_PASSCODE) {
+    isAuthenticated.value = true
+    authError.value = false
+    localStorage.setItem('cf_admin_auth', 'true')
+    showToast('✅ 驗證成功，歡迎使用內部管理系統！')
+    initSystemData()
+  } else {
+    authError.value = true
+    inputPasscode.value = ''
+  }
+}
+
+const handleLogout = () => {
+  if (!confirm('確定要登出並鎖定系統嗎？')) return
+  isAuthenticated.value = false
+  localStorage.removeItem('cf_admin_auth')
+}
+
+// ==========================================
+// 1. 浮動提示與視窗縮放
 // ==========================================
 const toastMessage = ref('')
 let toastTimer = null
@@ -1858,7 +1924,7 @@ const removeOrderItemRow = (idx) => {
 
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
-// 訂單載入：加入防錯保護並確保自動排序
+// 訂單載入
 const loadOrders = async () => {
   try {
     const { data, error } = await supabase.from('orders').select('*')
@@ -3311,6 +3377,7 @@ const shareCoupletToLineDirect = () => {
   drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
   drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
   drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
+
   drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
 
   bottomLines.value.forEach((item, idx) => {
@@ -3323,6 +3390,20 @@ const shareCoupletToLineDirect = () => {
 
   const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
   shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
+}
+
+// 初始化所有系統資料
+const initSystemData = () => {
+  autoFitZoom()
+  autoFitReceipt()
+  autoFitFarmerReceipt()
+  updateChineseAmount()
+  fetchSealFromCloud()
+  loadOrchids()
+  loadCustomers()
+  loadInventory()
+  loadReturns()
+  loadOrders()
 }
 
 // 雲端字型預載入與資料載入
@@ -3349,21 +3430,16 @@ onMounted(() => {
     document.head.appendChild(style)
   }
 
-  autoFitZoom()
-  autoFitReceipt()
-  autoFitFarmerReceipt()
-  updateChineseAmount()
-  fetchSealFromCloud()
   window.addEventListener('resize', () => {
     autoFitZoom()
     autoFitReceipt()
     autoFitFarmerReceipt()
   })
-  loadOrchids()
-  loadCustomers()
-  loadInventory()
-  loadReturns()
-  loadOrders()
+
+  // 若已通過驗證，自動開始載入資料庫資料
+  if (isAuthenticated.value) {
+    initSystemData()
+  }
 })
 </script>
 
@@ -3374,6 +3450,119 @@ onMounted(() => {
   height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
   background-color: #f1f5f9;
+}
+
+/* ====================================================
+   內部安全登入卡片樣式
+   ==================================================== */
+.auth-lock-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.auth-lock-card {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 14px;
+  padding: 32px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.lock-icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.auth-lock-card h2 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.lock-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.lock-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lock-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 2px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.lock-input:focus {
+  border-color: #2563eb;
+}
+
+.lock-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.lock-btn:hover {
+  background: #1d4ed8;
+}
+
+.lock-error-text {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.lock-tip {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.logout-nav-btn {
+  background: #ef4444 !important;
+  color: white !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  margin-left: 8px;
 }
 
 /* 浮動提示橫條 */
@@ -3493,7 +3682,7 @@ onMounted(() => {
   overflow-x: auto;
 }
 .nav-title { font-size: 16px; font-weight: 900; white-space: nowrap; margin-right: 12px; }
-.nav-tabs { display: flex; gap: 8px; }
+.nav-tabs { display: flex; gap: 8px; align-items: center; }
 .nav-tabs button {
   background: #334155;
   color: #e2e8f0;
@@ -4070,7 +4259,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 (純淨 A4 1:1 列印) */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
