@@ -1616,7 +1616,7 @@ const shareModalTitle = ref('')
 
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
-const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2b2ZyamliZGV6Ynl4eG11dG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMzQ2ODMsImV4cCI6MjEwNDcxMDY4M30.di9AXuYBtuSDL1upSKQ48-U0y9PN-TtFEYivmgJgbEQ'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // ----------------- 頁面分頁控制 -----------------
