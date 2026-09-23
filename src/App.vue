@@ -1187,7 +1187,7 @@
           </select>
         </div>
 
-        <!-- 🌟 新增：現場客戶手機/手寫線上簽名區 -->
+        <!-- 現場客戶手機/手寫線上簽名區 -->
         <div class="panel-section live-sign-panel">
           <div class="section-title-with-weight">
             <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
@@ -1269,7 +1269,7 @@
           </div>
         </div>
 
-        <!-- 🌟 一鍵傳送給下單客戶（含收件人簽名） -->
+        <!-- 一鍵傳送給下單客戶（含收件人簽名） -->
         <button 
           type="button" 
           class="line-action-btn mt-2" 
@@ -1353,7 +1353,6 @@
               <div class="footer-sign-box">
                 <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
                 <div class="sign-box-area">
-                  <!-- 客人簽好的簽名即時展示於此 -->
                   <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
                 </div>
               </div>
@@ -2250,10 +2249,11 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 核心多功能圖片傳送函式
+// 核心多功能圖片傳送函式 (同步下載 ＋ 剪貼簿 ＋ 彈窗預覽)
 const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
   const dataUrl = canvas.toDataURL('image/png')
 
+  // 1. 同步觸發瀏覽器下載
   const downloadLink = document.createElement('a')
   downloadLink.download = filename
   downloadLink.href = dataUrl
@@ -2261,6 +2261,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   downloadLink.click()
   document.body.removeChild(downloadLink)
 
+  // 2. 顯示預覽彈窗 (滑鼠右鍵直接複製)
   shareModalImg.value = dataUrl
   shareModalTitle.value = shareTitle
 
@@ -2268,6 +2269,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
     if (!blob) return
     const file = new File([blob], filename, { type: 'image/png' })
 
+    // 手機平板原生分享
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -2280,6 +2282,7 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
+    // 寫入剪貼簿 (供電腦版 Ctrl + V 貼上)
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
         await navigator.clipboard.write([
@@ -2296,7 +2299,36 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
-// 產生簽收單高畫質圖片供回傳下單客戶（直接合成手寫簽名）
+// Canvas 繪圖多行文字排版輔助函式 (防止壓格子的核心工具)
+const drawWrappedText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) => {
+  if (!text) return
+  const chars = String(text).split('')
+  let line = ''
+  let currentY = y
+  let linesCount = 1
+
+  for (let n = 0; n < chars.length; n++) {
+    const testLine = line + chars[n]
+    const metrics = ctx.measureText(testLine)
+    const testWidth = metrics.width
+    if (testWidth > maxWidth && n > 0) {
+      ctx.fillText(line, x, currentY)
+      line = chars[n]
+      currentY += lineHeight
+      linesCount++
+      if (linesCount > maxLines) {
+        // 超過行數加省略號
+        ctx.fillText('...', x + maxWidth - 20, currentY - lineHeight)
+        return
+      }
+    } else {
+      line = testLine
+    }
+  }
+  ctx.fillText(line, x, currentY)
+}
+
+// 產生簽收單高畫質圖片供回傳下單客戶（解決文字壓格問題）
 const shareReceiptToBuyerDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2336,13 +2368,16 @@ const shareReceiptToBuyerDirect = () => {
   ctx.lineTo(749, 80)
   ctx.stroke()
 
+  // 表格尺寸設定
   const tLeft = 45, tTop = 95, tWidth = 704
   const rowHeight = 75
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#334155'
 
+  // 外框
   ctx.strokeRect(tLeft, tTop, tWidth, rowHeight * 4)
 
+  // 內部橫線
   for (let i = 1; i <= 3; i++) {
     ctx.beginPath()
     ctx.moveTo(tLeft, tTop + rowHeight * i)
@@ -2350,58 +2385,80 @@ const shareReceiptToBuyerDirect = () => {
     ctx.stroke()
   }
 
-  ctx.beginPath()
-  ctx.moveTo(tLeft + 110, tTop)
-  ctx.lineTo(tLeft + 110, tTop + rowHeight)
-  ctx.moveTo(tLeft + 360, tTop)
-  ctx.lineTo(tLeft + 360, tTop + rowHeight)
-  ctx.moveTo(tLeft + 460, tTop)
-  ctx.lineTo(tLeft + 460, tTop + rowHeight)
-  ctx.stroke()
+  // 垂直分割線 (精確配比，留足空間給收件人與電話)
+  // [標籤 110px] [收件人 260px] [標籤 90px] [地址 244px]
+  const col1W = 110
+  const col2W = 260
+  const col3W = 90
 
   ctx.beginPath()
-  ctx.moveTo(tLeft + 110, tTop + rowHeight)
-  ctx.lineTo(tLeft + 110, tTop + rowHeight * 4)
+  // 第 1 欄右側線 (收件單位/人標籤右側)
+  ctx.moveTo(tLeft + col1W, tTop)
+  ctx.lineTo(tLeft + col1W, tTop + rowHeight * 4)
+  // 第 2 欄右側線 (收件人內容右側)
+  ctx.moveTo(tLeft + col1W + col2W, tTop)
+  ctx.lineTo(tLeft + col1W + col2W, tTop + rowHeight)
+  // 第 3 欄右側線 (送達地址標籤右側)
+  ctx.moveTo(tLeft + col1W + col2W + col3W, tTop)
+  ctx.lineTo(tLeft + col1W + col2W + col3W, tTop + rowHeight)
   ctx.stroke()
 
+  // 標籤欄底色 (灰色)
   ctx.fillStyle = '#f1f5f9'
-  ctx.fillRect(tLeft + 1, tTop + 1, 108, rowHeight - 2)
-  ctx.fillRect(tLeft + 361, tTop + 1, 98, rowHeight - 2)
-  ctx.fillRect(tLeft + 1, tTop + rowHeight + 1, 108, rowHeight - 2)
-  ctx.fillRect(tLeft + 1, tTop + rowHeight * 2 + 1, 108, rowHeight - 2)
-  ctx.fillRect(tLeft + 1, tTop + rowHeight * 3 + 1, 108, rowHeight - 2)
+  ctx.fillRect(tLeft + 1, tTop + 1, col1W - 2, rowHeight - 2)
+  ctx.fillRect(tLeft + col1W + col2W + 1, tTop + 1, col3W - 2, rowHeight - 2)
+  ctx.fillRect(tLeft + 1, tTop + rowHeight + 1, col1W - 2, rowHeight - 2)
+  ctx.fillRect(tLeft + 1, tTop + rowHeight * 2 + 1, col1W - 2, rowHeight - 2)
+  ctx.fillRect(tLeft + 1, tTop + rowHeight * 3 + 1, col1W - 2, rowHeight - 2)
 
+  // 填寫欄位標籤
   ctx.fillStyle = '#1e293b'
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
   ctx.font = `bold 15px ${fontFam}`
-  ctx.fillText('收件單位/人', tLeft + 55, tTop + 43)
-  ctx.fillText('送達地址', tLeft + 410, tTop + 43)
-  ctx.fillText('花禮品項', tLeft + 55, tTop + rowHeight + 43)
-  ctx.fillText('致贈/賀詞', tLeft + 55, tTop + rowHeight * 2 + 43)
-  ctx.fillText('備註說明', tLeft + 55, tTop + rowHeight * 3 + 43)
+  ctx.fillText('收件單位/人', tLeft + col1W / 2, tTop + rowHeight / 2)
+  ctx.fillText('送達地址', tLeft + col1W + col2W + col3W / 2, tTop + rowHeight / 2)
+  ctx.fillText('花禮品項', tLeft + col1W / 2, tTop + rowHeight * 1.5)
+  ctx.fillText('致贈/賀詞', tLeft + col1W / 2, tTop + rowHeight * 2.5)
+  ctx.fillText('備註說明', tLeft + col1W / 2, tTop + rowHeight * 3.5)
 
+  // 填寫欄位數值 (已套用自動換行，絕不壓到旁邊格子)
   ctx.textAlign = 'left'
-  ctx.font = `bold 16px ${fontFam}`
-  ctx.fillText(receiptForm.value.recipient || '—', tLeft + 120, tTop + 43)
+  ctx.textBaseline = 'top'
 
+  // 1. 收件人與電話 (限制在 col2W - 24px 寬度內，太長自動換行，絕不越界)
+  ctx.fillStyle = '#0f172a'
+  ctx.font = `bold 15px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 20, col2W - 24, 22, 2)
+
+  // 2. 送達地址 (限制在右邊格子寬度內自動換行)
+  ctx.fillStyle = '#334155'
   ctx.font = `14px ${fontFam}`
-  ctx.fillText(receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + 470, tTop + 43)
+  const addrWidth = tWidth - (col1W + col2W + col3W) - 24
+  drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 20, addrWidth, 20, 2)
 
+  // 3. 花禮品項
   ctx.fillStyle = '#1e3a8a'
   ctx.font = `bold 16px ${fontFam}`
-  ctx.fillText(receiptForm.value.item || '特選蘭花 1盆', tLeft + 120, tTop + rowHeight + 43)
+  drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 26, tWidth - col1W - 24, 24, 2)
 
+  // 4. 致贈/賀詞
   ctx.fillStyle = '#111827'
   ctx.font = `15px ${fontFam}`
-  ctx.fillText(receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + 120, tTop + rowHeight * 2 + 43)
-  ctx.fillText(receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + 120, tTop + rowHeight * 3 + 43)
+  drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 26, tWidth - col1W - 24, 22, 2)
 
+  // 5. 備註說明
+  ctx.fillStyle = '#475569'
+  ctx.font = `13.5px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 26, tWidth - col1W - 24, 20, 2)
+
+  // 底部說明區
   ctx.fillStyle = '#334155'
   ctx.font = `14px ${fontFam}`
   ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
   ctx.font = `12px ${fontFam}`
   ctx.fillStyle = '#64748b'
-  ctx.fillText('※ 專車親送・現場點交・祝頌商祺 (收件人已線上簽收)', 45, 465)
+  ctx.fillText('※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465)
 
   // 客戶簽名方框
   const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
@@ -2413,10 +2470,11 @@ const shareReceiptToBuyerDirect = () => {
 
   ctx.fillStyle = '#334155'
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
   ctx.font = `bold 12px ${fontFam}`
-  ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 16)
+  ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 12)
 
-  // 繪製收件人的真實簽名 (如果有簽名的話)
+  // 繪製手寫簽名
   const finishShare = () => {
     const filename = `已簽收單據_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
     shareOrCopyCanvasBlob(canvas, filename, '簽收單據回傳', '已簽名單據準備完成')
@@ -2522,6 +2580,7 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
+// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -3162,6 +3221,7 @@ const onFuneralFormatChange = () => {
     upperTarget.value = funeralUpperFormat.value
   }
 }
+
 const onCardCategoryChange = () => {
   if (cardCategory.value === 'funeral') {
     upperPrefix.value = '敬悼'
@@ -3254,7 +3314,6 @@ const shareCoupletToLineDirect = () => {
   drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
   drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
   drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
-
   drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
 
   bottomLines.value.forEach((item, idx) => {
@@ -3791,8 +3850,8 @@ input, select, textarea {
 .shop-name-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
 .sheet-main-title { font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
 .header-meta { font-size: 13px; line-height: 1.5; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 15px; }
-.receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 15px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
 .receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; }
 .receipt-table .val { width: 35%; }
 .receipt-table .val-bold { font-weight: bold; font-size: 16px; }
