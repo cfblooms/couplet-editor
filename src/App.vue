@@ -57,7 +57,6 @@
           <div class="card-box" id="order-form-box">
             <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
             
-            <!-- 客戶基本資訊 -->
             <div class="form-grid">
               <div class="field">
                 <label>客戶類型</label>
@@ -107,7 +106,6 @@
                 <button type="button" class="add-item-btn" @click="addOrderItemRow">＋ 新增一組花禮規格</button>
               </div>
 
-              <!-- 全域蘭花庫存快速選單列表 (datalist) -->
               <datalist id="inv-flower-select-options">
                 <option 
                   v-for="f in flowerInventory" 
@@ -838,28 +836,29 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援手機/平板/電腦全平台通用字體 + 500字重) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
+        <!-- 字體與粗細設定 -->
         <div class="panel-section">
           <label class="section-title">字體與粗細設定：</label>
           <div class="form-group">
-            <label>選擇字體：</label>
+            <label>選擇字體 (手機/平板/電腦均完美支援)：</label>
             <select v-model="cardFontFamily">
-              <option value="kai">標楷體 (雲端書法正楷・全平台通用)</option>
-              <option value="fangsong">華康仿宋 (古典仿宋體)</option>
-              <option value="dfkai_w7">華康楷書 (DFBiaoKaiShu / DFKaiShuW7)</option>
-              <option value="df_yankai">華康正顏楷體 (顏真卿厚重書法楷)</option>
-              <option value="wending">文鼎楷書 (典雅硬筆楷體)</option>
-              <option value="notosong">思源宋體 (現代精細宋體)</option>
+              <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
+              <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
+              <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
+              <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
+              <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
             </select>
           </div>
           <div class="form-group">
             <label>文字粗細 (字重)：</label>
             <select v-model="cardFontWeight">
               <option value="400">標準 (Regular 400)</option>
+              <option value="500">中等 (Medium 500)</option>
               <option value="600">半粗體 (Semi-Bold 600)</option>
               <option value="700">粗體 (Bold 700)</option>
               <option value="800">特粗體 (Extra-Bold 800)</option>
@@ -1022,7 +1021,7 @@
         >
           <div 
             id="card-print-target" 
-            class="card-board kai-font-supported" 
+            class="card-board" 
             :class="[
               isVertical ? 'mode-vertical' : 'mode-horizontal',
               !isVertical && cardCategory === 'celebration' ? 'style-floral' : ''
@@ -1051,7 +1050,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 -->
+            <!-- 中款 (字體大小上限支援至 300px) -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1090,7 +1089,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (支援 LINE 一鍵傳送讓客人簽名回傳) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (純幾盆簡明規格) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1462,7 +1461,6 @@
                 <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                 <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
                   <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <!-- 顯示您上傳的真實印章圖片 -->
                   <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                 </div>
               </div>
@@ -2034,16 +2032,7 @@ const exportStatementExcel = () => {
     '品項與規格': o.spec,
     '盆器': o.pot,
     '額外運費': getOrderShippingFee(o),
-    '預估成本': o.cost,
-    '訂單總售價': o.price,
-    '利潤': o.price - o.cost,
-    '統一編號': o.tax_id || '',
-    '開收據與否': o.need_receipt || '不需收據',
-    '訂單備註': o.note || '',
-    '花卡狀態': o.card_status || '未製作',
-    '簽收單狀態': o.receipt_status || '未列印',
-    '下單日期': o.order_date,
-    '預計送達': o.expected_date,
+    '售價(元)': o.price,
     '出貨狀態': o.shipped_status,
     '收款狀態': o.payment_status
   }))
@@ -2066,7 +2055,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單 (含 LINE 傳送直接簽收)
+// 3. A5 橫式簽收單
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -2879,29 +2868,224 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
+// ==========================================
+// 9. 花卡 / 輓聯編輯器 (全平台雲端字型支援)
+// ==========================================
+const isVertical = ref(true)
+const cardCategory = ref('funeral')
+const zoomLevel = ref(0.7)
+const viewportRef = ref(null)
+
+const cardFontFamily = ref('kai')
+const cardFontWeight = ref('700')
+
+// 全平台通用（手機、平板、Mac、Windows 均有明顯字型差別）
+const fontMapping = {
+  kai: '"TW-Kai", "DFKai-SB", "BiauKai", "Kaiti", serif',
+  notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
+  fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
+  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif',
+  systemkai: '"BiauKai", "DFKai-SB", "TW-Kai", serif'
+}
+
+const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
+
+const bottomLines = ref([
+  { text: '桃園市議會' },
+  { text: '議員 李宗豪' },
+  { text: '' },
+  { text: '' },
+  { text: '' },
+  { text: '' }
+])
+const getPlaceholder = (idx) => [
+  '第 1 格（例：單位 / 公司）',
+  '第 2 格（例：職稱姓名 1）',
+  '第 3 格（自訂聯名人 2）',
+  '第 4 格（自訂）',
+  '第 5 格（自訂）',
+  '第 6 格（自訂）'
+][idx]
+
+const funeralUpperFormat = ref('敬悼 X媽X老夫人')
+const funeralUpperSuffix = ref('千古')
+const gender = ref('female')
+const ageStage = ref('f_over80')
+const funeralPhrases = {
+  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
+  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
+  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
+  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
+  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
+  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
+}
+const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
+
+const celebrationType = ref('opening')
+const celebPrefix = ref('恭祝')
+const celebTarget = ref('鴻運實業有限公司')
+const celebPhrases = {
+  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
+  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
+  temple: ['聖誕千秋', '神威顯赫']
+}
+const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
+
+const upperText = ref('敬悼 陳媽李老夫人 千古')
+const middleText = ref('母儀千古')
+const suffixText = ref('敬輓')
+
+const parsedUpperTokens = computed(() => {
+  const chars = upperText.value.split('')
+  return chars.map(char => ({
+    char,
+    isSmall: char === '媽'
+  }))
+})
+
+const maFontSize = computed(() => {
+  const baseSize = layout.value.upper?.size || 40
+  return Math.max(12, baseSize - 20)
+})
+
+const defaultVertical = {
+  upper:    { x: 620, y: 120, size: 40 },
+  middle:   { x: 330, y: 220, size: 84 },
+  bottom_0: { x: 155, y: 520, size: 30 },
+  bottom_1: { x: 155, y: 680, size: 36 },
+  bottom_2: { x: 95,  y: 520, size: 30 },
+  bottom_3: { x: 95,  y: 680, size: 32 },
+  bottom_4: { x: 40,  y: 520, size: 30 },
+  bottom_5: { x: 40,  y: 680, size: 30 },
+  suffix:   { x: 155, y: 920, size: 34 }
+}
+const defaultHorizontal = {
+  upper:    { x: 180, y: 100, size: 36 },
+  middle:   { x: 220, y: 260, size: 76 },
+  bottom_0: { x: 340, y: 400, size: 28 },
+  bottom_1: { x: 340, y: 460, size: 32 },
+  bottom_2: { x: 340, y: 520, size: 28 },
+  bottom_3: { x: 340, y: 580, size: 28 },
+  bottom_4: { x: 340, y: 640, size: 28 },
+  bottom_5: { x: 340, y: 700, size: 28 },
+  suffix:   { x: 620, y: 490, size: 34 }
+}
+const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
+
+const switchOrientation = (vertical) => {
+  isVertical.value = vertical
+  resetPositions()
+  nextTick(() => autoFitZoom())
+}
+const resetPositions = () => {
+  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
+}
+
+const getStyle = (key) => {
+  const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
+  return { 
+    left: `${item.x}px`, 
+    top: `${item.y}px`, 
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const getUpperBoxStyle = () => {
+  const item = (layout.value && layout.value.upper) ? layout.value.upper : { x: 620, y: 120, size: 40 }
+  return {
+    left: `${item.x}px`,
+    top: `${item.y}px`,
+    fontSize: `${item.size}px`,
+    fontWeight: cardFontWeight.value
+  }
+}
+
+const autoFitZoom = () => {
+  if (!viewportRef.value) return
+  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
+  const cardWidth = isVertical.value ? 794 : 1123
+  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
+}
+
+let activeKey = null
+let currentAction = null
+let startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
+
+const startMove = (e, key) => {
+  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
+  originX = layout.value[key].x; originY = layout.value[key].y
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const startResize = (e, key) => {
+  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
+  originSize = layout.value[key].size
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+const onPointerMove = (e) => {
+  if (!activeKey || !layout.value[activeKey]) return
+  const dx = (e.clientX - startX) / zoomLevel.value
+  const dy = (e.clientY - startY) / zoomLevel.value
+  if (currentAction === 'move') {
+    layout.value[activeKey].x = Math.round(originX + dx)
+    layout.value[activeKey].y = Math.round(originY + dy)
+  } else if (currentAction === 'resize') {
+    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
+  }
+}
+const onPointerUp = () => {
+  activeKey = null; currentAction = null
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+}
+
+watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
+const buildFuneralUpper = () => {
+  if (funeralUpperFormat.value !== 'custom') upperText.value = `${funeralUpperFormat.value} ${funeralUpperSuffix.value}`
+}
+const buildCelebrationUpper = () => {
+  if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
+}
+const onCardCategoryChange = () => {
+  if (cardCategory.value === 'funeral') {
+    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
+  } else {
+    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
+  }
+}
+const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
+
+const printCouplet = () => {
+  nextTick(() => {
+    window.print()
+  })
+}
+
+// 雲端字型預載入（加入思源宋體、思源黑體 400/500/600/700/800，確保手機電腦字型立即生效）
 onMounted(() => {
+  if (!document.getElementById('google-noto-fonts-cdn')) {
+    const link = document.createElement('link')
+    link.id = 'google-noto-fonts-cdn'
+    link.rel = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Noto+Serif+TC:wght@400;500;600;700;800&display=swap'
+    document.head.appendChild(link)
+  }
+
   if (!document.getElementById('cns11643-tw-kai-font')) {
     const style = document.createElement('style')
     style.id = 'cns11643-tw-kai-font'
     style.innerHTML = `
       @font-face {
         font-family: 'TW-Kai';
-        src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2'),
-             url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff') format('woff');
+        src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
         font-weight: 400;
-        font-style: normal;
         font-display: swap;
       }
     `
     document.head.appendChild(style)
-  }
-
-  if (!document.getElementById('noto-serif-tc-font')) {
-    const link = document.createElement('link')
-    link.id = 'noto-serif-tc-font'
-    link.rel = 'stylesheet'
-    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;800&display=swap'
-    document.head.appendChild(link)
   }
 
   autoFitZoom()
@@ -3508,7 +3692,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 */
+/* 全域精準列印樣式 (純淨 A4 1:1 列印) */
 @media print {
   @page { 
     size: A4 portrait; 
