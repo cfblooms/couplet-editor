@@ -35,6 +35,11 @@
       </div>
     </header>
 
+    <!-- 浮動提示橫條 (取代會中斷剪貼簿的系統 alert) -->
+    <div v-if="toastMessage" class="floating-toast no-print">
+      {{ toastMessage }}
+    </div>
+
     <!-- ================= 模式 1：蘭花管理系統 ================= -->
     <div v-if="currentTab === 'manage'" class="manage-container no-print">
       <nav class="sub-nav">
@@ -836,12 +841,11 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援手機/平板/電腦全平台通用字體 + 500字重) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
 
-        <!-- 字體與粗細設定 -->
         <div class="panel-section">
           <label class="section-title">字體與粗細設定：</label>
           <div class="form-group">
@@ -1050,7 +1054,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
             </div>
 
-            <!-- 中款 (字體大小上限支援至 300px) -->
+            <!-- 中款 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1089,7 +1093,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 (純幾盆簡明規格) ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1165,13 +1169,13 @@
           </div>
         </div>
 
-        <!-- LINE 傳送給客人簽名回傳按鈕 -->
+        <!-- 升級版 LINE 傳送按鈕 -->
         <button 
           type="button" 
           class="line-action-btn mt-2" 
           @click="shareReceiptToLineDirect"
         >
-          💬 直接傳送 / 複製簽收單給客人 (LINE/手機簽收)
+          💬 直接傳送 / 複製簽收單給客人 (電腦LINE可直接貼上)
         </button>
 
         <button 
@@ -1243,7 +1247,7 @@
             <div class="sheet-footer">
               <div class="footer-left">
                 <div>送貨司機 / 經手人：______________</div>
-                <div class="footer-tip">※ 專車親送・現場點交・祝頌商祺</div>
+                <div class="footer-tip">※ 專車親送・現場點交・祝頌商祺 (客戶可手寫簽名後回傳照片)</div>
               </div>
               <div class="footer-sign-box">
                 <div class="sign-box-title">客戶簽收章 / 簽名欄</div>
@@ -1346,7 +1350,7 @@
           class="line-action-btn mt-2" 
           @click="shareFarmerReceiptToLineDirect"
         >
-          💬 直接傳送 / 複製收據給客人 (免下載)
+          💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
         </button>
 
         <button 
@@ -1492,6 +1496,17 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
+// 浮動通知提示 (取代中斷操作的 alert)
+const toastMessage = ref('')
+let toastTimer = null
+const showToast = (msg) => {
+  toastMessage.value = msg
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    toastMessage.value = ''
+  }, 4500)
+}
+
 // ----------------- Supabase 連線 -----------------
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
@@ -1536,9 +1551,9 @@ const onSelectLocalSeal = async (e) => {
         value: base64Data,
         updated_at: new Date()
       })
-      alert('✅ 印章已成功上傳至雲端！所有手機與平板打開均會自動同步！')
+      showToast('✅ 印章已成功上傳至雲端！所有手機與平板打開均會自動同步！')
     } catch (err) {
-      alert('✅ 印章已在本機生效！')
+      showToast('✅ 印章已在本機生效！')
     }
   }
   reader.readAsDataURL(file)
@@ -1688,7 +1703,6 @@ const formOrder = ref({
   ]
 })
 
-// 庫存選單選取後的智慧帶入
 const onFlowerSelectChange = (item) => {
   if (!item.orchid_name) return
   const matchedInv = inventoryList.value.find(i => 
@@ -1703,7 +1717,6 @@ const onFlowerSelectChange = (item) => {
   calcOrderPrice()
 }
 
-// 新增一組花禮規格
 const addOrderItemRow = () => {
   formOrder.value.items.push({
     orchid_name: '特選蘭花',
@@ -1716,7 +1729,6 @@ const addOrderItemRow = () => {
   calcOrderPrice()
 }
 
-// 移除特定一組花禮規格
 const removeOrderItemRow = (idx) => {
   if (formOrder.value.items.length > 1) {
     formOrder.value.items.splice(idx, 1)
@@ -1724,12 +1736,9 @@ const removeOrderItemRow = (idx) => {
   }
 }
 
-// 庫存過濾出蘭花品種列表供直接選取
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
-// ==========================================
-// 1. 訂單模組：自動累加所有規格盆數、售價與成本
-// ==========================================
+// 訂單模組：自動累加所有規格盆數、售價與成本
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
   if (data) orderList.value = data
@@ -1759,7 +1768,6 @@ const calcOrderPrice = () => {
     totalCost += (flowerBaseCost + potCost + quickCost) * p
   })
 
-  // 加上額外運費
   const ship = Number(formOrder.value.shipping_fee) || 0
   formOrder.value.price = totalPrice + ship
   formOrder.value.cost = totalCost
@@ -2014,7 +2022,7 @@ const copyLineStatement = () => {
   text += `※ 敬請核對帳款，感謝您的支持與惠顧！`
 
   navigator.clipboard.writeText(text).then(() => {
-    alert('✅ LINE 對帳明細已複製到剪貼簿！可直接貼給客戶！')
+    showToast('✅ LINE 對帳明細已複製到剪貼簿！可直接貼給客戶！')
   }).catch(() => {
     alert('複製失敗，請手動複製')
   })
@@ -2030,8 +2038,7 @@ const exportStatementExcel = () => {
     '客戶名稱': o.customer,
     '總盆數': getOrderTotalPots(o),
     '品項與規格': o.spec,
-    '盆器': o.pot,
-    '額外運費': getOrderShippingFee(o),
+    '運費': getOrderShippingFee(o),
     '售價(元)': o.price,
     '出貨狀態': o.shipped_status,
     '收款狀態': o.payment_status
@@ -2047,7 +2054,7 @@ const batchMarkPaid = async () => {
   const ids = statementOrders.value.map(o => o.id)
   const { error } = await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
   if (!error) {
-    alert('✅ 已批次結清成功！')
+    showToast('✅ 已批次結清成功！')
     loadOrders()
   } else {
     alert('更新失敗：' + error.message)
@@ -2122,6 +2129,54 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
+// 核心多功能圖片傳送函式 (解決電腦版 LINE 無法貼上與中斷問題)
+const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
+  canvas.toBlob(async (blob) => {
+    if (!blob) return alert('圖片生成失敗，請重試！')
+    const file = new File([blob], filename, { type: 'image/png' })
+
+    // 手機/平板原生分享通道
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          files: [file]
+        })
+        return
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error('Share failed', err)
+      }
+    }
+
+    // 電腦端雙保險通道：自動下載圖檔 + 寫入剪貼簿
+    // 1. 自動觸發下載 (讓使用者可以直接拖曳到 LINE)
+    const downloadLink = document.createElement('a')
+    downloadLink.download = filename
+    downloadLink.href = canvas.toDataURL('image/png')
+    downloadLink.click()
+
+    // 2. 寫入剪貼簿 (讓使用者可以直接在 LINE 按 Ctrl + V)
+    let copiedToClipboard = false
+    if (navigator.clipboard && navigator.clipboard.write) {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ])
+        copiedToClipboard = true
+      } catch (err) {
+        console.warn('剪貼簿寫入受阻，已啟用自動下載備案', err)
+      }
+    }
+
+    // 顯示友善不中斷操作的提示
+    if (copiedToClipboard) {
+      showToast(`📋 ${successMsg}！\n已複製到剪貼簿，並已自動下載圖檔！請在電腦 LINE 聊天室按 Ctrl + V (或直接拖曳圖片) 傳送！`)
+    } else {
+      showToast(`📁 ${successMsg}！\n圖檔已自動下載！請直接將圖片拖進電腦版 LINE 聊天室即可傳送！`)
+    }
+  }, 'image/png')
+}
+
 // 產生簽收單高畫質圖片供 LINE 傳送簽收
 const shareReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
@@ -2162,16 +2217,13 @@ const shareReceiptToLineDirect = () => {
   ctx.lineTo(749, 80)
   ctx.stroke()
 
-  // 表格邊界繪製 (寬度 704px, 高度 300px)
   const tLeft = 45, tTop = 95, tWidth = 704
   const rowHeight = 75
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#334155'
 
-  // 外框
   ctx.strokeRect(tLeft, tTop, tWidth, rowHeight * 4)
 
-  // 內部橫線
   for (let i = 1; i <= 3; i++) {
     ctx.beginPath()
     ctx.moveTo(tLeft, tTop + rowHeight * i)
@@ -2179,7 +2231,6 @@ const shareReceiptToLineDirect = () => {
     ctx.stroke()
   }
 
-  // 內部第一列直線
   ctx.beginPath()
   ctx.moveTo(tLeft + 110, tTop)
   ctx.lineTo(tLeft + 110, tTop + rowHeight)
@@ -2189,13 +2240,11 @@ const shareReceiptToLineDirect = () => {
   ctx.lineTo(tLeft + 460, tTop + rowHeight)
   ctx.stroke()
 
-  // 內部第2~4列標籤欄右側線
   ctx.beginPath()
   ctx.moveTo(tLeft + 110, tTop + rowHeight)
   ctx.lineTo(tLeft + 110, tTop + rowHeight * 4)
   ctx.stroke()
 
-  // 標籤欄底色 (灰色)
   ctx.fillStyle = '#f1f5f9'
   ctx.fillRect(tLeft + 1, tTop + 1, 108, rowHeight - 2)
   ctx.fillRect(tLeft + 361, tTop + 1, 98, rowHeight - 2)
@@ -2203,7 +2252,6 @@ const shareReceiptToLineDirect = () => {
   ctx.fillRect(tLeft + 1, tTop + rowHeight * 2 + 1, 108, rowHeight - 2)
   ctx.fillRect(tLeft + 1, tTop + rowHeight * 3 + 1, 108, rowHeight - 2)
 
-  // 填寫欄位標籤
   ctx.fillStyle = '#1e293b'
   ctx.textAlign = 'center'
   ctx.font = `bold 15px ${fontFam}`
@@ -2213,7 +2261,6 @@ const shareReceiptToLineDirect = () => {
   ctx.fillText('致贈/賀詞', tLeft + 55, tTop + rowHeight * 2 + 43)
   ctx.fillText('備註說明', tLeft + 55, tTop + rowHeight * 3 + 43)
 
-  // 填寫欄位數值
   ctx.textAlign = 'left'
   ctx.font = `bold 16px ${fontFam}`
   ctx.fillText(receiptForm.value.recipient || '—', tLeft + 120, tTop + 43)
@@ -2230,7 +2277,6 @@ const shareReceiptToLineDirect = () => {
   ctx.fillText(receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + 120, tTop + rowHeight * 2 + 43)
   ctx.fillText(receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + 120, tTop + rowHeight * 3 + 43)
 
-  // 底部簽名區
   ctx.fillStyle = '#334155'
   ctx.font = `14px ${fontFam}`
   ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
@@ -2238,7 +2284,6 @@ const shareReceiptToLineDirect = () => {
   ctx.fillStyle = '#64748b'
   ctx.fillText('※ 專車親送・現場點交・祝頌商祺 (客戶可直接手機手寫簽名後照片回傳)', 45, 465)
 
-  // 客戶簽名方框
   const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#475569'
@@ -2342,43 +2387,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 
 const printFarmerReceipt = () => window.print()
-
-const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
-  canvas.toBlob(async (blob) => {
-    if (!blob) return alert('圖片生成失敗，請重試！')
-    const file = new File([blob], filename, { type: 'image/png' })
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          files: [file]
-        })
-        return
-      } catch (err) {
-        if (err.name !== 'AbortError') console.error('Share failed', err)
-      }
-    }
-
-    if (navigator.clipboard && navigator.clipboard.write) {
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ])
-        alert(`✅ ${successMsg}\n\n已直接複製到您的電腦剪貼簿！請直接開啟 LINE 聊天室按 Ctrl + V (Mac 按 Cmd + V) 貼上即可傳送！`)
-        return
-      } catch (err) {
-        console.warn('Clipboard write failed, fallback to download', err)
-      }
-    }
-
-    const link = document.createElement('a')
-    link.download = filename
-    link.href = canvas.toDataURL('image/png')
-    link.click()
-    alert(`✅ ${successMsg} 已自動下載，請開啟 LINE 傳送給客戶！`)
-  }, 'image/png')
-}
 
 // 產生花卡高畫質圖片
 const shareCoupletToLineDirect = () => {
@@ -2869,7 +2877,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (全平台雲端字型支援)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2879,7 +2887,6 @@ const viewportRef = ref(null)
 const cardFontFamily = ref('kai')
 const cardFontWeight = ref('700')
 
-// 全平台通用（手機、平板、Mac、Windows 均有明顯字型差別）
 const fontMapping = {
   kai: '"TW-Kai", "DFKai-SB", "BiauKai", "Kaiti", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -3064,7 +3071,6 @@ const printCouplet = () => {
   })
 }
 
-// 雲端字型預載入（加入思源宋體、思源黑體 400/500/600/700/800，確保手機電腦字型立即生效）
 onMounted(() => {
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
@@ -3082,6 +3088,7 @@ onMounted(() => {
         font-family: 'TW-Kai';
         src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
         font-weight: 400;
+        font-style: normal;
         font-display: swap;
       }
     `
@@ -3113,6 +3120,29 @@ onMounted(() => {
   height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
   background-color: #f1f5f9;
+}
+
+/* 浮動提示橫條 (不阻擋操作) */
+.floating-toast {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background-color: #0f172a;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  font-size: 13.5px;
+  line-height: 1.5;
+  white-space: pre-line;
+  z-index: 10000;
+  border-left: 4px solid #10b981;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 /* 跨平台書法正楷字體類別 */
@@ -3635,7 +3665,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
