@@ -23,7 +23,7 @@
           :class="{ active: currentTab === 'receipt' }" 
           @click="currentTab = 'receipt'"
         >
-          📄 訂單 A5 簽收單
+          📄 訂單 A5 簽收單 (支援線上簽名)
         </button>
         <button 
           type="button" 
@@ -50,9 +50,9 @@
         <div class="share-modal-body">
           <img :src="shareModalImg" class="share-preview-img" alt="傳送預覽圖" />
           <div class="share-tips-row">
-            <span>💡 <b>電腦版 LINE 傳送方式：</b></span>
-            <span>1. 剛才已自動下載圖檔，可直接把圖檔<b>拖曳進 LINE</b>。</span>
-            <span>2. 或在此圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 發送。</span>
+            <span>💡 <b>傳送給訂購人方式：</b></span>
+            <span>1. 已自動下載圖檔，可直接將圖檔<b>傳送至 LINE</b>。</span>
+            <span>2. 電腦版可在圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 聊天室按 <b>Ctrl + V</b> 發送。</span>
           </div>
         </div>
       </div>
@@ -157,12 +157,12 @@
                 </div>
                 <div class="item-grid">
                   <div class="field">
-                    <label>品種名稱 (可手動輸入或從庫存選取)</label>
+                    <label>品種名稱</label>
                     <input 
                       v-model="item.orchid_name" 
                       list="inv-flower-select-options" 
                       @change="onFlowerSelectChange(item)"
-                      placeholder="手動輸入或點此選取庫存" 
+                      placeholder="手動輸入或選取庫存" 
                     />
                   </div>
                   <div class="field highlight-field">
@@ -276,19 +276,7 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>單號</th>
-                    <th>客戶名稱</th>
-                    <th>統編</th>
-                    <th>開收據</th>
-                    <th>總盆數</th>
-                    <th>規格明細</th>
-                    <th>運費</th>
-                    <th>總售價</th>
-                    <th>花卡</th>
-                    <th>簽收單</th>
-                    <th>出貨</th>
-                    <th>收款</th>
-                    <th>操作</th>
+                    <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -454,9 +442,6 @@
                       <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
                       <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                     </td>
-                  </tr>
-                  <tr v-if="statementOrders.length === 0">
-                    <td colspan="11" class="text-center py-4 text-gray">符合條件的訂單為 0 筆</td>
                   </tr>
                 </tbody>
               </table>
@@ -859,7 +844,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (敬悼、千古獨立成格) ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -893,11 +878,10 @@
           </select>
         </div>
 
-        <!-- 上款拆成獨立 3 格設定 -->
+        <!-- 上款獨立設定 -->
         <div class="panel-section">
-          <!-- 1. 前綴敬語 (敬悼/恭祝/恭賀，獨立一格) -->
           <div class="section-title-with-weight">
-            <label class="section-title">1. 上款開頭敬詞（獨立一格）：</label>
+            <label class="section-title">1. 開頭敬詞（獨立一格）：</label>
             <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
               <option value="400">400 (標準)</option>
               <option value="500">500 (中等)</option>
@@ -921,9 +905,8 @@
             </select>
           </div>
 
-          <!-- 2. 對象/稱謂 (獨立一格) -->
           <div class="section-title-with-weight mt-2">
-            <label class="section-title">2. 受禮對象 / 逝者稱謂（獨立一格）：</label>
+            <label class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</label>
             <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
               <option value="400">400 (標準)</option>
               <option value="500">500 (中等)</option>
@@ -947,7 +930,6 @@
           </template>
           <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂" />
 
-          <!-- 3. 上款結尾詞 (千古/靈前/誌慶，獨立一格) -->
           <div class="section-title-with-weight mt-2">
             <label class="section-title">3. 上款結尾詞（獨立一格）：</label>
             <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
@@ -1111,7 +1093,7 @@
               fontFamily: activeCssFontFamily
             }"
           >
-            <!-- 1. 上款開頭敬語 (例如: 敬悼 / 恭祝) - 獨立一格 -->
+            <!-- 1. 上款開頭敬語 (獨立一格) -->
             <div 
               v-if="upperPrefix.trim()"
               class="text-box upper-prefix-box"
@@ -1122,7 +1104,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
             </div>
 
-            <!-- 2. 受禮對象/稱謂 (例如: 陳媽李老夫人) - 獨立一格 -->
+            <!-- 2. 受禮對象/稱謂 (獨立一格) -->
             <div 
               v-if="upperTarget.trim()"
               class="text-box upper-target-box"
@@ -1139,7 +1121,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
             </div>
 
-            <!-- 3. 上款結尾敬詞 (例如: 千古 / 仙逝 / 誌慶) - 獨立一格 -->
+            <!-- 3. 上款結尾敬詞 (獨立一格) -->
             <div 
               v-if="upperSuffix.trim()"
               class="text-box upper-suffix-box"
@@ -1189,11 +1171,12 @@
       </div>
     </div>
 
-    <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+    <!-- ================= 模式 3：A5 橫式簽收單 (線上簽名 ＋ 簽好直接回傳下單人) ================= -->
     <div v-else-if="currentTab === 'receipt'" class="receipt-container">
       <div class="control-panel no-print">
         <h2>📋 橫式 A5 簽收單管理</h2>
 
+        <!-- 快速帶入 -->
         <div class="panel-section highlight-panel">
           <label class="section-title">依訂單編號快速帶入：</label>
           <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
@@ -1202,6 +1185,27 @@
               【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
             </option>
           </select>
+        </div>
+
+        <!-- 🌟 新增：現場客戶手機/手寫線上簽名區 -->
+        <div class="panel-section live-sign-panel">
+          <div class="section-title-with-weight">
+            <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
+            <button type="button" class="mini-clean-btn" @click="clearLiveSignature">✕ 清除重簽</button>
+          </div>
+          <div class="canvas-sign-wrapper">
+            <canvas 
+              ref="signPadCanvasRef" 
+              class="live-sign-pad" 
+              width="340" 
+              height="110"
+              @pointerdown="startSign"
+              @pointermove="drawingSign"
+              @pointerup="stopSign"
+              @pointerleave="stopSign"
+            ></canvas>
+          </div>
+          <div class="sign-hint-text">※ 收件人直接在上方白色框中手寫簽名，簽完自動帶入簽收單！</div>
         </div>
 
         <div class="panel-section">
@@ -1265,12 +1269,13 @@
           </div>
         </div>
 
+        <!-- 🌟 一鍵傳送給下單客戶（含收件人簽名） -->
         <button 
           type="button" 
           class="line-action-btn mt-2" 
-          @click="shareReceiptToLineDirect"
+          @click="shareReceiptToBuyerDirect"
         >
-          💬 直接傳送 / 複製簽收單給客人 (電腦LINE可直接貼上)
+          📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
         </button>
 
         <button 
@@ -1283,6 +1288,7 @@
         </button>
       </div>
 
+      <!-- 右側預覽區 (現場簽名會即時顯示於簽名欄) -->
       <div class="receipt-preview-area" ref="receiptViewportRef">
         <div class="zoom-toolbar no-print">
           <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
@@ -1342,11 +1348,14 @@
             <div class="sheet-footer">
               <div class="footer-left">
                 <div>送貨司機 / 經手人：______________</div>
-                <div class="footer-tip">※ 專車親送・現場點交・祝頌商祺 (客戶可手寫簽名後回傳照片)</div>
+                <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
               </div>
               <div class="footer-sign-box">
-                <div class="sign-box-title">客戶簽收章 / 簽名欄</div>
-                <div class="sign-box-area"></div>
+                <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
+                <div class="sign-box-area">
+                  <!-- 客人簽好的簽名即時展示於此 -->
+                  <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
+                </div>
               </div>
             </div>
           </div>
@@ -1591,7 +1600,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
-// 浮動通知提示
+// 浮動提示
 const toastMessage = ref('')
 let toastTimer = null
 const showToast = (msg) => {
@@ -1602,7 +1611,7 @@ const showToast = (msg) => {
   }, 4500)
 }
 
-// 圖片分享專用彈窗
+// 圖片分享彈窗
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 
@@ -1610,53 +1619,6 @@ const shareModalTitle = ref('')
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
-
-// ==========================================
-// 蔡鎮遠印章：全裝置雲端同步機制
-// ==========================================
-const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
-const activeCaiSealSrc = computed(() => {
-  return userCustomSeal.value || '/cai-seal.png'
-})
-
-const fetchSealFromCloud = async () => {
-  try {
-    const { data } = await supabase.from('system_settings').select('value').eq('key', 'cai_seal_img').single()
-    if (data && data.value) {
-      userCustomSeal.value = data.value
-      localStorage.setItem('user_cai_seal_img', data.value)
-    }
-  } catch (err) {
-    // 尚未建立設定表時靜默跳過
-  }
-}
-
-const triggerLocalSealPicker = () => {
-  document.getElementById('local-seal-picker')?.click()
-}
-
-const onSelectLocalSeal = async (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = async (event) => {
-    const base64Data = event.target.result
-    userCustomSeal.value = base64Data
-    localStorage.setItem('user_cai_seal_img', base64Data)
-
-    try {
-      await supabase.from('system_settings').upsert({
-        key: 'cai_seal_img',
-        value: base64Data,
-        updated_at: new Date()
-      })
-      showToast('✅ 印章已成功上傳至雲端！所有手機與平板打開均會自動同步！')
-    } catch (err) {
-      showToast('✅ 印章已在本機生效！')
-    }
-  }
-  reader.readAsDataURL(file)
-}
 
 // ----------------- 頁面分頁控制 -----------------
 const currentTab = ref('manage')
@@ -1684,7 +1646,7 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-// 核心過濾函式：只顯示「品種名 幾盆」，徹底去除株數雜訊
+// 核心過濾函式：只顯示「品種名 幾盆」
 const formatSimpleItemName = (ord) => {
   if (!ord) return '特選蘭花 1盆'
 
@@ -1711,7 +1673,6 @@ const formatSimpleItemName = (ord) => {
   return `${cleanName} ${totalPots}盆`
 }
 
-// 輔助函式：計算一筆訂單中的全部總盆數
 const getOrderTotalPots = (ord) => {
   if (!ord) return 1
   const searchStr = `${ord.note || ''} ${ord.spec || ''}`
@@ -1723,7 +1684,6 @@ const getOrderTotalPots = (ord) => {
   return 1
 }
 
-// 輔助函式：取得訂單運費
 const getOrderShippingFee = (ord) => {
   if (!ord) return 0
   const searchStr = `${ord.note || ''}`
@@ -1731,7 +1691,6 @@ const getOrderShippingFee = (ord) => {
   return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
-// 產生「當日日期 + 流水號」
 const generateDateSeqId = (prefix, existingList) => {
   const now = new Date()
   const y = now.getFullYear()
@@ -1837,7 +1796,6 @@ const removeOrderItemRow = (idx) => {
 
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
-// 訂單模組：自動累加所有規格盆數、售價與成本
 const loadOrders = async () => {
   const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
   if (data) orderList.value = data
@@ -2162,7 +2120,7 @@ const batchMarkPaid = async () => {
 }
 
 // ==========================================
-// 3. A5 橫式簽收單
+// 3. A5 橫式簽收單 (支援現場收件人線上簽名)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -2182,6 +2140,67 @@ const receiptForm = ref({
   notes: '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 })
 
+// 線上手寫簽名板狀態
+const signPadCanvasRef = ref(null)
+const liveSignDataUrl = ref('')
+let isSigning = false
+let lastSignX = 0
+let lastSignY = 0
+
+const getSignCoords = (e) => {
+  if (!signPadCanvasRef.value) return { x: 0, y: 0 }
+  const rect = signPadCanvasRef.value.getBoundingClientRect()
+  const scaleX = signPadCanvasRef.value.width / rect.width
+  const scaleY = signPadCanvasRef.value.height / rect.height
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  }
+}
+
+const startSign = (e) => {
+  isSigning = true
+  const coords = getSignCoords(e)
+  lastSignX = coords.x
+  lastSignY = coords.y
+}
+
+const drawingSign = (e) => {
+  if (!isSigning || !signPadCanvasRef.value) return
+  const ctx = signPadCanvasRef.value.getContext('2d')
+  const coords = getSignCoords(e)
+
+  ctx.lineWidth = 2.5
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = '#0f172a'
+
+  ctx.beginPath()
+  ctx.moveTo(lastSignX, lastSignY)
+  ctx.lineTo(coords.x, coords.y)
+  ctx.stroke()
+
+  lastSignX = coords.x
+  lastSignY = coords.y
+}
+
+const stopSign = () => {
+  if (!isSigning) return
+  isSigning = false
+  if (signPadCanvasRef.value) {
+    liveSignDataUrl.value = signPadCanvasRef.value.toDataURL('image/png')
+  }
+}
+
+const clearLiveSignature = () => {
+  if (signPadCanvasRef.value) {
+    const ctx = signPadCanvasRef.value.getContext('2d')
+    ctx.clearRect(0, 0, signPadCanvasRef.value.width, signPadCanvasRef.value.height)
+    liveSignDataUrl.value = ''
+    showToast('已清除簽名，請收件人重新簽署')
+  }
+}
+
 const onSelectReceiptOrder = () => {
   if (!selectedOrderId.value) return
   const ord = orderList.value.find(o => o.id === selectedOrderId.value)
@@ -2194,6 +2213,7 @@ const onSelectReceiptOrder = () => {
     receiptForm.value.item = formatSimpleItemName(ord)
     receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
     receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
+    clearLiveSignature()
   }
 }
 
@@ -2214,6 +2234,7 @@ const fillReceiptFromOrder = (ord) => {
   receiptForm.value.giver = `敬領 誌慶 / ${displayShopName.value} 敬製`
   receiptForm.value.notes = ord.note ? `備註：${ord.note}` : '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！'
 
+  clearLiveSignature()
   currentTab.value = 'receipt'
   nextTick(() => autoFitReceipt())
 }
@@ -2275,8 +2296,8 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   }, 'image/png')
 }
 
-// 產生簽收單高畫質圖片供 LINE 傳送簽收
-const shareReceiptToLineDirect = () => {
+// 產生簽收單高畫質圖片供回傳下單客戶（直接合成手寫簽名）
+const shareReceiptToBuyerDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
   canvas.height = 560 * 2
@@ -2289,21 +2310,25 @@ const shareReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
+  // 抬頭花店名
   ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
+  // 主標題
   ctx.fillStyle = '#dc2626'
   ctx.font = `bold 22px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
+  // 右上角單號與日期
   ctx.fillStyle = '#334155'
   ctx.font = `13px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
 
+  // 頂部分隔線
   ctx.lineWidth = 2.5
   ctx.strokeStyle = '#1e293b'
   ctx.beginPath()
@@ -2376,8 +2401,9 @@ const shareReceiptToLineDirect = () => {
   ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
   ctx.font = `12px ${fontFam}`
   ctx.fillStyle = '#64748b'
-  ctx.fillText('※ 專車親送・現場點交・祝頌商祺 (客戶可直接手機手寫簽名後照片回傳)', 45, 465)
+  ctx.fillText('※ 專車親送・現場點交・祝頌商祺 (收件人已線上簽收)', 45, 465)
 
+  // 客戶簽名方框
   const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#475569'
@@ -2390,8 +2416,22 @@ const shareReceiptToLineDirect = () => {
   ctx.font = `bold 12px ${fontFam}`
   ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 16)
 
-  const filename = `銷貨簽收單_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '簽收單確認', '簽收單圖片準備完成')
+  // 繪製收件人的真實簽名 (如果有簽名的話)
+  const finishShare = () => {
+    const filename = `已簽收單據_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '簽收單據回傳', '已簽名單據準備完成')
+  }
+
+  if (liveSignDataUrl.value) {
+    const signImg = new Image()
+    signImg.onload = () => {
+      ctx.drawImage(signImg, sBoxLeft + 10, sBoxTop + 24, sBoxW - 20, sBoxH - 28)
+      finishShare()
+    }
+    signImg.src = liveSignDataUrl.value
+  } else {
+    finishShare()
+  }
 }
 
 // ==========================================
@@ -2482,7 +2522,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 
 const printFarmerReceipt = () => window.print()
 
-// 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
   const canvas = document.createElement('canvas')
   canvas.width = 794 * 2
@@ -2872,7 +2911,6 @@ const deleteItem = async (table, id, reloadFn) => {
   if (!error) reloadFn()
 }
 
-// 匯出全部訂單 Excel
 const exportOrdersToExcel = () => {
   if (orderList.value.length === 0) return alert('目前尚無訂單可供匯出！')
   const exportData = orderList.value.map(o => ({
@@ -2905,7 +2943,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器 (上款獨立拆為: 開頭敬詞、對象稱謂、結尾詞)
+// 9. 花卡 / 輓聯編輯器
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2914,7 +2952,6 @@ const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
 
-// 上款獨立三欄
 const upperPrefix = ref('敬悼')
 const upperTarget = ref('陳媽李老夫人')
 const upperSuffix = ref('千古')
@@ -2930,7 +2967,6 @@ const celebTarget = ref('鴻運實業有限公司')
 const gender = ref('female')
 const ageStage = ref('f_over80')
 
-// 每個獨立格子的粗細
 const weights = ref({
   upper_prefix: '600',
   upper_target: '700',
@@ -3005,7 +3041,6 @@ const celebPhrases = {
 }
 const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
 
-// 稱謂解析 (支援小字「媽」)
 const parsedUpperTargetTokens = computed(() => {
   const chars = upperTarget.value.split('')
   return chars.map(char => ({
@@ -3019,7 +3054,6 @@ const maFontSize = computed(() => {
   return Math.max(12, baseSize - 20)
 })
 
-// 直式與橫式預設位置（上款三項獨立座標）
 const defaultVertical = {
   upper_prefix: { x: 620, y: 100, size: 36 },
   upper_target: { x: 620, y: 220, size: 42 },
@@ -3128,13 +3162,6 @@ const onFuneralFormatChange = () => {
     upperTarget.value = funeralUpperFormat.value
   }
 }
-const buildFuneralUpper = () => {
-  // 保留選單切換相容
-}
-const buildCelebrationUpper = () => {
-  upperPrefix.value = celebPrefix.value
-  upperTarget.value = celebTarget.value
-}
 const onCardCategoryChange = () => {
   if (cardCategory.value === 'funeral') {
     upperPrefix.value = '敬悼'
@@ -3158,7 +3185,7 @@ const printCouplet = () => {
   })
 }
 
-// 產生花卡高畫質圖片 (支援三格拆開獨立繪製)
+// 產生花卡高畫質圖片
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -3224,22 +3251,18 @@ const shareCoupletToLineDirect = () => {
     }
   }
 
-  // 分別繪製獨立的 3 格上款
   drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
   drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
   drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
 
-  // 繪製中款
   drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
 
-  // 繪製下款
   bottomLines.value.forEach((item, idx) => {
     if (item.text.trim()) {
       drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
     }
   })
 
-  // 繪製敬詞
   drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
 
   const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
@@ -3350,6 +3373,50 @@ onMounted(() => {
   font-size: 13px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* 現場收件人手寫簽名板樣式 */
+.live-sign-panel {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+}
+.canvas-sign-wrapper {
+  background: white;
+  border: 1.5px dashed #4ade80;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.live-sign-pad {
+  touch-action: none;
+  cursor: crosshair;
+  background-color: #ffffff;
+  display: block;
+}
+.mini-clean-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.sign-hint-text {
+  font-size: 11.5px;
+  color: #166534;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* 簽收單上的手寫簽名圖片 */
+.live-signature-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 /* 跨平台書法正楷字體類別 */
@@ -3591,7 +3658,6 @@ input, select, textarea {
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
 
-/* 每個格子獨立粗細選單樣式 */
 .section-title-with-weight {
   display: flex;
   justify-content: space-between;
@@ -3740,7 +3806,7 @@ input, select, textarea {
   display: flex; flex-direction: column; background-color: #fafafa;
 }
 .sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
-.sign-box-area { flex: 1; min-height: 48px; }
+.sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
 
 /* ====================================================
    農民出售農產品收據
@@ -3893,7 +3959,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3950,7 +4016,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 */
+/* 全域精準列印樣式 (純淨 A4 1:1 列印) */
 @media print {
   @page { 
     size: A4 portrait; 
