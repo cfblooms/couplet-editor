@@ -40,7 +40,7 @@
       {{ toastMessage }}
     </div>
 
-    <!-- 圖片傳送專用彈窗（可直接右鍵複製或拖進LINE） -->
+    <!-- 圖片傳送專用彈窗 -->
     <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
       <div class="image-modal-content share-preview-modal" @click.stop>
         <div class="image-modal-header">
@@ -859,7 +859,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (敬悼、千古獨立成格) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -893,11 +893,12 @@
           </select>
         </div>
 
-        <!-- 上款獨立設定 -->
+        <!-- 上款拆成獨立 3 格設定 -->
         <div class="panel-section">
+          <!-- 1. 前綴敬語 (敬悼/恭祝/恭賀，獨立一格) -->
           <div class="section-title-with-weight">
-            <label class="section-title">上款設定：</label>
-            <select v-model="weights.upper" class="mini-weight-select" title="設定上款粗細">
+            <label class="section-title">1. 上款開頭敬詞（獨立一格）：</label>
+            <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
               <option value="400">400 (標準)</option>
               <option value="500">500 (中等)</option>
               <option value="600">600 (半粗)</option>
@@ -905,46 +906,76 @@
               <option value="800">800 (特粗)</option>
             </select>
           </div>
+          <div class="form-row">
+            <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
+            <select v-if="cardCategory === 'funeral'" v-model="upperPrefix" style="width: 110px;">
+              <option value="敬悼">敬悼</option>
+              <option value="痛悼">痛悼</option>
+              <option value="敬唁">敬唁</option>
+              <option value="追悼">追悼</option>
+            </select>
+            <select v-else v-model="upperPrefix" style="width: 110px;">
+              <option value="恭祝">恭祝</option>
+              <option value="恭賀">恭賀</option>
+              <option value="敬賀">敬賀</option>
+            </select>
+          </div>
 
+          <!-- 2. 對象/稱謂 (獨立一格) -->
+          <div class="section-title-with-weight mt-2">
+            <label class="section-title">2. 受禮對象 / 逝者稱謂（獨立一格）：</label>
+            <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
+              <option value="400">400 (標準)</option>
+              <option value="500">500 (中等)</option>
+              <option value="600">600 (半粗)</option>
+              <option value="700">700 (粗體)</option>
+              <option value="800">800 (特粗)</option>
+            </select>
+          </div>
           <template v-if="cardCategory === 'funeral'">
             <div class="form-row">
-              <select v-model="funeralUpperFormat" @change="buildFuneralUpper">
-                <option value="敬悼 X媽X老夫人">敬悼 X媽X老夫人</option>
-                <option value="敬悼 X媽X夫人">敬悼 X媽X夫人</option>
-                <option value="敬悼 X公X老先生">敬悼 X公X老先生</option>
-                <option value="敬悼 X公X先生">敬悼 X公X先生</option>
-                <option value="敬悼 X女士">敬悼 X女士</option>
-                <option value="敬悼 X先生">敬悼 X先生</option>
+              <select v-model="funeralUpperFormat" @change="onFuneralFormatChange">
+                <option value="X媽X老夫人">X媽X老夫人</option>
+                <option value="X媽X夫人">X媽X夫人</option>
+                <option value="X公X老先生">X公X老先生</option>
+                <option value="X公X先生">X公X先生</option>
+                <option value="X女士">X女士</option>
+                <option value="X先生">X先生</option>
                 <option value="custom">自行輸入</option>
               </select>
-              <select v-model="funeralUpperSuffix" @change="buildFuneralUpper">
-                <option value="千古">千古</option>
-                <option value="仙逝">仙逝</option>
-                <option value="靈前">靈前</option>
-                <option value="冥前">冥前</option>
-                <option value="便覽">便覽</option>
-                <option value="淑靈">淑靈</option>
-                <option value="蓮前">蓮前</option>
-              </select>
             </div>
           </template>
+          <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂" />
 
-          <template v-else>
-            <div class="form-row">
-              <select v-model="celebrationType" @change="onCelebrationTypeChange">
-                <option value="opening">開幕</option>
-                <option value="moving">搬家</option>
-                <option value="temple">宮廟</option>
-              </select>
-              <select v-model="celebPrefix" @change="buildCelebrationUpper">
-                <option value="恭祝">恭祝</option>
-                <option value="恭賀">恭賀</option>
-              </select>
-              <input type="text" v-model="celebTarget" @input="buildCelebrationUpper" placeholder="受禮對象" />
-            </div>
-          </template>
-          
-          <input type="text" v-model="upperText" class="full-input mt-2" placeholder="上款文字" />
+          <!-- 3. 上款結尾詞 (千古/靈前/誌慶，獨立一格) -->
+          <div class="section-title-with-weight mt-2">
+            <label class="section-title">3. 上款結尾詞（獨立一格）：</label>
+            <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
+              <option value="400">400 (標準)</option>
+              <option value="500">500 (中等)</option>
+              <option value="600">600 (半粗)</option>
+              <option value="700">700 (粗體)</option>
+              <option value="800">800 (特粗)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <input type="text" v-model="upperSuffix" class="full-input" placeholder="例: 千古、仙逝、靈前" />
+            <select v-if="cardCategory === 'funeral'" v-model="upperSuffix" style="width: 110px;">
+              <option value="千古">千古</option>
+              <option value="仙逝">仙逝</option>
+              <option value="靈前">靈前</option>
+              <option value="冥前">冥前</option>
+              <option value="便覽">便覽</option>
+              <option value="淑靈">淑靈</option>
+              <option value="蓮前">蓮前</option>
+            </select>
+            <select v-else v-model="upperSuffix" style="width: 110px;">
+              <option value="誌慶">誌慶</option>
+              <option value="大吉">大吉</option>
+              <option value="惠存">惠存</option>
+              <option value="雅存">雅存</option>
+            </select>
+          </div>
         </div>
 
         <!-- 中款獨立設定 -->
@@ -1080,21 +1111,43 @@
               fontFamily: activeCssFontFamily
             }"
           >
-            <!-- 上款 -->
+            <!-- 1. 上款開頭敬語 (例如: 敬悼 / 恭祝) - 獨立一格 -->
             <div 
-              v-if="upperText.trim()"
-              class="text-box upper-box"
-              :style="getUpperBoxStyle()"
-              @pointerdown="startMove($event, 'upper')"
+              v-if="upperPrefix.trim()"
+              class="text-box upper-prefix-box"
+              :style="getStyle('upper_prefix')"
+              @pointerdown="startMove($event, 'upper_prefix')"
+            >
+              <span>{{ upperPrefix }}</span>
+              <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
+            </div>
+
+            <!-- 2. 受禮對象/稱謂 (例如: 陳媽李老夫人) - 獨立一格 -->
+            <div 
+              v-if="upperTarget.trim()"
+              class="text-box upper-target-box"
+              :style="getUpperTargetBoxStyle()"
+              @pointerdown="startMove($event, 'upper_target')"
             >
               <span 
-                v-for="(token, tIdx) in parsedUpperTokens" 
+                v-for="(token, tIdx) in parsedUpperTargetTokens" 
                 :key="tIdx" 
                 :style="token.isSmall ? { fontSize: maFontSize + 'px' } : {}"
               >
                 {{ token.char }}
               </span>
-              <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper')">⤡</div>
+              <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
+            </div>
+
+            <!-- 3. 上款結尾敬詞 (例如: 千古 / 仙逝 / 誌慶) - 獨立一格 -->
+            <div 
+              v-if="upperSuffix.trim()"
+              class="text-box upper-suffix-box"
+              :style="getStyle('upper_suffix')"
+              @pointerdown="startMove($event, 'upper_suffix')"
+            >
+              <span>{{ upperSuffix }}</span>
+              <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_suffix')">⤡</div>
             </div>
 
             <!-- 中款 -->
@@ -2176,11 +2229,10 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 核心多功能圖片傳送函式 (保證必下載 + 必可貼上 + 彈窗可右鍵複製)
+// 核心多功能圖片傳送函式
 const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
   const dataUrl = canvas.toDataURL('image/png')
 
-  // 1. 同步觸發瀏覽器下載 (絕不被攔截)
   const downloadLink = document.createElement('a')
   downloadLink.download = filename
   downloadLink.href = dataUrl
@@ -2188,11 +2240,9 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   downloadLink.click()
   document.body.removeChild(downloadLink)
 
-  // 2. 開啟預覽彈窗 (可供滑鼠右鍵直接複製)
   shareModalImg.value = dataUrl
   shareModalTitle.value = shareTitle
 
-  // 3. 嘗試原生分享 (手機/平板)
   canvas.toBlob(async (blob) => {
     if (!blob) return
     const file = new File([blob], filename, { type: 'image/png' })
@@ -2209,7 +2259,6 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
       }
     }
 
-    // 4. 嘗試寫入剪貼簿 (供電腦版 Ctrl + V 貼上)
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
         await navigator.clipboard.write([
@@ -2240,25 +2289,21 @@ const shareReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  // 抬頭花店名
   ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
-  // 主標題
   ctx.fillStyle = '#dc2626'
   ctx.font = `bold 22px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
-  // 右上角單號與日期
   ctx.fillStyle = '#334155'
   ctx.font = `13px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
 
-  // 頂部分隔線
   ctx.lineWidth = 2.5
   ctx.strokeStyle = '#1e293b'
   ctx.beginPath()
@@ -2436,87 +2481,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 
 const printFarmerReceipt = () => window.print()
-
-// 產生花卡高畫質圖片
-const shareCoupletToLineDirect = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
-
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
-
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
-
-  ctx.fillStyle = '#000000'
-  const targetFontFamily = activeCssFontFamily.value
-
-  const drawTextItem = (text, item, isVertMode, weightVal, isUpper = false) => {
-    if (!text || !item) return
-    ctx.textBaseline = 'top'
-    const w = String(weightVal || '600')
-    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
-    const sWidth = strokeWidthMap[w] || 0.8
-
-    if (isVertMode) {
-      let currentY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, item.x + offsetX, currentY)
-        }
-        ctx.fillText(char, item.x + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = item.x
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpper && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#000000'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, currentX, item.y + offsetY)
-        }
-        ctx.fillText(char, currentX, item.y + offsetY)
-        currentX += curSize + 4
-      })
-    }
-  }
-
-  drawTextItem(upperText.value, layout.value.upper, isVertical.value, weights.value.upper, true)
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
-
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
-}
 
 // 產生農民收據高畫質圖片
 const shareFarmerReceiptToLineDirect = () => {
@@ -2941,7 +2905,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 9. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器 (上款獨立拆為: 開頭敬詞、對象稱謂、結尾詞)
 // ==========================================
 const isVertical = ref(true)
 const cardCategory = ref('funeral')
@@ -2950,8 +2914,27 @@ const viewportRef = ref(null)
 
 const cardFontFamily = ref('kai')
 
+// 上款獨立三欄
+const upperPrefix = ref('敬悼')
+const upperTarget = ref('陳媽李老夫人')
+const upperSuffix = ref('千古')
+
+const middleText = ref('母儀千古')
+const suffixText = ref('敬輓')
+
+const funeralUpperFormat = ref('X媽X老夫人')
+const celebrationType = ref('opening')
+const celebPrefix = ref('恭祝')
+const celebTarget = ref('鴻運實業有限公司')
+
+const gender = ref('female')
+const ageStage = ref('f_over80')
+
+// 每個獨立格子的粗細
 const weights = ref({
-  upper: '600',
+  upper_prefix: '600',
+  upper_target: '700',
+  upper_suffix: '600',
   middle: '800',
   bottom_0: '600',
   bottom_1: '700',
@@ -3004,10 +2987,6 @@ const getPlaceholder = (idx) => [
   '第 6 格（自訂）'
 ][idx]
 
-const funeralUpperFormat = ref('敬悼 X媽X老夫人')
-const funeralUpperSuffix = ref('千古')
-const gender = ref('female')
-const ageStage = ref('f_over80')
 const funeralPhrases = {
   f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
   f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
@@ -3019,9 +2998,6 @@ const funeralPhrases = {
 }
 const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
 
-const celebrationType = ref('opening')
-const celebPrefix = ref('恭祝')
-const celebTarget = ref('鴻運實業有限公司')
 const celebPhrases = {
   opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
   moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
@@ -3029,12 +3005,9 @@ const celebPhrases = {
 }
 const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
 
-const upperText = ref('敬悼 陳媽李老夫人 千古')
-const middleText = ref('母儀千古')
-const suffixText = ref('敬輓')
-
-const parsedUpperTokens = computed(() => {
-  const chars = upperText.value.split('')
+// 稱謂解析 (支援小字「媽」)
+const parsedUpperTargetTokens = computed(() => {
+  const chars = upperTarget.value.split('')
   return chars.map(char => ({
     char,
     isSmall: char === '媽'
@@ -3042,32 +3015,39 @@ const parsedUpperTokens = computed(() => {
 })
 
 const maFontSize = computed(() => {
-  const baseSize = layout.value.upper?.size || 40
+  const baseSize = layout.value.upper_target?.size || 40
   return Math.max(12, baseSize - 20)
 })
 
+// 直式與橫式預設位置（上款三項獨立座標）
 const defaultVertical = {
-  upper:    { x: 620, y: 120, size: 40 },
-  middle:   { x: 330, y: 220, size: 84 },
-  bottom_0: { x: 155, y: 520, size: 30 },
-  bottom_1: { x: 155, y: 680, size: 36 },
-  bottom_2: { x: 95,  y: 520, size: 30 },
-  bottom_3: { x: 95,  y: 680, size: 32 },
-  bottom_4: { x: 40,  y: 520, size: 30 },
-  bottom_5: { x: 40,  y: 680, size: 30 },
-  suffix:   { x: 155, y: 920, size: 34 }
+  upper_prefix: { x: 620, y: 100, size: 36 },
+  upper_target: { x: 620, y: 220, size: 42 },
+  upper_suffix: { x: 620, y: 720, size: 36 },
+  middle:       { x: 330, y: 220, size: 84 },
+  bottom_0:     { x: 155, y: 520, size: 30 },
+  bottom_1:     { x: 155, y: 680, size: 36 },
+  bottom_2:     { x: 95,  y: 520, size: 30 },
+  bottom_3:     { x: 95,  y: 680, size: 32 },
+  bottom_4:     { x: 40,  y: 520, size: 30 },
+  bottom_5:     { x: 40,  y: 680, size: 30 },
+  suffix:       { x: 155, y: 920, size: 34 }
 }
+
 const defaultHorizontal = {
-  upper:    { x: 180, y: 100, size: 36 },
-  middle:   { x: 220, y: 260, size: 76 },
-  bottom_0: { x: 340, y: 400, size: 28 },
-  bottom_1: { x: 340, y: 460, size: 32 },
-  bottom_2: { x: 340, y: 520, size: 28 },
-  bottom_3: { x: 340, y: 580, size: 28 },
-  bottom_4: { x: 340, y: 640, size: 28 },
-  bottom_5: { x: 340, y: 700, size: 28 },
-  suffix:   { x: 620, y: 490, size: 34 }
+  upper_prefix: { x: 120, y: 90,  size: 34 },
+  upper_target: { x: 230, y: 90,  size: 38 },
+  upper_suffix: { x: 600, y: 90,  size: 34 },
+  middle:       { x: 220, y: 260, size: 76 },
+  bottom_0:     { x: 340, y: 400, size: 28 },
+  bottom_1:     { x: 340, y: 460, size: 32 },
+  bottom_2:     { x: 340, y: 520, size: 28 },
+  bottom_3:     { x: 340, y: 580, size: 28 },
+  bottom_4:     { x: 340, y: 640, size: 28 },
+  bottom_5:     { x: 340, y: 700, size: 28 },
+  suffix:       { x: 620, y: 490, size: 34 }
 }
+
 const layout = ref(JSON.parse(JSON.stringify(defaultVertical)))
 
 const switchOrientation = (vertical) => {
@@ -3090,9 +3070,9 @@ const getStyle = (key) => {
   }
 }
 
-const getUpperBoxStyle = () => {
-  const item = (layout.value && layout.value.upper) ? layout.value.upper : { x: 620, y: 120, size: 40 }
-  const weight = weights.value.upper || '600'
+const getUpperTargetBoxStyle = () => {
+  const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 620, y: 220, size: 42 }
+  const weight = weights.value.upper_target || '700'
   return {
     left: `${item.x}px`,
     top: `${item.y}px`,
@@ -3142,25 +3122,128 @@ const onPointerUp = () => {
 }
 
 watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
+
+const onFuneralFormatChange = () => {
+  if (funeralUpperFormat.value !== 'custom') {
+    upperTarget.value = funeralUpperFormat.value
+  }
+}
 const buildFuneralUpper = () => {
-  if (funeralUpperFormat.value !== 'custom') upperText.value = `${funeralUpperFormat.value} ${funeralUpperSuffix.value}`
+  // 保留選單切換相容
 }
 const buildCelebrationUpper = () => {
-  if (celebPrefix.value !== 'custom') upperText.value = `${celebPrefix.value} ${celebTarget.value}`
+  upperPrefix.value = celebPrefix.value
+  upperTarget.value = celebTarget.value
 }
 const onCardCategoryChange = () => {
   if (cardCategory.value === 'funeral') {
-    suffixText.value = '敬輓'; buildFuneralUpper(); middleText.value = currentFuneralPhrases.value[0] || ''
+    upperPrefix.value = '敬悼'
+    upperSuffix.value = '千古'
+    suffixText.value = '敬輓'
+    middleText.value = currentFuneralPhrases.value[0] || '母儀千古'
   } else {
-    suffixText.value = '敬賀'; buildCelebrationUpper(); middleText.value = currentCelebPhrases.value[0] || ''
+    upperPrefix.value = '恭祝'
+    upperSuffix.value = '誌慶'
+    suffixText.value = '敬賀'
+    middleText.value = currentCelebPhrases.value[0] || '開幕誌慶'
   }
 }
-const onCelebrationTypeChange = () => { middleText.value = currentCelebPhrases.value[0] || '' }
+const onCelebrationTypeChange = () => {
+  middleText.value = currentCelebPhrases.value[0] || ''
+}
 
 const printCouplet = () => {
   nextTick(() => {
     window.print()
   })
+}
+
+// 產生花卡高畫質圖片 (支援三格拆開獨立繪製)
+const shareCoupletToLineDirect = () => {
+  const canvas = document.createElement('canvas')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
+
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
+
+  ctx.fillStyle = '#000000'
+  const targetFontFamily = activeCssFontFamily.value
+
+  const drawTextItem = (text, item, isVertMode, weightVal, isUpperTarget = false) => {
+    if (!text || !item) return
+    ctx.textBaseline = 'top'
+    const w = String(weightVal || '600')
+    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
+    const sWidth = strokeWidthMap[w] || 0.8
+
+    if (isVertMode) {
+      let currentY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpperTarget && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, item.x + offsetX, currentY)
+        }
+        ctx.fillText(char, item.x + offsetX, currentY)
+        currentY += curSize + 8
+      })
+    } else {
+      let currentX = item.x
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isUpperTarget && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
+        
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, currentX, item.y + offsetY)
+        }
+        ctx.fillText(char, currentX, item.y + offsetY)
+        currentX += curSize + 4
+      })
+    }
+  }
+
+  // 分別繪製獨立的 3 格上款
+  drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
+  drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
+  drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
+
+  // 繪製中款
+  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
+
+  // 繪製下款
+  bottomLines.value.forEach((item, idx) => {
+    if (item.text.trim()) {
+      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
+    }
+  })
+
+  // 繪製敬詞
+  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
+
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
 // 雲端字型預載入
@@ -3616,7 +3699,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute right: -7px; bottom: -7px; width: 17px; height: 17px;
+  position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 11px;
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
@@ -3810,7 +3893,7 @@ input, select, textarea {
   font-size: 17px;
 }
 
-/* 蔡鎮遠姓名與真實蓋章圖片排版 (採用您的真實印章) */
+/* 蔡鎮遠姓名與真實蓋章圖片排版 */
 .f-farmer-stamp-cell {
   border-right: none !important;
   padding-left: 28px !important;
@@ -3867,7 +3950,7 @@ input, select, textarea {
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
 }
 
-/* 全域精準列印樣式 (純淨 A4 1:1 列印) */
+/* 全域精準列印樣式 */
 @media print {
   @page { 
     size: A4 portrait; 
