@@ -105,13 +105,14 @@
           <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
           <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
           <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
+          <button :class="{ active: subTab === 'shipping' }" @click="subTab = 'shipping'">🚚 7. 出貨派送進度</button>
         </nav>
 
         <div class="manage-content">
           <!-- 模組 1：訂單與帳務 -->
           <section v-if="subTab === 'order'" class="tab-pane">
             <div v-if="editingOrderId" class="edit-banner">
-              <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
+              <span>✏️️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
             </div>
 
@@ -284,7 +285,7 @@
                   </select>
                 </div>
                 <div class="field">
-                  <label>下單日期</label>
+                  <label>下單日期 (單號依此日產生)</label>
                   <input v-model="formOrder.order_date" type="date" />
                 </div>
                 <div class="field">
@@ -314,12 +315,13 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
+                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="ord in orderList" :key="ord.id">
                       <td><b>{{ ord.id }}</b></td>
+                      <td>{{ ord.order_date }}</td>
                       <td>{{ ord.customer }}</td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>
@@ -358,7 +360,11 @@
                         </select>
                       </td>
                       <td>
-                        <select v-model="ord.shipped_status" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)">
+                        <select 
+                          v-model="ord.shipped_status" 
+                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-orange'"
+                          @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
+                        >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
@@ -376,7 +382,7 @@
                         <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
                       </td>
                     </tr>
-                    <tr v-if="orderList.length === 0"><td colspan="13" class="text-center">尚無訂單資料</td></tr>
+                    <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -868,17 +874,95 @@
               </div>
             </div>
           </section>
-        </div>
-      </div>
 
-      <!-- 照片放大燈箱 -->
-      <div v-if="activeModalPhoto" class="image-modal-overlay" @click="activeModalPhoto = null">
-        <div class="image-modal-content" @click.stop>
-          <div class="image-modal-header">
-            <span>🌸 {{ activeModalTitle }}</span>
-            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
-          </div>
-          <img :src="activeModalPhoto" class="image-modal-img" alt="放大照片" />
+          <!-- 🌟 模組 7：出貨派送進度分頁 (已出貨 / 未出貨) -->
+          <section v-if="subTab === 'shipping'" class="tab-pane">
+            <div class="card-box">
+              <div class="shipping-tab-header">
+                <h3>🚚 訂單出貨與派送進度總覽</h3>
+                <div class="shipping-filter-tabs">
+                  <button 
+                    :class="{ active: shippingViewFilter === 'unshipped' }" 
+                    @click="shippingViewFilter = 'unshipped'"
+                  >
+                    📦 待出貨 / 配送中 ({{ unshippedOrders.length }} 筆)
+                  </button>
+                  <button 
+                    :class="{ active: shippingViewFilter === 'shipped' }" 
+                    @click="shippingViewFilter = 'shipped'"
+                  >
+                    ✅ 已出貨歷史 ({{ shippedOrders.length }} 筆)
+                  </button>
+                  <button 
+                    :class="{ active: shippingViewFilter === 'all' }" 
+                    @click="shippingViewFilter = 'all'"
+                  >
+                    全部 ({{ orderList.length }})
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-responsive mt-3">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>單號</th>
+                      <th>預計送達日</th>
+                      <th>客戶名稱</th>
+                      <th>電話</th>
+                      <th>送達地址 / 備註</th>
+                      <th>總盆數</th>
+                      <th>花禮規格</th>
+                      <th>花卡</th>
+                      <th>簽收單</th>
+                      <th>出貨狀態 (點擊切換)</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ord in displayedShippingOrders" :key="ord.id">
+                      <td><b>{{ ord.id }}</b></td>
+                      <td class="text-blue"><b>{{ ord.expected_date }}</b></td>
+                      <td><b>{{ ord.customer }}</b></td>
+                      <td>{{ ord.phone }}</td>
+                      <td class="addr-cell">{{ getCustomerAddress(ord) }}</td>
+                      <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
+                      <td>{{ ord.spec }}</td>
+                      <td>
+                        <span :class="getCardStatusClass(ord.card_status)">
+                          {{ ord.card_status || '未製作' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
+                          {{ ord.receipt_status || '未列印' }}
+                        </span>
+                      </td>
+                      <td>
+                        <select 
+                          v-model="ord.shipped_status" 
+                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-orange'"
+                          @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
+                        >
+                          <option value="未出貨">未出貨</option>
+                          <option value="已出貨">已出貨</option>
+                        </select>
+                      </td>
+                      <td class="action-cell">
+                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️</button>
+                      </td>
+                    </tr>
+                    <tr v-if="displayedShippingOrders.length === 0">
+                      <td colspan="11" class="text-center py-4 text-gray">
+                        {{ shippingViewFilter === 'unshipped' ? '🎉 目前沒有待出貨的訂單，全部已順利送達！' : '尚無資料' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
 
@@ -887,7 +971,7 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 花卡草稿暫存與切換專區 -->
+          <!-- 花卡草稿暫存與切換專區 -->
           <div class="panel-section draft-manage-panel">
             <label class="section-title">📑 花卡草稿暫存庫（未確認保留 / 打下一張）：</label>
             <div class="draft-action-btns">
@@ -914,7 +998,7 @@
                   @click="deleteDraft(selectedDraftId)"
                   title="刪除此草稿"
                 >
-                  🗑️
+                  🗑️️
                 </button>
               </div>
             </div>
@@ -1857,7 +1941,7 @@ const formatSimpleItemName = (ord) => {
   return `${cleanName} ${totalPots}盆`
 }
 
-// 🌟 精準計算總盆數
+// 精準計算總盆數
 const getOrderTotalPots = (ord) => {
   if (!ord) return 1
   const specText = String(ord.spec || '')
@@ -1884,16 +1968,32 @@ const getOrderShippingFee = (ord) => {
   return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
-const generateDateSeqId = (prefix, existingList) => {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, '0')
-  const d = String(now.getDate()).padStart(2, '0')
-  const dateStr = `${y}${m}${d}`
-  const targetPrefix = `${prefix}-${dateStr}-`
+// 🌟 修正後的單號產生邏輯：精準依據「選擇的下單日期」抓取當天已有訂單最大序號 + 1，保證不撞號！
+const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
+  let datePart = ''
+  if (dateStrVal) {
+    datePart = String(dateStrVal).replace(/-/g, '')
+  } else {
+    const now = new Date()
+    const y = now.getFullYear()
+    const m = String(now.getMonth() + 1).padStart(2, '0')
+    const d = String(now.getDate()).padStart(2, '0')
+    datePart = `${y}${m}${d}`
+  }
 
-  const todayItems = (existingList || []).filter(item => String(item.id || '').startsWith(targetPrefix))
-  const nextSeq = todayItems.length + 1
+  const targetPrefix = `${prefix}-${datePart}-`
+  const sameDateItems = (existingList || []).filter(item => String(item.id || '').startsWith(targetPrefix))
+
+  let maxSeq = 0
+  sameDateItems.forEach(item => {
+    const seqStr = String(item.id).replace(targetPrefix, '')
+    const seqNum = parseInt(seqStr, 10)
+    if (!isNaN(seqNum) && seqNum > maxSeq) {
+      maxSeq = seqNum
+    }
+  })
+
+  const nextSeq = maxSeq + 1
   return `${targetPrefix}${String(nextSeq).padStart(2, '0')}`
 }
 
@@ -2043,7 +2143,7 @@ const onOrderCustSelect = () => {
   }
 }
 
-// 編輯帶入：精準還原每一組規格的盆數
+// 編輯帶入
 const startEditOrder = (ord) => {
   editingOrderId.value = ord.id
   
@@ -2151,7 +2251,7 @@ const cancelEditOrder = () => {
   }
 }
 
-// 儲存訂單
+// 儲存訂單（解決主鍵重複問題）
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
@@ -2201,7 +2301,8 @@ const saveOrder = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    const newId = generateDateSeqId('OR', orderList.value)
+    // 依據選擇的「下單日期」動態產生當日最新無衝突流水號
+    const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
     const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
     if (!error) {
       alert(`訂單建立成功！單號：${newId}`)
@@ -2223,6 +2324,30 @@ const getCardStatusClass = (status) => {
   if (status === '已製作') return 'select-status green'
   if (status === '免製作') return 'select-status gray'
   return 'select-status orange'
+}
+
+// ==========================================
+// 🌟 出貨派送分頁控制
+// ==========================================
+const shippingViewFilter = ref('unshipped')
+
+const unshippedOrders = computed(() => {
+  return orderList.value.filter(o => o.shipped_status !== '已出貨')
+})
+
+const shippedOrders = computed(() => {
+  return orderList.value.filter(o => o.shipped_status === '已出貨')
+})
+
+const displayedShippingOrders = computed(() => {
+  if (shippingViewFilter.value === 'unshipped') return unshippedOrders.value
+  if (shippingViewFilter.value === 'shipped') return shippedOrders.value
+  return orderList.value
+})
+
+const getCustomerAddress = (ord) => {
+  const c = customers.value.find(item => item.name === ord.customer)
+  return c?.line_note || ord.note || '—'
 }
 
 // 2. 客戶未結對帳專區
@@ -2901,7 +3026,7 @@ const saveInventory = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    const newId = generateDateSeqId('IN', inventoryList.value)
+    const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
     const { error } = await supabase.from('inventory').insert([{ id: newId, ...payload }])
     if (!error) {
       alert(`進貨紀錄新增成功！編號：${newId}`)
@@ -2951,7 +3076,7 @@ const saveCustomer = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    const newId = generateDateSeqId('CU', customers.value)
+    const newId = generateDateSeqIdByDate('CU', '', customers.value)
     const { error } = await supabase.from('customers').insert([{ id: newId, ...payload }])
     if (!error) {
       alert(`客戶建立成功！編號：${newId}`)
@@ -3033,7 +3158,7 @@ const saveOrchid = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    const newId = generateDateSeqId('FL', orchids.value)
+    const newId = generateDateSeqIdByDate('FL', '', orchids.value)
     const { error } = await supabase.from('orchids').insert([{ id: newId, ...payload }])
     if (!error) {
       alert(`品種新增成功！編號：${newId}`)
@@ -3111,7 +3236,7 @@ const saveReturn = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    const newId = generateDateSeqId('RT', returnList.value)
+    const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
     const { error } = await supabase.from('returns').insert([{ id: newId, ...payload }])
     if (!error) {
       alert(`退貨紀錄儲存成功！單號：${newId}`)
@@ -3160,9 +3285,7 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// ==========================================
-// 9. 花卡 / 輓聯編輯器 (草稿切換 + 中款兩行)
-// ==========================================
+// 9. 花卡 / 輓聯編輯器
 const cardCategory = ref('funeral')
 const cardFontFamily = ref('kai')
 
@@ -3398,9 +3521,7 @@ const printCouplet = () => {
   })
 }
 
-// ==========================================
-// 🌟 花卡草稿庫：保留上一張、隨時還原與切換
-// ==========================================
+// 花卡草稿暫存
 const savedDrafts = ref(JSON.parse(localStorage.getItem('cf_card_drafts') || '[]'))
 const selectedDraftId = ref('')
 
@@ -3429,9 +3550,8 @@ const saveCurrentAsDraft = () => {
     layout: JSON.parse(JSON.stringify(layout.value))
   }
 
-  // 加入草稿清單最前面
   savedDrafts.value.unshift(draftData)
-  if (savedDrafts.value.length > 20) savedDrafts.value.pop() // 最多保留 20 張
+  if (savedDrafts.value.length > 20) savedDrafts.value.pop()
   localStorage.setItem('cf_card_drafts', JSON.stringify(savedDrafts.value))
   selectedDraftId.value = draftId
   showToast(`✅ 花卡已成功暫存！\n已保留為：「${draftTitle}」\n您現在可以點「開新花卡」打下一張了！`)
@@ -3478,7 +3598,7 @@ const startNewCard = () => {
   }
 }
 
-// 產生花卡高畫質圖片
+// 產生花卡圖片
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -3548,7 +3668,6 @@ const shareCoupletToLineDirect = () => {
   drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
   drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
 
-  // 繪製中款第 1 行與第 2 行
   drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
   if (middleText2.value.trim()) {
     drawTextItem(middleText2.value, layout.value.middle_2, isVertical.value, weights.value.middle_2)
@@ -3736,7 +3855,7 @@ onMounted(() => {
   margin-left: 8px;
 }
 
-/* 🌟 花卡草稿管理區塊樣式 */
+/* 花卡草稿管理區塊樣式 */
 .draft-manage-panel {
   background: #fdf4ff !important;
   border: 1.5px solid #f0abfc !important;
@@ -3787,6 +3906,40 @@ onMounted(() => {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+}
+
+/* 出貨派送分頁專用樣式 */
+.shipping-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+.shipping-filter-tabs {
+  display: flex;
+  gap: 8px;
+}
+.shipping-filter-tabs button {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+}
+.shipping-filter-tabs button.active {
+  background: #0284c7;
+  color: white;
+  border-color: #0284c7;
+}
+.addr-cell {
+  max-width: 220px;
+  word-break: break-all;
+  font-size: 12.5px;
 }
 
 /* 浮動提示橫條 */
@@ -4236,7 +4389,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
+  position: absolute right: -7px; bottom: -7px; width: 17px; height: 17px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 11px;
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
@@ -4483,6 +4636,7 @@ input, select, textarea {
   .control-panel { width: 100%; max-height: 46vh; }
   .form-grid { grid-template-columns: 1fr; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
+  .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
 /* 全域精準列印樣式 */
