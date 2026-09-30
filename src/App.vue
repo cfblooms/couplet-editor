@@ -381,7 +381,7 @@
                         </select>
                       </td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️️</button>
                         <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
                         <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
                         <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
@@ -723,7 +723,7 @@
             </div>
 
             <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
+              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>品種名稱</label>
@@ -1544,7 +1544,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 ================= -->
+      <!-- ================= 模式 4：農民收據 (空值不顯示 $ / 零不顯示改畫線) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1709,7 +1709,7 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                  <!-- 🌟 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
+                  <!-- 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
                   <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
                     {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
                   </div>
@@ -1734,17 +1734,17 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
-                <!-- 🌟 中文大寫金額：若數值為空或為零時，直接留空，不顯示「零」 -->
+                <!-- 🌟 中文大寫金額：若數值為空或為零時，直接畫橫線「—」，不寫「零」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
                     <div class="f-chinese-amount-line">
-                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
-                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
-                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
-                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
+                      <span class="d-val">{{ chineseDigits.hundredThousands || '—' }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.tenThousands || '—' }}</span> 萬
+                      <span class="d-val">{{ chineseDigits.thousands || '—' }}</span> 仟
+                      <span class="d-val">{{ chineseDigits.hundreds || '—' }}</span> 佰
+                      <span class="d-val">{{ chineseDigits.tens || '—' }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.ones || '—' }}</span> 元 整
                     </div>
                   </div>
                 </div>
@@ -2810,7 +2810,7 @@ const shareReceiptToBuyerDirect = () => {
 }
 
 // ==========================================
-// 4. 農民收據 (空值不顯示 $ / 零不顯示)
+// 4. 農民收據 (空值不顯示 $ / 零不顯示改畫線)
 // ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
@@ -2828,29 +2828,29 @@ const farmerReceipt = ref({
   note: ''
 })
 
-// 中文大寫欄位：預設留空或有值
+// 中文大寫欄位：若沒值一律預設為 '—' (畫線防偽)
 const chineseDigits = ref({
-  hundredThousands: '',
-  tenThousands: '',
-  thousands: '',
-  hundreds: '',
-  tens: '',
-  ones: ''
+  hundredThousands: '—',
+  tenThousands: '—',
+  thousands: '貳',
+  hundreds: '伍',
+  tens: '—',
+  ones: '—'
 })
 
 const digitMap = ['', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
 
-// 🌟 金額大寫解析：凡是 0 一律轉為 '' (空白)，不顯示「零」
+// 🌟 金額大寫解析：凡是 0 或空白一律轉為 '—' (畫線防偽)，絕不顯示「零」
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
   if (amt <= 0) {
     chineseDigits.value = {
-      hundredThousands: '',
-      tenThousands: '',
-      thousands: '',
-      hundreds: '',
-      tens: '',
-      ones: ''
+      hundredThousands: '—',
+      tenThousands: '—',
+      thousands: '—',
+      hundreds: '—',
+      tens: '—',
+      ones: '—'
     }
     return
   }
@@ -2858,7 +2858,7 @@ const updateChineseAmount = () => {
   const padded = amt.toString().padStart(6, '0')
   const digits = padded.split('').map(d => {
     const num = Number(d)
-    return num === 0 ? '' : digitMap[num]
+    return num === 0 ? '—' : digitMap[num]
   })
 
   chineseDigits.value = {
@@ -2938,16 +2938,16 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
   ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
   
-  // 🌟 LINE圖片繪製：若有金額才印出，否則完全空白
+  // 🌟 LINE 圖片繪製：若有金額才印出，否則完全空白
   const amtStr = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
     ? `NT$ ${Number(farmerReceipt.value.totalAmount).toLocaleString()} 元`
     : ''
   ctx.fillText(`金額：${amtStr}`, 42, 235)
 
-  // 🌟 LINE圖片大寫：無「零」
+  // 🌟 LINE 圖片大寫：無數字畫橫線「—」，不寫「零」
   const cAmtLine = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
-    ? `合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`
-    : '合計新台幣(中文大寫)：     拾     萬     仟     佰     拾     元整'
+    ? `合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands || '—'} 拾 ${chineseDigits.value.tenThousands || '—'} 萬 ${chineseDigits.value.thousands || '—'} 仟 ${chineseDigits.value.hundreds || '—'} 佰 ${chineseDigits.value.tens || '—'} 拾 ${chineseDigits.value.ones || '—'} 元整`
+    : '合計新台幣(中文大寫)：— 拾 — 萬 — 仟 — 佰 — 拾 — 元整'
   ctx.fillText(cAmtLine, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
@@ -3371,7 +3371,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000'
+    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
