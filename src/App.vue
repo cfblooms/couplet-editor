@@ -118,7 +118,7 @@
 
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
-                <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <h3>{{ editingOrderId ? '✏️️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
                 <span class="preview-seq-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
@@ -309,7 +309,7 @@
               </div>
             </div>
 
-            <!-- 🌟 訂單總覽清單：狀態統一（綠/紅），按鈕為深沉舒適莫蘭迪色 -->
+            <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡：已製作綠色、未製作紅色 -->
+                      <!-- 花卡狀態 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -372,7 +372,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單：已列印綠色、未列印紅色 -->
+                      <!-- 簽收單狀態 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -411,10 +411,9 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 莫蘭迪深雅色按鈕（上下排，立體清晰） -->
+                      <!-- 莫蘭迪深雅色操作按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
-                          <!-- 左側直立：單據按鈕 -->
                           <div class="stacked-action-col">
                             <button class="cozy-btn btn-morandi-amber" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
                               🖨️ 簽收單
@@ -423,13 +422,12 @@
                               🧾 農民收據
                             </button>
                           </div>
-                          <!-- 右側直立：管理操作按鈕 -->
                           <div class="stacked-action-col">
                             <button class="cozy-btn btn-morandi-blue" @click="startEditOrder(ord)" title="修改此訂單">
                               ✏️ 修改
                             </button>
                             <button class="cozy-btn btn-morandi-rose" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
-                              🗑️ 刪除
+                              🗑️️ 刪除
                             </button>
                           </div>
                         </div>
@@ -693,7 +691,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn btn-morandi-blue" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-morandi-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️️ 刪除</button>
+                          <button class="cozy-btn btn-morandi-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1047,7 +1045,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (徹底修復右側與頂端切字) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1824,6 +1822,7 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                  <!-- 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
                   <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
                     {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
                   </div>
@@ -2449,7 +2448,7 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 🌟 狀態樣式：已製作/已列印綠色，未製作/未列印紅色
+// 狀態樣式：已製作/已列印綠色，未製作/未列印紅色
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -2943,7 +2942,6 @@ const farmerReceipt = ref({
   note: ''
 })
 
-// 中文大寫欄位
 const chineseDigits = ref({
   hundredThousands: '',
   tenThousands: '',
@@ -3031,7 +3029,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillRect(0, 0, 794, 560)
 
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
-  ctx.fillStyle = '#000000'
+  ctx.fillStyle = '#0f172a'
 
   ctx.font = `bold 26px ${fontFam}`
   ctx.textAlign = 'center'
@@ -3039,7 +3037,7 @@ const shareFarmerReceiptToLineDirect = () => {
 
   ctx.font = `15px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
   ctx.strokeStyle = '#000000'
@@ -3483,7 +3481,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000'
+    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
@@ -3778,7 +3776,7 @@ const startNewCard = () => {
   }
 }
 
-// 產生花卡圖片
+// 🌟 修正後的產生花卡圖片函式（自動安全邊距，保證最上方與最右側字體 100% 完整不被切掉）
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -3808,7 +3806,14 @@ const shareCoupletToLineDirect = () => {
     const sWidth = strokeWidthMap[w] || 0.8
 
     if (isVertMode) {
-      let currentY = item.y
+      // 🌟 安全緩衝邊界校正：如果太靠近右側邊界（> 720px），自動微調內縮，絕不切字
+      let safeBaseX = item.x
+      const maxRightLimit = width - (item.size + 24)
+      if (safeBaseX > maxRightLimit) {
+        safeBaseX = maxRightLimit
+      }
+
+      let currentY = Math.max(item.y, 25)
       const chars = text.split('')
       chars.forEach(char => {
         const isMa = isUpperTarget && char === '媽'
@@ -3819,13 +3824,14 @@ const shareCoupletToLineDirect = () => {
         if (sWidth > 0) {
           ctx.strokeStyle = '#0f172a'
           ctx.lineWidth = sWidth
-          ctx.strokeText(char, item.x + offsetX, currentY)
+          ctx.strokeText(char, safeBaseX + offsetX, currentY)
         }
-        ctx.fillText(char, item.x + offsetX, currentY)
+        ctx.fillText(char, safeBaseX + offsetX, currentY)
         currentY += curSize + 8
       })
     } else {
-      let currentX = item.x
+      let currentX = Math.max(item.x, 25)
+      let currentY = Math.max(item.y, 25)
       const chars = text.split('')
       chars.forEach(char => {
         const isMa = isUpperTarget && char === '媽'
@@ -3836,9 +3842,9 @@ const shareCoupletToLineDirect = () => {
         if (sWidth > 0) {
           ctx.strokeStyle = '#0f172a'
           ctx.lineWidth = sWidth
-          ctx.strokeText(char, currentX, item.y + offsetY)
+          ctx.strokeText(char, currentX, currentY + offsetY)
         }
-        ctx.fillText(char, currentX, item.y + offsetY)
+        ctx.fillText(char, currentX, currentY + offsetY)
         currentX += curSize + 4
       })
     }
@@ -4457,7 +4463,7 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 🌟 表格與狀態下拉選單寬度與對齊（解決擁擠問題） */
+/* 表格與狀態下拉選單寬度與對齊 */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 1100px; }
@@ -4509,7 +4515,7 @@ input, select, textarea {
   gap: 5px;
 }
 
-/* 🌟 稍深、高辨識度、極致舒適的莫蘭迪色按鈕設計 */
+/* 莫蘭迪深雅色按鈕設計 */
 .cozy-btn {
   border: 1px solid transparent;
   padding: 5px 9px;
@@ -4523,7 +4529,6 @@ input, select, textarea {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
-/* 🖨️ 簽收單：深沉焦糖琥珀棕 (識別度極高、溫暖醇厚) */
 .btn-morandi-amber {
   background: #fdf5ea;
   color: #a4631e;
@@ -4534,7 +4539,6 @@ input, select, textarea {
   color: #8c5115;
 }
 
-/* 🧾 農民收據：沉穩灰紫/紫藤藕紫 (典雅雅緻、一眼可辨) */
 .btn-morandi-purple {
   background: #f7f1fb;
   color: #7d499c;
@@ -4545,7 +4549,6 @@ input, select, textarea {
   color: #693b84;
 }
 
-/* ✏️ 修改：丹寧灰石青藍 (冷靜穩重、乾淨舒服) */
 .btn-morandi-blue {
   background: #eff6fa;
   color: #2e6284;
@@ -4556,7 +4559,6 @@ input, select, textarea {
   color: #224d69;
 }
 
-/* 🗑️️ 刪除：磚瓦豆沙紅 (稍深沉穩、不刺眼又有警示感) */
 .btn-morandi-rose {
   background: #fdf2f2;
   color: #b0434b;
@@ -4567,7 +4569,6 @@ input, select, textarea {
   color: #96353d;
 }
 
-/* 🌟 狀態徽章統一色調（綠色飽滿、紅色警示、灰色免製作） */
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
 .badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
