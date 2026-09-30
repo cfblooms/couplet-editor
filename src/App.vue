@@ -782,7 +782,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -882,10 +882,43 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (中款兩行獨立) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (含草稿暫存切換) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
+
+          <!-- 🌟 花卡草稿暫存與切換專區 -->
+          <div class="panel-section draft-manage-panel">
+            <label class="section-title">📑 花卡草稿暫存庫（未確認保留 / 打下一張）：</label>
+            <div class="draft-action-btns">
+              <button type="button" class="draft-save-btn" @click="saveCurrentAsDraft">
+                💾 暫存此花卡草稿
+              </button>
+              <button type="button" class="draft-new-btn" @click="startNewCard">
+                ＋ 開新花卡 (清空)
+              </button>
+            </div>
+            <div class="mt-2" v-if="savedDrafts.length > 0">
+              <label class="sub-lbl">快速切換已暫存草稿 ({{ savedDrafts.length }} 張)：</label>
+              <div class="draft-selector-row">
+                <select v-model="selectedDraftId" @change="loadDraft(selectedDraftId)" class="full-input bold-select">
+                  <option value="">-- 點此切換回之前的草稿 --</option>
+                  <option v-for="d in savedDrafts" :key="d.id" :value="d.id">
+                    {{ d.title }}
+                  </option>
+                </select>
+                <button 
+                  v-if="selectedDraftId" 
+                  type="button" 
+                  class="mini-del-draft-btn" 
+                  @click="deleteDraft(selectedDraftId)"
+                  title="刪除此草稿"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="panel-section">
             <label class="section-title">字體選擇：</label>
@@ -1824,19 +1857,17 @@ const formatSimpleItemName = (ord) => {
   return `${cleanName} ${totalPots}盆`
 }
 
-// 🌟 修正後的總盆數計算函式：精準只看規格 (spec) 裡的每一組盆數，徹底避開 note 歷史累加干擾
+// 🌟 精準計算總盆數
 const getOrderTotalPots = (ord) => {
   if (!ord) return 1
   const specText = String(ord.spec || '')
   
-  // 1. 如果 spec 裡有「(X盆)」標記（多品項規格）
   const matches = [...specText.matchAll(/\((\d+)\s*盆\)/g)]
   if (matches.length > 0) {
     const sum = matches.reduce((total, m) => total + (parseInt(m[1]) || 0), 0)
     if (sum > 0) return sum
   }
 
-  // 2. 如果是早期備註格式：只抓 note 最前方或最後方的一組 [共X盆
   const noteText = String(ord.note || '')
   const metaMatch = noteText.match(/\[共(\d+)\s*盆/)
   if (metaMatch) {
@@ -1846,7 +1877,6 @@ const getOrderTotalPots = (ord) => {
   return 1
 }
 
-// 取得運費
 const getOrderShippingFee = (ord) => {
   if (!ord) return 0
   const searchStr = `${ord.note || ''}`
@@ -2013,7 +2043,7 @@ const onOrderCustSelect = () => {
   }
 }
 
-// 🌟 修正後的編輯帶入：精準還原每一組規格的盆數，避免盆數越改越多
+// 編輯帶入：精準還原每一組規格的盆數
 const startEditOrder = (ord) => {
   editingOrderId.value = ord.id
   
@@ -2061,7 +2091,6 @@ const startEditOrder = (ord) => {
     })
   }
 
-  // 移除 note 裡重複疊加的舊標籤
   const cleanNote = String(ord.note || '').replace(/\[共\d+盆,\s*運費:\d+元\]/g, '').trim()
 
   formOrder.value = {
@@ -2122,7 +2151,7 @@ const cancelEditOrder = () => {
   }
 }
 
-// 🌟 修正後的儲存：徹底清空重複的 [共X盆] 舊標籤，保證每次只加上最新的一組
+// 儲存訂單
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
@@ -2137,7 +2166,6 @@ const saveOrder = async () => {
   const mainItem = formOrder.value.items[0] || {}
   const finalPotStr = (mainItem.pot || '桌上盆 (100)') + (mainItem.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
 
-  // 先清空原本可能重複貼上的所有 [共X盆, 運費:X元] 標籤
   const baseNote = String(formOrder.value.note || '').replace(/\[共\d+盆,\s*運費:\d+元\]/g, '').trim()
   const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
   const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee || 0}元]`
@@ -3132,7 +3160,9 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// 9. 花卡 / 輓聯編輯器 (中款兩行獨立)
+// ==========================================
+// 9. 花卡 / 輓聯編輯器 (草稿切換 + 中款兩行)
+// ==========================================
 const cardCategory = ref('funeral')
 const cardFontFamily = ref('kai')
 
@@ -3211,7 +3241,7 @@ const getPlaceholder = (idx) => [
 
 const funeralPhrases = {
   f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
-  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹粄'],
+  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
   f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
   m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
   m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
@@ -3368,7 +3398,87 @@ const printCouplet = () => {
   })
 }
 
-// 產生花卡高畫質圖片 (支援中款兩行繪製)
+// ==========================================
+// 🌟 花卡草稿庫：保留上一張、隨時還原與切換
+// ==========================================
+const savedDrafts = ref(JSON.parse(localStorage.getItem('cf_card_drafts') || '[]'))
+const selectedDraftId = ref('')
+
+const saveCurrentAsDraft = () => {
+  const now = new Date()
+  const timeStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  const targetName = upperTarget.value.trim() || '未填對象'
+  const phrase = middleText.value.trim() || '無中款'
+  const draftTitle = `【${targetName}】${phrase} (${timeStr})`
+  
+  const draftId = 'draft_' + Date.now()
+  const draftData = {
+    id: draftId,
+    title: draftTitle,
+    isVertical: isVertical.value,
+    cardCategory: cardCategory.value,
+    cardFontFamily: cardFontFamily.value,
+    upperPrefix: upperPrefix.value,
+    upperTarget: upperTarget.value,
+    upperSuffix: upperSuffix.value,
+    middleText: middleText.value,
+    middleText2: middleText2.value,
+    suffixText: suffixText.value,
+    bottomLines: JSON.parse(JSON.stringify(bottomLines.value)),
+    weights: JSON.parse(JSON.stringify(weights.value)),
+    layout: JSON.parse(JSON.stringify(layout.value))
+  }
+
+  // 加入草稿清單最前面
+  savedDrafts.value.unshift(draftData)
+  if (savedDrafts.value.length > 20) savedDrafts.value.pop() // 最多保留 20 張
+  localStorage.setItem('cf_card_drafts', JSON.stringify(savedDrafts.value))
+  selectedDraftId.value = draftId
+  showToast(`✅ 花卡已成功暫存！\n已保留為：「${draftTitle}」\n您現在可以點「開新花卡」打下一張了！`)
+}
+
+const loadDraft = (id) => {
+  if (!id) return
+  const draft = savedDrafts.value.find(d => d.id === id)
+  if (!draft) return
+
+  isVertical.value = draft.isVertical
+  cardCategory.value = draft.cardCategory
+  cardFontFamily.value = draft.cardFontFamily || 'kai'
+  upperPrefix.value = draft.upperPrefix || ''
+  upperTarget.value = draft.upperTarget || ''
+  upperSuffix.value = draft.upperSuffix || ''
+  middleText.value = draft.middleText || ''
+  middleText2.value = draft.middleText2 || ''
+  suffixText.value = draft.suffixText || '敬輓'
+  bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines))
+  weights.value = JSON.parse(JSON.stringify(draft.weights))
+  layout.value = JSON.parse(JSON.stringify(draft.layout))
+
+  showToast(`📂 已成功載入「${draft.title}」！您可以直接修改或列印！`)
+  nextTick(() => autoFitZoom())
+}
+
+const deleteDraft = (id) => {
+  if (!confirm('確定要刪除這張暫存草稿嗎？')) return
+  savedDrafts.value = savedDrafts.value.filter(d => d.id !== id)
+  localStorage.setItem('cf_card_drafts', JSON.stringify(savedDrafts.value))
+  selectedDraftId.value = ''
+  showToast('已刪除該暫存草稿')
+}
+
+const startNewCard = () => {
+  if (confirm('確定要開新花卡嗎？（若剛才的花卡尚未儲存草稿，建議先點「暫存此花卡草稿」）')) {
+    upperTarget.value = ''
+    middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '開幕誌慶'
+    middleText2.value = ''
+    selectedDraftId.value = ''
+    resetPositions()
+    showToast('✨ 已為您建立空白花卡，請開始輸入下一張內容！')
+  }
+}
+
+// 產生花卡高畫質圖片
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -3624,6 +3734,59 @@ onMounted(() => {
   font-weight: bold !important;
   cursor: pointer !important;
   margin-left: 8px;
+}
+
+/* 🌟 花卡草稿管理區塊樣式 */
+.draft-manage-panel {
+  background: #fdf4ff !important;
+  border: 1.5px solid #f0abfc !important;
+}
+.draft-action-btns {
+  display: flex;
+  gap: 8px;
+}
+.draft-save-btn {
+  flex: 1;
+  background: #c026d3;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.draft-save-btn:hover { background: #a21caf; }
+.draft-new-btn {
+  background: #ffffff;
+  color: #701a75;
+  border: 1.5px solid #d8b4fe;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.sub-lbl {
+  font-size: 11.5px;
+  font-weight: bold;
+  color: #86198f;
+  display: block;
+  margin-bottom: 4px;
+}
+.draft-selector-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.mini-del-draft-btn {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 /* 浮動提示橫條 */
