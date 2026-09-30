@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡：稍微更淺的綠色與粉紅色 -->
+                      <!-- 花卡狀態 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -372,7 +372,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單：稍微更淺的綠色與粉紅色 -->
+                      <!-- 簽收單狀態 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -411,7 +411,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 明亮活潑、高辨識度的莫蘭迪色系按鈕 -->
+                      <!-- 莫蘭迪深雅色操作按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <!-- 左側直立：單據按鈕 -->
@@ -693,7 +693,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn btn-bright-blue" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -706,7 +706,7 @@
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div v-if="editingCustId" class="edit-banner">
-              <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
+              <span>✏️️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
             </div>
 
@@ -792,7 +792,7 @@
             </div>
 
             <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
+              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>品種名稱</label>
@@ -1047,7 +1047,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (DOM截圖所見即所得) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1370,6 +1370,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
+            <!-- 🌟 花卡真實 DOM 畫布：所見即所得直接截圖對象 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1898,6 +1899,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
+import html2canvas from 'html2canvas'
 
 // ==========================================
 // 內部通行碼防護設定 (通行碼: cf000725)
@@ -2448,7 +2450,7 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 🌟 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
+// 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-soft-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -3031,7 +3033,7 @@ const shareFarmerReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  ctx.font = `900 26px ${fontFam}`
+  ctx.font = `bold 26px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
 
@@ -3481,7 +3483,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
+    styles.textShadow = '0 0 1.2px #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
@@ -3776,98 +3778,42 @@ const startNewCard = () => {
   }
 }
 
-// 產生花卡圖片
-const shareCoupletToLineDirect = () => {
-  const canvas = document.createElement('canvas')
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
+// 🌟 所見即所得：直接使用 html2canvas 截取真實畫面，100% 不裁切任何右側或上方文字
+const shareCoupletToLineDirect = async () => {
+  const cardElem = document.getElementById('card-print-target')
+  if (!cardElem) return
 
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
+  showToast('⏳ 正在為您生成所見即所得花卡高畫質圖片...')
 
-  if (!isVertical.value && cardCategory.value === 'celebration') {
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#fce7f3'
-    ctx.strokeRect(6, 6, width - 12, height - 12)
-  }
+  try {
+    // 取得當前縮放比並暫時計算還原比例，以 2 倍解析度精緻截圖
+    const targetWidth = isVertical.value ? 794 : 1123
+    const targetHeight = isVertical.value ? 1123 : 794
 
-  ctx.fillStyle = '#0f172a'
-  const targetFontFamily = activeCssFontFamily.value
-
-  const drawTextItem = (text, item, isVertMode, weightVal, isUpperTarget = false) => {
-    if (!text || !item) return
-    ctx.textBaseline = 'top'
-    const w = String(weightVal || '600')
-    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
-    const sWidth = strokeWidthMap[w] || 0.8
-
-    if (isVertMode) {
-      let safeBaseX = item.x
-      const maxRightLimit = width - (item.size + 24)
-      if (safeBaseX > maxRightLimit) {
-        safeBaseX = maxRightLimit
+    const canvas = await html2canvas(cardElem, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: targetWidth,
+      height: targetHeight,
+      windowWidth: targetWidth,
+      windowHeight: targetHeight,
+      onclone: (clonedDoc) => {
+        const clonedCard = clonedDoc.getElementById('card-print-target')
+        if (clonedCard) {
+          clonedCard.style.transform = 'none'
+          clonedCard.style.boxShadow = 'none'
+          clonedCard.style.position = 'static'
+        }
       }
+    })
 
-      let currentY = Math.max(item.y, 25)
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpperTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetX = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#0f172a'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, safeBaseX + offsetX, currentY)
-        }
-        ctx.fillText(char, safeBaseX + offsetX, currentY)
-        currentY += curSize + 8
-      })
-    } else {
-      let currentX = Math.max(item.x, 25)
-      let currentY = Math.max(item.y, 25)
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isUpperTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offsetY = isMa ? Math.round((item.size - curSize) / 2) : 0
-        
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#0f172a'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, currentX, currentY + offsetY)
-        }
-        ctx.fillText(char, currentX, currentY + offsetY)
-        currentX += curSize + 4
-      })
-    }
+    const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+    shareOrCopyCanvasBlob(canvas, filename, '花卡確認 (所見即所得)', '花卡圖片準備完成')
+  } catch (err) {
+    console.error('html2canvas screenshot failed', err)
+    showToast('截圖生成失敗，請重試！')
   }
-
-  drawTextItem(upperPrefix.value, layout.value.upper_prefix, isVertical.value, weights.value.upper_prefix)
-  drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
-  drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
-
-  drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
-  if (middleText2.value.trim()) {
-    drawTextItem(middleText2.value, layout.value.middle_2, isVertical.value, weights.value.middle_2)
-  }
-
-  bottomLines.value.forEach((item, idx) => {
-    if (item.text.trim()) {
-      drawTextItem(item.text, layout.value['bottom_' + idx], isVertical.value, weights.value['bottom_' + idx])
-    }
-  })
-
-  drawTextItem(suffixText.value, layout.value.suffix, isVertical.value, weights.value.suffix)
-
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認', '花卡圖片準備完成')
 }
 
 // 初始化所有系統資料
@@ -4514,7 +4460,7 @@ input, select, textarea {
   gap: 5px;
 }
 
-/* 🌟 明亮活潑的莫蘭迪高辨識度按鈕設計 */
+/* 明亮活潑的莫蘭迪高辨識度按鈕設計 */
 .cozy-btn {
   border: 1px solid transparent;
   padding: 5px 9px;
@@ -4528,7 +4474,6 @@ input, select, textarea {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
-/* 🖨️ 簽收單：香檳暖杏黃 (明亮溫潤、對比極佳) */
 .btn-bright-amber {
   background: #fef3c7;
   color: #b45309;
@@ -4539,7 +4484,6 @@ input, select, textarea {
   color: #92400e;
 }
 
-/* 🧾 農民收據：紫丁香粉紫 (明亮透麗、一眼即辨) */
 .btn-bright-purple {
   background: #f3e8ff;
   color: #7e22ce;
@@ -4550,7 +4494,6 @@ input, select, textarea {
   color: #6b21a8;
 }
 
-/* ✏️ 修改：天青湖灰藍 (明亮清爽、整潔舒服) */
 .btn-bright-blue {
   background: #e0f2fe;
   color: #0369a1;
@@ -4561,7 +4504,6 @@ input, select, textarea {
   color: #075985;
 }
 
-/* 🗑️ 刪除：粉珊瑚淡櫻紅 (明亮警示、絕無刺眼血紅感) */
 .btn-bright-rose {
   background: #ffe4e6;
   color: #be123c;
@@ -4572,7 +4514,6 @@ input, select, textarea {
   color: #9f1239;
 }
 
-/* 🌟 狀態徽章：提供較淺的薄荷綠與淡蜜桃粉紅（比出貨/開收據顏色更淺、更柔和） */
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
 .badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
@@ -4580,7 +4521,6 @@ input, select, textarea {
 .badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
 .badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
 
-/* 🌟 專屬淺色版狀態（花卡與簽收單專用） */
 .badge-soft-green {
   background: #ecfdf5 !important;
   color: #059669 !important;
