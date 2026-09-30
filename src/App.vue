@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 花卡狀態 -->
+                      <!-- 🌟 花卡：未製作採用更淺、柔和的粉紅 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -372,7 +372,7 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單狀態 -->
+                      <!-- 🌟 簽收單：未列印採用更淺、柔和的粉紅 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -411,24 +411,24 @@
                         </select>
                       </td>
 
-                      <!-- 莫蘭迪深雅色操作按鈕 -->
+                      <!-- 🌟 沉穩且略帶亮度的莫蘭迪柔和按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <!-- 左側直立：單據按鈕 -->
                           <div class="stacked-action-col">
-                            <button class="cozy-btn btn-bright-amber" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
+                            <button class="cozy-btn btn-calm-amber" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
                               🖨️ 簽收單
                             </button>
-                            <button class="cozy-btn btn-bright-purple" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">
+                            <button class="cozy-btn btn-calm-purple" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">
                               🧾 農民收據
                             </button>
                           </div>
                           <!-- 右側直立：管理操作按鈕 -->
                           <div class="stacked-action-col">
-                            <button class="cozy-btn btn-bright-blue" @click="startEditOrder(ord)" title="修改此訂單">
+                            <button class="cozy-btn btn-calm-blue" @click="startEditOrder(ord)" title="修改此訂單">
                               ✏️ 修改
                             </button>
-                            <button class="cozy-btn btn-bright-rose" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
+                            <button class="cozy-btn btn-calm-rose" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
                               🗑️ 刪除
                             </button>
                           </div>
@@ -552,8 +552,8 @@
                       </td>
                       <td>
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-amber" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                          <button class="cozy-btn btn-bright-purple" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                          <button class="cozy-btn btn-calm-amber" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn btn-calm-purple" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                         </div>
                       </td>
                     </tr>
@@ -692,8 +692,8 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-blue" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑 刪除</button>
+                          <button class="cozy-btn btn-calm-blue" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -706,7 +706,7 @@
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div v-if="editingCustId" class="edit-banner">
-              <span>✏️️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
+              <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
             </div>
 
@@ -773,8 +773,8 @@
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-blue" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn btn-calm-blue" @click="startEditCust(c)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -850,8 +850,8 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-blue" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn btn-calm-blue" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -942,8 +942,8 @@
                       <td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-blue" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-bright-rose" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn btn-calm-blue" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1029,8 +1029,8 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn btn-bright-amber" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                          <button class="cozy-btn btn-bright-blue" @click="startEditOrder(ord)" title="編輯訂單">✏️ 修改</button>
+                          <button class="cozy-btn btn-calm-amber" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
+                          <button class="cozy-btn btn-calm-blue" @click="startEditOrder(ord)" title="編輯訂單">✏️ 修改</button>
                         </div>
                       </td>
                     </tr>
@@ -1047,7 +1047,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (DOM截圖所見即所得) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1370,7 +1370,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡真實 DOM 畫布：所見即所得直接截圖對象 -->
+            <!-- 🌟 花卡真實 DOM 畫布 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1849,6 +1849,7 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
+                <!-- 中文大寫金額：若完全沒填金額（空白或0），橫線全部不要，只留純空白；有填金額時才在空位畫橫線「—」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
@@ -2450,7 +2451,7 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
+// 🌟 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-soft-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -3033,7 +3034,7 @@ const shareFarmerReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  ctx.font = `bold 26px ${fontFam}`
+  ctx.font = `900 26px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
 
@@ -3483,7 +3484,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000'
+    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
@@ -3778,7 +3779,7 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 所見即所得：直接使用 html2canvas 截取真實畫面，100% 不裁切任何右側或上方文字
+// 所見即所得截圖
 const shareCoupletToLineDirect = async () => {
   const cardElem = document.getElementById('card-print-target')
   if (!cardElem) return
@@ -3786,7 +3787,6 @@ const shareCoupletToLineDirect = async () => {
   showToast('⏳ 正在為您生成所見即所得花卡高畫質圖片...')
 
   try {
-    // 取得當前縮放比並暫時計算還原比例，以 2 倍解析度精緻截圖
     const targetWidth = isVertical.value ? 794 : 1123
     const targetHeight = isVertical.value ? 1123 : 794
 
@@ -4460,7 +4460,7 @@ input, select, textarea {
   gap: 5px;
 }
 
-/* 明亮活潑的莫蘭迪高辨識度按鈕設計 */
+/* 🌟 稍為沉穩一點、亮度適中、高質感的莫蘭迪色按鈕設計 */
 .cozy-btn {
   border: 1px solid transparent;
   padding: 5px 9px;
@@ -4471,52 +4471,51 @@ input, select, textarea {
   white-space: nowrap;
   text-align: center;
   transition: all 0.15s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
-.btn-bright-amber {
-  background: #fef3c7;
-  color: #b45309;
-  border-color: #fde68a;
+.btn-calm-amber {
+  background: #fcf6e8;
+  color: #8c6328;
+  border-color: #edd9b5;
 }
-.btn-bright-amber:hover {
-  background: #fde68a;
-  color: #92400e;
-}
-
-.btn-bright-purple {
-  background: #f3e8ff;
-  color: #7e22ce;
-  border-color: #e9d5ff;
-}
-.btn-bright-purple:hover {
-  background: #e9d5ff;
-  color: #6b21a8;
+.btn-calm-amber:hover {
+  background: #f7ebd4;
+  color: #735020;
 }
 
-.btn-bright-blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border-color: #bae6fd;
+.btn-calm-purple {
+  background: #f6f0fb;
+  color: #6c4b82;
+  border-color: #ded1e9;
 }
-.btn-bright-blue:hover {
-  background: #bae6fd;
-  color: #075985;
+.btn-calm-purple:hover {
+  background: #ece0f5;
+  color: #593b6d;
 }
 
-.btn-bright-rose {
-  background: #ffe4e6;
-  color: #be123c;
-  border-color: #fecdd3;
+.btn-calm-blue {
+  background: #edf5fa;
+  color: #3b637d;
+  border-color: #d0e3ef;
 }
-.btn-bright-rose:hover {
-  background: #fecdd3;
-  color: #9f1239;
+.btn-calm-blue:hover {
+  background: #ddeaf3;
+  color: #2d4e63;
+}
+
+.btn-calm-rose {
+  background: #fbf1f1;
+  color: #9c4850;
+  border-color: #f1cfd2;
+}
+.btn-calm-rose:hover {
+  background: #f7e0e2;
+  color: #823a41;
 }
 
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
-.badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 .badge-orange { background: #ffedd5; color: #c2410c; }
 .badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
 .badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
@@ -4527,8 +4526,13 @@ input, select, textarea {
   border: 1px solid #a7f3d0 !important;
 }
 .badge-soft-red {
-  background: #fff1f2 !important;
-  color: #e11d48 !important;
+  background: #fff5f6 !important;
+  color: #be123c !important;
+  border: 1px solid #fecdd3 !important;
+}
+.badge-red {
+  background: #fff5f6 !important;
+  color: #be123c !important;
   border: 1px solid #fecdd3 !important;
 }
 
