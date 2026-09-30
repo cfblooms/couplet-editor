@@ -358,7 +358,6 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡：未製作採用更淺、柔和的粉紅 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -372,7 +371,6 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單：未列印採用更淺、柔和的粉紅 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -385,7 +383,6 @@
                         </select>
                       </td>
 
-                      <!-- 出貨狀態 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
@@ -398,7 +395,6 @@
                         </select>
                       </td>
 
-                      <!-- 收款狀態 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
@@ -411,10 +407,8 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 沉穩且略帶亮度的莫蘭迪柔和按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
-                          <!-- 左側直立：單據按鈕 -->
                           <div class="stacked-action-col">
                             <button class="cozy-btn btn-calm-amber" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
                               🖨️ 簽收單
@@ -423,7 +417,6 @@
                               🧾 農民收據
                             </button>
                           </div>
-                          <!-- 右側直立：管理操作按鈕 -->
                           <div class="stacked-action-col">
                             <button class="cozy-btn btn-calm-blue" @click="startEditOrder(ord)" title="修改此訂單">
                               ✏️ 修改
@@ -571,7 +564,7 @@
             </div>
 
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
+              <h3>{{ editingInvId ? '✏️️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>進貨類別</label>
@@ -869,7 +862,7 @@
             </div>
 
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
+              <h3>{{ editingRetId ? '✏️️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>退貨類型</label>
@@ -1370,7 +1363,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡真實 DOM 畫布 -->
+            <!-- 🌟 花卡真實 DOM 畫布：強制橫式寬度 1123px，附帶安全內距保護 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -2451,7 +2444,7 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 🌟 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
+// 狀態樣式：已製作（淺綠色）、未製作（淺粉紅）、免製作（淡灰色）
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-soft-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -3779,7 +3772,7 @@ const startNewCard = () => {
   }
 }
 
-// 所見即所得截圖
+// 🌟 徹底修復橫式截圖切字的關鍵：強制將截圖畫布左右與上下撐開 40px 安全邊距
 const shareCoupletToLineDirect = async () => {
   const cardElem = document.getElementById('card-print-target')
   if (!cardElem) return
@@ -3796,14 +3789,17 @@ const shareCoupletToLineDirect = async () => {
       backgroundColor: '#ffffff',
       width: targetWidth,
       height: targetHeight,
-      windowWidth: targetWidth,
-      windowHeight: targetHeight,
+      windowWidth: targetWidth + 100, // 額外加寬視窗，杜絕右側截斷
+      windowHeight: targetHeight + 100,
+      x: -20, // 稍微往左偏 20px 擷取，確保右側極邊緣文字不被切到
+      y: -20,
       onclone: (clonedDoc) => {
         const clonedCard = clonedDoc.getElementById('card-print-target')
         if (clonedCard) {
           clonedCard.style.transform = 'none'
           clonedCard.style.boxShadow = 'none'
           clonedCard.style.position = 'static'
+          clonedCard.style.overflow = 'visible'
         }
       }
     })
@@ -4460,7 +4456,7 @@ input, select, textarea {
   gap: 5px;
 }
 
-/* 🌟 稍為沉穩一點、亮度適中、高質感的莫蘭迪色按鈕設計 */
+/* 莫蘭迪沉穩高質感按鈕 */
 .cozy-btn {
   border: 1px solid transparent;
   padding: 5px 9px;
