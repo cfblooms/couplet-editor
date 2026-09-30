@@ -309,7 +309,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單 -->
+            <!-- 🌟 訂單總覽清單：寬度充足、操作按鈕改為上下兩排 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -320,34 +320,51 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
+                      <th class="col-id">單號</th>
+                      <th class="col-date">下單日</th>
+                      <th class="col-cust">客戶名稱</th>
+                      <th class="col-tax">統編</th>
+                      <th class="col-receipt">開收據</th>
+                      <th class="col-pots">總盆數</th>
+                      <th class="col-spec">規格明細</th>
+                      <th class="col-ship">運費</th>
+                      <th class="col-price">總售價</th>
+                      <th class="col-status">花卡</th>
+                      <th class="col-status">簽收單</th>
+                      <th class="col-status">出貨</th>
+                      <th class="col-status">收款</th>
+                      <th class="col-actions">單據／操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="ord in orderList" :key="ord.id">
                       <td><b>{{ ord.id }}</b></td>
                       <td>{{ ord.order_date }}</td>
-                      <td>{{ ord.customer }}</td>
+                      <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>
                         <select 
                           v-model="ord.need_receipt" 
                           :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
                           @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
+                          class="status-select-box"
                         >
                           <option value="不需收據">不需收據</option>
                           <option value="需開收據">需開收據</option>
                         </select>
                       </td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
-                      <td>{{ ord.spec }}</td>
+                      <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
-                      <td class="text-blue"><b>${{ ord.price }}</b></td>
+                      <td class="text-blue font-bold">${{ ord.price }}</td>
+                      
+                      <!-- 狀態下拉選單（給予舒適寬度，不擠在一起） -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
+                          class="status-select-box"
                         >
                           <option value="未製作">未製作</option>
                           <option value="已製作">已製作</option>
@@ -359,6 +376,7 @@
                           v-model="ord.receipt_status" 
                           :class="ord.receipt_status === '已列印' ? 'select-status green' : 'select-status orange'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
+                          class="status-select-box"
                         >
                           <option value="未列印">未列印</option>
                           <option value="已列印">已列印</option>
@@ -369,22 +387,46 @@
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-orange'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
+                          class="status-select-box"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
                       <td>
-                        <select v-model="ord.payment_status" @change="updateOrderField(ord, 'payment_status', ord.payment_status)">
+                        <select 
+                          v-model="ord.payment_status" 
+                          :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
+                          @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
+                          class="status-select-box"
+                        >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
                         </select>
                       </td>
+
+                      <!-- 🌟 操作區塊：黃色簽收單與紫色農民收據上下排、修改與刪除上下排 -->
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
-                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除">🗑️</button>
+                        <div class="stacked-action-container">
+                          <!-- 左側直立：單據按鈕 -->
+                          <div class="stacked-action-col">
+                            <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
+                              🖨️ 簽收單
+                            </button>
+                            <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">
+                              🧾 農民收據
+                            </button>
+                          </div>
+                          <!-- 右側直立：管理操作按鈕 -->
+                          <div class="stacked-action-col">
+                            <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">
+                              ✏️ 修改
+                            </button>
+                            <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
+                              🗑️ 刪除
+                            </button>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                     <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
@@ -488,8 +530,10 @@
                         </span>
                       </td>
                       <td>
-                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                        <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                        <div class="stacked-action-col">
+                          <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -644,7 +688,7 @@
             </div>
 
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
+              <h3>{{ editingCustId ? '✏️️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>客戶 / 店鋪名稱</label>
@@ -948,14 +992,17 @@
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-orange'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
+                          class="status-select-box"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
                       <td class="action-cell">
-                        <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️️</button>
+                        <div class="stacked-action-col">
+                          <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
+                          <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️ 修改</button>
+                        </div>
                       </td>
                     </tr>
                     <tr v-if="displayedShippingOrders.length === 0">
@@ -971,7 +1018,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援數字與手柄雙向調整大小) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -979,7 +1026,7 @@
           <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️️ 花卡全裝置雲端草稿庫：</label>
+              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
@@ -1748,6 +1795,7 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                  <!-- 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
                   <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
                     {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
                   </div>
@@ -1772,6 +1820,7 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
+                <!-- 中文大寫金額：若完全沒填金額（空白或0），橫線全部不要，只留純空白；有填金額時才在空位畫橫線「—」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
@@ -3405,7 +3454,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
+    styles.textShadow = '0 0 1.2px #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
@@ -4379,32 +4428,63 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 狀態徽章 */
-.select-status { font-weight: bold; padding: 4px 6px; border-radius: 4px; }
-.select-status.orange { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-.select-status.green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.select-status.gray { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-
+/* 🌟 表格與狀態下拉選單寬度與對齊（解決擁擠問題） */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 750px; }
-.data-table th { background: #f8fafc; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
-.data-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-.action-cell { white-space: nowrap; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 1100px; }
+.data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
+.data-table td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-.badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
+.status-select-box {
+  min-width: 82px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.spec-cell-wrap {
+  max-width: 240px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+/* 🌟 操作按鈕上下兩排卡片排列 */
+.action-cell { white-space: nowrap; }
+.stacked-action-container {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.stacked-action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mini-btn {
+  border: none;
+  padding: 4px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-align: center;
+}
+.print-btn { background: #f59e0b; color: white; }
+.farmer-btn { background: #8b5cf6; color: white; }
+.edit-btn { background: #3b82f6; color: white; }
+.del-btn { background: #ef4444; color: white; }
+
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
 .badge-red { background: #fee2e2; color: #dc2626; }
 .badge-orange { background: #ffedd5; color: #c2410c; }
 .badge-green { background: #dcfce7; color: #16a34a; }
 .badge-gray { background: #f1f5f9; color: #64748b; }
 .status-tag { font-size: 12px; font-weight: bold; }
-
-.mini-btn { border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; }
-.edit-btn { background: #3b82f6; color: white; }
-.del-btn { background: #ef4444; color: white; }
-.print-btn { background: #f59e0b; color: white; font-weight: bold; font-size: 12px; }
-.farmer-btn { background: #8b5cf6; color: white; font-weight: bold; font-size: 12px; }
 
 .text-red { color: #dc2626; }
 .text-blue { color: #2563eb; }
