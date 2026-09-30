@@ -98,7 +98,6 @@
 
       <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
-        <!-- 🌟 次導覽列：包含出貨派送進度 -->
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
           <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
@@ -794,7 +793,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -881,7 +880,7 @@
             </div>
           </section>
 
-          <!-- 🌟 模組 7：出貨派送進度分頁 (明確獨立顯示) -->
+          <!-- 模組 7：出貨派送進度分頁 -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -956,7 +955,7 @@
                       </td>
                       <td class="action-cell">
                         <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️️</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️</button>
                       </td>
                     </tr>
                     <tr v-if="displayedShippingOrders.length === 0">
@@ -972,28 +971,31 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (含草稿暫存切換) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 花卡草稿暫存與切換專區 -->
+          <!-- 🌟 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
-            <label class="section-title">📑 花卡草稿暫存庫（未確認保留 / 打下一張）：</label>
+            <div class="section-title-with-weight">
+              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
+              <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
+            </div>
             <div class="draft-action-btns">
-              <button type="button" class="draft-save-btn" @click="saveCurrentAsDraft">
-                💾 暫存此花卡草稿
+              <button type="button" class="draft-save-btn" @click="saveCurrentAsCloudDraft">
+                💾 存至雲端草稿 (全裝置同步)
               </button>
               <button type="button" class="draft-new-btn" @click="startNewCard">
-                ＋ 開新花卡 (清空)
+                ＋ 開新花卡
               </button>
             </div>
-            <div class="mt-2" v-if="savedDrafts.length > 0">
-              <label class="sub-lbl">快速切換已暫存草稿 ({{ savedDrafts.length }} 張)：</label>
+            <div class="mt-2">
+              <label class="sub-lbl">跨電腦/手機讀取暫存草稿 ({{ cloudDrafts.length }} 張)：</label>
               <div class="draft-selector-row">
-                <select v-model="selectedDraftId" @change="loadDraft(selectedDraftId)" class="full-input bold-select">
-                  <option value="">-- 點此切換回之前的草稿 --</option>
-                  <option v-for="d in savedDrafts" :key="d.id" :value="d.id">
+                <select v-model="selectedDraftId" @change="loadCloudDraft(selectedDraftId)" class="full-input bold-select">
+                  <option value="">-- 請選擇要調出的雲端草稿 --</option>
+                  <option v-for="d in cloudDrafts" :key="d.id" :value="d.id">
                     {{ d.title }}
                   </option>
                 </select>
@@ -1001,8 +1003,8 @@
                   v-if="selectedDraftId" 
                   type="button" 
                   class="mini-del-draft-btn" 
-                  @click="deleteDraft(selectedDraftId)"
-                  title="刪除此草稿"
+                  @click="deleteCloudDraft(selectedDraftId)"
+                  title="從雲端刪除此草稿"
                 >
                   🗑️
                 </button>
@@ -1465,7 +1467,7 @@
             :disabled="!receiptForm.recipient && !selectedOrderId"
             @click="printReceiptAndMarkDone"
           >
-            🖨️️ 列印 A5 橫式簽收單 (自動標記已列印)
+            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
           </button>
         </div>
 
@@ -1974,7 +1976,7 @@ const getOrderShippingFee = (ord) => {
   return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
-// 🌟 單號產生：精準依據「選擇的下單日期」抓取當天已有訂單最大序號 + 1
+// 依據選擇的「下單日期」動態產生當日最新無衝突流水號
 const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   let datePart = ''
   if (dateStrVal) {
@@ -2060,7 +2062,6 @@ const formOrder = ref({
   ]
 })
 
-// 即時預覽下一個產生的訂單編號
 const previewNextOrderId = computed(() => {
   return generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
 })
@@ -2262,7 +2263,7 @@ const cancelEditOrder = () => {
   }
 }
 
-// 儲存訂單（依所選下單日期產生單號，保證不撞號）
+// 儲存訂單
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
@@ -2312,7 +2313,6 @@ const saveOrder = async () => {
       alert('修改失敗：' + error.message)
     }
   } else {
-    // 依據選擇的「下單日期」動態產生當日最新無衝突流水號
     const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
     const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
     if (!error) {
@@ -2337,9 +2337,7 @@ const getCardStatusClass = (status) => {
   return 'select-status orange'
 }
 
-// ==========================================
 // 出貨派送分頁控制
-// ==========================================
 const shippingViewFilter = ref('unshipped')
 
 const unshippedOrders = computed(() => {
@@ -3532,11 +3530,24 @@ const printCouplet = () => {
   })
 }
 
-// 花卡草稿暫存
-const savedDrafts = ref(JSON.parse(localStorage.getItem('cf_card_drafts') || '[]'))
+// ==========================================
+// 🌟 雲端草稿同步庫（Supabase 支援）
+// ==========================================
+const cloudDrafts = ref([])
 const selectedDraftId = ref('')
 
-const saveCurrentAsDraft = () => {
+const loadCloudDrafts = async () => {
+  try {
+    const { data, error } = await supabase.from('card_drafts').select('*').order('created_at', { ascending: false })
+    if (data) {
+      cloudDrafts.value = data
+    }
+  } catch (err) {
+    console.warn('loadCloudDrafts error', err)
+  }
+}
+
+const saveCurrentAsCloudDraft = async () => {
   const now = new Date()
   const timeStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   const targetName = upperTarget.value.trim() || '未填對象'
@@ -3544,9 +3555,7 @@ const saveCurrentAsDraft = () => {
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   
   const draftId = 'draft_' + Date.now()
-  const draftData = {
-    id: draftId,
-    title: draftTitle,
+  const draftPayload = {
     isVertical: isVertical.value,
     cardCategory: cardCategory.value,
     cardFontFamily: cardFontFamily.value,
@@ -3561,18 +3570,32 @@ const saveCurrentAsDraft = () => {
     layout: JSON.parse(JSON.stringify(layout.value))
   }
 
-  savedDrafts.value.unshift(draftData)
-  if (savedDrafts.value.length > 20) savedDrafts.value.pop()
-  localStorage.setItem('cf_card_drafts', JSON.stringify(savedDrafts.value))
-  selectedDraftId.value = draftId
-  showToast(`✅ 花卡已成功暫存！\n已保留為：「${draftTitle}」\n您現在可以點「開新花卡」打下一張了！`)
+  try {
+    const { error } = await supabase.from('card_drafts').insert([{
+      id: draftId,
+      title: draftTitle,
+      data: draftPayload
+    }])
+    if (!error) {
+      showToast(`☁️ 花卡已成功存至雲端！\n草稿名稱：「${draftTitle}」\n其他電腦或手機點開都能同步看到！`)
+      await loadCloudDrafts()
+      selectedDraftId.value = draftId
+    } else {
+      // 容錯備用
+      localStorage.setItem(`draft_${draftId}`, JSON.stringify({ id: draftId, title: draftTitle, data: draftPayload }))
+      showToast(`⚠️ 雲端保存：${error.message}\n已先行在本機備份！`)
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
-const loadDraft = (id) => {
+const loadCloudDraft = (id) => {
   if (!id) return
-  const draft = savedDrafts.value.find(d => d.id === id)
-  if (!draft) return
+  const item = cloudDrafts.value.find(d => d.id === id)
+  if (!item || !item.data) return
 
+  const draft = item.data
   isVertical.value = draft.isVertical
   cardCategory.value = draft.cardCategory
   cardFontFamily.value = draft.cardFontFamily || 'kai'
@@ -3586,20 +3609,24 @@ const loadDraft = (id) => {
   weights.value = JSON.parse(JSON.stringify(draft.weights))
   layout.value = JSON.parse(JSON.stringify(draft.layout))
 
-  showToast(`📂 已成功載入「${draft.title}」！您可以直接修改或列印！`)
+  showToast(`📂 已從雲端載入「${item.title}」！`)
   nextTick(() => autoFitZoom())
 }
 
-const deleteDraft = (id) => {
-  if (!confirm('確定要刪除這張暫存草稿嗎？')) return
-  savedDrafts.value = savedDrafts.value.filter(d => d.id !== id)
-  localStorage.setItem('cf_card_drafts', JSON.stringify(savedDrafts.value))
-  selectedDraftId.value = ''
-  showToast('已刪除該暫存草稿')
+const deleteCloudDraft = async (id) => {
+  if (!confirm('確定要從雲端刪除這張暫存草稿嗎？（其他裝置也會一併移除）')) return
+  try {
+    await supabase.from('card_drafts').delete().eq('id', id)
+    cloudDrafts.value = cloudDrafts.value.filter(d => d.id !== id)
+    selectedDraftId.value = ''
+    showToast('已從雲端移除該草稿')
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 const startNewCard = () => {
-  if (confirm('確定要開新花卡嗎？（若剛才的花卡尚未儲存草稿，建議先點「暫存此花卡草稿」）')) {
+  if (confirm('確定要開新花卡嗎？（若剛才的花卡尚未保存，請先點「存至雲端草稿」）')) {
     upperTarget.value = ''
     middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '開幕誌慶'
     middleText2.value = ''
@@ -3708,6 +3735,7 @@ const initSystemData = () => {
   loadInventory()
   loadReturns()
   loadOrders()
+  loadCloudDrafts()
 }
 
 // 雲端字型預載入與資料載入
@@ -3866,10 +3894,20 @@ onMounted(() => {
   margin-left: 8px;
 }
 
-/* 花卡草稿管理區塊樣式 */
+/* 雲端草稿管理區塊樣式 */
 .draft-manage-panel {
   background: #fdf4ff !important;
   border: 1.5px solid #f0abfc !important;
+}
+.mini-refresh-btn {
+  background: #fdf2f8;
+  border: 1px solid #f472b6;
+  color: #db2777;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
 }
 .draft-action-btns {
   display: flex;
@@ -4694,62 +4732,62 @@ input, select, textarea {
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    width: 210mm !important;
-    height: 297mm !important;
-    overflow: visible !important;
-    display: block !important;
+    width: 210mm !important; 
+    height: 297mm !important; 
+    overflow: visible !important; 
+    display: block !important; 
   }
   
   .no-print { display: none !important; }
   
   .canvas-viewport, .receipt-preview-area { 
     padding: 0 !important; 
-    margin: 0 !important;
+    margin: 0 !important; 
     background: white !important; 
     overflow: visible !important; 
-    display: block !important;
-    width: 210mm !important;
-    height: 297mm !important;
+    display: block !important; 
+    width: 210mm !important; 
+    height: 297mm !important; 
   }
   
   .card-scaler-container { 
     width: 210mm !important; 
     height: 297mm !important; 
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    position: static !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
   }
   
   #card-print-target.mode-vertical { 
     position: absolute !important; 
-    top: 0 !important;
-    left: 0 !important;
+    top: 0 !important; 
+    left: 0 !important; 
     width: 210mm !important; 
     height: 297mm !important; 
     transform: none !important; 
     box-shadow: none !important; 
-    margin: 0 !important;
-    display: block !important;
-    visibility: visible !important;
-    page-break-inside: avoid !important;
-    page-break-after: avoid !important;
+    margin: 0 !important; 
+    display: block !important; 
+    visibility: visible !important; 
+    page-break-inside: avoid !important; 
+    page-break-after: avoid !important; 
   }
 
-  #card-print-target.mode-horizontal {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 297mm !important;
-    height: 210mm !important;
-    transform: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-    display: block !important;
-    visibility: visible !important;
+  #card-print-target.mode-horizontal { 
+    position: absolute !important; 
+    top: 0 !important; 
+    left: 0 !important; 
+    width: 297mm !important; 
+    height: 210mm !important; 
+    transform: none !important; 
+    box-shadow: none !important; 
+    margin: 0 !important; 
+    display: block !important; 
+    visibility: visible !important; 
   }
 
-  #card-print-target * {
-    visibility: visible !important;
+  #card-print-target * { 
+    visibility: visible !important; 
   }
 
   .a5-landscape-sheet, .farmer-receipt-sheet { 
@@ -4758,7 +4796,7 @@ input, select, textarea {
     box-shadow: none !important; 
     width: 210mm !important; 
     height: 148mm !important; 
-    margin: 0 auto !important;
+    margin: 0 auto !important; 
   }
 }
 </style>
