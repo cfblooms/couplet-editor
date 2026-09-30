@@ -98,6 +98,7 @@
 
       <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
+        <!-- 🌟 次導覽列：包含出貨派送進度 -->
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
           <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
@@ -105,21 +106,34 @@
           <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
           <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
           <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
-          <button :class="{ active: subTab === 'shipping' }" @click="subTab = 'shipping'">🚚 7. 出貨派送進度</button>
+          <button :class="{ active: subTab === 'shipping' }" @click="subTab = 'shipping'" class="nav-shipping-highlight">🚚 7. 出貨派送進度 ({{ unshippedOrders.length }})</button>
         </nav>
 
         <div class="manage-content">
           <!-- 模組 1：訂單與帳務 -->
           <section v-if="subTab === 'order'" class="tab-pane">
             <div v-if="editingOrderId" class="edit-banner">
-              <span>✏️️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
+              <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
             </div>
 
             <div class="card-box" id="order-form-box">
-              <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+              <div class="order-form-title-row">
+                <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <span class="preview-seq-badge">
+                  預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
+                </span>
+              </div>
               
               <div class="form-grid">
+                <div class="field highlight-date-field">
+                  <label>📅 下單日期（單號會依此日期編號）：</label>
+                  <input v-model="formOrder.order_date" type="date" class="bold-date-input" />
+                </div>
+                <div class="field">
+                  <label>預計出貨 / 送達日：</label>
+                  <input v-model="formOrder.expected_date" type="date" />
+                </div>
                 <div class="field">
                   <label>客戶類型</label>
                   <select v-model="formOrder.cust_type">
@@ -283,14 +297,6 @@
                     <option value="未結">未結</option>
                     <option value="已結">已結</option>
                   </select>
-                </div>
-                <div class="field">
-                  <label>下單日期 (單號依此日產生)</label>
-                  <input v-model="formOrder.order_date" type="date" />
-                </div>
-                <div class="field">
-                  <label>預計出貨/送達日</label>
-                  <input v-model="formOrder.expected_date" type="date" />
                 </div>
               </div>
 
@@ -788,7 +794,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -875,7 +881,7 @@
             </div>
           </section>
 
-          <!-- 🌟 模組 7：出貨派送進度分頁 (已出貨 / 未出貨) -->
+          <!-- 🌟 模組 7：出貨派送進度分頁 (明確獨立顯示) -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -922,7 +928,7 @@
                   <tbody>
                     <tr v-for="ord in displayedShippingOrders" :key="ord.id">
                       <td><b>{{ ord.id }}</b></td>
-                      <td class="text-blue"><b>{{ ord.expected_date }}</b></td>
+                      <td class="text-blue font-bold">{{ ord.expected_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
                       <td>{{ ord.phone }}</td>
                       <td class="addr-cell">{{ getCustomerAddress(ord) }}</td>
@@ -950,7 +956,7 @@
                       </td>
                       <td class="action-cell">
                         <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️️</button>
                       </td>
                     </tr>
                     <tr v-if="displayedShippingOrders.length === 0">
@@ -998,7 +1004,7 @@
                   @click="deleteDraft(selectedDraftId)"
                   title="刪除此草稿"
                 >
-                  🗑️️
+                  🗑️
                 </button>
               </div>
             </div>
@@ -1459,7 +1465,7 @@
             :disabled="!receiptForm.recipient && !selectedOrderId"
             @click="printReceiptAndMarkDone"
           >
-            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+            🖨️️ 列印 A5 橫式簽收單 (自動標記已列印)
           </button>
         </div>
 
@@ -1968,7 +1974,7 @@ const getOrderShippingFee = (ord) => {
   return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
-// 🌟 修正後的單號產生邏輯：精準依據「選擇的下單日期」抓取當天已有訂單最大序號 + 1，保證不撞號！
+// 🌟 單號產生：精準依據「選擇的下單日期」抓取當天已有訂單最大序號 + 1
 const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   let datePart = ''
   if (dateStrVal) {
@@ -2024,7 +2030,7 @@ const formRet = ref({
   reason: '運送碰撞 / 開花不良'
 })
 
-// 訂單表單：支援多組花禮規格
+// 訂單表單
 const formOrder = ref({
   cust_type: '批發',
   customer: '',
@@ -2052,6 +2058,11 @@ const formOrder = ref({
       quick_pot: '未使用'
     }
   ]
+})
+
+// 即時預覽下一個產生的訂單編號
+const previewNextOrderId = computed(() => {
+  return generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
 })
 
 const onFlowerSelectChange = (item) => {
@@ -2251,7 +2262,7 @@ const cancelEditOrder = () => {
   }
 }
 
-// 儲存訂單（解決主鍵重複問題）
+// 儲存訂單（依所選下單日期產生單號，保證不撞號）
 const saveOrder = async () => {
   if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
   
@@ -2327,7 +2338,7 @@ const getCardStatusClass = (status) => {
 }
 
 // ==========================================
-// 🌟 出貨派送分頁控制
+// 出貨派送分頁控制
 // ==========================================
 const shippingViewFilter = ref('unshipped')
 
@@ -3909,6 +3920,11 @@ onMounted(() => {
 }
 
 /* 出貨派送分頁專用樣式 */
+.nav-shipping-highlight {
+  background: #0284c7 !important;
+  color: white !important;
+  font-weight: 900 !important;
+}
 .shipping-tab-header {
   display: flex;
   justify-content: space-between;
@@ -3940,6 +3956,34 @@ onMounted(() => {
   max-width: 220px;
   word-break: break-all;
   font-size: 12.5px;
+}
+.font-bold { font-weight: bold; }
+
+/* 訂單表單標題列與即時單號預覽 */
+.order-form-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.preview-seq-badge {
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: #1e40af;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.highlight-date-field {
+  background: #fefce8;
+  border: 1.5px solid #fde047;
+  border-radius: 6px;
+  padding: 6px;
+}
+.bold-date-input {
+  font-weight: bold;
+  color: #854d0e;
+  font-size: 14px;
 }
 
 /* 浮動提示橫條 */
@@ -4095,7 +4139,7 @@ onMounted(() => {
 .cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
 .card-box { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-.card-box h3 { margin: 0 0 12px 0; font-size: 16px; color: #1e293b; }
+.card-box h3 { margin: 0; font-size: 16px; color: #1e293b; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .field label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 input, select, textarea {
@@ -4389,7 +4433,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute right: -7px; bottom: -7px; width: 17px; height: 17px;
+  position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 11px;
   display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
