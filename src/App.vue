@@ -723,7 +723,7 @@
             </div>
 
             <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
+              <h3>{{ editingOrchidId ? '✏️️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>品種名稱</label>
@@ -793,7 +793,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -955,7 +955,7 @@
                       </td>
                       <td class="action-cell">
                         <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️️</button>
                       </td>
                     </tr>
                     <tr v-if="displayedShippingOrders.length === 0">
@@ -976,7 +976,7 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 花卡雲端即時草稿庫 -->
+          <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
@@ -1620,8 +1620,8 @@
             </div>
 
             <div class="form-group mt-2">
-              <label>總金額 (元)：</label>
-              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" />
+              <label>總金額 (元，沒填時留空)：</label>
+              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
             </div>
 
             <div class="form-group">
@@ -1709,7 +1709,10 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">${{ farmerReceipt.totalAmount }}</div>
+                  <!-- 🌟 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
+                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
+                    {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
+                  </div>
                   <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
                 </div>
 
@@ -1731,6 +1734,7 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
+                <!-- 🌟 中文大寫金額：若數值為空或為零時，直接留空，不顯示「零」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
@@ -2805,7 +2809,9 @@ const shareReceiptToBuyerDirect = () => {
   }
 }
 
-// 4. 農民收據
+// ==========================================
+// 4. 農民收據 (空值不顯示 $ / 零不顯示)
+// ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115',
@@ -2822,21 +2828,39 @@ const farmerReceipt = ref({
   note: ''
 })
 
+// 中文大寫欄位：預設留空或有值
 const chineseDigits = ref({
-  hundredThousands: '零',
-  tenThousands: '零',
-  thousands: '貳',
-  hundreds: '伍',
-  tens: '零',
-  ones: '零'
+  hundredThousands: '',
+  tenThousands: '',
+  thousands: '',
+  hundreds: '',
+  tens: '',
+  ones: ''
 })
 
-const digitMap = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
+const digitMap = ['', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
 
+// 🌟 金額大寫解析：凡是 0 一律轉為 '' (空白)，不顯示「零」
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
+  if (amt <= 0) {
+    chineseDigits.value = {
+      hundredThousands: '',
+      tenThousands: '',
+      thousands: '',
+      hundreds: '',
+      tens: '',
+      ones: ''
+    }
+    return
+  }
+
   const padded = amt.toString().padStart(6, '0')
-  const digits = padded.split('').map(d => digitMap[Number(d)])
+  const digits = padded.split('').map(d => {
+    const num = Number(d)
+    return num === 0 ? '' : digitMap[num]
+  })
+
   chineseDigits.value = {
     hundredThousands: digits[0],
     tenThousands: digits[1],
@@ -2865,7 +2889,7 @@ const onSelectFarmerReceiptOrder = () => {
     farmerReceipt.value.itemName = '蝴蝶蘭花禮'
     farmerReceipt.value.spec = formatSimpleItemName(ord)
     farmerReceipt.value.qty = `${getOrderTotalPots(ord)} 盆`
-    farmerReceipt.value.unitPrice = Number(ord.price).toLocaleString()
+    farmerReceipt.value.unitPrice = Number(ord.price) ? Number(ord.price).toLocaleString() : ''
     farmerReceipt.value.totalAmount = Number(ord.price) || 0
     farmerReceipt.value.note = ord.id
 
@@ -2913,8 +2937,18 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
   ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
-  ctx.fillText(`金額：NT$ ${farmerReceipt.value.totalAmount.toLocaleString()} 元`, 42, 235)
-  ctx.fillText(`合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`, 42, 285)
+  
+  // 🌟 LINE圖片繪製：若有金額才印出，否則完全空白
+  const amtStr = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
+    ? `NT$ ${Number(farmerReceipt.value.totalAmount).toLocaleString()} 元`
+    : ''
+  ctx.fillText(`金額：${amtStr}`, 42, 235)
+
+  // 🌟 LINE圖片大寫：無「零」
+  const cAmtLine = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
+    ? `合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`
+    : '合計新台幣(中文大寫)：     拾     萬     仟     佰     拾     元整'
+  ctx.fillText(cAmtLine, 42, 285)
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
   const finishCanvas = () => {
@@ -3337,7 +3371,7 @@ const getWeightStyle = (wVal) => {
   } else if (w === '600') {
     styles.textShadow = '0 0 0.8px #000'
   } else if (w === '700') {
-    styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
+    styles.textShadow = '0 0 1.2px #000'
   } else if (w === '800') {
     styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000, -0.5px 0 0 #000'
   }
@@ -3530,9 +3564,7 @@ const printCouplet = () => {
   })
 }
 
-// ==========================================
-// 🌟 雲端草稿同步庫（Supabase 支援）
-// ==========================================
+// 雲端草稿同步
 const cloudDrafts = ref([])
 const selectedDraftId = ref('')
 
@@ -3581,9 +3613,7 @@ const saveCurrentAsCloudDraft = async () => {
       await loadCloudDrafts()
       selectedDraftId.value = draftId
     } else {
-      // 容錯備用
-      localStorage.setItem(`draft_${draftId}`, JSON.stringify({ id: draftId, title: draftTitle, data: draftPayload }))
-      showToast(`⚠️ 雲端保存：${error.message}\n已先行在本機備份！`)
+      showToast(`⚠️ 雲端保存：${error.message}`)
     }
   } catch (err) {
     console.error(err)
@@ -4661,6 +4691,7 @@ input, select, textarea {
   min-width: 26px;
   text-align: center;
   font-size: 17px;
+  display: inline-block;
 }
 
 /* 蔡鎮遠姓名與真實蓋章圖片排版 */
