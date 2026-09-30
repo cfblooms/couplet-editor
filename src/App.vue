@@ -666,67 +666,67 @@
                 </div>
               </div>
 
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveCustomer">
-                  {{ editingCustId ? '確認更新客戶' : '儲存客戶資料' }}
-                </button>
-                <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">
-                  取消
-                </button>
+            <div class="btn-action-row mt-2">
+              <button class="primary-btn" @click="saveCustomer">
+                {{ editingCustId ? '確認更新客戶' : '儲存客戶資料' }}
+              </button>
+              <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">
+                取消
+              </button>
+            </div>
+          </div>
+
+          <div class="card-box mt-3">
+            <h3>📋 現有客戶清單 ({{ customers.length }} 位)</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>客戶編號</th><th>名稱</th><th>類別</th><th>結帳週期</th><th>電話</th><th>地址 / 備註</th><th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="c in customers" :key="c.id">
+                    <td><b>{{ c.id }}</b></td>
+                    <td><b>{{ c.name }}</b></td>
+                    <td><span class="badge">{{ c.type }}</span></td>
+                    <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
+                    <td>{{ c.phone }}</td>
+                    <td>{{ c.line_note }}</td>
+                    <td class="action-cell">
+                      <button class="mini-btn edit-btn" @click="startEditCust(c)" title="修改">✏️</button>
+                      <button class="mini-btn del-btn" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 模組 5：蘭花品種庫 -->
+        <section v-if="subTab === 'orchid'" class="tab-pane">
+          <div v-if="editingOrchidId" class="edit-banner">
+            <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
+            <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
+          </div>
+
+          <div class="card-box" id="orchid-form-box">
+            <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label>品種名稱</label>
+                <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
+              </div>
+              <div class="field">
+                <label>特色說明</label>
+                <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
+              </div>
+              <div class="field">
+                <label>品種照片</label>
+                <input type="file" accept="image/*" @change="onPhotoFileChange" />
               </div>
             </div>
-
-            <div class="card-box mt-3">
-              <h3>📋 現有客戶清單 ({{ customers.length }} 位)</h3>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>客戶編號</th><th>名稱</th><th>類別</th><th>結帳週期</th><th>電話</th><th>地址 / 備註</th><th>操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="c in customers" :key="c.id">
-                      <td><b>{{ c.id }}</b></td>
-                      <td><b>{{ c.name }}</b></td>
-                      <td><span class="badge">{{ c.type }}</span></td>
-                      <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
-                      <td>{{ c.phone }}</td>
-                      <td>{{ c.line_note }}</td>
-                      <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditCust(c)" title="修改">✏️</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <!-- 模組 5：蘭花品種庫 -->
-          <section v-if="subTab === 'orchid'" class="tab-pane">
-            <div v-if="editingOrchidId" class="edit-banner">
-              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
-              <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
-            </div>
-
-            <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label>品種名稱</label>
-                  <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
-                </div>
-                <div class="field">
-                  <label>特色說明</label>
-                  <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
-                </div>
-                <div class="field">
-                  <label>品種照片</label>
-                  <input type="file" accept="image/*" @change="onPhotoFileChange" />
-                </div>
-              </div>
 
             <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
               <div class="preview-label">照片預覽：</div>
@@ -882,7 +882,7 @@
       </div>
     </div>
 
-    <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+    <!-- ================= 模式 2：花卡 / 輓聯編輯器 (中款兩行獨立) ================= -->
     <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
       <div class="control-panel no-print">
         <h2>⚙️ 卡片與題詞設定</h2>
@@ -998,11 +998,12 @@
           </div>
         </div>
 
-        <!-- 中款獨立設定 -->
+        <!-- 🌟 中款設定：擴充為兩行獨立格 -->
         <div class="panel-section">
+          <!-- 中款第 1 行 -->
           <div class="section-title-with-weight">
-            <label class="section-title">中款詞語：</label>
-            <select v-model="weights.middle" class="mini-weight-select" title="設定中款粗細">
+            <label class="section-title">中款第 1 行（主要題詞）：</label>
+            <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
               <option value="400">400 (標準)</option>
               <option value="500">500 (中等)</option>
               <option value="600">600 (半粗)</option>
@@ -1056,7 +1057,20 @@
             </div>
           </template>
 
-          <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款詞語" />
+          <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款第 1 行詞語" />
+
+          <!-- 中款第 2 行 (獨立一格) -->
+          <div class="section-title-with-weight mt-3">
+            <label class="section-title">中款第 2 行（選填，兩行時使用）：</label>
+            <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
+              <option value="400">400 (標準)</option>
+              <option value="500">500 (中等)</option>
+              <option value="600">600 (半粗)</option>
+              <option value="700">700 (粗體)</option>
+              <option value="800">800 (特粗)</option>
+            </select>
+          </div>
+          <input type="text" v-model="middleText2" class="full-input" placeholder="留空則不顯示第 2 行" />
         </div>
 
         <!-- 下款 6 格獨立粗細設定 -->
@@ -1170,7 +1184,7 @@
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_suffix')">⤡</div>
             </div>
 
-            <!-- 中款 -->
+            <!-- 中款第 1 行 -->
             <div 
               v-if="middleText.trim()"
               class="text-box middle-box"
@@ -1179,6 +1193,17 @@
             >
               <span>{{ middleText }}</span>
               <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
+            </div>
+
+            <!-- 中款第 2 行 (選填獨立格) -->
+            <div 
+              v-if="middleText2.trim()"
+              class="text-box middle-box-2"
+              :style="getStyle('middle_2')"
+              @pointerdown="startMove($event, 'middle_2')"
+            >
+              <span>{{ middleText2 }}</span>
+              <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle_2')">⤡</div>
             </div>
 
             <!-- 下款 -->
@@ -3079,14 +3104,17 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `宸豐蘭藝_全部訂單清單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// 9. 花卡 / 輓聯編輯器
+// 9. 花卡 / 輓聯編輯器 (中款兩行獨立)
 const cardCategory = ref('funeral')
 const cardFontFamily = ref('kai')
 
 const upperPrefix = ref('敬悼')
 const upperTarget = ref('陳媽李老夫人')
 const upperSuffix = ref('千古')
+
+// 🌟 中款第 1 行與第 2 行獨立定義
 const middleText = ref('母儀千古')
+const middleText2 = ref('')
 const suffixText = ref('敬輓')
 
 const funeralUpperFormat = ref('X媽X老夫人')
@@ -3097,11 +3125,13 @@ const celebTarget = ref('鴻運實業有限公司')
 const gender = ref('female')
 const ageStage = ref('f_over80')
 
+// 🌟 加入 middle_2 獨立粗細
 const weights = ref({
   upper_prefix: '600',
   upper_target: '700',
   upper_suffix: '600',
   middle: '800',
+  middle_2: '800',
   bottom_0: '600',
   bottom_1: '700',
   bottom_2: '600',
@@ -3184,11 +3214,13 @@ const maFontSize = computed(() => {
   return Math.max(12, baseSize - 20)
 })
 
+// 🌟 預設位置：加入 middle_2（第2行）預設對齊
 const defaultVertical = {
   upper_prefix: { x: 620, y: 100, size: 36 },
   upper_target: { x: 620, y: 220, size: 42 },
   upper_suffix: { x: 620, y: 720, size: 36 },
-  middle:       { x: 330, y: 220, size: 84 },
+  middle:       { x: 380, y: 220, size: 76 },
+  middle_2:     { x: 280, y: 220, size: 76 },
   bottom_0:     { x: 155, y: 520, size: 30 },
   bottom_1:     { x: 155, y: 680, size: 36 },
   bottom_2:     { x: 95,  y: 520, size: 30 },
@@ -3202,13 +3234,14 @@ const defaultHorizontal = {
   upper_prefix: { x: 120, y: 90,  size: 34 },
   upper_target: { x: 230, y: 90,  size: 38 },
   upper_suffix: { x: 600, y: 90,  size: 34 },
-  middle:       { x: 220, y: 260, size: 76 },
-  bottom_0:     { x: 340, y: 400, size: 28 },
-  bottom_1:     { x: 340, y: 460, size: 32 },
-  bottom_2:     { x: 340, y: 520, size: 28 },
-  bottom_3:     { x: 340, y: 580, size: 28 },
+  middle:       { x: 220, y: 220, size: 68 },
+  middle_2:     { x: 220, y: 310, size: 68 },
+  bottom_0:     { x: 340, y: 440, size: 28 },
+  bottom_1:     { x: 340, y: 490, size: 32 },
+  bottom_2:     { x: 340, y: 540, size: 28 },
+  bottom_3:     { x: 340, y: 590, size: 28 },
   bottom_4:     { x: 340, y: 640, size: 28 },
-  bottom_5:     { x: 340, y: 700, size: 28 },
+  bottom_5:     { x: 340, y: 690, size: 28 },
   suffix:       { x: 620, y: 490, size: 34 }
 }
 
@@ -3291,11 +3324,13 @@ const onCardCategoryChange = () => {
     upperSuffix.value = '千古'
     suffixText.value = '敬輓'
     middleText.value = currentFuneralPhrases.value[0] || '母儀千古'
+    middleText2.value = ''
   } else {
     upperPrefix.value = '恭祝'
     upperSuffix.value = '誌慶'
     suffixText.value = '敬賀'
     middleText.value = currentCelebPhrases.value[0] || '開幕誌慶'
+    middleText2.value = ''
   }
 }
 const onCelebrationTypeChange = () => {
@@ -3308,7 +3343,7 @@ const printCouplet = () => {
   })
 }
 
-// 產生花卡高畫質圖片
+// 產生花卡高畫質圖片 (支援中款兩行繪製)
 const shareCoupletToLineDirect = () => {
   const canvas = document.createElement('canvas')
   const width = isVertical.value ? 794 : 1123
@@ -3378,7 +3413,11 @@ const shareCoupletToLineDirect = () => {
   drawTextItem(upperTarget.value, layout.value.upper_target, isVertical.value, weights.value.upper_target, true)
   drawTextItem(upperSuffix.value, layout.value.upper_suffix, isVertical.value, weights.value.upper_suffix)
 
+  // 繪製中款第 1 行與第 2 行
   drawTextItem(middleText.value, layout.value.middle, isVertical.value, weights.value.middle)
+  if (middleText2.value.trim()) {
+    drawTextItem(middleText2.value, layout.value.middle_2, isVertical.value, weights.value.middle_2)
+  }
 
   bottomLines.value.forEach((item, idx) => {
     if (item.text.trim()) {
@@ -3436,7 +3475,6 @@ onMounted(() => {
     autoFitFarmerReceipt()
   })
 
-  // 若已通過驗證，自動開始載入資料庫資料
   if (isAuthenticated.value) {
     initSystemData()
   }
@@ -3452,9 +3490,7 @@ onMounted(() => {
   background-color: #f1f5f9;
 }
 
-/* ====================================================
-   內部安全登入卡片樣式
-   ==================================================== */
+/* 內部安全登入卡片樣式 */
 .auth-lock-overlay {
   position: fixed;
   top: 0;
@@ -4001,10 +4037,12 @@ input, select, textarea {
 }
 .card-board.mode-vertical { width: 794px; height: 1123px; }
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
-.card-board.mode-vertical .middle-box { letter-spacing: 20px; }
+.card-board.mode-vertical .middle-box,
+.card-board.mode-vertical .middle-box-2 { letter-spacing: 20px; }
 .card-board.mode-horizontal { width: 1123px; height: 794px; }
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
-.card-board.mode-horizontal .middle-box { letter-spacing: 16px; }
+.card-board.mode-horizontal .middle-box,
+.card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
 .card-board.style-floral { border: 12px solid #fce7f3; }
 
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #000; }
