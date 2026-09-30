@@ -309,7 +309,7 @@
               </div>
             </div>
 
-            <!-- 🌟 訂單總覽清單：寬度充足、操作按鈕改為上下兩排 -->
+            <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 狀態下拉選單（給予舒適寬度，不擠在一起） -->
+                      <!-- 狀態下拉選單（充足寬度不折行） -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -405,24 +405,24 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 操作區塊：黃色簽收單與紫色農民收據上下排、修改與刪除上下排 -->
+                      <!-- 🌟 舒適護眼莫蘭迪色系操作按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
-                          <!-- 左側直立：單據按鈕 -->
+                          <!-- 左側：單據按鈕（上下排） -->
                           <div class="stacked-action-col">
-                            <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
+                            <button class="cozy-btn btn-receipt" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">
                               🖨️ 簽收單
                             </button>
-                            <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">
+                            <button class="cozy-btn btn-farmer" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">
                               🧾 農民收據
                             </button>
                           </div>
-                          <!-- 右側直立：管理操作按鈕 -->
+                          <!-- 右側：管理按鈕（上下排） -->
                           <div class="stacked-action-col">
-                            <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="修改此訂單">
+                            <button class="cozy-btn btn-edit" @click="startEditOrder(ord)" title="修改此訂單">
                               ✏️ 修改
                             </button>
-                            <button class="mini-btn del-btn" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
+                            <button class="cozy-btn btn-delete" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
                               🗑️ 刪除
                             </button>
                           </div>
@@ -436,7 +436,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區 -->
+          <!-- 模組 2：客戶未結對帳專區 (花卡與簽收單單行防折) -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -506,33 +506,48 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>規格明細</th><th>金額</th><th>花卡</th><th>簽收單</th><th>收款狀態</th><th>操作</th>
+                      <th>單號</th>
+                      <th>下單日</th>
+                      <th>客戶名稱</th>
+                      <th>統編</th>
+                      <th>開收據</th>
+                      <th>規格明細</th>
+                      <th>金額</th>
+                      <!-- 🌟 寬度充足不折行 -->
+                      <th class="nowrap-col">花卡狀態</th>
+                      <th class="nowrap-col">簽收單狀態</th>
+                      <th class="nowrap-col">收款狀態</th>
+                      <th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="ord in statementOrders" :key="ord.id">
                       <td><b>{{ ord.id }}</b></td>
                       <td>{{ ord.order_date }}</td>
-                      <td>{{ ord.customer }}</td>
+                      <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>{{ ord.need_receipt || '不需收據' }}</td>
-                      <td>{{ ord.spec }}</td>
-                      <td class="text-blue"><b>${{ ord.price }}</b></td>
-                      <td><span class="status-tag">{{ ord.card_status || '未製作' }}</span></td>
-                      <td>
-                        <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
+                      <td class="spec-cell-wrap">{{ ord.spec }}</td>
+                      <td class="text-blue font-bold">${{ ord.price }}</td>
+                      
+                      <!-- 🌟 單行保持 nowrap，絕不折成兩行 -->
+                      <td class="nowrap-cell">
+                        <span class="inline-badge status-tag">{{ ord.card_status || '未製作' }}</span>
+                      </td>
+                      <td class="nowrap-cell">
+                        <span :class="ord.receipt_status === '已列印' ? 'inline-badge badge-green' : 'inline-badge badge-orange'">
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
-                      <td>
-                        <span :class="ord.payment_status === '未結' ? 'badge badge-red' : 'badge badge-green'">
+                      <td class="nowrap-cell">
+                        <span :class="ord.payment_status === '未結' ? 'inline-badge badge-red' : 'inline-badge badge-green'">
                           {{ ord.payment_status }}
                         </span>
                       </td>
                       <td>
                         <div class="stacked-action-col">
-                          <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                          <button class="mini-btn farmer-btn" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                          <button class="cozy-btn btn-receipt" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn btn-farmer" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                         </div>
                       </td>
                     </tr>
@@ -670,8 +685,10 @@
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditInv(inv)" title="修改">✏️</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
+                        <div class="stacked-action-col">
+                          <button class="cozy-btn btn-edit" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-delete" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -688,7 +705,7 @@
             </div>
 
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
+              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>客戶 / 店鋪名稱</label>
@@ -749,8 +766,10 @@
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditCust(c)" title="修改">✏️</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
+                        <div class="stacked-action-col">
+                          <button class="cozy-btn btn-edit" @click="startEditCust(c)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-delete" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️ 刪除</button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -824,8 +843,10 @@
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditOrchid(item)" title="修改">✏️</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️</button>
+                        <div class="stacked-action-col">
+                          <button class="cozy-btn btn-edit" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-delete" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -914,8 +935,10 @@
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditRet(ret)" title="修改">✏️</button>
-                        <button class="mini-btn del-btn" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️</button>
+                        <div class="stacked-action-col">
+                          <button class="cozy-btn btn-edit" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn btn-delete" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -962,9 +985,9 @@
                       <th>送達地址 / 備註</th>
                       <th>總盆數</th>
                       <th>花禮規格</th>
-                      <th>花卡</th>
-                      <th>簽收單</th>
-                      <th>出貨狀態 (點擊切換)</th>
+                      <th class="nowrap-col">花卡</th>
+                      <th class="nowrap-col">簽收單</th>
+                      <th class="nowrap-col">出貨狀態</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -977,17 +1000,17 @@
                       <td class="addr-cell">{{ getCustomerAddress(ord) }}</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td>{{ ord.spec }}</td>
-                      <td>
-                        <span :class="getCardStatusClass(ord.card_status)">
+                      <td class="nowrap-cell">
+                        <span :class="getCardStatusClass(ord.card_status)" class="inline-badge">
                           {{ ord.card_status || '未製作' }}
                         </span>
                       </td>
-                      <td>
-                        <span :class="ord.receipt_status === '已列印' ? 'badge badge-green' : 'badge badge-orange'">
+                      <td class="nowrap-cell">
+                        <span :class="ord.receipt_status === '已列印' ? 'inline-badge badge-green' : 'inline-badge badge-orange'">
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
-                      <td>
+                      <td class="nowrap-cell">
                         <select 
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-orange'"
@@ -1000,8 +1023,8 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                          <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️ 修改</button>
+                          <button class="cozy-btn btn-receipt" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
+                          <button class="cozy-btn btn-edit" @click="startEditOrder(ord)" title="編輯訂單">✏️ 修改</button>
                         </div>
                       </td>
                     </tr>
@@ -1795,7 +1818,6 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                  <!-- 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
                   <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
                     {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
                   </div>
@@ -1820,7 +1842,6 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
-                <!-- 中文大寫金額：若完全沒填金額（空白或0），橫線全部不要，只留純空白；有填金額時才在空位畫橫線「—」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
@@ -2914,7 +2935,6 @@ const farmerReceipt = ref({
   note: ''
 })
 
-// 中文大寫欄位
 const chineseDigits = ref({
   hundredThousands: '',
   tenThousands: '',
@@ -3002,7 +3022,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillRect(0, 0, 794, 560)
 
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "Kaiti", serif'
-  ctx.fillStyle = '#000000'
+  ctx.fillStyle = '#0f172a'
 
   ctx.font = `bold 26px ${fontFam}`
   ctx.textAlign = 'center'
@@ -3768,7 +3788,7 @@ const shareCoupletToLineDirect = () => {
     ctx.strokeRect(6, 6, width - 12, height - 12)
   }
 
-  ctx.fillStyle = '#000000'
+  ctx.fillStyle = '#0f172a'
   const targetFontFamily = activeCssFontFamily.value
 
   const drawTextItem = (text, item, isVertMode, weightVal, isUpperTarget = false) => {
@@ -4070,7 +4090,7 @@ onMounted(() => {
   font-size: 14px;
 }
 
-/* 🌟 控制項微調：字級數字輸入框與右側排列 */
+/* 控制項微調：字級數字輸入框與右側排列 */
 .ctrl-row-right {
   display: flex;
   align-items: center;
@@ -4433,7 +4453,24 @@ input, select, textarea {
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 1100px; }
 .data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
-.data-table td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+.data-table td { padding: 8px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+
+/* 🌟 單行禁止折行類別（客戶未結對帳專區專用） */
+.nowrap-col {
+  white-space: nowrap;
+  min-width: 86px;
+}
+.nowrap-cell {
+  white-space: nowrap !important;
+}
+.inline-badge {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
 
 .status-select-box {
   min-width: 82px;
@@ -4463,20 +4500,60 @@ input, select, textarea {
   gap: 5px;
 }
 
-.mini-btn {
-  border: none;
-  padding: 4px 9px;
-  border-radius: 4px;
+/* 🌟 莫蘭迪 / 低飽和舒適柔和色按鈕樣式 */
+.cozy-btn {
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  border-radius: 5px;
   cursor: pointer;
   font-size: 11.5px;
   font-weight: bold;
   white-space: nowrap;
   text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.print-btn { background: #f59e0b; color: white; }
-.farmer-btn { background: #8b5cf6; color: white; }
-.edit-btn { background: #3b82f6; color: white; }
-.del-btn { background: #ef4444; color: white; }
+
+/* 🖨️ 簽收單：奶茶駝棕色（取代刺眼黃） */
+.btn-receipt {
+  background: #f5efe6;
+  color: #8c6d46;
+  border-color: #e5d7c3;
+}
+.btn-receipt:hover {
+  background: #ebdcc9;
+}
+
+/* 🧾 農民收據：莫蘭迪藕紫色（取代亮紫） */
+.btn-farmer {
+  background: #f3eef7;
+  color: #725287;
+  border-color: #ded1e6;
+}
+.btn-farmer:hover {
+  background: #e6d9ef;
+}
+
+/* ✏️ 修改：霧霾海軍藍（取代亮藍） */
+.btn-edit {
+  background: #ebf3f7;
+  color: #3b6b88;
+  border-color: #cadfe8;
+}
+.btn-edit:hover {
+  background: #d8e8f0;
+}
+
+/* 🗑️ 刪除：乾燥玫瑰粉（取代刺眼亮紅） */
+.btn-delete {
+  background: #fdf0f0;
+  color: #a34e56;
+  border-color: #f3cbcf;
+}
+.btn-delete:hover {
+  background: #f7dcdElements;
+  background: #fae1e3;
+}
 
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
