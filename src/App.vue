@@ -112,7 +112,7 @@
           <!-- 模組 1：訂單與帳務 -->
           <section v-if="subTab === 'order'" class="tab-pane">
             <div v-if="editingOrderId" class="edit-banner">
-              <span>✏️️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
+              <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
             </div>
 
@@ -626,7 +626,7 @@
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
-                        <button class="mini-btn edit-btn" @click="startEditInv(inv)" title="修改">✏️️</button>
+                        <button class="mini-btn edit-btn" @click="startEditInv(inv)" title="修改">✏️</button>
                         <button class="mini-btn del-btn" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
                       </td>
                     </tr>
@@ -955,7 +955,7 @@
                       </td>
                       <td class="action-cell">
                         <button class="mini-btn print-btn" @click="fillReceiptFromOrder(ord)" title="開啟簽收單">🖨️ 簽收單</button>
-                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️</button>
+                        <button class="mini-btn edit-btn" @click="startEditOrder(ord)" title="編輯訂單">✏️️</button>
                       </td>
                     </tr>
                     <tr v-if="displayedShippingOrders.length === 0">
@@ -971,7 +971,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (全裝置雲端同步草稿庫) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援數字與手柄雙向調整大小) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -979,7 +979,7 @@
           <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
+              <label class="section-title">☁️️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
@@ -1041,17 +1041,23 @@
             </select>
           </div>
 
-          <!-- 上款獨立設定 -->
+          <!-- 上款獨立設定 (含字級數字微調) -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">1. 開頭敬詞（獨立一格）：</label>
-              <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
-                <option value="400">400 (標準)</option>
-                <option value="500">500 (中等)</option>
-                <option value="600">600 (半粗)</option>
-                <option value="700">700 (粗體)</option>
-                <option value="800">800 (特粗)</option>
-              </select>
+              <div class="ctrl-row-right">
+                <div class="size-input-wrap">
+                  <span class="size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="mini-size-num-input" />
+                </div>
+                <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800">800</option>
+                </select>
+              </div>
             </div>
             <div class="form-row">
               <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
@@ -1070,13 +1076,19 @@
 
             <div class="section-title-with-weight mt-2">
               <label class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</label>
-              <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
-                <option value="400">400 (標準)</option>
-                <option value="500">500 (中等)</option>
-                <option value="600">600 (半粗)</option>
-                <option value="700">700 (粗體)</option>
-                <option value="800">800 (特粗)</option>
-              </select>
+              <div class="ctrl-row-right">
+                <div class="size-input-wrap">
+                  <span class="size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="mini-size-num-input" />
+                </div>
+                <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800">800</option>
+                </select>
+              </div>
             </div>
             <template v-if="cardCategory === 'funeral'">
               <div class="form-row">
@@ -1095,13 +1107,19 @@
 
             <div class="section-title-with-weight mt-2">
               <label class="section-title">3. 上款結尾詞（獨立一格）：</label>
-              <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
-                <option value="400">400 (標準)</option>
-                <option value="500">500 (中等)</option>
-                <option value="600">600 (半粗)</option>
-                <option value="700">700 (粗體)</option>
-                <option value="800">800 (特粗)</option>
-              </select>
+              <div class="ctrl-row-right">
+                <div class="size-input-wrap">
+                  <span class="size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="mini-size-num-input" />
+                </div>
+                <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800">800</option>
+                </select>
+              </div>
             </div>
             <div class="form-row">
               <input type="text" v-model="upperSuffix" class="full-input" placeholder="例: 千古、仙逝、靈前" />
@@ -1123,17 +1141,23 @@
             </div>
           </div>
 
-          <!-- 中款設定：兩行獨立格 -->
+          <!-- 中款設定：兩行獨立格 (含字級數字微調) -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">中款第 1 行（主要題詞）：</label>
-              <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
-                <option value="400">400 (標準)</option>
-                <option value="500">500 (中等)</option>
-                <option value="600">600 (半粗)</option>
-                <option value="700">700 (粗體)</option>
-                <option value="800">800 (特粗)</option>
-              </select>
+              <div class="ctrl-row-right">
+                <div class="size-input-wrap">
+                  <span class="size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="mini-size-num-input" />
+                </div>
+                <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800">800</option>
+                </select>
+              </div>
             </div>
 
             <template v-if="cardCategory === 'funeral'">
@@ -1185,23 +1209,32 @@
 
             <div class="section-title-with-weight mt-3">
               <label class="section-title">中款第 2 行（選填，兩行時使用）：</label>
-              <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
-                <option value="400">400 (標準)</option>
-                <option value="500">500 (中等)</option>
-                <option value="600">600 (半粗)</option>
-                <option value="700">700 (粗體)</option>
-                <option value="800">800 (特粗)</option>
-              </select>
+              <div class="ctrl-row-right">
+                <div class="size-input-wrap">
+                  <span class="size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="mini-size-num-input" />
+                </div>
+                <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="600">600</option>
+                  <option value="700">700</option>
+                  <option value="800">800</option>
+                </select>
+              </div>
             </div>
             <input type="text" v-model="middleText2" class="full-input" placeholder="留空則不顯示第 2 行" />
           </div>
 
-          <!-- 下款 6 格獨立粗細設定 -->
+          <!-- 下款 6 格獨立粗細與字級設定 -->
           <div class="panel-section">
-            <label class="section-title">下款設定（每個格子可個別選擇粗細）：</label>
+            <label class="section-title">下款設定（每個格子可個別選擇粗細與數字字級）：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
+              <div class="size-input-wrap">
+                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="mini-size-num-input" title="微調字級大小" />
+              </div>
               <select v-model="weights['bottom_' + idx]" class="mini-weight-select" title="設定此格粗細">
                 <option value="400">400</option>
                 <option value="500">500</option>
@@ -1214,13 +1247,19 @@
             <div class="form-group mt-2">
               <div class="section-title-with-weight">
                 <label class="section-title">結尾敬詞：</label>
-                <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
-                  <option value="400">400 (標準)</option>
-                  <option value="500">500 (中等)</option>
-                  <option value="600">600 (半粗)</option>
-                  <option value="700">700 (粗體)</option>
-                  <option value="800">800 (特粗)</option>
-                </select>
+                <div class="ctrl-row-right">
+                  <div class="size-input-wrap">
+                    <span class="size-lbl">字級:</span>
+                    <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="mini-size-num-input" />
+                  </div>
+                  <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="600">600</option>
+                    <option value="700">700</option>
+                    <option value="800">800</option>
+                  </select>
+                </div>
               </div>
               <select v-model="suffixText" class="full-input">
                 <option value="敬輓">敬輓</option>
@@ -1709,7 +1748,6 @@
                   <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
                   <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
                   <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                  <!-- 金額欄位：沒填金額時完全不顯示 $ 符號與數字 -->
                   <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
                     {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
                   </div>
@@ -1734,7 +1772,6 @@
                   <div class="f-grid-val col-p-note"></div>
                 </div>
 
-                <!-- 🌟 中文大寫金額：若完全沒填金額（空白或0），橫線全部不要，只留純空白；有填金額時才在空位畫橫線「—」 -->
                 <div class="f-grid-row f-amount-row">
                   <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
                   <div class="f-grid-val f-amount-val-cell">
@@ -2840,9 +2877,6 @@ const chineseDigits = ref({
 
 const digitMap = ['', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖']
 
-// 🌟 金額大寫解析：
-// 1. 若完全沒填金額（空白或0），全部欄位留空（不畫橫線也不寫零）
-// 2. 若有填金額，沒有數字的高位/低位畫橫線「—」防偽
 const updateChineseAmount = () => {
   const amt = Math.floor(Number(farmerReceipt.value.totalAmount) || 0)
   if (amt <= 0) {
@@ -2940,13 +2974,11 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
   ctx.fillText(`品名：${farmerReceipt.value.itemName}    規格：${farmerReceipt.value.spec}    數量：${farmerReceipt.value.qty}    單價：${farmerReceipt.value.unitPrice}`, 42, 195)
   
-  // 🌟 LINE 圖片繪製：若有金額才印出，否則完全空白
   const amtStr = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
     ? `NT$ ${Number(farmerReceipt.value.totalAmount).toLocaleString()} 元`
     : ''
   ctx.fillText(`金額：${amtStr}`, 42, 235)
 
-  // 🌟 LINE 圖片大寫：若沒金額完全留白，有金額才畫線
   const cAmtLine = (farmerReceipt.value.totalAmount && Number(farmerReceipt.value.totalAmount) > 0)
     ? `合計新台幣(中文大寫)：${chineseDigits.value.hundredThousands} 拾 ${chineseDigits.value.tenThousands} 萬 ${chineseDigits.value.thousands} 仟 ${chineseDigits.value.hundreds} 佰 ${chineseDigits.value.tens} 拾 ${chineseDigits.value.ones} 元整`
     : '合計新台幣(中文大寫)：     拾     萬     仟     佰     拾     元整'
@@ -3989,6 +4021,38 @@ onMounted(() => {
   font-size: 14px;
 }
 
+/* 🌟 控制項微調：字級數字輸入框與右側排列 */
+.ctrl-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.size-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+.size-lbl {
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: bold;
+}
+.mini-size-num-input {
+  width: 44px !important;
+  padding: 1px 3px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+  border-radius: 3px !important;
+  text-align: center;
+  background: white;
+}
+
 /* 出貨派送分頁專用樣式 */
 .nav-shipping-highlight {
   background: #0284c7 !important;
@@ -4387,7 +4451,7 @@ input, select, textarea {
   height: calc(100vh - 52px);
 }
 .control-panel {
-  width: 390px; background: white; padding: 16px;
+  width: 420px; background: white; padding: 16px;
   box-shadow: 2px 0 10px rgba(0,0,0,0.06); overflow-y: auto; flex-shrink: 0;
 }
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
@@ -4402,7 +4466,7 @@ input, select, textarea {
 }
 .mini-weight-select {
   width: auto !important;
-  padding: 2px 6px !important;
+  padding: 2px 5px !important;
   font-size: 11px !important;
   font-weight: bold !important;
   color: #1e3a8a !important;
