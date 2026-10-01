@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗（已加強高度限制，完整收納在畫面中） -->
+      <!-- 圖片傳送專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -207,7 +207,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️ 刪除此組
+                      🗑️️
                     </button>
                   </div>
                   <div class="item-grid">
@@ -361,7 +361,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：#FEF0EF -->
+                      <!-- 花卡未製作：#FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -376,7 +376,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：#FEF0EF -->
+                      <!-- 簽收單未列印：#FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 按鈕：簽收單 #F8E8D1、農民收據 #DEE2FF -->
+                      <!-- 🌟 按鈕：修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -439,20 +439,20 @@
                           </div>
                           <div class="stacked-action-col">
                             <button 
-                              class="cozy-btn" 
+                              class="cozy-btn icon-only-btn" 
                               style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
                               @click="startEditOrder(ord)" 
                               title="修改此訂單"
                             >
-                              ✏️ 修改
+                              ✏️
                             </button>
                             <button 
-                              class="cozy-btn" 
+                              class="cozy-btn icon-only-btn" 
                               style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" 
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
-                              🗑️ 刪除
+                              🗑️️
                             </button>
                           </div>
                         </div>
@@ -575,7 +575,6 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -586,7 +585,6 @@
                         </span>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -596,13 +594,13 @@
                         </span>
                       </td>
                       
-                      <!-- 收款狀態下拉選單 -->
+                      <!-- 🌟 對帳區收款狀態選單縮小寬度 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.payment_status" 
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="status-select-box"
+                          class="compact-status-select"
                         >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
@@ -763,10 +761,11 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
+                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -844,10 +843,11 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
+                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -860,7 +860,7 @@
           <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div v-if="editingOrchidId" class="edit-banner">
-              <span>✏️️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
+              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
             </div>
 
@@ -921,10 +921,11 @@
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
+                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -937,7 +938,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -1013,10 +1014,11 @@
                       <td>{{ ret.qty }}</td>
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
+                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -1066,7 +1068,7 @@
                       <th>花禮規格</th>
                       <th class="nowrap-col">花卡</th>
                       <th class="nowrap-col">簽收單</th>
-                      <th class="nowrap-col">出貨狀態</th>
+                      <th class="nowrap-col">派送狀態</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -1096,17 +1098,19 @@
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
+                      <!-- 🌟 派送狀態選單寬度最佳化 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="status-select-box"
+                          class="compact-status-select"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
+                      <!-- 🌟 修改按鈕簡約圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button 
@@ -1118,12 +1122,12 @@
                             🖨️ 簽收單
                           </button>
                           <button 
-                            class="cozy-btn" 
+                            class="cozy-btn icon-only-btn" 
                             style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
                             @click="startEditOrder(ord)" 
                             title="編輯訂單"
                           >
-                            ✏️ 修改
+                            ✏️
                           </button>
                         </div>
                       </td>
@@ -1167,14 +1171,14 @@
             </div>
           </div>
 
-          <!-- 🌟 花卡雲端即時草稿庫（按鈕質感升級） -->
+          <!-- 🌟 花卡雲端即時草稿庫（已換成高質感紫色） -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️️ 花卡全裝置雲端草稿庫：</label>
+              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="modern-cloud-save-btn" @click="saveCurrentAsCloudDraft">
+              <button type="button" class="modern-cloud-save-purple-btn" @click="saveCurrentAsCloudDraft">
                 💾 存至雲端草稿 (全裝置同步)
               </button>
               <button type="button" class="modern-new-card-btn" @click="startNewCard">
@@ -1237,9 +1241,10 @@
             <div class="section-title-with-weight">
               <label class="section-title">1. 開頭敬詞（獨立一格）：</label>
               <div class="ctrl-row-right">
-                <div class="size-input-wrap">
-                  <span class="size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="mini-size-num-input" />
+                <!-- 🌟 精緻小巧字級格 -->
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
                 </div>
                 <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
                   <option value="400">400</option>
@@ -1269,9 +1274,9 @@
             <div class="section-title-with-weight mt-2">
               <label class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</label>
               <div class="ctrl-row-right">
-                <div class="size-input-wrap">
-                  <span class="size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="mini-size-num-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
                 </div>
                 <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
                   <option value="400">400</option>
@@ -1300,9 +1305,9 @@
             <div class="section-title-with-weight mt-2">
               <label class="section-title">3. 上款結尾詞（選填）：</label>
               <div class="ctrl-row-right">
-                <div class="size-input-wrap">
-                  <span class="size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="mini-size-num-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
                 </div>
                 <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
                   <option value="400">400</option>
@@ -1336,9 +1341,9 @@
             <div class="section-title-with-weight">
               <label class="section-title">中款第 1 行（主要題詞）：</label>
               <div class="ctrl-row-right">
-                <div class="size-input-wrap">
-                  <span class="size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="mini-size-num-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
                 </div>
                 <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
                   <option value="400">400</option>
@@ -1400,9 +1405,9 @@
             <div class="section-title-with-weight mt-3">
               <label class="section-title">中款第 2 行（選填，兩行時使用）：</label>
               <div class="ctrl-row-right">
-                <div class="size-input-wrap">
-                  <span class="size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="mini-size-num-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
                 </div>
                 <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
                   <option value="400">400</option>
@@ -1422,8 +1427,8 @@
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
-              <div class="size-input-wrap">
-                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="mini-size-num-input" title="微調字級大小" />
+              <div class="compact-size-wrap">
+                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" title="微調字級大小" />
               </div>
               <select v-model="weights['bottom_' + idx]" class="mini-weight-select" title="設定此格粗細">
                 <option value="400">400</option>
@@ -1438,9 +1443,9 @@
               <div class="section-title-with-weight">
                 <label class="section-title">結尾敬詞：</label>
                 <div class="ctrl-row-right">
-                  <div class="size-input-wrap">
-                    <span class="size-lbl">字級:</span>
-                    <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="mini-size-num-input" />
+                  <div class="compact-size-wrap">
+                    <span class="compact-size-lbl">字級:</span>
+                    <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
                   </div>
                   <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
                     <option value="400">400</option>
@@ -1484,7 +1489,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 (純白底，無粉紅邊框) -->
+            <!-- 花卡看板主體 (純白底，無粉紅邊框) -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1603,7 +1608,7 @@
 
           <div class="panel-section live-sign-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">✍️️ 收件人線上簽名板 (送達現場簽名)：</label>
+              <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
               <button type="button" class="mini-clean-btn" @click="clearLiveSignature">✕ 清除重簽</button>
             </div>
             <div class="canvas-sign-wrapper">
@@ -1649,7 +1654,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -2021,7 +2026,6 @@ const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
 const inputPasscode = ref('')
 const authError = ref(false)
 
-// 登入方法
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
   if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
@@ -4085,7 +4089,7 @@ input, select, textarea {
   display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
 }
 .remove-item-btn {
-  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-size: 12px; cursor: pointer;
 }
 .item-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;
@@ -4137,9 +4141,15 @@ input, select, textarea {
 .nowrap-cell { white-space: nowrap !important; }
 .inline-badge { display: inline-block; white-space: nowrap; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
 .status-select-box { min-width: 82px; padding: 4px 6px; font-size: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+
+/* 🌟 收款狀態與派送狀態縮短版選單 */
+.compact-status-select {
+  width: 72px !important; min-width: 72px !important; padding: 3px 4px !important; font-size: 12px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
+}
+
 .spec-cell-wrap { max-width: 240px; line-height: 1.4; word-break: break-all; }
 
-/* 操作按鈕上下兩排卡片排列 */
+/* 操作按鈕樣式 */
 .action-cell { white-space: nowrap; }
 .stacked-action-container { display: flex; gap: 6px; align-items: center; }
 .stacked-action-col { display: flex; flex-direction: column; gap: 5px; }
@@ -4147,6 +4157,11 @@ input, select, textarea {
 .cozy-btn {
   padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
   white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* 🌟 修改與刪除純圖示按鈕 */
+.icon-only-btn {
+  padding: 4px 8px !important; font-size: 14px !important; min-width: 32px;
 }
 
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
@@ -4176,7 +4191,7 @@ input, select, textarea {
 .table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
-/* 🌟 照片彈窗（已加強高度限制，完整收納在畫面中） */
+/* 照片彈窗 */
 .image-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
   display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 16px; box-sizing: border-box;
@@ -4199,20 +4214,20 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
 }
 
-/* 🌟 草稿與新花卡按鈕質感設計 */
+/* 🌟 草稿與新花卡按鈕（存至雲端改為紫色） */
 .draft-manage-panel {
   background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
 }
 .draft-action-btns {
   display: flex; gap: 8px; margin-top: 6px;
 }
-.modern-cloud-save-btn {
-  flex: 1.3; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;
+.modern-cloud-save-purple-btn {
+  flex: 1.3; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;
   padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: all 0.15s ease-in-out;
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2); transition: all 0.15s ease-in-out;
 }
-.modern-cloud-save-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transform: translateY(-1px);
+.modern-cloud-save-purple-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); transform: translateY(-1px);
 }
 .modern-new-card-btn {
   flex: 0.9; background: #ffffff; color: #2563eb; border: 1.5px solid #93c5fd;
@@ -4230,6 +4245,17 @@ input, select, textarea {
 }
 .mini-del-draft-btn {
   background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13px;
+}
+
+/* 🌟 字級輸入框精巧化 */
+.compact-size-wrap {
+  display: flex; align-items: center; gap: 3px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px;
+}
+.compact-size-lbl {
+  font-size: 11px; font-weight: bold; color: #64748b;
+}
+.compact-size-input {
+  width: 44px !important; padding: 1px 2px !important; font-size: 12px !important; font-weight: bold !important; text-align: center; border: none !important; outline: none;
 }
 
 /* 簽收單與收據控制面板 */
