@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 -->
+      <!-- 圖片傳送專用彈窗（已加強高度限制，完整收納在畫面中） -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -87,7 +87,9 @@
             <button class="close-modal-btn" @click="shareModalImg = ''">✕</button>
           </div>
           <div class="share-modal-body">
-            <img :src="shareModalImg" class="share-preview-img" alt="傳送預覽圖" />
+            <div class="share-img-scroll-container">
+              <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
+            </div>
             <div class="share-tips-row">
               <span>💡 <b>傳送給訂購人方式：</b></span>
               <span>1. 已自動下載圖檔，可直接將圖檔<b>傳送至 LINE</b>。</span>
@@ -205,7 +207,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️️ 刪除此組
+                      🗑️ 刪除此組
                     </button>
                   </div>
                   <div class="item-grid">
@@ -310,7 +312,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單（依單號順序排序） -->
+            <!-- 訂單總覽清單（嚴格依單號順序排序） -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -858,7 +860,7 @@
           <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div v-if="editingOrchidId" class="edit-banner">
-              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
+              <span>✏️️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
             </div>
 
@@ -921,7 +923,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -1165,17 +1167,17 @@
             </div>
           </div>
 
-          <!-- 花卡雲端即時草稿庫 -->
+          <!-- 🌟 花卡雲端即時草稿庫（按鈕質感升級） -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
+              <label class="section-title">☁️️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="draft-save-btn" @click="saveCurrentAsCloudDraft">
+              <button type="button" class="modern-cloud-save-btn" @click="saveCurrentAsCloudDraft">
                 💾 存至雲端草稿 (全裝置同步)
               </button>
-              <button type="button" class="draft-new-btn" @click="startNewCard">
+              <button type="button" class="modern-new-card-btn" @click="startNewCard">
                 ＋ 開新花卡
               </button>
             </div>
@@ -1601,7 +1603,7 @@
 
           <div class="panel-section live-sign-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
+              <label class="section-title">✍️️ 收件人線上簽名板 (送達現場簽名)：</label>
               <button type="button" class="mini-clean-btn" @click="clearLiveSignature">✕ 清除重簽</button>
             </div>
             <div class="canvas-sign-wrapper">
@@ -2019,7 +2021,7 @@ const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
 const inputPasscode = ref('')
 const authError = ref(false)
 
-// 登入方法（置於最前，防止 TDZ 錯誤）
+// 登入方法
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
   if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
@@ -4174,18 +4176,61 @@ input, select, textarea {
 .table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
-/* 照片燈箱 */
+/* 🌟 照片彈窗（已加強高度限制，完整收納在畫面中） */
 .image-modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65);
-  display: flex; justify-content: center; align-items: center; z-index: 9999;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+  display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 16px; box-sizing: border-box;
 }
 .image-modal-content {
-  background: white; border-radius: 12px; padding: 16px; max-width: 90vw; max-height: 90vh;
-  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  background: white; border-radius: 14px; padding: 18px; max-width: 850px; width: 100%; max-height: 92vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box;
 }
-.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; }
-.close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
-.image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
+.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 12px; font-size: 15px; }
+.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; }
+.share-modal-body { display: flex; flex-direction: column; align-items: center; overflow: hidden; width: 100%; }
+.share-img-scroll-container {
+  width: 100%; display: flex; justify-content: center; align-items: center;
+  background-color: #f8fafc; border-radius: 8px; padding: 12px; box-sizing: border-box; margin-bottom: 12px;
+}
+.share-preview-img-contained {
+  max-height: 60vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.share-tips-row {
+  display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
+}
+
+/* 🌟 草稿與新花卡按鈕質感設計 */
+.draft-manage-panel {
+  background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
+}
+.draft-action-btns {
+  display: flex; gap: 8px; margin-top: 6px;
+}
+.modern-cloud-save-btn {
+  flex: 1.3; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;
+  padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: all 0.15s ease-in-out;
+}
+.modern-cloud-save-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transform: translateY(-1px);
+}
+.modern-new-card-btn {
+  flex: 0.9; background: #ffffff; color: #2563eb; border: 1.5px solid #93c5fd;
+  padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+.modern-new-card-btn:hover {
+  background: #eff6ff; border-color: #3b82f6;
+}
+.draft-selector-row {
+  display: flex; gap: 6px; align-items: center;
+}
+.mini-refresh-btn {
+  background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 11px; padding: 2px 6px; cursor: pointer;
+}
+.mini-del-draft-btn {
+  background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13px;
+}
 
 /* 簽收單與收據控制面板 */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
