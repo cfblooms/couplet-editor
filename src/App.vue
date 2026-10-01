@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 按鈕：修改與刪除純圖示（垃圾桶統一為 🗑️） -->
+                      <!-- 按鈕：修改與刪除純圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -575,7 +575,7 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 花卡未製作：#FEF0EF -->
+                      <!-- 🌟 花卡未製作：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -586,7 +586,7 @@
                         </span>
                       </td>
 
-                      <!-- 簽收單未列印：#FEF0EF -->
+                      <!-- 🌟 簽收單未列印：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -763,7 +763,6 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
-                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️</button>
@@ -845,11 +844,10 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
-                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️</button>
                         </div>
                       </td>
                     </tr>
@@ -923,7 +921,6 @@
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
-                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
@@ -940,12 +937,12 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
+              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>退貨類型</label>
@@ -1016,7 +1013,6 @@
                       <td>{{ ret.qty }}</td>
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
-                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️</button>
@@ -1035,7 +1031,6 @@
             <div class="card-box">
               <div class="shipping-tab-header">
                 <h3>🚚 訂單出貨與派送進度總覽</h3>
-                <!-- 膠囊式切換鈕 -->
                 <div class="modern-pill-tabs">
                   <button 
                     :class="{ active: shippingViewFilter === 'unshipped' }" 
@@ -1175,14 +1170,14 @@
             </div>
           </div>
 
-          <!-- 🌟 花卡雲端即時草稿庫（淺紫色漸層按鈕） -->
+          <!-- 🌟 花卡雲端即時草稿庫（更淡、更淺優雅粉紫） -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="modern-cloud-save-light-purple-btn" @click="saveCurrentAsCloudDraft">
+              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">
                 💾 存至雲端草稿 (全裝置同步)
               </button>
               <button type="button" class="modern-new-card-btn" @click="startNewCard">
@@ -1274,6 +1269,7 @@
               </select>
             </div>
 
+            <!-- 🌟 稱謂設定（支援填入兩個不同 X 內容） -->
             <div class="section-title-with-weight mt-2">
               <label class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</label>
               <div class="ctrl-row-right">
@@ -1293,17 +1289,30 @@
             <template v-if="cardCategory === 'funeral'">
               <div class="form-row">
                 <select v-model="funeralUpperFormat" @change="onFuneralFormatChange">
-                  <option value="X媽X老夫人">X媽X老夫人</option>
-                  <option value="X媽X夫人">X媽X夫人</option>
-                  <option value="X公X老先生">X公X老先生</option>
-                  <option value="X公X先生">X公X先生</option>
+                  <option value="X媽X老夫人">X媽X老夫人 (填兩字/姓)</option>
+                  <option value="X媽X夫人">X媽X夫人 (填兩字/姓)</option>
+                  <option value="X公X老先生">X公X老先生 (填兩字/名)</option>
+                  <option value="X公X先生">X公X先生 (填兩字/名)</option>
                   <option value="X女士">X女士</option>
                   <option value="X先生">X先生</option>
-                  <option value="custom">自行輸入</option>
+                  <option value="custom">自訂直接輸入</option>
                 </select>
               </div>
+
+              <!-- 🌟 專屬雙 X 快速填寫格 -->
+              <div v-if="isDoubleXFormat" class="double-x-row mt-2">
+                <div class="x-input-group">
+                  <span class="x-badge">前X</span>
+                  <input type="text" v-model="targetX1" placeholder="本姓/夫姓" @input="combineTargetX" />
+                </div>
+                <span class="x-connector">＋</span>
+                <div class="x-input-group">
+                  <span class="x-badge">後X</span>
+                  <input type="text" v-model="targetX2" placeholder="本姓/名字" @input="combineTargetX" />
+                </div>
+              </div>
             </template>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂" />
+            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂 (可直接修改結果)" />
 
             <div class="section-title-with-weight mt-2">
               <label class="section-title">3. 上款結尾詞（選填）：</label>
@@ -1339,7 +1348,7 @@
             </div>
           </div>
 
-          <!-- 中款設定 -->
+          <!-- 🌟 中款設定（支援下拉選單選取＋快速標籤） -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">中款第 1 行（主要題詞）：</label>
@@ -1356,6 +1365,21 @@
                   <option value="800">800</option>
                 </select>
               </div>
+            </div>
+
+            <!-- 🌟 主要題詞下拉選單 -->
+            <div class="form-group mb-2">
+              <label class="sub-label-tip">▼ 點選往下拉快速挑選：</label>
+              <select v-model="middleText" class="full-input bold-select-dropdown">
+                <option value="">-- 請下拉選擇主要題詞 --</option>
+                <option 
+                  v-for="phrase in availableMiddlePhrases" 
+                  :key="phrase" 
+                  :value="phrase"
+                >
+                  {{ phrase }}
+                </option>
+              </select>
             </div>
 
             <template v-if="cardCategory === 'funeral'">
@@ -1403,7 +1427,7 @@
               </div>
             </template>
 
-            <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款第 1 行詞語" />
+            <input type="text" v-model="middleText" class="full-input mt-2" placeholder="中款第 1 行詞語 (可自由手寫修改)" />
 
             <div class="section-title-with-weight mt-3">
               <label class="section-title">中款第 2 行（選填，兩行時使用）：</label>
@@ -1594,7 +1618,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 單據字體調大至清晰舒適) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1742,7 +1766,7 @@
                 </div>
               </div>
 
-              <!-- 🌟 簽收單表格文字調大至 16px ~ 17.5px -->
+              <!-- 簽收單表格 -->
               <table class="receipt-table">
                 <tbody>
                   <tr>
@@ -1785,7 +1809,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (🌟 單據字體調大至清晰舒適) ================= -->
+      <!-- ================= 模式 4：農民收據 ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1920,7 +1944,7 @@
                 </div>
               </div>
 
-              <!-- 🌟 農民收據表格字體調大至 16px ~ 18px -->
+              <!-- 農民收據表格 -->
               <div class="f-receipt-grid-table">
                 <div class="f-grid-row f-row-top">
                   <div class="f-col-buyer-group">
@@ -3518,6 +3542,38 @@ const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
 const funeralUpperFormat = ref('custom')
+const targetX1 = ref('')
+const targetX2 = ref('')
+
+const isDoubleXFormat = computed(() => {
+  return ['X媽X老夫人', 'X媽X夫人', 'X公X老先生', 'X公X先生'].includes(funeralUpperFormat.value)
+})
+
+const onFuneralFormatChange = () => {
+  if (funeralUpperFormat.value === 'custom') return
+  if (funeralUpperFormat.value === 'X女士') {
+    upperTarget.value = '陳女士'
+  } else if (funeralUpperFormat.value === 'X先生') {
+    upperTarget.value = '陳先生'
+  } else {
+    combineTargetX()
+  }
+}
+
+const combineTargetX = () => {
+  const x1 = targetX1.value.trim() || '張'
+  const x2 = targetX2.value.trim() || '李'
+  if (funeralUpperFormat.value === 'X媽X老夫人') {
+    upperTarget.value = `${x1}媽${x2}老夫人`
+  } else if (funeralUpperFormat.value === 'X媽X夫人') {
+    upperTarget.value = `${x1}媽${x2}夫人`
+  } else if (funeralUpperFormat.value === 'X公X老先生') {
+    upperTarget.value = `${x1}公${x2}老先生`
+  } else if (funeralUpperFormat.value === 'X公X先生') {
+    upperTarget.value = `${x1}公${x2}先生`
+  }
+}
+
 const celebrationType = ref('opening')
 const celebPrefix = ref('祝')
 const celebTarget = ref('')
@@ -3594,6 +3650,14 @@ const celebPhrases = {
   temple: ['聖誕千秋', '神威顯赫']
 }
 const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
+
+// 🌟 當前可用主要題詞下拉清單
+const availableMiddlePhrases = computed(() => {
+  if (cardCategory.value === 'funeral') {
+    return currentFuneralPhrases.value
+  }
+  return currentCelebPhrases.value
+})
 
 const parsedUpperTargetTokens = computed(() => {
   return upperTarget.value.split('').map(char => ({
@@ -3707,11 +3771,6 @@ const onPointerUp = () => {
 
 watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
 
-const onFuneralFormatChange = () => {
-  if (funeralUpperFormat.value !== 'custom') {
-    upperTarget.value = funeralUpperFormat.value
-  }
-}
 const onCardCategoryChange = () => {
   if (cardCategory.value === 'funeral') {
     upperPrefix.value = '敬悼'
@@ -3726,9 +3785,6 @@ const onCardCategoryChange = () => {
     middleText.value = currentCelebPhrases.value[0] || '高票當選'
     middleText2.value = '為民服務'
   }
-}
-const onCelebrationTypeChange = () => {
-  middleText.value = currentCelebPhrases.value[0] || ''
 }
 
 const printCouplet = () => {
@@ -3834,6 +3890,8 @@ const startNewCard = () => {
     middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'
     middleText2.value = ''
     selectedDraftId.value = ''
+    targetX1.value = ''
+    targetX2.value = ''
     resetPositions()
     showToast('✨ 已為您建立空白花卡，請開始輸入下一張內容！')
   }
@@ -4138,14 +4196,14 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
 
-/* 🌟 表格樣式（全體字體微調放大） */
+/* 表格樣式 */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; min-width: 1100px; }
 .data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13.5px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 🌟 狀態標籤與選單（格子適中不鬆散，字體 13px） */
+/* 狀態標籤與選單（格子適中不鬆散） */
 .nowrap-col { white-space: nowrap; min-width: 76px; }
 .nowrap-cell { white-space: nowrap !important; }
 .inline-badge {
@@ -4190,7 +4248,7 @@ input, select, textarea {
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
 
-/* 🌟 出貨派送進度膠囊式按鈕組 */
+/* 出貨派送進度膠囊式按鈕組 */
 .shipping-tab-header {
   display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
 }
@@ -4208,7 +4266,7 @@ input, select, textarea {
   background: #1e293b; color: #ffffff; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
 }
 
-/* 🌟 簽收單管理：現場手寫簽名板高雅卡片面板 */
+/* 現場手寫簽名板高雅卡片面板 */
 .modern-sign-card {
   background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important;
 }
@@ -4235,6 +4293,28 @@ input, select, textarea {
 .sign-watermark-hint {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   font-size: 13px; color: #cbd5e1; font-weight: bold; pointer-events: none; user-select: none;
+}
+
+/* 🌟 雙 X 稱謂填寫專用樣式 */
+.double-x-row {
+  display: flex; align-items: center; gap: 8px; background: #eff6ff; padding: 8px 10px; border-radius: 6px; border: 1px dashed #93c5fd;
+}
+.x-input-group {
+  display: flex; align-items: center; gap: 4px; flex: 1;
+}
+.x-badge {
+  background: #3b82f6; color: white; font-size: 11.5px; font-weight: bold; padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+}
+.x-connector {
+  font-weight: bold; color: #60a5fa;
+}
+
+/* 🌟 題詞下拉提示 */
+.sub-label-tip {
+  font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 3px;
+}
+.bold-select-dropdown {
+  background: #f8fafc; font-weight: bold; color: #1e3a8a; border-color: #93c5fd;
 }
 
 /* 蘭花品種照片上傳 */
@@ -4271,20 +4351,20 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
 }
 
-/* 🌟 草稿與新花卡按鈕（淺紫色漸層按鈕） */
+/* 🌟 存至雲端草稿：更淡、更淺優雅粉紫 */
 .draft-manage-panel {
   background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
 }
 .draft-action-btns {
   display: flex; gap: 8px; margin-top: 6px;
 }
-.modern-cloud-save-light-purple-btn {
-  flex: 1.3; background: linear-gradient(135deg, #b49ef7 0%, #a78bfa 100%); color: #2e1065; border: 1px solid #8b5cf6;
+.ultra-light-purple-btn {
+  flex: 1.3; background: linear-gradient(135deg, #ede9fe 0%, #e9d5ff 100%); color: #4c1d95; border: 1.5px solid #c4b5fd;
   padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
-  box-shadow: 0 2px 4px rgba(167, 139, 250, 0.25); transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 3px rgba(167, 139, 250, 0.15); transition: all 0.15s ease-in-out;
 }
-.modern-cloud-save-light-purple-btn:hover {
-  background: linear-gradient(135deg, #a78bfa 0%, #9061f9 100%); color: #ffffff; transform: translateY(-1px);
+.ultra-light-purple-btn:hover {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%); color: #31104b; transform: translateY(-1px);
 }
 .modern-new-card-btn {
   flex: 0.9; background: #ffffff; color: #2563eb; border: 1.5px solid #93c5fd;
@@ -4395,7 +4475,7 @@ input, select, textarea {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
 }
 
-/* 🌟 A5 橫式簽收單單據上字體稍微調大 */
+/* A5 橫式簽收單完整美觀樣式 */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 36px 42px; box-sizing: border-box;
@@ -4424,7 +4504,7 @@ input, select, textarea {
 .sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
 .sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
 
-/* 🌟 農民出售農產品收據單據上字體稍微調大 */
+/* 農民出售農產品收據完整美觀樣式 */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
