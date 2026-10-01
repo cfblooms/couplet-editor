@@ -356,6 +356,7 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
+                      <!-- 金額字體加粗 -->
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
                       <!-- 🌟 花卡未製作：#FEF0EF -->
@@ -1013,7 +1014,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -2020,14 +2021,18 @@ const inputPasscode = ref('')
 const authError = ref(false)
 
 const handleLogin = () => {
-  const entered = inputPasscode.value.trim().toLowerCase()
+  const entered = (inputPasscode.value || '').trim().toLowerCase()
   if (entered === INTERNAL_PASSCODE.toLowerCase()) {
     isAuthenticated.value = true
     authError.value = false
     localStorage.setItem('cf_admin_auth', 'true')
     showToast('✅ 驗證成功，歡迎使用內部管理系統！')
     nextTick(() => {
-      initSystemData()
+      try {
+        initSystemData()
+      } catch (e) {
+        console.error('init error:', e)
+      }
     })
   } else {
     authError.value = true
@@ -2728,8 +2733,8 @@ let lastSignY = 0
 const getSignCoords = (e) => {
   if (!signPadCanvasRef.value) return { x: 0, y: 0 }
   const rect = signPadCanvasRef.value.getBoundingClientRect()
-  const scaleX = signPadCanvasRef.width / rect.width
-  const scaleY = signPadCanvasRef.height / rect.height
+  const scaleX = signPadCanvasRef.value.width / rect.width
+  const scaleY = signPadCanvasRef.value.height / rect.height
   return {
     x: (e.clientX - rect.left) * scaleX,
     y: (e.clientY - rect.top) * scaleY
@@ -3833,14 +3838,13 @@ const generateFlawlessCoupletImage = () => {
   const ctx = canvas.getContext('2d')
   ctx.scale(2, 2)
 
-  // 1. 純白底（完全無粉紅外框）
+  // 純白底，無任何粉紅外框
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
   const targetFontFamily = activeCssFontFamily.value
   ctx.fillStyle = '#0f172a'
 
-  // 2. 核心繪製邏輯
   const renderItem = (text, item, wVal, isTarget = false) => {
     if (!text || !item) return
     const w = String(wVal || '600')
@@ -3866,7 +3870,6 @@ const generateFlawlessCoupletImage = () => {
         curY += curSize + 8
       })
     } else {
-      // 橫式排版核心修復：精確計算總長度，如果右端會超出邊界，系統自動將起始點往左移
       const chars = text.split('')
       let totalTextWidth = 0
       chars.forEach(char => {
@@ -3876,9 +3879,9 @@ const generateFlawlessCoupletImage = () => {
       })
 
       let curX = item.x
-      const safeRightMargin = 45 // 距離右邊界 45px 安全邊距
+      const safeRightMargin = 45
       if (curX + totalTextWidth > width - safeRightMargin) {
-        curX = width - safeRightMargin - totalTextWidth // 自動向左挪移，保證最後一個字「員」100% 完整呈現
+        curX = width - safeRightMargin - totalTextWidth
       }
 
       chars.forEach(char => {
@@ -3898,33 +3901,26 @@ const generateFlawlessCoupletImage = () => {
     }
   }
 
-  // 繪製上款敬詞
   renderItem(upperPrefix.value, layout.value.upper_prefix, weights.value.upper_prefix)
-  // 繪製受禮對象（新北市 陳乃瑜議員）
   renderItem(upperTarget.value, layout.value.upper_target, weights.value.upper_target, true)
-  // 繪製上款結尾詞
   if (upperSuffix.value && upperSuffix.value.trim()) {
     renderItem(upperSuffix.value, layout.value.upper_suffix, weights.value.upper_suffix)
   }
-  // 繪製中款
   renderItem(middleText.value, layout.value.middle, weights.value.middle)
   if (middleText2.value && middleText2.value.trim()) {
     renderItem(middleText2.value, layout.value.middle_2, weights.value.middle_2)
   }
-  // 繪製下款 6 格
   bottomLines.value.forEach((b, idx) => {
     if (b.text && b.text.trim()) {
       renderItem(b.text, layout.value['bottom_' + idx], weights.value['bottom_' + idx])
     }
   })
-  // 繪製敬詞
   renderItem(suffixText.value, layout.value.suffix, weights.value.suffix)
 
   const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
   shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
 }
 
-// 支援直接傳送按鈕
 const shareCoupletDirect = generateFlawlessCoupletImage
 
 // 初始化所有系統資料
@@ -3972,7 +3968,11 @@ onMounted(() => {
   })
 
   if (isAuthenticated.value) {
-    initSystemData()
+    try {
+      initSystemData()
+    } catch (err) {
+      console.warn('init mounted error:', err)
+    }
   }
 })
 </script>
@@ -4295,7 +4295,7 @@ input, select, textarea {
   display: flex; flex-direction: column; justify-content: space-between; color: #000;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.f-header { display: flex; direction: column; align-items: center; position: relative; margin-bottom: 12px; }
+.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
 .f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
 .f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 10px; }
 
