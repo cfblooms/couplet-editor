@@ -30,11 +30,11 @@
 
     <!-- ================= 系統主畫面 ================= -->
     <template v-else>
-      <!-- 動態列印方向設定（直式 portrait / 橫式 landscape） -->
+      <!-- 動態列印樣式（A4 / A5 與直式 / 橫式自動匹配） -->
       <component :is="'style'">
         @media print {
           @page {
-            size: {{ (currentTab === 'couplet' && !isVertical) ? 'A4 landscape' : (currentTab === 'receipt' || currentTab === 'farmer_receipt' ? 'A5 landscape' : 'A4 portrait') }} !important;
+            size: {{ getDynamicPrintPageSize }} !important;
             margin: 0 !important;
           }
         }
@@ -56,7 +56,7 @@
             :class="{ active: currentTab === 'couplet' }" 
             @click="currentTab = 'couplet'"
           >
-            🎴 花卡 / 輓聯編輯器 (A4)
+            🎴 花卡 / 輓聯編輯器 (A4/A5)
           </button>
           <button 
             type="button" 
@@ -319,7 +319,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單 -->
+            <!-- 訂單總覽清單（嚴格依單號順序排序） -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -423,7 +423,7 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單 #F8E8D1、農民收據 #D7CDD5 行內樣式完全強制生效 -->
+                      <!-- 按鈕：簽收單 #F8E8D1、農民收據 #B392AC -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -437,7 +437,7 @@
                             </button>
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #D7CDD5 !important; color: #4a3847 !important; border: 1px solid #c4b6c1 !important;" 
+                              style="background-color: #B392AC !important; color: #361730 !important; border: 1px solid #9e7997 !important;" 
                               @click="fillFarmerReceiptFromOrder(ord)" 
                               title="帶入農民收據"
                             >
@@ -472,7 +472,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區 -->
+          <!-- 模組 2：客戶未結對帳專區（可直接更改未結/已結） -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -551,7 +551,7 @@
                       <th>金額</th>
                       <th class="nowrap-col">花卡狀態</th>
                       <th class="nowrap-col">簽收單狀態</th>
-                      <th class="nowrap-col">收款狀態</th>
+                      <th class="nowrap-col">收款狀態 (可直接更改)</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -567,7 +567,7 @@
                       
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
@@ -576,17 +576,26 @@
                       </td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
+                      
+                      <!-- 🌟 收款狀態：直接以下拉選單修改未結與已結 -->
                       <td class="nowrap-cell">
-                        <span :class="ord.payment_status === '未結' ? 'inline-badge badge-red' : 'inline-badge badge-green'">
-                          {{ ord.payment_status }}
-                        </span>
+                        <select 
+                          v-model="ord.payment_status" 
+                          :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
+                          @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
+                          class="status-select-box"
+                        >
+                          <option value="未結">未結</option>
+                          <option value="已結">已結</option>
+                        </select>
                       </td>
+
                       <td>
                         <div class="stacked-action-col">
                           <button 
@@ -598,7 +607,7 @@
                           </button>
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #D7CDD5 !important; color: #4a3847 !important; border: 1px solid #c4b6c1 !important;" 
+                            style="background-color: #B392AC !important; color: #361730 !important; border: 1px solid #9e7997 !important;" 
                             @click="fillFarmerReceiptFromOrder(ord)"
                           >
                             🧾 農民收據
@@ -742,7 +751,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1117,10 +1126,31 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (橫式絕對不裁切核心) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5自由切換) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
-          <h2>⚙️️ 卡片與題詞設定</h2>
+          <h2>⚙️ 卡片與題詞設定</h2>
+
+          <!-- 🌟 新增 A4 / A5 尺寸自由切換 -->
+          <div class="panel-section">
+            <label class="section-title">📄 紙張尺寸選擇：</label>
+            <div class="btn-group">
+              <button 
+                type="button" 
+                :class="{ active: cardPaperSize === 'A4' }" 
+                @click="switchPaperSize('A4')"
+              >
+                A4 (大尺寸)
+              </button>
+              <button 
+                type="button" 
+                :class="{ active: cardPaperSize === 'A5' }" 
+                @click="switchPaperSize('A5')"
+              >
+                A5 (小尺寸花卡)
+              </button>
+            </div>
+          </div>
 
           <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
@@ -1152,7 +1182,7 @@
                   @click="deleteCloudDraft(selectedDraftId)"
                   title="從雲端刪除此草稿"
                 >
-                  🗑️
+                  🗑️️
                 </button>
               </div>
             </div>
@@ -1419,9 +1449,8 @@
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <!-- 🌟 傳送函式直接使用高精準原生 Canvas 繪製，徹底告別 html2canvas 截圖裁切 -->
           <button type="button" class="line-action-btn mt-2" @click="generateFlawlessCoupletImage">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1436,11 +1465,11 @@
           <div 
             class="card-scaler-container" 
             :style="{
-              width: (isVertical ? 794 : 1123) * zoomLevel + 'px',
-              height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
+              width: currentCardDimensions.w * zoomLevel + 'px',
+              height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 (寬高動態響應 A4 / A5) -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1449,6 +1478,8 @@
                 !isVertical && cardCategory === 'celebration' ? 'style-floral' : ''
               ]"
               :style="{
+                width: currentCardDimensions.w + 'px',
+                height: currentCardDimensions.h + 'px',
                 transform: `scale(${zoomLevel})`,
                 transformOrigin: 'top left',
                 fontFamily: activeCssFontFamily
@@ -1465,7 +1496,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 (橫式寬度徹底釋放) -->
+              <!-- 2. 受禮對象/稱謂 -->
               <div 
                 v-if="upperTarget.trim()"
                 class="text-box upper-target-box"
@@ -2013,14 +2044,43 @@ const showToast = (msg) => {
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 
+// 🌟 新增 A4 / A5 紙張切換狀態（預設 A4）
+const cardPaperSize = ref('A4')
 const isVertical = ref(false)
 const zoomLevel = ref(0.7)
 const viewportRef = ref(null)
 
+// 計算動態畫布尺寸（支援 A4 與 A5）
+const currentCardDimensions = computed(() => {
+  if (cardPaperSize.value === 'A5') {
+    return isVertical.value ? { w: 560, h: 794 } : { w: 794, h: 560 }
+  }
+  return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
+})
+
+// 計算動態列印尺寸指令
+const getDynamicPrintPageSize = computed(() => {
+  if (currentTab.value === 'couplet') {
+    if (cardPaperSize.value === 'A5') {
+      return isVertical.value ? 'A5 portrait' : 'A5 landscape'
+    }
+    return isVertical.value ? 'A4 portrait' : 'A4 landscape'
+  }
+  if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
+    return 'A5 landscape'
+  }
+  return 'A4 portrait'
+})
+
+const switchPaperSize = (size) => {
+  cardPaperSize.value = size
+  nextTick(() => autoFitZoom())
+}
+
 const autoFitZoom = () => {
   if (!viewportRef.value) return
   const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
-  const cardWidth = isVertical.value ? 794 : 1123
+  const cardWidth = currentCardDimensions.value.w
   zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
 }
 
@@ -2289,7 +2349,7 @@ const removeOrderItemRow = (idx) => {
 
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
-// 訂單載入
+// 🌟 訂單載入：一律按照單號（ID）由大到小嚴格遞減排序
 const loadOrders = async () => {
   try {
     const { data, error } = await supabase.from('orders').select('*')
@@ -2298,7 +2358,7 @@ const loadOrders = async () => {
       return
     }
     if (data) {
-      orderList.value = data.sort((a, b) => new Date(b.created_at || b.order_date) - new Date(a.created_at || a.order_date))
+      orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
     }
   } catch (err) {
     console.error('loadOrders fatal error:', err)
@@ -2513,10 +2573,12 @@ const saveOrder = async () => {
   }
 }
 
+// 🌟 即時更新資料欄位（含對帳專區切換付款狀態）
 const updateOrderField = async (ord, field, value) => {
   const updateObj = {}
   updateObj[field] = value
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
+  showToast(`✅ 單號 ${ord.id} 的狀態已即時更新！`)
 }
 
 const getCardStatusClass = (status) => {
@@ -3107,7 +3169,7 @@ const shareFarmerReceiptToLineDirect = () => {
 
   ctx.font = `15px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
   ctx.strokeStyle = '#0f172a'
@@ -3473,7 +3535,7 @@ const saveReturn = async () => {
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  const { error } = await supabase.from('table').delete().eq('id', id)
+  const { error } = await supabase.from(table).delete().eq('id', id)
   if (!error) reloadFn()
 }
 
@@ -3668,6 +3730,7 @@ const getStyle = (key) => {
   }
 }
 
+// 🌟 受禮對象專屬：白底透明、無邊界阻擋
 const getUpperTargetBoxStyle = () => {
   const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 220, y: 80, size: 38 }
   const weight = weights.value.upper_target || '700'
@@ -3771,6 +3834,7 @@ const saveCurrentAsCloudDraft = async () => {
   
   const draftId = 'draft_' + Date.now()
   const draftPayload = {
+    cardPaperSize: cardPaperSize.value,
     isVertical: isVertical.value,
     cardCategory: cardCategory.value,
     cardFontFamily: cardFontFamily.value,
@@ -3809,6 +3873,7 @@ const loadCloudDraft = (id) => {
   if (!item || !item.data) return
 
   const draft = item.data
+  cardPaperSize.value = draft.cardPaperSize || 'A4'
   isVertical.value = draft.isVertical
   cardCategory.value = draft.cardCategory
   cardFontFamily.value = draft.cardFontFamily || 'kai'
@@ -3849,14 +3914,12 @@ const startNewCard = () => {
   }
 }
 
-// ==========================================
-// 🌟 終極根治解法：直接精確高解析度 Canvas 繪製（100% 絕不裁切任何字）
-// ==========================================
+// 🌟 終極根治解法：直接以 Canvas 繪製輸出真實比例圖檔
 const generateFlawlessCoupletImage = () => {
-  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
+  showToast('⏳ 正在生成完整花卡高畫質圖片...')
 
-  const width = isVertical.value ? 794 : 1123
-  const height = isVertical.value ? 1123 : 794
+  const width = currentCardDimensions.value.w
+  const height = currentCardDimensions.value.h
 
   const canvas = document.createElement('canvas')
   canvas.width = width * 2
@@ -3887,7 +3950,6 @@ const generateFlawlessCoupletImage = () => {
     ctx.textBaseline = 'top'
 
     if (isVertical.value) {
-      // 直式排版
       let curY = item.y
       const chars = text.split('')
       chars.forEach(char => {
@@ -3905,7 +3967,6 @@ const generateFlawlessCoupletImage = () => {
         curY += curSize + 8
       })
     } else {
-      // 🌟 橫式排版：針對超長文字（如：新北市 陳乃瑜議員）主動計算寬度，確保 100% 留邊
       let curX = item.x
       const chars = text.split('')
 
@@ -3921,40 +3982,29 @@ const generateFlawlessCoupletImage = () => {
           ctx.strokeText(char, curX, item.y + offY)
         }
         ctx.fillText(char, curX, item.y + offY)
-        curX += curSize + 6 // 依據字級橫向推進
+        curX += curSize + 6
       })
     }
   }
 
-  // 繪製上款敬詞
   renderItem(upperPrefix.value, layout.value.upper_prefix, weights.value.upper_prefix)
-  // 繪製受禮人（陳乃瑜議員）
   renderItem(upperTarget.value, layout.value.upper_target, weights.value.upper_target, true)
-  // 繪製上款結尾詞
   if (upperSuffix.value && upperSuffix.value.trim()) {
     renderItem(upperSuffix.value, layout.value.upper_suffix, weights.value.upper_suffix)
   }
-
-  // 繪製中款第 1 行
   renderItem(middleText.value, layout.value.middle, weights.value.middle)
-  // 繪製中款第 2 行
   if (middleText2.value && middleText2.value.trim()) {
     renderItem(middleText2.value, layout.value.middle_2, weights.value.middle_2)
   }
-
-  // 繪製下款 6 格
   bottomLines.value.forEach((b, idx) => {
     if (b.text && b.text.trim()) {
       renderItem(b.text, layout.value['bottom_' + idx], weights.value['bottom_' + idx])
     }
   })
-
-  // 繪製敬賀敬輓
   renderItem(suffixText.value, layout.value.suffix, weights.value.suffix)
 
-  // 輸出圖片
-  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, '花卡確認 (完整無裁切)', '花卡圖片準備完成')
+  const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
 }
 
 // 初始化所有系統資料
@@ -4762,7 +4812,7 @@ input, select, textarea {
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
-/* 標準 A4 卡片 (794x1123，對應 210mm x 297mm) */
+/* 標準卡片畫布容器 */
 .card-scaler-container { 
   position: relative; 
   margin-bottom: 40px; 
@@ -4775,11 +4825,9 @@ input, select, textarea {
   user-select: none; 
   touch-action: none; 
 }
-.card-board.mode-vertical { width: 794px; height: 1123px; }
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
 .card-board.mode-vertical .middle-box,
 .card-board.mode-vertical .middle-box-2 { letter-spacing: 20px; }
-.card-board.mode-horizontal { width: 1123px; height: 794px; }
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .card-board.mode-horizontal .middle-box,
 .card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
@@ -5039,7 +5087,7 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* 全域精準列印樣式（完全動態自適應直向與橫向） */
+/* 全域列印樣式（完全動態自適應 A4 / A5 / 直向 / 橫向） */
 @media print {
   html, body, .main-wrapper, .couplet-screen-wrapper { 
     margin: 0 !important; 
@@ -5065,27 +5113,10 @@ input, select, textarea {
     padding: 0 !important; 
   }
   
-  #card-print-target.mode-vertical { 
+  #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
     left: 0 !important; 
-    width: 210mm !important; 
-    height: 297mm !important; 
-    transform: none !important; 
-    box-shadow: none !important; 
-    margin: 0 !important; 
-    display: block !important; 
-    visibility: visible !important; 
-    page-break-inside: avoid !important; 
-    page-break-after: avoid !important; 
-  }
-
-  #card-print-target.mode-horizontal { 
-    position: absolute !important; 
-    top: 0 !important; 
-    left: 0 !important; 
-    width: 297mm !important; 
-    height: 210mm !important; 
     transform: none !important; 
     box-shadow: none !important; 
     margin: 0 !important; 
