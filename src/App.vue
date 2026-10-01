@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡狀態：未製作強制套用 #E3D0CC -->
+                      <!-- 🌟 花卡未製作：強制 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -373,7 +373,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單狀態：未列印強制套用 #E3D0CC -->
+                      <!-- 🌟 簽收單未列印：強制 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -387,7 +387,6 @@
                         </select>
                       </td>
 
-                      <!-- 出貨狀態 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
@@ -400,7 +399,6 @@
                         </select>
                       </td>
 
-                      <!-- 收款狀態 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
@@ -413,7 +411,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 按鈕顏色：簽收單 #F8E8D1、農民收據 #D7CDD5 -->
+                      <!-- 🌟 簽收單 #F8E8D1、農民收據 #D7CDD5 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -449,7 +447,7 @@
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
-                              🗑️ 刪除
+                              🗑️️ 刪除
                             </button>
                           </div>
                         </div>
@@ -610,7 +608,7 @@
             </div>
 
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
+              <h3>{{ editingInvId ? '✏️️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>進貨類別</label>
@@ -745,7 +743,7 @@
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div v-if="editingCustId" class="edit-banner">
-              <span>✏️️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
+              <span>✏️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
             </div>
 
@@ -826,7 +824,7 @@
           <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div v-if="editingOrchidId" class="edit-banner">
-              <span>✏️️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
+              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
             </div>
 
@@ -1089,7 +1087,7 @@
                             @click="startEditOrder(ord)" 
                             title="編輯訂單"
                           >
-                            ✏️️ 修改
+                            ✏️ 修改
                           </button>
                         </div>
                       </td>
@@ -1107,7 +1105,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (徹底解決橫式切字) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (橫式絕對不裁切核心) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1142,7 +1140,7 @@
                   @click="deleteCloudDraft(selectedDraftId)"
                   title="從雲端刪除此草稿"
                 >
-                  🗑️️
+                  🗑️
                 </button>
               </div>
             </div>
@@ -1204,6 +1202,7 @@
                 <option value="追悼">追悼</option>
               </select>
               <select v-else v-model="upperPrefix" style="width: 110px;">
+                <option value="祝">祝</option>
                 <option value="恭祝">恭祝</option>
                 <option value="恭賀">恭賀</option>
                 <option value="敬賀">敬賀</option>
@@ -1409,7 +1408,7 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletSuperDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️️ 列印 A4 花卡 / 輓聯</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1428,7 +1427,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 (橫式寬度保證 1123px，高度 794px) -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1453,7 +1452,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 (取消所有阻擋邊界，給予絕對充足空間) -->
+              <!-- 2. 受禮對象/稱謂 (橫式寬度徹底釋放，絕無邊界折斷) -->
               <div 
                 v-if="upperTarget.trim()"
                 class="text-box upper-target-box"
@@ -1470,7 +1469,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
               </div>
 
-              <!-- 3. 上款結尾敬詞 (只有在有文字時才渲染，避免空文字框擋路) -->
+              <!-- 3. 上款結尾敬詞 (只有在有文字時才渲染) -->
               <div 
                 v-if="upperSuffix && upperSuffix.trim()"
                 class="text-box upper-suffix-box"
@@ -1742,7 +1741,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
+            <label class="section-title">✏️️ 收據內容確認與自由修改：</label>
             <div class="form-row">
               <div class="field">
                 <label>民國年</label>
@@ -1921,7 +1920,7 @@
                   </div>
                 </div>
 
-                <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
+                <!-- 蔡鎮遠姓名與印章 -->
                 <div class="f-grid-row f-farmer-info-row">
                   <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                   <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
@@ -2002,7 +2001,7 @@ const showToast = (msg) => {
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 
-const isVertical = ref(false) // 橫式為預設
+const isVertical = ref(false)
 const zoomLevel = ref(0.7)
 const viewportRef = ref(null)
 
@@ -2508,7 +2507,6 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 狀態樣式：未製作使用指定色 #E3D0CC
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-soft-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -3463,7 +3461,7 @@ const saveReturn = async () => {
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  const { error } = await supabase.from(table).delete().eq('id', id)
+  const { error } = await supabase.from('table').delete().eq('id', id)
   if (!error) reloadFn()
 }
 
@@ -3658,7 +3656,7 @@ const getStyle = (key) => {
   }
 }
 
-// 🌟 受禮對象專屬：白底透明、無邊界阻擋
+// 🌟 受禮對象：無右側限制、白底透明
 const getUpperTargetBoxStyle = () => {
   const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 220, y: 80, size: 38 }
   const weight = weights.value.upper_target || '700'
@@ -3840,29 +3838,48 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 直接擷取所見即所得高畫質畫面
+// 🌟 核心終極截圖：徹底鎖定 1123 × 794 真實像素，解除縮放
 const shareCoupletSuperDirect = async () => {
   const cardElem = document.getElementById('card-print-target')
   if (!cardElem) return
 
   showToast('⏳ 正在生成無切字花卡圖片...')
 
+  // 判定真實寬高：橫式 1123x794，直式 794x1123
   const targetWidth = isVertical.value ? 794 : 1123
   const targetHeight = isVertical.value ? 1123 : 794
 
-  // 暫存目前的 transform
-  const prevTransform = cardElem.style.transform
-  cardElem.style.transform = 'none'
+  // 在背景動態創建 1:1 絕對尺寸乾淨容器
+  const cloneWrapper = document.createElement('div')
+  cloneWrapper.style.position = 'fixed'
+  cloneWrapper.style.left = '-9999px'
+  cloneWrapper.style.top = '0'
+  cloneWrapper.style.width = targetWidth + 'px'
+  cloneWrapper.style.height = targetHeight + 'px'
+  cloneWrapper.style.backgroundColor = '#ffffff'
+  cloneWrapper.style.overflow = 'visible'
+  cloneWrapper.style.zIndex = '-9999'
 
-  await nextTick()
+  const cloned = cardElem.cloneNode(true)
+  cloned.style.transform = 'none'
+  cloned.style.position = 'static'
+  cloned.style.boxShadow = 'none'
+  cloned.style.width = targetWidth + 'px'
+  cloned.style.height = targetHeight + 'px'
+  cloned.style.overflow = 'visible'
+
+  cloneWrapper.appendChild(cloned)
+  document.body.appendChild(cloneWrapper)
 
   try {
-    const canvas = await html2canvas(cardElem, {
+    const canvas = await html2canvas(cloned, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       width: targetWidth,
       height: targetHeight,
+      windowWidth: targetWidth + 100,
+      windowHeight: targetHeight + 100,
       scrollX: 0,
       scrollY: 0
     })
@@ -3873,7 +3890,9 @@ const shareCoupletSuperDirect = async () => {
     console.error('Capture error', err)
     showToast('生成失敗，請重試')
   } finally {
-    cardElem.style.transform = prevTransform
+    if (document.body.contains(cloneWrapper)) {
+      document.body.removeChild(cloneWrapper)
+    }
   }
 }
 
