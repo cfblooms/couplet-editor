@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡狀態：未製作使用 #E3D0CC -->
+                      <!-- 🌟 未製作使用指定色 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -372,7 +372,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單狀態：未列印使用 #E3D0CC -->
+                      <!-- 🌟 未列印使用指定色 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -385,11 +385,10 @@
                         </select>
                       </td>
 
-                      <!-- 出貨狀態 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
-                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-subtle-red'"
+                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-custom-e3'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
                           class="status-select-box"
                         >
@@ -398,11 +397,10 @@
                         </select>
                       </td>
 
-                      <!-- 收款狀態 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
-                          :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-subtle-red'"
+                          :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
                           class="status-select-box"
                         >
@@ -411,7 +409,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 按鈕：簽收單(#F8E8D1)、農民收據(#D7CDD5)、修改/刪除沉穩莫蘭迪 -->
+                      <!-- 🌟 簽收單(#F8E8D1)、農民收據(#D7CDD5)、修改/刪除沉穩色 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -424,7 +422,7 @@
                           </div>
                           <div class="stacked-action-col">
                             <button class="cozy-btn btn-calm-blue" @click="startEditOrder(ord)" title="修改此訂單">
-                              ✏️️ 修改
+                              ✏️ 修改
                             </button>
                             <button class="cozy-btn btn-calm-rose" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">
                               🗑️ 刪除
@@ -544,7 +542,7 @@
                         </span>
                       </td>
                       <td class="nowrap-cell">
-                        <span :class="ord.payment_status === '未結' ? 'inline-badge badge-subtle-red' : 'inline-badge badge-green'">
+                        <span :class="ord.payment_status === '未結' ? 'inline-badge badge-red' : 'inline-badge badge-green'">
                           {{ ord.payment_status }}
                         </span>
                       </td>
@@ -941,7 +939,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn btn-calm-blue" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn btn-calm-rose" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1017,7 +1015,7 @@
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.shipped_status" 
-                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-subtle-red'"
+                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-custom-e3'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
                           class="status-select-box"
                         >
@@ -1045,7 +1043,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (徹底修復右側切字) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (獨立離線節點截圖，徹底解決切字) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1115,7 +1113,7 @@
             </select>
           </div>
 
-          <!-- 上款獨立設定 (含字級數字微調) -->
+          <!-- 上款獨立設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">1. 開頭敬詞（獨立一格）：</label>
@@ -1215,7 +1213,7 @@
             </div>
           </div>
 
-          <!-- 中款設定：兩行獨立格 (含字級數字微調) -->
+          <!-- 中款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">中款第 1 行（主要題詞）：</label>
@@ -1348,7 +1346,8 @@
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <button type="button" class="line-action-btn mt-2" @click="shareCoupletToLineDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
+          <!-- 🌟 換上全新函式名稱 shareCoupletDirectCapture 避免快取 -->
+          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirectCapture">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
           <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
         </div>
 
@@ -1368,7 +1367,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡真實 DOM 畫布 -->
+            <!-- 🌟 花卡看板 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1382,7 +1381,7 @@
                 fontFamily: activeCssFontFamily
               }"
             >
-              <!-- 1. 上款開頭敬語 (獨立一格) -->
+              <!-- 1. 上款開頭敬語 -->
               <div 
                 v-if="upperPrefix.trim()"
                 class="text-box upper-prefix-box"
@@ -1393,7 +1392,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 (獨立一格) -->
+              <!-- 2. 受禮對象/稱謂 -->
               <div 
                 v-if="upperTarget.trim()"
                 class="text-box upper-target-box"
@@ -1410,7 +1409,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
               </div>
 
-              <!-- 3. 上款結尾敬詞 (獨立一格) -->
+              <!-- 3. 上款結尾敬詞 -->
               <div 
                 v-if="upperSuffix.trim()"
                 class="text-box upper-suffix-box"
@@ -1432,7 +1431,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
               </div>
 
-              <!-- 中款第 2 行 (選填獨立格) -->
+              <!-- 中款第 2 行 -->
               <div 
                 v-if="middleText2.trim()"
                 class="text-box middle-box-2"
@@ -1861,7 +1860,7 @@
                   </div>
                 </div>
 
-                <!-- 蔡鎮遠姓名與真實蓋章圖片排版 -->
+                <!-- 蔡鎮遠姓名與印章 -->
                 <div class="f-grid-row f-farmer-info-row">
                   <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
                   <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
@@ -2093,7 +2092,7 @@ const getOrderShippingFee = (ord) => {
   return shipMatch ? parseInt(shipMatch[1]) : 0
 }
 
-// 依據選擇的「下單日期」動態產生當日最新無衝突流水號
+// 依據選擇的「下單日期」動態產生當日最新流水號
 const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   let datePart = ''
   if (dateStrVal) {
@@ -2448,7 +2447,7 @@ const updateOrderField = async (ord, field, value) => {
   await supabase.from('orders').update(updateObj).eq('id', ord.id)
 }
 
-// 🌟 狀態樣式：未製作使用色碼 #E3D0CC
+// 狀態樣式：未製作使用指定色 #E3D0CC
 const getCardStatusClass = (status) => {
   if (status === '已製作') return 'badge badge-soft-green'
   if (status === '免製作') return 'badge badge-gray'
@@ -2924,7 +2923,7 @@ const shareReceiptToBuyerDirect = () => {
 }
 
 // ==========================================
-// 4. 農民收據 (空值不顯示 $ / 空白不顯示橫線)
+// 4. 農民收據
 // ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
@@ -3723,7 +3722,7 @@ const saveCurrentAsCloudDraft = async () => {
       await loadCloudDrafts()
       selectedDraftId.value = draftId
     } else {
-      showToast(`⚠️ 雲端保存：${error.message}`)
+      showToast(`⚠️️ 雲端保存：${error.message}`)
     }
   } catch (err) {
     console.error(err)
@@ -3776,33 +3775,49 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 核心修復：截圖前暫時解除 scale 縮放限制，直接 1:1 實體像素截圖，保證 100% 完整無切字
-const shareCoupletToLineDirect = async () => {
+// 🌟 獨立全新函式：建立無縮放背景節點截圖，完全避開舊快取與容器裁剪
+const shareCoupletDirectCapture = async () => {
   const cardElem = document.getElementById('card-print-target')
   if (!cardElem) return
 
   showToast('⏳ 正在為您生成所見即所得花卡高畫質圖片...')
 
-  // 暫存原有的 transform 與樣式
-  const originalTransform = cardElem.style.transform
-  const originalTransformOrigin = cardElem.style.transformOrigin
-  
-  // 先把卡片瞬間設為 1:1 無縮放真實渲染
-  cardElem.style.transform = 'none'
-  cardElem.style.transformOrigin = 'top left'
+  const targetWidth = isVertical.value ? 794 : 1123
+  const targetHeight = isVertical.value ? 1123 : 794
 
-  await nextTick()
+  // 1. 在背景建立一個完全獨立的隱藏容器
+  const offscreenContainer = document.createElement('div')
+  offscreenContainer.style.position = 'fixed'
+  offscreenContainer.style.left = '-9999px'
+  offscreenContainer.style.top = '0'
+  offscreenContainer.style.width = targetWidth + 'px'
+  offscreenContainer.style.height = targetHeight + 'px'
+  offscreenContainer.style.overflow = 'visible'
+  offscreenContainer.style.zIndex = '-9999'
+  offscreenContainer.style.backgroundColor = '#ffffff'
+
+  // 2. 複製真實花卡節點，並解除縮放
+  const clonedCard = cardElem.cloneNode(true)
+  clonedCard.style.transform = 'none'
+  clonedCard.style.position = 'static'
+  clonedCard.style.boxShadow = 'none'
+  clonedCard.style.margin = '0'
+  clonedCard.style.width = targetWidth + 'px'
+  clonedCard.style.height = targetHeight + 'px'
+  clonedCard.style.overflow = 'visible'
+
+  offscreenContainer.appendChild(clonedCard)
+  document.body.appendChild(offscreenContainer)
 
   try {
-    const targetWidth = isVertical.value ? 794 : 1123
-    const targetHeight = isVertical.value ? 1123 : 794
-
-    const canvas = await html2canvas(cardElem, {
+    const canvas = await html2canvas(clonedCard, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       width: targetWidth,
       height: targetHeight,
+      windowWidth: targetWidth,
+      windowHeight: targetHeight,
       scrollX: 0,
       scrollY: 0
     })
@@ -3813,9 +3828,10 @@ const shareCoupletToLineDirect = async () => {
     console.error('html2canvas screenshot failed', err)
     showToast('截圖生成失敗，請重試！')
   } finally {
-    // 截圖結束後立即復原畫面縮放，操作介面完全不跳動
-    cardElem.style.transform = originalTransform
-    cardElem.style.transformOrigin = originalTransformOrigin
+    // 3. 截圖完成後清理背景容器
+    if (document.body.contains(offscreenContainer)) {
+      document.body.removeChild(offscreenContainer)
+    }
   }
 }
 
@@ -4463,7 +4479,7 @@ input, select, textarea {
   gap: 5px;
 }
 
-/* 🌟 操作按鈕色彩精準客製化 */
+/* 🌟 指定色碼專屬按鈕樣式 */
 .cozy-btn {
   border: 1px solid transparent;
   padding: 5px 9px;
@@ -4480,7 +4496,7 @@ input, select, textarea {
 /* 🖨️ 簽收單：指定 #F8E8D1 */
 .btn-color-f8 {
   background: #F8E8D1;
-  color: #785a31;
+  color: #72562d;
   border-color: #ebd3b4;
 }
 .btn-color-f8:hover {
@@ -4491,7 +4507,7 @@ input, select, textarea {
 /* 🧾 農民收據：指定 #D7CDD5 */
 .btn-color-d7 {
   background: #D7CDD5;
-  color: #503d4d;
+  color: #4b3748;
   border-color: #c4b6c1;
 }
 .btn-color-d7:hover {
@@ -4499,7 +4515,7 @@ input, select, textarea {
   color: #3b2c39;
 }
 
-/* ✏️ 修改：沉穩莫蘭迪石藍 */
+/* ✏️ 修改：沉穩石藍 */
 .btn-calm-blue {
   background: #dbe7ee;
   color: #304e63;
@@ -4510,7 +4526,7 @@ input, select, textarea {
   color: #1e3545;
 }
 
-/* 🗑️ 刪除：沉穩莫蘭迪磚粉紅 */
+/* 🗑️ 刪除：沉穩磚粉紅 */
 .btn-calm-rose {
   background: #ebd8da;
   color: #79373d;
@@ -4536,16 +4552,11 @@ input, select, textarea {
 /* 🌟 指定 #E3D0CC：未製作 / 未列印專用 */
 .badge-custom-e3 {
   background: #E3D0CC !important;
-  color: #6b3f37 !important;
-  border: 1px solid #cfb8b3 !important;
+  color: #633c35 !important;
+  border: 1px solid #ceb7b2 !important;
 }
 
-/* 出貨/收款標籤使用的柔紅（與未結一致但更柔和） */
-.badge-subtle-red {
-  background: #fdf2f4 !important;
-  color: #b9384f !important;
-  border: 1px solid #f6d1d7 !important;
-}
+.badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
 .status-tag { font-size: 12px; font-weight: bold; }
 
