@@ -128,7 +128,6 @@
               </div>
               
               <div class="form-grid">
-                <!-- 🌟 乾淨單行：已移除「（單號會依此日期編號）」 -->
                 <div class="field highlight-date-field single-line-date-row">
                   <span class="single-line-label">📅 下單日期：</span>
                   <input v-model="formOrder.order_date" type="date" class="bold-date-input single-line-date-control" />
@@ -687,7 +686,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)">✏️️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)">✏️</button>
                           <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
@@ -760,7 +759,7 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -778,7 +777,6 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -787,7 +785,6 @@
             </div>
           </div>
 
-          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
@@ -809,7 +806,6 @@
             </div>
           </div>
 
-          <!-- 字體與粗細同一行 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
@@ -848,9 +844,7 @@
             </select>
           </div>
 
-          <!-- 上款設定：標題列靠右排列字級與粗細，輸入框放下一行 -->
           <div class="panel-section">
-            <!-- 1. 開頭敬詞 -->
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞（獨立一格）：</span>
               <div class="ctrl-row-right">
@@ -873,7 +867,6 @@
               </select>
             </div>
 
-            <!-- 2. 受禮對象 / 稱謂 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</span>
               <div class="ctrl-row-right">
@@ -902,7 +895,6 @@
             </template>
             <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂 (可直接修改結果)" />
 
-            <!-- 3. 上款結尾詞 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞（選填）：</span>
               <div class="ctrl-row-right">
@@ -926,7 +918,6 @@
             </div>
           </div>
 
-          <!-- 中款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">中款第 1 行（主要題詞）：</span>
@@ -966,7 +957,6 @@
 
             <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款第 1 行詞語" />
 
-            <!-- 中款第 2 行 -->
             <div class="section-title-with-weight mt-3">
               <span class="section-title">中款第 2 行（選填）：</span>
               <div class="ctrl-row-right">
@@ -982,7 +972,6 @@
             <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
-          <!-- 下款設定 -->
           <div class="panel-section">
             <label class="section-title">下款設定：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
@@ -996,7 +985,6 @@
               </select>
             </div>
 
-            <!-- 結尾敬詞 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">結尾敬詞：</span>
               <div class="ctrl-row-right">
@@ -1025,6 +1013,7 @@
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
             <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
@@ -1089,92 +1078,423 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 完整左側編輯面板) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
+
           <div class="panel-section highlight-panel">
             <label class="section-title">依訂單編號快速帶入：</label>
             <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }}</option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
+              </option>
             </select>
           </div>
 
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
               <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
-              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature">↺ 清除重簽</button>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
+                ↺ 清除重簽
+              </button>
             </div>
             <div class="modern-canvas-wrapper">
-              <canvas ref="signPadCanvasRef" class="modern-live-sign-pad" width="340" height="110" @pointerdown="startSign" @pointermove="drawingSign" @pointerup="stopSign" @pointerleave="stopSign"></canvas>
+              <canvas 
+                ref="signPadCanvasRef" 
+                class="modern-live-sign-pad" 
+                width="340" 
+                height="110"
+                @pointerdown="startSign"
+                @pointermove="drawingSign"
+                @pointerup="stopSign"
+                @pointerleave="stopSign"
+              ></canvas>
               <div v-if="!liveSignDataUrl" class="sign-watermark-hint">請在此區域手寫簽名</div>
             </div>
           </div>
 
-          <button type="button" class="line-action-btn mt-2" @click="shareReceiptToBuyerDirect">📤 簽好直接傳送給訂購人</button>
-          <button type="button" class="print-action-btn mt-2" @click="printReceiptAndMarkDone">🖨️ 列印 A5 橫式簽收單</button>
+          <div class="panel-section">
+            <label class="section-title">抬頭花店名稱：</label>
+            <div class="btn-group">
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'default' }" 
+                @click="shopNameMode = 'default'"
+              >
+                宸豐蘭藝
+              </button>
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'custom' }" 
+                @click="shopNameMode = 'custom'"
+              >
+                自行輸入
+              </button>
+            </div>
+            <input 
+              v-if="shopNameMode === 'custom'" 
+              type="text" 
+              v-model="customShopName" 
+              class="full-input mt-2" 
+              placeholder="請輸入自訂花店名稱" 
+            />
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            
+            <div class="form-group">
+              <label>收件單位 / 聯絡人 / 電話：</label>
+              <input type="text" v-model="receiptForm.recipient" />
+            </div>
+
+            <div class="form-group">
+              <label>送達地址：</label>
+              <input type="text" v-model="receiptForm.address" />
+            </div>
+
+            <div class="form-group">
+              <label>送達日期：</label>
+              <input type="text" v-model="receiptForm.deliveryDate" />
+            </div>
+
+            <div class="form-group">
+              <label>花禮品項規格 (幾盆)：</label>
+              <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆、特選蘭花 2盆 (共3盆)" />
+            </div>
+
+            <div class="form-group">
+              <label>致贈單位 / 祝賀詞：</label>
+              <input type="text" v-model="receiptForm.giver" />
+            </div>
+
+            <div class="form-group">
+              <label>備註說明：</label>
+              <textarea v-model="receiptForm.notes" rows="2"></textarea>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareReceiptToBuyerDirect"
+          >
+            📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            :disabled="!receiptForm.recipient && !selectedOrderId"
+            @click="printReceiptAndMarkDone"
+          >
+            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+          </button>
         </div>
 
         <div class="receipt-preview-area" ref="receiptViewportRef">
-          <div class="a5-landscape-sheet kai-font-supported">
-            <div class="sheet-header">
-              <div class="shop-name-title">{{ displayShopName }}</div>
-              <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
-              <div class="header-meta"><div><b>訂單編號：</b>{{ receiptForm.orderId || '現場開單' }}</div><div><b>送達日期：</b>{{ receiptForm.deliveryDate }}</div></div>
-            </div>
-            <table class="receipt-table">
-              <tbody>
-                <tr><td class="lbl">收件單位/人</td><td class="val val-bold">{{ receiptForm.recipient }}</td><td class="lbl">送達地址</td><td class="val">{{ receiptForm.address }}</td></tr>
-                <tr><td class="lbl">花禮品項</td><td class="val val-highlight" colspan="3">{{ receiptForm.item }}</td></tr>
-                <tr><td class="lbl">致贈/賀詞</td><td class="val" colspan="3">{{ receiptForm.giver }}</td></tr>
-                <tr><td class="lbl">備註說明</td><td class="val" colspan="3">{{ receiptForm.notes }}</td></tr>
-              </tbody>
-            </table>
-            <div class="sheet-footer">
-              <div class="footer-left"><div>送貨司機 / 經手人：______________</div><div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div></div>
-              <div class="footer-sign-box">
-                <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
-                <div class="sign-box-area"><img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" /></div>
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          </div>
+
+          <div 
+            class="receipt-scaler-container" 
+            :style="{
+              width: (794 * receiptZoom) + 'px',
+              height: (560 * receiptZoom) + 'px'
+            }"
+          >
+            <div 
+              class="a5-landscape-sheet kai-font-supported"
+              :style="{
+                transform: `scale(${receiptZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="sheet-header">
+                <div class="shop-name-title">{{ displayShopName }}</div>
+                <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
+                <div class="header-meta">
+                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場直接開單' }}</div>
+                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate || '依約定送達' }}</div>
+                </div>
+              </div>
+
+              <table class="receipt-table">
+                <tbody>
+                  <tr>
+                    <td class="lbl">收件單位/人</td>
+                    <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
+                    <td class="lbl">送達地址</td>
+                    <td class="val">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">花禮品項</td>
+                    <td class="val val-highlight" colspan="3">
+                      {{ receiptForm.item || '特選蘭花 1盆' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">致贈/賀詞</td>
+                    <td class="val" colspan="3">{{ receiptForm.giver || '敬領 誌慶 / 宸豐蘭藝 敬製' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">備註說明</td>
+                    <td class="val" colspan="3">{{ receiptForm.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="sheet-footer">
+                <div class="footer-left">
+                  <div>送貨司機 / 經手人：______________</div>
+                  <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
+                </div>
+                <div class="footer-sign-box">
+                  <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
+                  <div class="sign-box-area">
+                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 ================= -->
+      <!-- ================= 模式 4：農民收據 (🌟 完整左側編輯面板) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
+
+          <div class="panel-section stamp-select-panel">
+            <label class="section-title">🔴 蔡鎮遠印章（全裝置雲端同步）：</label>
+            <input type="file" id="local-seal-picker" accept="image/*" style="display:none" @change="onSelectLocalSeal" />
+            <button type="button" class="seal-choose-btn" @click="triggerLocalSealPicker">
+              📁 上傳蔡鎮遠印章圖檔 (電腦/手機/平板全部同步)
+            </button>
+          </div>
+
           <div class="panel-section highlight-panel">
             <label class="section-title">依訂單編號自動帶入收據：</label>
             <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }}</option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+                【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (統編: {{ ord.tax_id || '無' }})
+              </option>
             </select>
           </div>
-          <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptToLineDirect">💬 直接傳送 / 複製收據給客人</button>
-          <button type="button" class="print-action-btn mt-2" @click="printFarmerReceipt">🖨️ 列印農民收據</button>
+
+          <div class="panel-section">
+            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
+            <div class="form-row">
+              <div class="field">
+                <label>民國年</label>
+                <input type="text" v-model="farmerReceipt.year" />
+              </div>
+              <div class="field">
+                <label>月</label>
+                <input type="text" v-model="farmerReceipt.month" />
+              </div>
+              <div class="field">
+                <label>日</label>
+                <input type="text" v-model="farmerReceipt.day" />
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label>購貨商號名稱：</label>
+              <input type="text" v-model="farmerReceipt.buyerName" />
+            </div>
+
+            <div class="form-group">
+              <label>統一編號：</label>
+              <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
+            </div>
+
+            <div class="form-group">
+              <label>住址 (整大格顯示)：</label>
+              <input type="text" v-model="farmerReceipt.buyerAddress" />
+            </div>
+
+            <div class="form-group">
+              <label>品名：</label>
+              <input type="text" v-model="farmerReceipt.itemName" />
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label>規格</label>
+                <input type="text" v-model="farmerReceipt.spec" />
+              </div>
+              <div class="field">
+                <label>數量</label>
+                <input type="text" v-model="farmerReceipt.qty" />
+              </div>
+              <div class="field">
+                <label>單價</label>
+                <input type="text" v-model="farmerReceipt.unitPrice" />
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label>總金額 (元，沒填時留空)：</label>
+              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
+            </div>
+
+            <div class="form-group">
+              <label>備註：</label>
+              <input type="text" v-model="farmerReceipt.note" />
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareFarmerReceiptToLineDirect"
+          >
+            💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            @click="printFarmerReceipt"
+          >
+            🖨️ 列印農民收據
+          </button>
         </div>
 
+        <!-- 右側預覽區 -->
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
-          <div class="farmer-receipt-sheet kai-font-supported">
-            <div class="f-header">
-              <div class="f-title-wrap"><div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div></div>
-              <div class="f-date-wrap">中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日</div>
-            </div>
-            <div class="f-receipt-grid-table">
-              <div class="f-grid-row f-row-top">
-                <div class="f-col-buyer-group">
-                  <div class="f-sub-row"><div class="f-grid-lbl f-w-head">購貨商號名稱</div><div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div></div>
-                  <div class="f-sub-row"><div class="f-grid-lbl f-w-head">統一編號</div><div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div></div>
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+          </div>
+
+          <div 
+            class="farmer-scaler-container" 
+            :style="{
+              width: (794 * farmerZoom) + 'px',
+              height: (560 * farmerZoom) + 'px'
+            }"
+          >
+            <div 
+              class="farmer-receipt-sheet kai-font-supported"
+              :style="{
+                transform: `scale(${farmerZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="f-header">
+                <div class="f-title-wrap">
+                  <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
                 </div>
-                <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div><div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
+                <div class="f-date-wrap">
+                  中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
+                </div>
               </div>
-              <div class="f-grid-row f-header-row"><div class="f-grid-lbl col-p-name">品 名</div><div class="f-grid-lbl col-p-spec">規 格</div><div class="f-grid-lbl col-p-qty">數 量</div><div class="f-grid-lbl col-p-price">單 價</div><div class="f-grid-lbl col-p-amt">金 額</div><div class="f-grid-lbl col-p-note">備 註</div></div>
-              <div class="f-grid-row f-data-row"><div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div><div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div><div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div><div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div><div class="f-grid-val col-p-amt f-text-right f-bold f-pr">{{ farmerReceipt.totalAmount ? '$' + Number(farmerReceipt.totalAmount).toLocaleString() : '' }}</div><div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div></div>
-              <div class="f-grid-row f-amount-row"><div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div><div class="f-grid-val f-amount-val-cell"><div class="f-chinese-amount-line"><span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾 <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬 <span class="d-val">{{ chineseDigits.thousands }}</span> 仟 <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰 <span class="d-val">{{ chineseDigits.tens }}</span> 拾 <span class="d-val">{{ chineseDigits.ones }}</span> 元 整</div></div></div>
-              <div class="f-grid-row f-farmer-info-row"><div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div><div class="f-grid-val f-farmer-stamp-cell f-flex-1"><span class="f-farmer-name-clean">蔡鎮遠</span><img :src="activeCaiSealSrc" class="cai-real-stamp-img" /></div></div>
+
+              <!-- 農民收據表格 -->
+              <div class="f-receipt-grid-table">
+                <div class="f-grid-row f-row-top">
+                  <div class="f-col-buyer-group">
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
+                      <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
+                    </div>
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">統一編號</div>
+                      <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
+                    </div>
+                  </div>
+                  <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
+                  <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
+                </div>
+
+                <div class="f-grid-row f-header-row">
+                  <div class="f-grid-lbl col-p-name">品 名</div>
+                  <div class="f-grid-lbl col-p-spec">規 格</div>
+                  <div class="f-grid-lbl col-p-qty">數 量</div>
+                  <div class="f-grid-lbl col-p-price">單 價</div>
+                  <div class="f-grid-lbl col-p-amt">金 額</div>
+                  <div class="f-grid-lbl col-p-note">備 註</div>
+                </div>
+
+                <div class="f-grid-row f-data-row">
+                  <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
+                  <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
+                  <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
+                  <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
+                    {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
+                  </div>
+                  <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-amount-row">
+                  <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
+                  <div class="f-grid-val f-amount-val-cell">
+                    <div class="f-chinese-amount-line">
+                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
+                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
+                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
+                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 蔡鎮遠姓名與印章 -->
+                <div class="f-grid-row f-farmer-info-row">
+                  <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
+                  <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
+                    <span class="f-farmer-name-clean">蔡鎮遠</span>
+                    <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
+                  </div>
+                </div>
+
+                <div class="f-grid-row f-id-addr-row">
+                  <div class="f-grid-lbl f-w-head">住 址</div>
+                  <div class="f-grid-val f-flex-1"></div>
+                  <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
+                  <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
+                </div>
+              </div>
+
+              <div class="f-statement">
+                本收據之農民身分確實無誤，若有不實者願依法受罰。
+              </div>
+
+              <div class="f-footer-note">
+                <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              </div>
             </div>
           </div>
         </div>
@@ -1250,7 +1570,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 自動印表機自適應切換
+// 🖨️ 自動印表機自適應切換 (A4/A5, 直/橫)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1883,7 +2203,9 @@ const batchMarkPaid = async () => {
   }
 }
 
-// 3. A5 橫式簽收單
+// ==========================================
+// 3. A5 橫式簽收單 (完整資料與方法)
+// ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -2114,7 +2436,7 @@ const shareReceiptToBuyerDirect = () => {
   ctx.moveTo(tLeft + col1W, tTop)
   ctx.lineTo(tLeft + col1W, tTop + rowHeight * 4)
   ctx.moveTo(tLeft + col1W + col2W, tTop)
-  ctx.lineTo(tLeft + col1W + col2W, tTop + rowHeight)
+  ctx.lineTo(tLeft + col1W + col2W + rowHeight)
   ctx.moveTo(tLeft + col1W + col2W + col3W, tTop)
   ctx.lineTo(tLeft + col1W + col2W + col3W, tTop + rowHeight)
   ctx.stroke()
@@ -2196,7 +2518,9 @@ const shareReceiptToBuyerDirect = () => {
   }
 }
 
-// 4. 農民收據
+// ==========================================
+// 4. 農民收據 (完整資料與方法)
+// ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115',
@@ -3291,7 +3615,7 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🌟 下單日期絕對單行樣式 */
+/* 🌟 下單日期絕對單行鎖死樣式 */
 .single-line-date-row {
   grid-column: 1 / -1 !important;
   display: flex !important;
@@ -3599,7 +3923,7 @@ input, select, textarea {
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 13.5px; border-color: #3b82f6; }
 
-/* 🌟 控制項標題行與字級粗細並排樣式 */
+/* 控制項標題行與字級粗細並排樣式 */
 .section-title-with-weight {
   display: flex; justify-content: space-between; align-items: center; width: 100%;
 }
