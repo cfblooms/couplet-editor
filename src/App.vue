@@ -122,7 +122,8 @@
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
                 <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
-                <span class="preview-seq-badge">
+                <!-- 🌟 預計產生單號改到最右邊 -->
+                <span class="preview-seq-badge right-aligned-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
               </div>
@@ -312,7 +313,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單（嚴格依單號順序排序） -->
+            <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -361,14 +362,14 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：#FEF0EF -->
+                      <!-- 🌟 花卡未製作：短格 #FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
-                          class="status-select-box"
+                          class="short-status-select"
                         >
                           <option value="未製作">未製作</option>
                           <option value="已製作">已製作</option>
@@ -376,47 +377,47 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：#FEF0EF -->
+                      <!-- 🌟 簽收單未列印：短格 #FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
-                          class="status-select-box"
+                          class="short-status-select"
                         >
                           <option value="未列印">未列印</option>
                           <option value="已列印">已列印</option>
                         </select>
                       </td>
 
-                      <!-- 出貨狀態 -->
+                      <!-- 🌟 出貨狀態短格 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="status-select-box"
+                          class="short-status-select"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
 
-                      <!-- 收款狀態 -->
+                      <!-- 🌟 收款狀態短格 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="status-select-box"
+                          class="short-status-select"
                         >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
                         </select>
                       </td>
 
-                      <!-- 按鈕：修改與刪除純圖示 -->
+                      <!-- 🌟 按鈕：修改按鈕全面採用 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -440,7 +441,7 @@
                           <div class="stacked-action-col">
                             <button 
                               class="cozy-btn icon-only-btn" 
-                              style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
+                              style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" 
                               @click="startEditOrder(ord)" 
                               title="修改此訂單"
                             >
@@ -575,7 +576,7 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：#FEF0EF -->
+                      <!-- 花卡未製作：短格 #FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -586,7 +587,7 @@
                         </span>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：#FEF0EF -->
+                      <!-- 簽收單未列印：短格 #FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -596,13 +597,13 @@
                         </span>
                       </td>
                       
-                      <!-- 收款狀態選單縮小寬度 -->
+                      <!-- 🌟 收款狀態短格 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.payment_status" 
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="compact-status-select"
+                          class="short-status-select"
                         >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
@@ -763,9 +764,10 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
+                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditInv(inv)" title="修改">✏️</button>
                           <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
                         </div>
                       </td>
@@ -844,10 +846,11 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
+                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditCust(c)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -921,9 +924,10 @@
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
+                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
                           <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️</button>
                         </div>
                       </td>
@@ -937,7 +941,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -1013,9 +1017,10 @@
                       <td>{{ ret.qty }}</td>
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
+                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditRet(ret)" title="修改">✏️</button>
                           <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️</button>
                         </div>
                       </td>
@@ -1099,17 +1104,19 @@
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
+                      <!-- 🌟 派送狀態短格 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="compact-status-select"
+                          class="short-status-select"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
+                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button 
@@ -1122,7 +1129,7 @@
                           </button>
                           <button 
                             class="cozy-btn icon-only-btn" 
-                            style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
+                            style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" 
                             @click="startEditOrder(ord)" 
                             title="編輯訂單"
                           >
@@ -1170,7 +1177,7 @@
             </div>
           </div>
 
-          <!-- 🌟 花卡雲端即時草稿庫（更淡、更淺優雅粉紫） -->
+          <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
@@ -1180,7 +1187,8 @@
               <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">
                 💾 存至雲端草稿 (全裝置同步)
               </button>
-              <button type="button" class="modern-new-card-btn" @click="startNewCard">
+              <!-- 🌟 開新花卡換成薄荷綠 -->
+              <button type="button" class="mint-new-card-btn" @click="startNewCard">
                 ＋ 開新花卡
               </button>
             </div>
@@ -1206,16 +1214,31 @@
             </div>
           </div>
 
+          <!-- 🌟 花卡字體與粗細整合成同一行 -->
           <div class="panel-section">
-            <label class="section-title">字體選擇：</label>
-            <div class="form-group">
-              <select v-model="cardFontFamily" class="full-input">
-                <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
-                <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
-                <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
-                <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
-                <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
-              </select>
+            <div class="inline-font-weight-row">
+              <div class="inline-item-flex">
+                <label class="mini-field-lbl">字體選擇：</label>
+                <select v-model="cardFontFamily" class="full-input compact-inline-select">
+                  <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
+                  <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
+                  <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
+                  <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
+                  <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
+                </select>
+              </div>
+              <div class="inline-item-fixed">
+                <label class="mini-field-lbl">中款預設粗細：</label>
+                <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
+                  <option value="400">400 (正常)</option>
+                  <option value="500">500 (微厚)</option>
+                  <option value="550">550 (中厚)</option>
+                  <option value="600">600 (半粗)</option>
+                  <option value="650">650 (厚粗)</option>
+                  <option value="700">700 (粗體)</option>
+                  <option value="800">800 (特粗)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -1244,10 +1267,13 @@
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
                 </div>
+                <!-- 🌟 粗細新增 550 與 650 -->
                 <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
                   <option value="400">400</option>
                   <option value="500">500</option>
+                  <option value="550">550</option>
                   <option value="600">600</option>
+                  <option value="650">650</option>
                   <option value="700">700</option>
                   <option value="800">800</option>
                 </select>
@@ -1269,7 +1295,7 @@
               </select>
             </div>
 
-            <!-- 🌟 稱謂設定（支援填入兩個不同 X 內容） -->
+            <!-- 稱謂設定 -->
             <div class="section-title-with-weight mt-2">
               <label class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</label>
               <div class="ctrl-row-right">
@@ -1277,10 +1303,13 @@
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
                 </div>
+                <!-- 🌟 粗細新增 550 與 650 -->
                 <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
                   <option value="400">400</option>
                   <option value="500">500</option>
+                  <option value="550">550</option>
                   <option value="600">600</option>
+                  <option value="650">650</option>
                   <option value="700">700</option>
                   <option value="800">800</option>
                 </select>
@@ -1299,7 +1328,7 @@
                 </select>
               </div>
 
-              <!-- 🌟 專屬雙 X 快速填寫格 -->
+              <!-- 專屬雙 X 快速填寫格 -->
               <div v-if="isDoubleXFormat" class="double-x-row mt-2">
                 <div class="x-input-group">
                   <span class="x-badge">前X</span>
@@ -1321,10 +1350,13 @@
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
                 </div>
+                <!-- 🌟 粗細新增 550 與 650 -->
                 <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
                   <option value="400">400</option>
                   <option value="500">500</option>
+                  <option value="550">550</option>
                   <option value="600">600</option>
+                  <option value="650">650</option>
                   <option value="700">700</option>
                   <option value="800">800</option>
                 </select>
@@ -1348,7 +1380,7 @@
             </div>
           </div>
 
-          <!-- 🌟 中款設定（支援下拉選單選取＋快速標籤） -->
+          <!-- 中款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <label class="section-title">中款第 1 行（主要題詞）：</label>
@@ -1357,17 +1389,20 @@
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
                 </div>
+                <!-- 🌟 粗細新增 550 與 650 -->
                 <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
                   <option value="400">400</option>
                   <option value="500">500</option>
+                  <option value="550">550</option>
                   <option value="600">600</option>
+                  <option value="650">650</option>
                   <option value="700">700</option>
                   <option value="800">800</option>
                 </select>
               </div>
             </div>
 
-            <!-- 🌟 主要題詞下拉選單 -->
+            <!-- 主要題詞下拉選單 -->
             <div class="form-group mb-2">
               <label class="sub-label-tip">▼ 點選往下拉快速挑選：</label>
               <select v-model="middleText" class="full-input bold-select-dropdown">
@@ -1436,10 +1471,13 @@
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
                 </div>
+                <!-- 🌟 粗細新增 550 與 650 -->
                 <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
                   <option value="400">400</option>
                   <option value="500">500</option>
+                  <option value="550">550</option>
                   <option value="600">600</option>
+                  <option value="650">650</option>
                   <option value="700">700</option>
                   <option value="800">800</option>
                 </select>
@@ -1457,10 +1495,13 @@
               <div class="compact-size-wrap">
                 <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" title="微調字級大小" />
               </div>
+              <!-- 🌟 粗細新增 550 與 650 -->
               <select v-model="weights['bottom_' + idx]" class="mini-weight-select" title="設定此格粗細">
                 <option value="400">400</option>
                 <option value="500">500</option>
+                <option value="550">550</option>
                 <option value="600">600</option>
+                <option value="650">650</option>
                 <option value="700">700</option>
                 <option value="800">800</option>
               </select>
@@ -1474,10 +1515,13 @@
                     <span class="compact-size-lbl">字級:</span>
                     <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
                   </div>
+                  <!-- 🌟 粗細新增 550 與 650 -->
                   <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
                     <option value="400">400</option>
                     <option value="500">500</option>
+                    <option value="550">550</option>
                     <option value="600">600</option>
+                    <option value="650">650</option>
                     <option value="700">700</option>
                     <option value="800">800</option>
                   </select>
@@ -3596,11 +3640,14 @@ const weights = ref({
   suffix: '700'
 })
 
+// 🌟 全面支援 550 與 650 筆畫厚度
 const getWeightStyle = (wVal) => {
   const w = String(wVal || '600')
   const styles = { fontWeight: w }
   if (w === '500') styles.textShadow = '0 0 0.4px #000'
+  else if (w === '550') styles.textShadow = '0 0 0.6px #000'
   else if (w === '600') styles.textShadow = '0 0 0.8px #000'
+  else if (w === '650') styles.textShadow = '0 0 1.0px #000, 0.2px 0.2px 0 #000'
   else if (w === '700') styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
   else if (w === '800') styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000'
   return styles
@@ -3651,7 +3698,6 @@ const celebPhrases = {
 }
 const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
 
-// 🌟 當前可用主要題詞下拉清單
 const availableMiddlePhrases = computed(() => {
   if (cardCategory.value === 'funeral') {
     return currentFuneralPhrases.value
@@ -3897,7 +3943,7 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 純 Canvas 輸出：根據當前紙張尺寸 (A4 / A5) 1:1 繪出，絕不切字
+// 🌟 純 Canvas 輸出：支援 550 與 650 筆畫厚度
 const generateFlawlessCoupletImage = () => {
   showToast('⏳ 正在生成無切字花卡高畫質圖片...')
 
@@ -3916,10 +3962,19 @@ const generateFlawlessCoupletImage = () => {
   const targetFontFamily = activeCssFontFamily.value
   ctx.fillStyle = '#0f172a'
 
+  const strokeWidthMap = {
+    '400': 0,
+    '500': 0.4,
+    '550': 0.6,
+    '600': 0.8,
+    '650': 1.1,
+    '700': 1.4,
+    '800': 2.2
+  }
+
   const renderItem = (text, item, wVal, isTarget = false) => {
     if (!text || !item) return
     const w = String(wVal || '600')
-    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
     const sWidth = strokeWidthMap[w] || 0.8
     ctx.textBaseline = 'top'
 
@@ -3992,7 +4047,6 @@ const generateFlawlessCoupletImage = () => {
   shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
 }
 
-// 支援直接傳送函式
 const shareCoupletDirect = () => {
   generateFlawlessCoupletImage()
 }
@@ -4131,6 +4185,15 @@ onMounted(() => {
 /* 通用卡片外觀與表單排版 */
 .card-box { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
 .card-box h3 { margin: 0; font-size: 16.5px; color: #1e293b; }
+
+/* 🌟 單號自動貼齊最右側 */
+.order-form-title-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+.right-aligned-badge {
+  margin-left: auto;
+}
+
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .field label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 input, select, textarea {
@@ -4203,17 +4266,17 @@ input, select, textarea {
 .data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13.5px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 狀態標籤與選單（格子適中不鬆散） */
-.nowrap-col { white-space: nowrap; min-width: 76px; }
+/* 🌟 狀態標籤與選單格子縮短（消除多餘寬度） */
+.nowrap-col { white-space: nowrap; width: 70px; }
 .nowrap-cell { white-space: nowrap !important; }
 .inline-badge {
   display: inline-block; white-space: nowrap; padding: 3px 6px; border-radius: 4px; font-size: 13px; font-weight: bold;
 }
-.status-select-box {
-  min-width: 76px; padding: 3px 6px; font-size: 13px; font-weight: bold; border-radius: 4px; cursor: pointer;
+.short-status-select {
+  width: 66px !important; min-width: 66px !important; padding: 3px 2px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
 }
-.compact-status-select {
-  width: 74px !important; min-width: 74px !important; padding: 3px 4px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
+.status-select-box {
+  width: 76px !important; min-width: 76px !important; padding: 3px 4px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
 }
 
 .spec-cell-wrap { max-width: 240px; line-height: 1.4; word-break: break-all; }
@@ -4232,7 +4295,7 @@ input, select, textarea {
   padding: 4px 8px !important; font-size: 14.5px !important; min-width: 32px;
 }
 
-.badge { padding: 3px 6px; border-radius: 4px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
+.badge { padding: 3px 5px; border-radius: 4px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
 .badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
 .badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
@@ -4295,7 +4358,7 @@ input, select, textarea {
   font-size: 13px; color: #cbd5e1; font-weight: bold; pointer-events: none; user-select: none;
 }
 
-/* 🌟 雙 X 稱謂填寫專用樣式 */
+/* 雙 X 稱謂填寫專用樣式 */
 .double-x-row {
   display: flex; align-items: center; gap: 8px; background: #eff6ff; padding: 8px 10px; border-radius: 6px; border: 1px dashed #93c5fd;
 }
@@ -4309,7 +4372,7 @@ input, select, textarea {
   font-weight: bold; color: #60a5fa;
 }
 
-/* 🌟 題詞下拉提示 */
+/* 題詞下拉提示 */
 .sub-label-tip {
   font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 3px;
 }
@@ -4351,7 +4414,7 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
 }
 
-/* 🌟 存至雲端草稿：更淡、更淺優雅粉紫 */
+/* 草稿與新花卡按鈕 */
 .draft-manage-panel {
   background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
 }
@@ -4366,14 +4429,16 @@ input, select, textarea {
 .ultra-light-purple-btn:hover {
   background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%); color: #31104b; transform: translateY(-1px);
 }
-.modern-new-card-btn {
-  flex: 0.9; background: #ffffff; color: #2563eb; border: 1.5px solid #93c5fd;
+/* 🌟 開新花卡按鈕：清爽薄荷綠 */
+.mint-new-card-btn {
+  flex: 0.9; background: #ecfdf5; color: #047857; border: 1.5px solid #a7f3d0;
   padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
   transition: all 0.15s ease-in-out;
 }
-.modern-new-card-btn:hover {
-  background: #eff6ff; border-color: #3b82f6;
+.mint-new-card-btn:hover {
+  background: #d1fae5; border-color: #6ee7b7;
 }
+
 .draft-selector-row {
   display: flex; gap: 6px; align-items: center;
 }
@@ -4382,6 +4447,23 @@ input, select, textarea {
 }
 .mini-del-draft-btn {
   background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13.5px;
+}
+
+/* 🌟 花卡字體與粗細整合成同一行 */
+.inline-font-weight-row {
+  display: flex; gap: 10px; align-items: flex-end; width: 100%;
+}
+.inline-item-flex {
+  flex: 1.6;
+}
+.inline-item-fixed {
+  flex: 1.1;
+}
+.mini-field-lbl {
+  display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px;
+}
+.compact-inline-select {
+  padding: 6px 8px !important; font-size: 13px !important;
 }
 
 /* 字級輸入框精巧化 */
