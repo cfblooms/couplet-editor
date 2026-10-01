@@ -30,6 +30,16 @@
 
     <!-- ================= 系統主畫面 ================= -->
     <template v-else>
+      <!-- 動態列印方向設定（直式 portrait / 橫式 landscape） -->
+      <component :is="'style'">
+        @media print {
+          @page {
+            size: {{ (currentTab === 'couplet' && !isVertical) ? 'A4 landscape' : (currentTab === 'receipt' || currentTab === 'farmer_receipt' ? 'A5 landscape' : 'A4 portrait') }} !important;
+            margin: 0 !important;
+          }
+        }
+      </component>
+
       <!-- 頂端主導覽列 -->
       <header class="no-print top-nav">
         <div class="nav-title">🌸 宸豐蘭藝</div>
@@ -358,11 +368,11 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：行內樣式直寫 #E3D0CC -->
+                      <!-- 花卡未製作：行內樣式寫死 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
                           class="status-select-box"
@@ -373,11 +383,11 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：行內樣式直寫 #E3D0CC -->
+                      <!-- 簽收單未列印：行內樣式寫死 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
                           class="status-select-box"
@@ -413,7 +423,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單 #F8E8D1、農民收據 #D7CDD5 行內樣式強制生效 -->
+                      <!-- 簽收單 #F8E8D1、農民收據 #D7CDD5 行內樣式完全強制生效 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -557,7 +567,7 @@
                       
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
@@ -566,7 +576,7 @@
                       </td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
@@ -1047,7 +1057,7 @@
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
@@ -1056,7 +1066,7 @@
                       </td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
@@ -1142,7 +1152,7 @@
                   @click="deleteCloudDraft(selectedDraftId)"
                   title="從雲端刪除此草稿"
                 >
-                  🗑️️
+                  🗑️
                 </button>
               </div>
             </div>
@@ -1596,7 +1606,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -3097,7 +3107,7 @@ const shareFarmerReceiptToLineDirect = () => {
 
   ctx.font = `15px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.day} 日`, 760, 80)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
   ctx.strokeStyle = '#0f172a'
@@ -3463,7 +3473,7 @@ const saveReturn = async () => {
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  const { error } = await supabase.from(table).delete().eq('id', id)
+  const { error } = await supabase.from('table').delete().eq('id', id)
   if (!error) reloadFn()
 }
 
@@ -5029,19 +5039,12 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* 全域精準列印樣式 */
+/* 全域精準列印樣式（完全動態自適應直向與橫向） */
 @media print {
-  @page { 
-    size: A4 portrait; 
-    margin: 0 !important;
-  }
-  
   html, body, .main-wrapper, .couplet-screen-wrapper { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    width: 210mm !important; 
-    height: 297mm !important; 
     overflow: visible !important; 
     display: block !important; 
   }
@@ -5054,13 +5057,9 @@ input, select, textarea {
     background: white !important; 
     overflow: visible !important; 
     display: block !important; 
-    width: 210mm !important; 
-    height: 297mm !important; 
   }
   
   .card-scaler-container { 
-    width: 210mm !important; 
-    height: 297mm !important; 
     position: static !important; 
     margin: 0 !important; 
     padding: 0 !important; 
@@ -5092,6 +5091,8 @@ input, select, textarea {
     margin: 0 !important; 
     display: block !important; 
     visibility: visible !important; 
+    page-break-inside: avoid !important; 
+    page-break-after: avoid !important; 
   }
 
   #card-print-target * { 
