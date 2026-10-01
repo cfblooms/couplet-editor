@@ -204,7 +204,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️️ 刪除此組
+                      🗑️ 刪除此組
                     </button>
                   </div>
                   <div class="item-grid">
@@ -356,7 +356,7 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
-                      <!-- 金額字體加粗 -->
+                      <!-- 金額加粗 -->
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
                       <!-- 🌟 花卡未製作：#FEF0EF -->
@@ -558,6 +558,7 @@
                       <th>金額</th>
                       <th class="nowrap-col">花卡狀態</th>
                       <th class="nowrap-col">簽收單狀態</th>
+                      <!-- 乾淨表頭 -->
                       <th class="nowrap-col">收款狀態</th>
                       <th>操作</th>
                     </tr>
@@ -573,6 +574,7 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
+                      <!-- 🌟 花卡未製作：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -583,6 +585,7 @@
                         </span>
                       </td>
 
+                      <!-- 🌟 簽收單未列印：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -701,7 +704,6 @@
                       <option value="桌上盆 (100)">桌上盆 (成本100)</option>
                       <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
                       <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                      <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
                       <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
                       <option value="快捷盆 (70)">快捷盆 (成本70)</option>
                     </select>
@@ -762,7 +764,7 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -781,7 +783,7 @@
             </div>
 
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
+              <h3>{{ editingCustId ? '✏️️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>客戶 / 店鋪名稱</label>
@@ -920,7 +922,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -1120,7 +1122,7 @@
                             @click="startEditOrder(ord)" 
                             title="編輯訂單"
                           >
-                            ✏️️ 修改
+                            ✏️ 修改
                           </button>
                         </div>
                       </td>
@@ -1794,7 +1796,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
+            <label class="section-title">✏️️ 收據內容確認與自由修改：</label>
             <div class="form-row">
               <div class="field">
                 <label>民國年</label>
@@ -1869,7 +1871,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️️ 列印農民收據
+            🖨️ 列印農民收據
           </button>
         </div>
 
@@ -2005,12 +2007,7 @@
   </div>
 </template>
 
-<script setup>
-// 完全保持上面完整 script 程式碼
-</script>
-
 <style scoped>
-/* 全域版面與背景 */
 .main-wrapper {
   display: flex;
   flex-direction: column;
