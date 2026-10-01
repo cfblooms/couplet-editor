@@ -128,9 +128,9 @@
               </div>
               
               <div class="form-grid">
-                <!-- 🌟 下單日期嚴格保證絕對同一行 -->
+                <!-- 🌟 乾淨單行：已移除「（單號會依此日期編號）」 -->
                 <div class="field highlight-date-field single-line-date-row">
-                  <span class="single-line-label">📅 下單日期（單號會依此日期編號）：</span>
+                  <span class="single-line-label">📅 下單日期：</span>
                   <input v-model="formOrder.order_date" type="date" class="bold-date-input single-line-date-control" />
                 </div>
                 <div class="field">
@@ -217,7 +217,7 @@
                       <input 
                         v-model="item.orchid_name" 
                         list="inv-flower-select-options" 
-                        @change="onFlowerSelectChange(item)"
+                        @change="onFlowerSelectChange(item)" 
                         placeholder="手動輸入或選取庫存" 
                       />
                     </div>
@@ -362,11 +362,11 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：短格 #F8EDEB -->
+                      <!-- 🌟 花卡未製作：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
                           class="short-status-select"
@@ -377,11 +377,11 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：短格 #F8EDEB -->
+                      <!-- 🌟 簽收單未列印：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
                           class="short-status-select"
@@ -417,7 +417,7 @@
                         </select>
                       </td>
 
-                      <!-- 按鈕：修改 #E0FBFC，刪除統一為 🗑️ -->
+                      <!-- 操作按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -508,7 +508,6 @@
                 </div>
               </div>
 
-              <!-- 統計資訊三大指標卡片：總金額、總盆數、總訂單數 -->
               <div class="statement-summary-cards mt-3">
                 <div class="sum-card red-card">
                   <div class="sum-label">💰 對帳總金額</div>
@@ -551,18 +550,7 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號</th>
-                      <th>下單日</th>
-                      <th>客戶名稱</th>
-                      <th>統編</th>
-                      <th>開收據</th>
-                      <th>總盆數</th>
-                      <th>規格明細</th>
-                      <th>金額</th>
-                      <th class="nowrap-col">花卡狀態</th>
-                      <th class="nowrap-col">簽收單狀態</th>
-                      <th class="nowrap-col">收款狀態</th>
-                      <th>操作</th>
+                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>金額</th><th>花卡狀態</th><th>簽收單狀態</th><th>收款狀態</th><th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -575,29 +563,23 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
-                      
-                      <!-- 花卡未製作：短格 #F8EDEB -->
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
                           {{ ord.card_status || '未製作' }}
                         </span>
                       </td>
-
-                      <!-- 簽收單未列印：短格 #F8EDEB -->
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
-                      
-                      <!-- 收款狀態短格 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.payment_status" 
@@ -609,25 +591,10 @@
                           <option value="已結">已結</option>
                         </select>
                       </td>
-
                       <td>
                         <div class="stacked-action-col">
-                          <button 
-                            class="cozy-btn" 
-                            style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
-                            @click="fillReceiptFromOrder(ord)" 
-                            title="帶入簽收單"
-                          >
-                            🖨️ 簽收單
-                          </button>
-                          <button 
-                            class="cozy-btn" 
-                            style="background-color: #DEE2FF !important; color: #28305c !important; border: 1px solid #c2c9fa !important;" 
-                            @click="fillFarmerReceiptFromOrder(ord)" 
-                            title="帶入農民收據"
-                          >
-                            🧾 農民收據
-                          </button>
+                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn" style="background-color: #DEE2FF !important; color: #28305c !important;" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                         </div>
                       </td>
                     </tr>
@@ -639,114 +606,9 @@
 
           <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
-            <div v-if="editingInvId" class="edit-banner">
-              <span>✏️ 目前正在編輯進貨紀錄：<b>{{ editingInvId }}</b></span>
-              <button class="cancel-edit-btn" @click="cancelEditInv">✕ 取消修改</button>
-            </div>
-
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label>進貨類別</label>
-                  <select v-model="formInv.category">
-                    <option value="蘭花">蘭花</option>
-                    <option value="陶瓷盆">陶瓷盆</option>
-                  </select>
-                </div>
-
-                <template v-if="formInv.category === '蘭花'">
-                  <div class="field">
-                    <label>蘭花品種名稱</label>
-                    <input v-model="formInv.item_name" list="orchid-options" placeholder="選擇或自行輸入" />
-                    <datalist id="orchid-options">
-                      <option v-for="o in orchids" :key="o.id" :value="o.name" />
-                    </datalist>
-                  </div>
-                  <div class="field">
-                    <label>梗數規格</label>
-                    <select v-model="formInv.spec_spike">
-                      <option value="單梗">單梗</option>
-                      <option value="雙梗">雙梗</option>
-                      <option value="多梗">多梗</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label>花色</label>
-                    <select v-model="formInv.spec_color">
-                      <option value="紅">紅</option>
-                      <option value="白">白</option>
-                      <option value="粉">粉</option>
-                      <option value="黃">黃</option>
-                      <option value="其他">其他</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label>花朵大小</label>
-                    <select v-model="formInv.spec_size">
-                      <option value="大">大</option>
-                      <option value="中">中</option>
-                      <option value="小">小</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label>株高規格</label>
-                    <select v-model="formInv.spec_height">
-                      <option value="高">高</option>
-                      <option value="中">中</option>
-                      <option value="矮">矮</option>
-                    </select>
-                  </div>
-                </template>
-
-                <template v-else>
-                  <div class="field">
-                    <label>盆器類型</label>
-                    <select v-model="formInv.pot_type" @change="onPotTypeChange">
-                      <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                      <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                      <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                      <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                      <option value="快捷盆 (70)">快捷盆 (成本70)</option>
-                    </select>
-                  </div>
-                </template>
-
-                <div class="field">
-                  <label>{{ formInv.category === '陶瓷盆' ? '進貨數量' : '進貨株數 (棵)' }}</label>
-                  <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
-                </div>
-                <div class="field">
-                  <label>{{ formInv.category === '陶瓷盆' ? '單個價格 (元)' : '單株價格 (元)' }}</label>
-                  <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
-                </div>
-                <div class="field">
-                  <label>總成本 (元)</label>
-                  <input v-model.number="formInv.cost" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>供應商 / 花農</label>
-                  <input v-model="formInv.supplier" type="text" placeholder="某某花農" />
-                </div>
-                <div class="field">
-                  <label>進貨日期</label>
-                  <input v-model="formInv.date" type="date" />
-                </div>
-              </div>
-
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveInventory">
-                  {{ editingInvId ? '確認更新進貨' : '確認新增進貨' }}
-                </button>
-                <button v-if="editingInvId" class="secondary-btn" @click="cancelEditInv">
-                  取消
-                </button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
-              <h3>📦 現有進貨清單 ({{ inventoryList.length }} 筆)</h3>
-              <div class="table-responsive">
+              <h3>📦 進貨與庫存清單 ({{ inventoryList.length }} 筆)</h3>
+              <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
                     <tr>
@@ -764,11 +626,10 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
-                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditInv(inv)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditInv(inv)">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -780,63 +641,12 @@
 
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
-            <div v-if="editingCustId" class="edit-banner">
-              <span>✏️️ 目前正在編輯客戶：<b>{{ editingCustId }}</b></span>
-              <button class="cancel-edit-btn" @click="cancelEditCust">✕ 取消修改</button>
-            </div>
-
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 新增客戶 / 花店資料' }}</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label>客戶 / 店鋪名稱</label>
-                  <input v-model="formCust.name" type="text" placeholder="例: 大吉花店、宏達批發" />
-                </div>
-                <div class="field">
-                  <label>客戶類別</label>
-                  <select v-model="formCust.type">
-                    <option value="批發商">批發商</option>
-                    <option value="零售">零售</option>
-                    <option value="花店">花店</option>
-                    <option value="個人">個人</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>預設結帳週期</label>
-                  <select v-model="formCust.billing_cycle">
-                    <option value="每單結">每單結 (現結)</option>
-                    <option value="週結">週結</option>
-                    <option value="月結">月結</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>聯絡電話</label>
-                  <input v-model="formCust.phone" type="text" placeholder="0912-345678" />
-                </div>
-                <div class="field">
-                  <label>常用送達地址 / 備註</label>
-                  <input v-model="formCust.line_note" type="text" placeholder="常用送達地址" />
-                </div>
-              </div>
-
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveCustomer">
-                  {{ editingCustId ? '確認更新客戶' : '儲存客戶資料' }}
-                </button>
-                <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">
-                  取消
-                </button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
-              <h3>📋 現有客戶清單 ({{ customers.length }} 位)</h3>
-              <div class="table-responsive">
+              <h3>👥 客戶名冊資料庫 ({{ customers.length }} 位)</h3>
+              <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
-                    <tr>
-                      <th>客戶編號</th><th>名稱</th><th>類別</th><th>結帳週期</th><th>電話</th><th>地址 / 備註</th><th>操作</th>
-                    </tr>
+                    <tr><th>編號</th><th>名稱</th><th>類別</th><th>週期</th><th>電話</th><th>地址/備註</th><th>操作</th></tr>
                   </thead>
                   <tbody>
                     <tr v-for="c in customers" :key="c.id">
@@ -846,11 +656,10 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
-                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditCust(c)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditCust(c)">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -862,73 +671,24 @@
 
           <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
-            <div v-if="editingOrchidId" class="edit-banner">
-              <span>✏️ 目前正在編輯品種：<b>{{ editingOrchidId }}</b></span>
-              <button class="cancel-edit-btn" @click="cancelEditOrchid">✕ 取消修改</button>
-            </div>
-
             <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 新增蘭花品種資料' }}</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label>品種名稱</label>
-                  <input v-model="formOrchid.name" type="text" placeholder="輸入品種名稱" />
-                </div>
-                <div class="field">
-                  <label>特色說明</label>
-                  <input v-model="formOrchid.note" type="text" placeholder="花型大小、花期、養護備註" />
-                </div>
-                <div class="field">
-                  <label>品種照片</label>
-                  <input type="file" accept="image/*" @change="onPhotoFileChange" />
-                </div>
-              </div>
-
-              <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
-                <div class="preview-label">照片預覽：</div>
-                <img :src="formOrchid.photo_url" class="preview-thumb" alt="品種照片預覽" />
-                <button type="button" class="remove-photo-btn" @click="formOrchid.photo_url = ''">✕ 移除照片</button>
-              </div>
-
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveOrchid">
-                  {{ editingOrchidId ? '確認更新品種' : '儲存至品種庫' }}
-                </button>
-                <button v-if="editingOrchidId" class="secondary-btn" @click="cancelEditOrchid">
-                  取消
-                </button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
-              <h3>📋 現有品種清單 ({{ orchids.length }} 筆)</h3>
-              <div class="table-responsive">
+              <h3>🌸 蘭花品種清單 ({{ orchids.length }} 筆)</h3>
+              <div class="table-responsive mt-2">
                 <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>品種編號</th><th>花照</th><th>品種名稱</th><th>特色說明</th><th>操作</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>編號</th><th>花照</th><th>名稱</th><th>特色說明</th><th>操作</th></tr></thead>
                   <tbody>
                     <tr v-for="item in orchids" :key="item.id">
                       <td><b>{{ item.id }}</b></td>
                       <td class="photo-col">
-                        <img 
-                          v-if="item.photo_url" 
-                          :src="item.photo_url" 
-                          class="table-orchid-img" 
-                          @click="openLargePhoto(item.photo_url, item.name)"
-                          title="點擊查看大圖" 
-                        />
+                        <img v-if="item.photo_url" :src="item.photo_url" class="table-orchid-img" @click="openLargePhoto(item.photo_url, item.name)" />
                         <span v-else class="no-photo-badge">無照片</span>
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
-                      <!-- 修改按鈕換色為 #E0FBFC -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)">✏️️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -940,87 +700,18 @@
 
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
-            <div v-if="editingRetId" class="edit-banner">
-              <span>✏ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
-              <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
-            </div>
-
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
-              <div class="form-grid">
-                <div class="field">
-                  <label>退貨類型</label>
-                  <select v-model="formRet.return_type">
-                    <option value="退給花農">1. 我們向花農退貨</option>
-                    <option value="批發商向我們退貨">2. 批發商向我們退貨</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>對象名稱</label>
-                  <input v-model="formRet.party_name" list="cust-options" placeholder="選擇或手動輸入" />
-                </div>
-                <div class="field">
-                  <label>關聯品項</label>
-                  <select v-model="formRet.target_item">
-                    <option v-for="inv in inventoryList" :key="inv.id" :value="inv.id + ' - ' + inv.item_name">
-                      {{ inv.id }} - {{ inv.item_name }} ({{ inv.spec }})
-                    </option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>不良株數 (棵)</label>
-                  <input v-model.number="formRet.qty" type="number" min="1" @input="calcRetTotal" />
-                </div>
-                <div class="field">
-                  <label>每棵單價 (元)</label>
-                  <input v-model.number="formRet.unit_price" type="number" min="0" @input="calcRetTotal" />
-                </div>
-                <div class="field">
-                  <label>總損益金額 (元)</label>
-                  <input v-model.number="formRet.total_amount" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>處理日期</label>
-                  <input v-model="formRet.date" type="date" />
-                </div>
-                <div class="field">
-                  <label>退貨原因</label>
-                  <input v-model="formRet.reason" type="text" placeholder="運送碰撞 / 開花不良" />
-                </div>
-              </div>
-
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveReturn">
-                  {{ editingRetId ? '確認更新退貨' : '確認送出退貨紀錄' }}
-                </button>
-                <button v-if="editingRetId" class="secondary-btn" @click="cancelEditRet">
-                  取消
-                </button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
-              <h3>📋 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
-              <div class="table-responsive">
+              <h3>🔄 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
+              <div class="table-responsive mt-2">
                 <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>退貨單號</th><th>類型</th><th>對象</th><th>品項</th><th>株數</th><th>總額</th><th>原因</th><th>操作</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>退貨單號</th><th>類型</th><th>對象</th><th>品項</th><th>株數</th><th>總額</th><th>原因</th><th>操作</th></tr></thead>
                   <tbody>
                     <tr v-for="ret in returnList" :key="ret.id">
-                      <td><b>{{ ret.id }}</b></td>
-                      <td>{{ ret.return_type }}</td>
-                      <td><b>{{ ret.party_name }}</b></td>
-                      <td>{{ ret.target_item }}</td>
-                      <td>{{ ret.qty }}</td>
-                      <td class="text-red"><b>${{ ret.total_amount }}</b></td>
-                      <td>{{ ret.reason }}</td>
+                      <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditRet(ret)" title="修改">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditRet(ret)">✏️</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -1036,46 +727,16 @@
               <div class="shipping-tab-header">
                 <h3>🚚 訂單出貨與派送進度總覽</h3>
                 <div class="modern-pill-tabs">
-                  <button 
-                    :class="{ active: shippingViewFilter === 'unshipped' }" 
-                    @click="shippingViewFilter = 'unshipped'"
-                    class="pill-tab-item"
-                  >
-                    📦 待出貨 / 配送中 ({{ unshippedOrders.length }})
-                  </button>
-                  <button 
-                    :class="{ active: shippingViewFilter === 'shipped' }" 
-                    @click="shippingViewFilter = 'shipped'"
-                    class="pill-tab-item"
-                  >
-                    ✅ 已出貨歷史 ({{ shippedOrders.length }})
-                  </button>
-                  <button 
-                    :class="{ active: shippingViewFilter === 'all' }" 
-                    @click="shippingViewFilter = 'all'"
-                    class="pill-tab-item"
-                  >
-                    全部 ({{ orderList.length }})
-                  </button>
+                  <button :class="{ active: shippingViewFilter === 'unshipped' }" @click="shippingViewFilter = 'unshipped'" class="pill-tab-item">📦 待出貨 / 配送中 ({{ unshippedOrders.length }})</button>
+                  <button :class="{ active: shippingViewFilter === 'shipped' }" @click="shippingViewFilter = 'shipped'" class="pill-tab-item">✅ 已出貨歷史 ({{ shippedOrders.length }})</button>
+                  <button :class="{ active: shippingViewFilter === 'all' }" @click="shippingViewFilter = 'all'" class="pill-tab-item">全部 ({{ orderList.length }})</button>
                 </div>
               </div>
 
               <div class="table-responsive mt-3">
                 <table class="data-table">
                   <thead>
-                    <tr>
-                      <th>單號</th>
-                      <th>預計送達日</th>
-                      <th>客戶名稱</th>
-                      <th>電話</th>
-                      <th>送達地址 / 備註</th>
-                      <th>總盆數</th>
-                      <th>花禮規格</th>
-                      <th class="nowrap-col">花卡</th>
-                      <th class="nowrap-col">簽收單</th>
-                      <th class="nowrap-col">派送狀態</th>
-                      <th>操作</th>
-                    </tr>
+                    <tr><th>單號</th><th>預計送達日</th><th>客戶名稱</th><th>電話</th><th>送達地址/備註</th><th>總盆數</th><th>規格</th><th>花卡</th><th>簽收單</th><th>派送狀態</th><th>操作</th></tr>
                   </thead>
                   <tbody>
                     <tr v-for="ord in displayedShippingOrders" :key="ord.id">
@@ -1087,57 +748,21 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
-                        <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
-                          :class="getCardStatusClass(ord.card_status)" 
-                          class="inline-badge"
-                        >
-                          {{ ord.card_status || '未製作' }}
-                        </span>
+                        <span :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="getCardStatusClass(ord.card_status)" class="inline-badge">{{ ord.card_status || '未製作' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F8EDEB !important', color: '#682e2b !important', border: '1px solid #ebd4cf !important' } : {}"
-                          :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
-                        >
-                          {{ ord.receipt_status || '未列印' }}
-                        </span>
+                        <span :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'">{{ ord.receipt_status || '未列印' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <select 
-                          v-model="ord.shipped_status" 
-                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
-                          @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="short-status-select"
-                        >
-                          <option value="未出貨">未出貨</option>
-                          <option value="已出貨">已出貨</option>
+                        <select v-model="ord.shipped_status" :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)" class="short-status-select">
+                          <option value="未出貨">未出貨</option><option value="已出貨">已出貨</option>
                         </select>
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button 
-                            class="cozy-btn" 
-                            style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
-                            @click="fillReceiptFromOrder(ord)" 
-                            title="開啟簽收單"
-                          >
-                            🖨️️ 簽收單
-                          </button>
-                          <button 
-                            class="cozy-btn icon-only-btn" 
-                            style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" 
-                            @click="startEditOrder(ord)" 
-                            title="編輯訂單"
-                          >
-                            ✏️
-                          </button>
+                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
-                      </td>
-                    </tr>
-                    <tr v-if="displayedShippingOrders.length === 0">
-                      <td colspan="11" class="text-center py-4 text-gray">
-                        {{ shippingViewFilter === 'unshipped' ? '🎉 目前沒有待出貨的訂單，全部已順利送達！' : '尚無資料' }}
                       </td>
                     </tr>
                   </tbody>
@@ -1148,7 +773,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (純白底無框) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5 自動自適應印表機) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1157,60 +782,34 @@
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
-              <button 
-                type="button" 
-                :class="{ active: cardPaperSize === 'A4' }" 
-                @click="switchPaperSize('A4')"
-              >
-                A4 (大尺寸)
-              </button>
-              <button 
-                type="button" 
-                :class="{ active: cardPaperSize === 'A5' }" 
-                @click="switchPaperSize('A5')"
-              >
-                A5 (小尺寸花卡)
-              </button>
+              <button type="button" :class="{ active: cardPaperSize === 'A4' }" @click="switchPaperSize('A4')">A4 (大尺寸)</button>
+              <button type="button" :class="{ active: cardPaperSize === 'A5' }" @click="switchPaperSize('A5')">A5 (小尺寸花卡)</button>
             </div>
           </div>
 
-          <!-- 花卡雲端即時草稿庫 -->
+          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
-              <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
+              <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
+              <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">
-                💾 存至雲端草稿 (全裝置同步)
-              </button>
-              <button type="button" class="mint-new-card-btn" @click="startNewCard">
-                ＋ 開新花卡
-              </button>
+              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">💾 存至雲端草稿 (全裝置同步)</button>
+              <button type="button" class="mint-new-card-btn" @click="startNewCard">＋ 開新花卡</button>
             </div>
             <div class="mt-2">
               <label class="sub-lbl">跨電腦/手機讀取暫存草稿 ({{ cloudDrafts.length }} 張)：</label>
               <div class="draft-selector-row">
                 <select v-model="selectedDraftId" @change="loadCloudDraft(selectedDraftId)" class="full-input bold-select">
                   <option value="">-- 請選擇要調出的雲端草稿 --</option>
-                  <option v-for="d in cloudDrafts" :key="d.id" :value="d.id">
-                    {{ d.title }}
-                  </option>
+                  <option v-for="d in cloudDrafts" :key="d.id" :value="d.id">{{ d.title }}</option>
                 </select>
-                <button 
-                  v-if="selectedDraftId" 
-                  type="button" 
-                  class="mini-del-draft-btn" 
-                  @click="deleteCloudDraft(selectedDraftId)"
-                  title="從雲端刪除此草稿"
-                >
-                  🗑️
-                </button>
+                <button v-if="selectedDraftId" type="button" class="mini-del-draft-btn" @click="deleteCloudDraft(selectedDraftId)">🗑️</button>
               </div>
             </div>
           </div>
 
-          <!-- 花卡字體與粗細同一行 -->
+          <!-- 字體與粗細同一行 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
@@ -1226,13 +825,8 @@
               <div class="inline-item-fixed">
                 <label class="mini-field-lbl">中款預設粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400 (正常)</option>
-                  <option value="500">500 (微厚)</option>
-                  <option value="550">550 (中厚)</option>
-                  <option value="600">600 (半粗)</option>
-                  <option value="650">650 (厚粗)</option>
-                  <option value="700">700 (粗體)</option>
-                  <option value="800">800 (特粗)</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
+                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -1254,160 +848,104 @@
             </select>
           </div>
 
-          <!-- 上款設定：標題行與字級粗細並排，輸入框放下一行 -->
+          <!-- 上款設定：標題列靠右排列字級與粗細，輸入框放下一行 -->
           <div class="panel-section">
-            <!-- 🌟 1. 開頭敬詞 -->
+            <!-- 1. 開頭敬詞 -->
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞（獨立一格）：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
                 </div>
-                <select v-model="weights.upper_prefix" class="mini-weight-select" title="設定開頭敬詞粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.upper_prefix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
             <div class="form-row mt-1">
               <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
               <select v-if="cardCategory === 'funeral'" v-model="upperPrefix" style="width: 110px;">
-                <option value="敬悼">敬悼</option>
-                <option value="痛悼">痛悼</option>
-                <option value="敬唁">敬唁</option>
-                <option value="追悼">追悼</option>
+                <option value="敬悼">敬悼</option><option value="痛悼">痛悼</option><option value="敬唁">敬唁</option><option value="追悼">追悼</option>
               </select>
               <select v-else v-model="upperPrefix" style="width: 110px;">
-                <option value="祝">祝</option>
-                <option value="恭祝">恭祝</option>
-                <option value="恭賀">恭賀</option>
-                <option value="敬賀">敬賀</option>
+                <option value="祝">祝</option><option value="恭祝">恭祝</option><option value="恭賀">恭賀</option><option value="敬賀">敬賀</option>
               </select>
             </div>
 
-            <!-- 🌟 2. 受禮對象 / 稱謂 -->
+            <!-- 2. 受禮對象 / 稱謂 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
                 </div>
-                <select v-model="weights.upper_target" class="mini-weight-select" title="設定稱謂粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.upper_target" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
             <template v-if="cardCategory === 'funeral'">
               <div class="form-row mt-1">
                 <select v-model="funeralUpperFormat" @change="onFuneralFormatChange">
-                  <option value="X媽X老夫人">X媽X老夫人 (填兩字/姓)</option>
-                  <option value="X媽X夫人">X媽X夫人 (填兩字/姓)</option>
-                  <option value="X公X老先生">X公X老先生 (填兩字/名)</option>
-                  <option value="X公X先生">X公X先生 (填兩字/名)</option>
-                  <option value="X女士">X女士</option>
-                  <option value="X先生">X先生</option>
-                  <option value="custom">自訂直接輸入</option>
+                  <option value="X媽X老夫人">X媽X老夫人 (填兩字/姓)</option><option value="X媽X夫人">X媽X夫人 (填兩字/姓)</option>
+                  <option value="X公X老先生">X公X老先生 (填兩字/名)</option><option value="X公X先生">X公X先生 (填兩字/名)</option>
+                  <option value="X女士">X女士</option><option value="X先生">X先生</option><option value="custom">自訂直接輸入</option>
                 </select>
               </div>
-
-              <!-- 雙 X 快速填寫格 -->
               <div v-if="isDoubleXFormat" class="double-x-row mt-1">
-                <div class="x-input-group">
-                  <span class="x-badge">前X</span>
-                  <input type="text" v-model="targetX1" placeholder="本姓/夫姓" @input="combineTargetX" />
-                </div>
+                <div class="x-input-group"><span class="x-badge">前X</span><input type="text" v-model="targetX1" placeholder="本姓/夫姓" @input="combineTargetX" /></div>
                 <span class="x-connector">＋</span>
-                <div class="x-input-group">
-                  <span class="x-badge">後X</span>
-                  <input type="text" v-model="targetX2" placeholder="本姓/名字" @input="combineTargetX" />
-                </div>
+                <div class="x-input-group"><span class="x-badge">後X</span><input type="text" v-model="targetX2" placeholder="本姓/名字" @input="combineTargetX" /></div>
               </div>
             </template>
             <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂 (可直接修改結果)" />
 
-            <!-- 🌟 3. 上款結尾詞 -->
+            <!-- 3. 上款結尾詞 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞（選填）：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
                 </div>
-                <select v-model="weights.upper_suffix" class="mini-weight-select" title="設定結尾詞粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.upper_suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
             <div class="form-row mt-1">
               <input type="text" v-model="upperSuffix" class="full-input" placeholder="留空則不顯示" />
               <select v-if="cardCategory === 'funeral'" v-model="upperSuffix" style="width: 110px;">
-                <option value="千古">千古</option>
-                <option value="仙逝">仙逝</option>
-                <option value="靈前">靈前</option>
-                <option value="冥前">冥前</option>
-                <option value="">(留空)</option>
+                <option value="千古">千古</option><option value="仙逝">仙逝</option><option value="靈前">靈前</option><option value="冥前">冥前</option><option value="">(留空)</option>
               </select>
               <select v-else v-model="upperSuffix" style="width: 110px;">
-                <option value="誌慶">誌慶</option>
-                <option value="大吉">大吉</option>
-                <option value="惠存">惠存</option>
-                <option value="">(留空)</option>
+                <option value="誌慶">誌慶</option><option value="大吉">大吉</option><option value="惠存">惠存</option><option value="">(留空)</option>
               </select>
             </div>
           </div>
 
-          <!-- 中款設定：標題行與字級粗細並排，輸入框放下一行 -->
+          <!-- 中款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">中款第 1 行（主要題詞）：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
                 </div>
-                <select v-model="weights.middle" class="mini-weight-select" title="設定中款第1行粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.middle" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
 
-            <!-- 主要題詞下拉選單 -->
             <div class="form-group mt-1 mb-2">
               <label class="sub-label-tip">▼ 點選往下拉快速挑選：</label>
               <select v-model="middleText" class="full-input bold-select-dropdown">
                 <option value="">-- 請下拉選擇主要題詞 --</option>
-                <option 
-                  v-for="phrase in availableMiddlePhrases" 
-                  :key="phrase" 
-                  :value="phrase"
-                >
-                  {{ phrase }}
-                </option>
+                <option v-for="phrase in availableMiddlePhrases" :key="phrase" :value="phrase">{{ phrase }}</option>
               </select>
             </div>
 
@@ -1416,123 +954,70 @@
                 <label><input type="radio" value="female" v-model="gender" /> 女性</label>
                 <label><input type="radio" value="male" v-model="gender" /> 男性</label>
               </div>
-              <select v-model="ageStage" class="full-input mb-1">
-                <template v-if="gender === 'female'">
-                  <option value="f_under49">49歲以下（稱女士）</option>
-                  <option value="f_50_79">50至79歲（稱夫人／女士）</option>
-                  <option value="f_over80">80歲以上（稱老夫人）</option>
-                </template>
-                <template v-else>
-                  <option value="m_under49">49歲以下（稱先生）</option>
-                  <option value="m_50_69">50至69歲（稱先生）</option>
-                  <option value="m_70_79">70至79歲（稱老先生）</option>
-                  <option value="m_over80">80歲以上（稱老先生）</option>
-                </template>
-              </select>
               <div class="tags-container mb-2">
-                <button 
-                  type="button" 
-                  v-for="phrase in currentFuneralPhrases" 
-                  :key="phrase" 
-                  class="tag-btn"
-                  @click="middleText = phrase"
-                >
-                  {{ phrase }}
-                </button>
+                <button type="button" v-for="phrase in currentFuneralPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
               </div>
             </template>
-
             <template v-else>
               <div class="tags-container mb-2">
-                <button 
-                  type="button" 
-                  v-for="phrase in currentCelebPhrases" 
-                  :key="phrase" 
-                  class="tag-btn"
-                  @click="middleText = phrase"
-                >
-                  {{ phrase }}
-                </button>
+                <button type="button" v-for="phrase in currentCelebPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
               </div>
             </template>
 
-            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款第 1 行詞語 (可自由手寫修改)" />
+            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款第 1 行詞語" />
 
-            <!-- 🌟 中款第 2 行 -->
+            <!-- 中款第 2 行 -->
             <div class="section-title-with-weight mt-3">
-              <span class="section-title">中款第 2 行（選填，兩行時使用）：</span>
+              <span class="section-title">中款第 2 行（選填）：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
                 </div>
-                <select v-model="weights.middle_2" class="mini-weight-select" title="設定中款第2行粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.middle_2" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
             <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
-          <!-- 下款 6 格獨立粗細與字級設定 -->
+          <!-- 下款設定 -->
           <div class="panel-section">
-            <label class="section-title">下款設定（每個格子可個別選擇粗細與數字字級）：</label>
+            <label class="section-title">下款設定：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
               <div class="compact-size-wrap">
-                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" title="微調字級大小" />
+                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
               </div>
-              <select v-model="weights['bottom_' + idx]" class="mini-weight-select" title="設定此格粗細">
-                <option value="400">400</option>
-                <option value="500">500</option>
-                <option value="550">550</option>
-                <option value="600">600</option>
-                <option value="650">650</option>
-                <option value="700">700</option>
-                <option value="800">800</option>
+              <select v-model="weights['bottom_' + idx]" class="mini-weight-select">
+                <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
               </select>
             </div>
 
-            <!-- 🌟 結尾敬詞：標題列與字級粗細並排，輸入框放下一行 -->
+            <!-- 結尾敬詞 -->
             <div class="section-title-with-weight mt-2">
               <span class="section-title">結尾敬詞：</span>
               <div class="ctrl-row-right">
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
-                  <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" title="微調字級大小" />
+                  <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
                 </div>
-                <select v-model="weights.suffix" class="mini-weight-select" title="設定敬詞粗細">
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="550">550</option>
-                  <option value="600">600</option>
-                  <option value="650">650</option>
-                  <option value="700">700</option>
-                  <option value="800">800</option>
+                <select v-model="weights.suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
                 </select>
               </div>
             </div>
             <select v-model="suffixText" class="full-input mt-1">
-              <option value="敬輓">敬輓</option>
-              <option value="泣輓">泣輓</option>
-              <option value="拜輓">拜輓</option>
-              <option value="敬賀">敬賀</option>
-              <option value="恭賀">恭賀</option>
-              <option value="拜賀">拜賀</option>
-              <option value="謹致">謹致</option>
+              <option value="敬輓">敬輓</option><option value="泣輓">泣輓</option><option value="拜輓">拜輓</option>
+              <option value="敬賀">敬賀</option><option value="恭賀">恭賀</option><option value="拜賀">拜賀</option><option value="謹致">謹致</option>
             </select>
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1550,7 +1035,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 花卡看板主體 (純白底，無粉紅邊框) -->
+            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1563,87 +1048,39 @@
                 fontFamily: activeCssFontFamily
               }"
             >
-              <!-- 1. 上款開頭敬語 -->
-              <div 
-                v-if="upperPrefix.trim()"
-                class="text-box upper-prefix-box"
-                :style="getStyle('upper_prefix')"
-                @pointerdown="startMove($event, 'upper_prefix')"
-              >
+              <div v-if="upperPrefix.trim()" class="text-box upper-prefix-box" :style="getStyle('upper_prefix')" @pointerdown="startMove($event, 'upper_prefix')">
                 <span>{{ upperPrefix }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 -->
-              <div 
-                v-if="upperTarget.trim()"
-                class="text-box upper-target-box"
-                :style="getUpperTargetBoxStyle()"
-                @pointerdown="startMove($event, 'upper_target')"
-              >
-                <span 
-                  v-for="(token, tIdx) in parsedUpperTargetTokens" 
-                  :key="tIdx" 
-                  :style="token.isSmall ? { fontSize: maFontSize + 'px' } : {}"
-                >
-                  {{ token.char }}
-                </span>
+              <div v-if="upperTarget.trim()" class="text-box upper-target-box" :style="getUpperTargetBoxStyle()" @pointerdown="startMove($event, 'upper_target')">
+                <span v-for="(token, tIdx) in parsedUpperTargetTokens" :key="tIdx" :style="token.isSmall ? { fontSize: maFontSize + 'px' } : {}">{{ token.char }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
               </div>
 
-              <!-- 3. 上款結尾敬詞 -->
-              <div 
-                v-if="upperSuffix && upperSuffix.trim()"
-                class="text-box upper-suffix-box"
-                :style="getStyle('upper_suffix')"
-                @pointerdown="startMove($event, 'upper_suffix')"
-              >
+              <div v-if="upperSuffix && upperSuffix.trim()" class="text-box upper-suffix-box" :style="getStyle('upper_suffix')" @pointerdown="startMove($event, 'upper_suffix')">
                 <span>{{ upperSuffix }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_suffix')">⤡</div>
               </div>
 
-              <!-- 中款第 1 行 -->
-              <div 
-                v-if="middleText.trim()"
-                class="text-box middle-box"
-                :style="getStyle('middle')"
-                @pointerdown="startMove($event, 'middle')"
-              >
+              <div v-if="middleText.trim()" class="text-box middle-box" :style="getStyle('middle')" @pointerdown="startMove($event, 'middle')">
                 <span>{{ middleText }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
               </div>
 
-              <!-- 中款第 2 行 -->
-              <div 
-                v-if="middleText2.trim()"
-                class="text-box middle-box-2"
-                :style="getStyle('middle_2')"
-                @pointerdown="startMove($event, 'middle_2')"
-              >
+              <div v-if="middleText2.trim()" class="text-box middle-box-2" :style="getStyle('middle_2')" @pointerdown="startMove($event, 'middle_2')">
                 <span>{{ middleText2 }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle_2')">⤡</div>
               </div>
 
-              <!-- 下款 -->
               <template v-for="(item, idx) in bottomLines" :key="'bottom-' + idx">
-                <div 
-                  v-if="item.text.trim()"
-                  class="text-box"
-                  :style="getStyle('bottom_' + idx)"
-                  @pointerdown="startMove($event, 'bottom_' + idx)"
-                >
+                <div v-if="item.text.trim()" class="text-box" :style="getStyle('bottom_' + idx)" @pointerdown="startMove($event, 'bottom_' + idx)">
                   <span>{{ item.text }}</span>
                   <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'bottom_' + idx)">⤡</div>
                 </div>
               </template>
 
-              <!-- 敬詞 -->
-              <div 
-                v-if="suffixText.trim()"
-                class="text-box suffix-box"
-                :style="getStyle('suffix')"
-                @pointerdown="startMove($event, 'suffix')"
-              >
+              <div v-if="suffixText.trim()" class="text-box suffix-box" :style="getStyle('suffix')" @pointerdown="startMove($event, 'suffix')">
                 <span>{{ suffixText }}</span>
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'suffix')">⤡</div>
               </div>
@@ -1656,187 +1093,49 @@
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
-
           <div class="panel-section highlight-panel">
             <label class="section-title">依訂單編號快速帶入：</label>
             <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
-              </option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }}</option>
             </select>
           </div>
 
-          <!-- 線上簽名板高雅面板 -->
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
               <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
-              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
-                ↺ 清除重簽
-              </button>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature">↺ 清除重簽</button>
             </div>
             <div class="modern-canvas-wrapper">
-              <canvas 
-                ref="signPadCanvasRef" 
-                class="modern-live-sign-pad" 
-                width="340" 
-                height="110"
-                @pointerdown="startSign"
-                @pointermove="drawingSign"
-                @pointerup="stopSign"
-                @pointerleave="stopSign"
-              ></canvas>
+              <canvas ref="signPadCanvasRef" class="modern-live-sign-pad" width="340" height="110" @pointerdown="startSign" @pointermove="drawingSign" @pointerup="stopSign" @pointerleave="stopSign"></canvas>
               <div v-if="!liveSignDataUrl" class="sign-watermark-hint">請在此區域手寫簽名</div>
             </div>
           </div>
 
-          <div class="panel-section">
-            <label class="section-title">抬頭花店名稱：</label>
-            <div class="btn-group">
-              <button 
-                type="button" 
-                :class="{ active: shopNameMode === 'default' }" 
-                @click="shopNameMode = 'default'"
-              >
-                宸豐蘭藝
-              </button>
-              <button 
-                type="button" 
-                :class="{ active: shopNameMode === 'custom' }" 
-                @click="shopNameMode = 'custom'"
-              >
-                自行輸入
-              </button>
-            </div>
-            <input 
-              v-if="shopNameMode === 'custom'" 
-              type="text" 
-              v-model="customShopName" 
-              class="full-input mt-2" 
-              placeholder="請輸入自訂花店名稱" 
-            />
-          </div>
-
-          <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
-            
-            <div class="form-group">
-              <label>收件單位 / 聯絡人 / 電話：</label>
-              <input type="text" v-model="receiptForm.recipient" />
-            </div>
-
-            <div class="form-group">
-              <label>送達地址：</label>
-              <input type="text" v-model="receiptForm.address" />
-            </div>
-
-            <div class="form-group">
-              <label>送達日期：</label>
-              <input type="text" v-model="receiptForm.deliveryDate" />
-            </div>
-
-            <div class="form-group">
-              <label>花禮品項規格 (幾盆)：</label>
-              <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆、特選蘭花 2盆 (共3盆)" />
-            </div>
-
-            <div class="form-group">
-              <label>致贈單位 / 祝賀詞：</label>
-              <input type="text" v-model="receiptForm.giver" />
-            </div>
-
-            <div class="form-group">
-              <label>備註說明：</label>
-              <textarea v-model="receiptForm.notes" rows="2"></textarea>
-            </div>
-          </div>
-
-          <button 
-            type="button" 
-            class="line-action-btn mt-2" 
-            @click="shareReceiptToBuyerDirect"
-          >
-            📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
-          </button>
-
-          <button 
-            type="button" 
-            class="print-action-btn mt-2" 
-            :disabled="!receiptForm.recipient && !selectedOrderId"
-            @click="printReceiptAndMarkDone"
-          >
-            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
-          </button>
+          <button type="button" class="line-action-btn mt-2" @click="shareReceiptToBuyerDirect">📤 簽好直接傳送給訂購人</button>
+          <button type="button" class="print-action-btn mt-2" @click="printReceiptAndMarkDone">🖨️ 列印 A5 橫式簽收單</button>
         </div>
 
         <div class="receipt-preview-area" ref="receiptViewportRef">
-          <div class="zoom-toolbar no-print">
-            <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
-            <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
-            <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
-          </div>
-
-          <div 
-            class="receipt-scaler-container" 
-            :style="{
-              width: (794 * receiptZoom) + 'px',
-              height: (560 * receiptZoom) + 'px'
-            }"
-          >
-            <div 
-              class="a5-landscape-sheet kai-font-supported"
-              :style="{
-                transform: `scale(${receiptZoom})`,
-                transformOrigin: 'top left'
-              }"
-            >
-              <div class="sheet-header">
-                <div class="shop-name-title">{{ displayShopName }}</div>
-                <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
-                <div class="header-meta">
-                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場直接開單' }}</div>
-                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate || '依約定送達' }}</div>
-                </div>
-              </div>
-
-              <!-- 簽收單表格 -->
-              <table class="receipt-table">
-                <tbody>
-                  <tr>
-                    <td class="lbl">收件單位/人</td>
-                    <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
-                    <td class="lbl">送達地址</td>
-                    <td class="val">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="lbl">花禮品項</td>
-                    <td class="val val-highlight" colspan="3">
-                      {{ receiptForm.item || '特選蘭花 1盆' }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="lbl">致贈/賀詞</td>
-                    <td class="val" colspan="3">{{ receiptForm.giver || '敬領 誌慶 / 宸豐蘭藝 敬製' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="lbl">備註說明</td>
-                    <td class="val" colspan="3">{{ receiptForm.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div class="sheet-footer">
-                <div class="footer-left">
-                  <div>送貨司機 / 經手人：______________</div>
-                  <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
-                </div>
-                <div class="footer-sign-box">
-                  <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
-                  <div class="sign-box-area">
-                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
-                  </div>
-                </div>
+          <div class="a5-landscape-sheet kai-font-supported">
+            <div class="sheet-header">
+              <div class="shop-name-title">{{ displayShopName }}</div>
+              <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
+              <div class="header-meta"><div><b>訂單編號：</b>{{ receiptForm.orderId || '現場開單' }}</div><div><b>送達日期：</b>{{ receiptForm.deliveryDate }}</div></div>
+            </div>
+            <table class="receipt-table">
+              <tbody>
+                <tr><td class="lbl">收件單位/人</td><td class="val val-bold">{{ receiptForm.recipient }}</td><td class="lbl">送達地址</td><td class="val">{{ receiptForm.address }}</td></tr>
+                <tr><td class="lbl">花禮品項</td><td class="val val-highlight" colspan="3">{{ receiptForm.item }}</td></tr>
+                <tr><td class="lbl">致贈/賀詞</td><td class="val" colspan="3">{{ receiptForm.giver }}</td></tr>
+                <tr><td class="lbl">備註說明</td><td class="val" colspan="3">{{ receiptForm.notes }}</td></tr>
+              </tbody>
+            </table>
+            <div class="sheet-footer">
+              <div class="footer-left"><div>送貨司機 / 經手人：______________</div><div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div></div>
+              <div class="footer-sign-box">
+                <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
+                <div class="sign-box-area"><img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" /></div>
               </div>
             </div>
           </div>
@@ -1847,230 +1146,35 @@
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
-
-          <div class="panel-section stamp-select-panel">
-            <label class="section-title">🔴 蔡鎮遠印章（全裝置雲端同步）：</label>
-            <input type="file" id="local-seal-picker" accept="image/*" style="display:none" @change="onSelectLocalSeal" />
-            <button type="button" class="seal-choose-btn" @click="triggerLocalSealPicker">
-              📁 上傳蔡鎮遠印章圖檔 (電腦/手機/平板全部同步)
-            </button>
-          </div>
-
           <div class="panel-section highlight-panel">
             <label class="section-title">依訂單編號自動帶入收據：</label>
             <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-                【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (統編: {{ ord.tax_id || '無' }})
-              </option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }}</option>
             </select>
           </div>
-
-          <div class="panel-section">
-            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
-            <div class="form-row">
-              <div class="field">
-                <label>民國年</label>
-                <input type="text" v-model="farmerReceipt.year" />
-              </div>
-              <div class="field">
-                <label>月</label>
-                <input type="text" v-model="farmerReceipt.month" />
-              </div>
-              <div class="field">
-                <label>日</label>
-                <input type="text" v-model="farmerReceipt.day" />
-              </div>
-            </div>
-
-            <div class="form-group mt-2">
-              <label>購貨商號名稱：</label>
-              <input type="text" v-model="farmerReceipt.buyerName" />
-            </div>
-
-            <div class="form-group">
-              <label>統一編號：</label>
-              <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
-            </div>
-
-            <div class="form-group">
-              <label>住址 (整大格顯示)：</label>
-              <input type="text" v-model="farmerReceipt.buyerAddress" />
-            </div>
-
-            <div class="form-group">
-              <label>品名：</label>
-              <input type="text" v-model="farmerReceipt.itemName" />
-            </div>
-
-            <div class="form-row">
-              <div class="field">
-                <label>規格</label>
-                <input type="text" v-model="farmerReceipt.spec" />
-              </div>
-              <div class="field">
-                <label>數量</label>
-                <input type="text" v-model="farmerReceipt.qty" />
-              </div>
-              <div class="field">
-                <label>單價</label>
-                <input type="text" v-model="farmerReceipt.unitPrice" />
-              </div>
-            </div>
-
-            <div class="form-group mt-2">
-              <label>總金額 (元，沒填時留空)：</label>
-              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
-            </div>
-
-            <div class="form-group">
-              <label>備註：</label>
-              <input type="text" v-model="farmerReceipt.note" />
-            </div>
-          </div>
-
-          <button 
-            type="button" 
-            class="line-action-btn mt-2" 
-            @click="shareFarmerReceiptToLineDirect"
-          >
-            💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
-          </button>
-
-          <button 
-            type="button" 
-            class="print-action-btn mt-2" 
-            @click="printFarmerReceipt"
-          >
-            🖨️ 列印農民收據
-          </button>
+          <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptToLineDirect">💬 直接傳送 / 複製收據給客人</button>
+          <button type="button" class="print-action-btn mt-2" @click="printFarmerReceipt">🖨️ 列印農民收據</button>
         </div>
 
-        <!-- 右側預覽區 -->
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
-          <div class="zoom-toolbar no-print">
-            <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
-            <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
-            <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
-          </div>
-
-          <div 
-            class="farmer-scaler-container" 
-            :style="{
-              width: (794 * farmerZoom) + 'px',
-              height: (560 * farmerZoom) + 'px'
-            }"
-          >
-            <div 
-              class="farmer-receipt-sheet kai-font-supported"
-              :style="{
-                transform: `scale(${farmerZoom})`,
-                transformOrigin: 'top left'
-              }"
-            >
-              <div class="f-header">
-                <div class="f-title-wrap">
-                  <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+          <div class="farmer-receipt-sheet kai-font-supported">
+            <div class="f-header">
+              <div class="f-title-wrap"><div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div></div>
+              <div class="f-date-wrap">中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日</div>
+            </div>
+            <div class="f-receipt-grid-table">
+              <div class="f-grid-row f-row-top">
+                <div class="f-col-buyer-group">
+                  <div class="f-sub-row"><div class="f-grid-lbl f-w-head">購貨商號名稱</div><div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div></div>
+                  <div class="f-sub-row"><div class="f-grid-lbl f-w-head">統一編號</div><div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div></div>
                 </div>
-                <div class="f-date-wrap">
-                  中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
-                </div>
+                <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div><div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
               </div>
-
-              <!-- 農民收據表格 -->
-              <div class="f-receipt-grid-table">
-                <div class="f-grid-row f-row-top">
-                  <div class="f-col-buyer-group">
-                    <div class="f-sub-row">
-                      <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
-                      <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
-                    </div>
-                    <div class="f-sub-row">
-                      <div class="f-grid-lbl f-w-head">統一編號</div>
-                      <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
-                    </div>
-                  </div>
-                  <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
-                  <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
-                </div>
-
-                <div class="f-grid-row f-header-row">
-                  <div class="f-grid-lbl col-p-name">品 名</div>
-                  <div class="f-grid-lbl col-p-spec">規 格</div>
-                  <div class="f-grid-lbl col-p-qty">數 量</div>
-                  <div class="f-grid-lbl col-p-price">單 價</div>
-                  <div class="f-grid-lbl col-p-amt">金 額</div>
-                  <div class="f-grid-lbl col-p-note">備 註</div>
-                </div>
-
-                <div class="f-grid-row f-data-row">
-                  <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
-                  <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
-                  <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
-                  <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
-                    {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
-                  </div>
-                  <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
-                </div>
-
-                <div class="f-grid-row f-data-row f-empty-row">
-                  <div class="f-grid-val col-p-name"></div>
-                  <div class="f-grid-val col-p-spec"></div>
-                  <div class="f-grid-val col-p-qty"></div>
-                  <div class="f-grid-val col-p-price"></div>
-                  <div class="f-grid-val col-p-amt"></div>
-                  <div class="f-grid-val col-p-note"></div>
-                </div>
-
-                <div class="f-grid-row f-data-row f-empty-row">
-                  <div class="f-grid-val col-p-name"></div>
-                  <div class="f-grid-val col-p-spec"></div>
-                  <div class="f-grid-val col-p-qty"></div>
-                  <div class="f-grid-val col-p-price"></div>
-                  <div class="f-grid-val col-p-amt"></div>
-                  <div class="f-grid-val col-p-note"></div>
-                </div>
-
-                <div class="f-grid-row f-amount-row">
-                  <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
-                  <div class="f-grid-val f-amount-val-cell">
-                    <div class="f-chinese-amount-line">
-                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
-                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
-                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
-                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
-                      <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 蔡鎮遠姓名與印章 -->
-                <div class="f-grid-row f-farmer-info-row">
-                  <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
-                  <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
-                    <span class="f-farmer-name-clean">蔡鎮遠</span>
-                    <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
-                  </div>
-                </div>
-
-                <div class="f-grid-row f-id-addr-row">
-                  <div class="f-grid-lbl f-w-head">住 址</div>
-                  <div class="f-grid-val f-flex-1"></div>
-                  <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
-                  <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
-                </div>
-              </div>
-
-              <div class="f-statement">
-                本收據之農民身分確實無誤，若有不實者願依法受罰。
-              </div>
-
-              <div class="f-footer-note">
-                <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
-              </div>
+              <div class="f-grid-row f-header-row"><div class="f-grid-lbl col-p-name">品 名</div><div class="f-grid-lbl col-p-spec">規 格</div><div class="f-grid-lbl col-p-qty">數 量</div><div class="f-grid-lbl col-p-price">單 價</div><div class="f-grid-lbl col-p-amt">金 額</div><div class="f-grid-lbl col-p-note">備 註</div></div>
+              <div class="f-grid-row f-data-row"><div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div><div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div><div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div><div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div><div class="f-grid-val col-p-amt f-text-right f-bold f-pr">{{ farmerReceipt.totalAmount ? '$' + Number(farmerReceipt.totalAmount).toLocaleString() : '' }}</div><div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div></div>
+              <div class="f-grid-row f-amount-row"><div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div><div class="f-grid-val f-amount-val-cell"><div class="f-chinese-amount-line"><span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾 <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬 <span class="d-val">{{ chineseDigits.thousands }}</span> 仟 <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰 <span class="d-val">{{ chineseDigits.tens }}</span> 拾 <span class="d-val">{{ chineseDigits.ones }}</span> 元 整</div></div></div>
+              <div class="f-grid-row f-farmer-info-row"><div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div><div class="f-grid-val f-farmer-stamp-cell f-flex-1"><span class="f-farmer-name-clean">蔡鎮遠</span><img :src="activeCaiSealSrc" class="cai-real-stamp-img" /></div></div>
             </div>
           </div>
         </div>
@@ -2097,7 +1201,7 @@ const handleLogin = () => {
   if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
     isAuthenticated.value = true
     authError.value = false
-    localStorage.setItem('cf_admin_auth', 'true')
+    try { localStorage.setItem('cf_admin_auth', 'true') } catch (e) {}
     showToast('✅ 驗證成功，歡迎使用內部管理系統！')
     nextTick(() => {
       try {
@@ -2115,7 +1219,7 @@ const handleLogin = () => {
 const handleLogout = () => {
   if (!confirm('確定要登出並鎖定系統嗎？')) return
   isAuthenticated.value = false
-  localStorage.removeItem('cf_admin_auth')
+  try { localStorage.removeItem('cf_admin_auth') } catch (e) {}
 }
 
 // ==========================================
@@ -2146,6 +1250,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
+// 🖨️ 自動印表機自適應切換
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -2155,11 +1260,9 @@ const updateDynamicPrintStyle = () => {
   }
   let pageSize = 'A4 portrait'
   if (currentTab.value === 'couplet') {
-    if (cardPaperSize.value === 'A5') {
-      pageSize = isVertical.value ? 'A5 portrait' : 'A5 landscape'
-    } else {
-      pageSize = isVertical.value ? 'A4 portrait' : 'A4 landscape'
-    }
+    const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
+    const orientation = isVertical.value ? 'portrait' : 'landscape'
+    pageSize = `${size} ${orientation}`
   } else if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
     pageSize = 'A5 landscape'
   }
@@ -4094,7 +3197,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 全域字體大小適度微調小一點，更顯精緻俐落 */
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -4189,7 +3291,7 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🌟 下單日期絕對單行鎖死樣式 */
+/* 🌟 下單日期絕對單行樣式 */
 .single-line-date-row {
   grid-column: 1 / -1 !important;
   display: flex !important;
@@ -4675,6 +3777,7 @@ input, select, textarea {
   .control-panel { width: 100%; max-height: 46vh; }
   .form-grid { grid-template-columns: 1fr; }
   .single-line-date-row { flex-direction: column !important; align-items: flex-start !important; }
+  .single-line-date-control { max-width: 100% !important; flex: 1 !important; width: 100% !important; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
