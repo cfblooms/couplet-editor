@@ -207,7 +207,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️️
+                      🗑
                     </button>
                   </div>
                   <div class="item-grid">
@@ -361,7 +361,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 花卡未製作：#FEF0EF -->
+                      <!-- 🌟 花卡未製作：#FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -376,7 +376,7 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單未列印：#FEF0EF -->
+                      <!-- 🌟 簽收單未列印：#FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 按鈕：修改與刪除只留圖示 -->
+                      <!-- 按鈕：修改與刪除純圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -452,7 +452,7 @@
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
-                              🗑️️
+                              🗑
                             </button>
                           </div>
                         </div>
@@ -594,7 +594,7 @@
                         </span>
                       </td>
                       
-                      <!-- 🌟 對帳區收款狀態選單縮小寬度 -->
+                      <!-- 收款狀態選單縮小寬度 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.payment_status" 
@@ -761,7 +761,6 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
-                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️</button>
@@ -843,7 +842,6 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
-                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️</button>
@@ -921,7 +919,6 @@
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
-                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
@@ -938,7 +935,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div v-if="editingRetId" class="edit-banner">
-              <span>✏️️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
+              <span>✏️ 目前正在編輯退貨紀錄：<b>{{ editingRetId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditRet">✕ 取消修改</button>
             </div>
 
@@ -1014,7 +1011,6 @@
                       <td>{{ ret.qty }}</td>
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
-                      <!-- 🌟 修改與刪除只留圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️</button>
@@ -1028,27 +1024,31 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 -->
+          <!-- 模組 7：出貨派送進度分頁（全新現代膠囊切換標籤） -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
                 <h3>🚚 訂單出貨與派送進度總覽</h3>
-                <div class="shipping-filter-tabs">
+                <!-- 🌟 全新精緻現代膠囊式切換鈕 -->
+                <div class="modern-pill-tabs">
                   <button 
                     :class="{ active: shippingViewFilter === 'unshipped' }" 
                     @click="shippingViewFilter = 'unshipped'"
+                    class="pill-tab-item"
                   >
-                    📦 待出貨 / 配送中 ({{ unshippedOrders.length }} 筆)
+                    📦 待出貨 / 配送中 ({{ unshippedOrders.length }})
                   </button>
                   <button 
                     :class="{ active: shippingViewFilter === 'shipped' }" 
                     @click="shippingViewFilter = 'shipped'"
+                    class="pill-tab-item"
                   >
-                    ✅ 已出貨歷史 ({{ shippedOrders.length }} 筆)
+                    ✅ 已出貨歷史 ({{ shippedOrders.length }})
                   </button>
                   <button 
                     :class="{ active: shippingViewFilter === 'all' }" 
                     @click="shippingViewFilter = 'all'"
+                    class="pill-tab-item"
                   >
                     全部 ({{ orderList.length }})
                   </button>
@@ -1098,7 +1098,6 @@
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
-                      <!-- 🌟 派送狀態選單寬度最佳化 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.shipped_status" 
@@ -1110,7 +1109,6 @@
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
-                      <!-- 🌟 修改按鈕簡約圖示 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button 
@@ -1171,7 +1169,7 @@
             </div>
           </div>
 
-          <!-- 🌟 花卡雲端即時草稿庫（已換成高質感紫色） -->
+          <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
@@ -1241,7 +1239,6 @@
             <div class="section-title-with-weight">
               <label class="section-title">1. 開頭敬詞（獨立一格）：</label>
               <div class="ctrl-row-right">
-                <!-- 🌟 精緻小巧字級格 -->
                 <div class="compact-size-wrap">
                   <span class="compact-size-lbl">字級:</span>
                   <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
@@ -1591,7 +1588,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 簽名板全新高雅面板) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1606,15 +1603,18 @@
             </select>
           </div>
 
-          <div class="panel-section live-sign-panel">
-            <div class="section-title-with-weight">
-              <label class="section-title">✍️ 收件人線上簽名板 (送達現場簽名)：</label>
-              <button type="button" class="mini-clean-btn" @click="clearLiveSignature">✕ 清除重簽</button>
+          <!-- 🌟 線上簽名板全新高雅美觀面板 -->
+          <div class="panel-section modern-sign-card">
+            <div class="modern-sign-header">
+              <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
+                ↺ 清除重簽
+              </button>
             </div>
-            <div class="canvas-sign-wrapper">
+            <div class="modern-canvas-wrapper">
               <canvas 
                 ref="signPadCanvasRef" 
-                class="live-sign-pad" 
+                class="modern-live-sign-pad" 
                 width="340" 
                 height="110"
                 @pointerdown="startSign"
@@ -1622,8 +1622,8 @@
                 @pointerup="stopSign"
                 @pointerleave="stopSign"
               ></canvas>
+              <div v-if="!liveSignDataUrl" class="sign-watermark-hint">請在此區域手寫簽名</div>
             </div>
-            <div class="sign-hint-text">※ 收件人直接在上方白色框中手寫簽名，簽完自動帶入簽收單！</div>
           </div>
 
           <div class="panel-section">
@@ -1654,7 +1654,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1877,7 +1877,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️ 列印農民收據
+            🖨️️ 列印農民收據
           </button>
         </div>
 
@@ -4129,22 +4129,24 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 表格樣式 */
+/* 🌟 表格樣式（全體字體微幅放大更清晰） */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 1100px; }
-.data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
-.data-table td { padding: 8px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; min-width: 1100px; }
+.data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
+.data-table td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 單行禁止折行類別 */
-.nowrap-col { white-space: nowrap; min-width: 86px; }
+/* 🌟 單行狀態標籤與選單（格子適中不鬆散，字體調大至 13px） */
+.nowrap-col { white-space: nowrap; min-width: 76px; }
 .nowrap-cell { white-space: nowrap !important; }
-.inline-badge { display: inline-block; white-space: nowrap; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.status-select-box { min-width: 82px; padding: 4px 6px; font-size: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-
-/* 🌟 收款狀態與派送狀態縮短版選單 */
+.inline-badge {
+  display: inline-block; white-space: nowrap; padding: 3px 6px; border-radius: 4px; font-size: 13px; font-weight: bold;
+}
+.status-select-box {
+  min-width: 76px; padding: 3px 6px; font-size: 13px; font-weight: bold; border-radius: 4px; cursor: pointer;
+}
 .compact-status-select {
-  width: 72px !important; min-width: 72px !important; padding: 3px 4px !important; font-size: 12px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
+  width: 74px !important; min-width: 74px !important; padding: 3px 4px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
 }
 
 .spec-cell-wrap { max-width: 240px; line-height: 1.4; word-break: break-all; }
@@ -4155,16 +4157,15 @@ input, select, textarea {
 .stacked-action-col { display: flex; flex-direction: column; gap: 5px; }
 
 .cozy-btn {
-  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
+  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12.5px; font-weight: 700;
   white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
-/* 🌟 修改與刪除純圖示按鈕 */
 .icon-only-btn {
   padding: 4px 8px !important; font-size: 14px !important; min-width: 32px;
 }
 
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
+.badge { padding: 3px 6px; border-radius: 4px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
 .badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
 .badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
@@ -4179,6 +4180,53 @@ input, select, textarea {
 .py-4 { padding: 16px 0; }
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
+
+/* 🌟 出貨派送進度全新膠囊式按鈕組 */
+.shipping-tab-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
+}
+.modern-pill-tabs {
+  display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 30px; gap: 4px;
+}
+.pill-tab-item {
+  border: none; background: transparent; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;
+  color: #475569; cursor: pointer; transition: all 0.2s ease;
+}
+.pill-tab-item:hover {
+  color: #0f172a;
+}
+.pill-tab-item.active {
+  background: #1e293b; color: #ffffff; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+}
+
+/* 🌟 簽收單管理：現場手寫簽名板全新高雅卡片面板 */
+.modern-sign-card {
+  background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important;
+}
+.modern-sign-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+}
+.modern-sign-title {
+  font-size: 13px; font-weight: bold; color: #1e293b;
+}
+.modern-clean-sign-btn {
+  background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px;
+  font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.15s ease;
+}
+.modern-clean-sign-btn:hover {
+  background: #fee2e2; color: #dc2626; border-color: #fca5a5;
+}
+.modern-canvas-wrapper {
+  position: relative; width: 100%; display: flex; justify-content: center;
+}
+.modern-live-sign-pad {
+  width: 100%; height: 110px; background: #ffffff; border: 1.5px dashed #94a3b8; border-radius: 8px;
+  cursor: crosshair; touch-action: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+.sign-watermark-hint {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 13px; color: #cbd5e1; font-weight: bold; pointer-events: none; user-select: none;
+}
 
 /* 蘭花品種照片上傳 */
 .photo-preview-wrap {
@@ -4214,7 +4262,7 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
 }
 
-/* 🌟 草稿與新花卡按鈕（存至雲端改為紫色） */
+/* 草稿與新花卡按鈕 */
 .draft-manage-panel {
   background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
 }
@@ -4247,7 +4295,7 @@ input, select, textarea {
   background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13px;
 }
 
-/* 🌟 字級輸入框精巧化 */
+/* 字級輸入框精巧化 */
 .compact-size-wrap {
   display: flex; align-items: center; gap: 3px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px;
 }
