@@ -207,7 +207,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑
+                      🗑️
                     </button>
                   </div>
                   <div class="item-grid">
@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 按鈕：修改與刪除純圖示 -->
+                      <!-- 按鈕：修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -452,7 +452,7 @@
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
-                              🗑
+                              🗑️
                             </button>
                           </div>
                         </div>
@@ -575,6 +575,7 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
+                      <!-- 花卡未製作：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -585,6 +586,7 @@
                         </span>
                       </td>
 
+                      <!-- 簽收單未列印：#FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
@@ -761,6 +763,7 @@
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
                       <td>{{ inv.date }}</td>
+                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️</button>
@@ -842,6 +845,7 @@
                       <td><span class="badge badge-purple">{{ c.billing_cycle || '每單結' }}</span></td>
                       <td>{{ c.phone }}</td>
                       <td>{{ c.line_note }}</td>
+                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️</button>
@@ -919,6 +923,7 @@
                       </td>
                       <td><b>{{ item.name }}</b></td>
                       <td>{{ item.note }}</td>
+                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️</button>
@@ -940,7 +945,7 @@
             </div>
 
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
+              <h3>{{ editingRetId ? '✏️️ 修改退貨紀錄' : '🔄 退貨與不良品登記' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>退貨類型</label>
@@ -1011,6 +1016,7 @@
                       <td>{{ ret.qty }}</td>
                       <td class="text-red"><b>${{ ret.total_amount }}</b></td>
                       <td>{{ ret.reason }}</td>
+                      <!-- 修改與刪除純圖示（垃圾桶統一為 🗑️） -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️</button>
@@ -1024,12 +1030,12 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁（全新現代膠囊切換標籤） -->
+          <!-- 模組 7：出貨派送進度分頁 -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
                 <h3>🚚 訂單出貨與派送進度總覽</h3>
-                <!-- 🌟 全新精緻現代膠囊式切換鈕 -->
+                <!-- 膠囊式切換鈕 -->
                 <div class="modern-pill-tabs">
                   <button 
                     :class="{ active: shippingViewFilter === 'unshipped' }" 
@@ -1169,14 +1175,14 @@
             </div>
           </div>
 
-          <!-- 花卡雲端即時草稿庫 -->
+          <!-- 🌟 花卡雲端即時草稿庫（淺紫色漸層按鈕） -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="modern-cloud-save-purple-btn" @click="saveCurrentAsCloudDraft">
+              <button type="button" class="modern-cloud-save-light-purple-btn" @click="saveCurrentAsCloudDraft">
                 💾 存至雲端草稿 (全裝置同步)
               </button>
               <button type="button" class="modern-new-card-btn" @click="startNewCard">
@@ -1588,7 +1594,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 簽名板全新高雅面板) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 單據字體調大至清晰舒適) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1603,7 +1609,7 @@
             </select>
           </div>
 
-          <!-- 🌟 線上簽名板全新高雅美觀面板 -->
+          <!-- 線上簽名板高雅面板 -->
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
               <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
@@ -1736,6 +1742,7 @@
                 </div>
               </div>
 
+              <!-- 🌟 簽收單表格文字調大至 16px ~ 17.5px -->
               <table class="receipt-table">
                 <tbody>
                   <tr>
@@ -1778,7 +1785,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 ================= -->
+      <!-- ================= 模式 4：農民收據 (🌟 單據字體調大至清晰舒適) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1877,7 +1884,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️️ 列印農民收據
+            🖨️ 列印農民收據
           </button>
         </div>
 
@@ -1913,6 +1920,7 @@
                 </div>
               </div>
 
+              <!-- 🌟 農民收據表格字體調大至 16px ~ 18px -->
               <div class="f-receipt-grid-table">
                 <div class="f-grid-row f-row-top">
                   <div class="f-col-buyer-group">
@@ -2905,17 +2913,17 @@ const shareReceiptToBuyerDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  ctx.font = `900 26px ${fontFam}`
+  ctx.font = `900 28px ${fontFam}`
   ctx.textAlign = 'left'
   ctx.fillText(displayShopName.value, 45, 60)
 
   ctx.fillStyle = '#dc2626'
-  ctx.font = `bold 22px ${fontFam}`
+  ctx.font = `bold 24px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('銷貨 / 出貨簽收單', 397, 60)
 
   ctx.fillStyle = '#334155'
-  ctx.font = `13px ${fontFam}`
+  ctx.font = `14px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`訂單編號：${receiptForm.value.orderId || '現場開單'}`, 749, 48)
   ctx.fillText(`送達日期：${receiptForm.value.deliveryDate || '依約定送達'}`, 749, 68)
@@ -2960,7 +2968,7 @@ const shareReceiptToBuyerDirect = () => {
   ctx.fillStyle = '#1e293b'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `bold 15px ${fontFam}`
+  ctx.font = `bold 16px ${fontFam}`
   ctx.fillText('收件單位/人', tLeft + col1W / 2, tTop + rowHeight / 2)
   ctx.fillText('送達地址', tLeft + col1W + col2W + col3W / 2, tTop + rowHeight / 2)
   ctx.fillText('花禮品項', tLeft + col1W / 2, tTop + rowHeight * 1.5)
@@ -2971,29 +2979,29 @@ const shareReceiptToBuyerDirect = () => {
   ctx.textBaseline = 'top'
 
   ctx.fillStyle = '#0f172a'
-  ctx.font = `bold 15px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 20, col2W - 24, 22, 2)
+  ctx.font = `bold 16.5px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 18, col2W - 24, 23, 2)
 
   ctx.fillStyle = '#334155'
-  ctx.font = `14px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 20, tWidth - (col1W + col2W + col3W) - 24, 20, 2)
+  ctx.font = `15px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 18, tWidth - (col1W + col2W + col3W) - 24, 22, 2)
 
   ctx.fillStyle = '#1e3a8a'
-  ctx.font = `bold 16px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 26, tWidth - col1W - 24, 24, 2)
+  ctx.font = `bold 17.5px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 24, tWidth - col1W - 24, 25, 2)
 
   ctx.fillStyle = '#111827'
-  ctx.font = `15px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 26, tWidth - col1W - 24, 22, 2)
+  ctx.font = `16px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 24, tWidth - col1W - 24, 23, 2)
 
   ctx.fillStyle = '#475569'
-  ctx.font = `13.5px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 26, tWidth - col1W - 24, 20, 2)
+  ctx.font = `14.5px ${fontFam}`
+  drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 24, tWidth - col1W - 24, 21, 2)
 
   ctx.fillStyle = '#334155'
-  ctx.font = `14px ${fontFam}`
+  ctx.font = `15px ${fontFam}`
   ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
-  ctx.font = `12px ${fontFam}`
+  ctx.font = `13px ${fontFam}`
   ctx.fillStyle = '#64748b'
   ctx.fillText('※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465)
 
@@ -3007,7 +3015,7 @@ const shareReceiptToBuyerDirect = () => {
   ctx.fillStyle = '#334155'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `bold 12px ${fontFam}`
+  ctx.font = `bold 13px ${fontFam}`
   ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 12)
 
   const finishShare = () => {
@@ -3117,11 +3125,11 @@ const shareFarmerReceiptToLineDirect = () => {
   const fontFam = '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif'
   ctx.fillStyle = '#0f172a'
 
-  ctx.font = `900 26px ${fontFam}`
+  ctx.font = `900 27px ${fontFam}`
   ctx.textAlign = 'center'
   ctx.fillText('農（漁、牧）民出售農（漁、牧）產品收據', 397, 45)
 
-  ctx.font = `15px ${fontFam}`
+  ctx.font = `16px ${fontFam}`
   ctx.textAlign = 'right'
   ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.day} 日`, 760, 80)
 
@@ -3130,7 +3138,7 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.strokeRect(30, 95, 734, 380)
 
   ctx.textAlign = 'left'
-  ctx.font = `bold 14.5px ${fontFam}`
+  ctx.font = `bold 16px ${fontFam}`
   ctx.fillText(`購貨商號名稱：${farmerReceipt.value.buyerName}`, 42, 125)
   ctx.fillText(`統一編號：${farmerReceipt.value.taxId}`, 42, 155)
   ctx.fillText(`住址：${farmerReceipt.value.buyerAddress}`, 430, 135)
@@ -3148,11 +3156,11 @@ const shareFarmerReceiptToLineDirect = () => {
   ctx.fillText(`農（漁、牧）民姓名：蔡鎮遠`, 42, 335)
   
   const finishCanvas = () => {
-    ctx.font = `14.5px ${fontFam}`
+    ctx.font = `15px ${fontFam}`
     ctx.fillText(`住址：                     國民統一身分證編號：F129940801`, 42, 368)
-    ctx.font = `11px ${fontFam}`
+    ctx.font = `12px ${fontFam}`
     ctx.fillText(`本收據之農民身分確實無誤，若有不實者願依法受罰。`, 42, 410)
-    ctx.font = `9.5px ${fontFam}`
+    ctx.font = `10.5px ${fontFam}`
     ctx.fillText(`附註：依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅...`, 42, 435)
 
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
@@ -3992,6 +4000,7 @@ onMounted(() => {
   height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
   background-color: #f1f5f9;
+  font-size: 14.5px;
 }
 .system-root {
   display: flex;
@@ -4012,7 +4021,7 @@ onMounted(() => {
 }
 .lock-icon { font-size: 42px; margin-bottom: 12px; }
 .auth-lock-card h2 { margin: 0 0 6px 0; font-size: 20px; color: #0f172a; font-weight: 900; }
-.lock-subtitle { font-size: 13px; color: #64748b; margin: 0 0 20px 0; line-height: 1.5; }
+.lock-subtitle { font-size: 13.5px; color: #64748b; margin: 0 0 20px 0; line-height: 1.5; }
 .lock-form { display: flex; flex-direction: column; gap: 12px; }
 .lock-input {
   width: 100%; padding: 12px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px;
@@ -4020,14 +4029,14 @@ onMounted(() => {
 }
 .lock-input:focus { border-color: #2563eb; }
 .lock-btn {
-  background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+  background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15.5px; font-weight: bold; cursor: pointer; transition: background 0.2s;
 }
 .lock-btn:hover { background: #1d4ed8; }
-.lock-error-text { color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; }
-.lock-tip { margin-top: 20px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+.lock-error-text { color: #dc2626; font-size: 13.5px; font-weight: bold; margin-top: 10px; }
+.lock-tip { margin-top: 20px; font-size: 12.5px; color: #94a3b8; line-height: 1.5; }
 .logout-nav-btn {
   background: #ef4444 !important; color: white !important; border: none !important; padding: 6px 12px !important;
-  border-radius: 6px !important; font-size: 12px !important; font-weight: bold !important; cursor: pointer !important; margin-left: 8px;
+  border-radius: 6px !important; font-size: 13px !important; font-weight: bold !important; cursor: pointer !important; margin-left: 8px;
 }
 
 /* 頂端導航 */
@@ -4035,10 +4044,10 @@ onMounted(() => {
   height: 52px; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; flex-shrink: 0; overflow-x: auto;
 }
-.nav-title { font-size: 16px; font-weight: 900; white-space: nowrap; margin-right: 12px; }
+.nav-title { font-size: 17px; font-weight: 900; white-space: nowrap; margin-right: 12px; }
 .nav-tabs { display: flex; gap: 8px; align-items: center; }
 .nav-tabs button {
-  background: #334155; color: #e2e8f0; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; white-space: nowrap;
+  background: #334155; color: #e2e8f0; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13.5px; white-space: nowrap;
 }
 .nav-tabs button.active { background: #2563eb; color: white; }
 
@@ -4048,7 +4057,7 @@ onMounted(() => {
   display: flex; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 8px 16px; gap: 8px; overflow-x: auto;
 }
 .sub-nav button {
-  background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap;
+  background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; white-space: nowrap;
 }
 .sub-nav button.active { background: #10b981; color: white; border-color: #10b981; }
 .manage-content { flex: 1; overflow-y: auto; padding: 16px; }
@@ -4057,18 +4066,18 @@ onMounted(() => {
 .edit-banner {
   background: #fef3c7; border: 1.5px solid #f59e0b; color: #92400e;
   padding: 10px 16px; border-radius: 8px; margin-bottom: 12px;
-  display: flex; justify-content: space-between; align-items: center; font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 14.5px;
 }
-.cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; }
+.cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12.5px; cursor: pointer; }
 
 /* 通用卡片外觀與表單排版 */
 .card-box { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-.card-box h3 { margin: 0; font-size: 16px; color: #1e293b; }
+.card-box h3 { margin: 0; font-size: 16.5px; color: #1e293b; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.field label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+.field label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 input, select, textarea {
   width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
-  border-radius: 6px; font-size: 13px; box-sizing: border-box;
+  border-radius: 6px; font-size: 14px; box-sizing: border-box;
 }
 
 /* 多規格花禮卡片設計 */
@@ -4078,18 +4087,18 @@ input, select, textarea {
 .items-header {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
 }
-.items-header h4 { margin: 0; font-size: 14px; color: #1e293b; font-weight: bold; }
+.items-header h4 { margin: 0; font-size: 14.5px; color: #1e293b; font-weight: bold; }
 .add-item-btn {
-  background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer;
+  background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
 }
 .order-item-card {
   background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 10px;
 }
 .item-card-title {
-  display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
+  display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; font-weight: bold; color: #3b82f6; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
 }
 .remove-item-btn {
-  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-size: 12px; cursor: pointer;
+  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 6px; border-radius: 4px; font-size: 13px; cursor: pointer;
 }
 .item-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;
@@ -4097,16 +4106,16 @@ input, select, textarea {
 
 .highlight-field { background-color: #f0fdf4; padding: 6px; border-radius: 6px; border: 1px solid #bbf7d0; }
 .highlight-field label { color: #15803d; }
-.bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
+.bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 16px; }
 .bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
 .text-purple { color: #7e22ce; }
-.font-heavy { font-weight: 800 !important; font-size: 15px !important; }
+.font-heavy { font-weight: 800 !important; font-size: 15.5px !important; }
 
 .btn-action-row { display: flex; gap: 8px; }
-.primary-btn { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.secondary-btn { background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.excel-btn { background: #059669; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-.line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; width: 100%; }
+.primary-btn { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+.secondary-btn { background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+.excel-btn { background: #059669; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.line-action-btn { background: #06c755; color: white; border: none; padding: 11px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; width: 100%; }
 
 /* 對帳專區樣式 */
 .statement-filter-grid {
@@ -4121,22 +4130,22 @@ input, select, textarea {
 .blue-card { background: #eff6ff; border-color: #bfdbfe; }
 .purple-card { background: #faf5ff; border-color: #e9d5ff; }
 .green-card { background: #f0fdf4; border-color: #bbf7d0; }
-.sum-label { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
-.sum-value { font-size: 20px; font-weight: 900; color: #0f172a; }
-.sum-value.font-medium { font-size: 15px; }
+.sum-label { font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+.sum-value { font-size: 21px; font-weight: 900; color: #0f172a; }
+.sum-value.font-medium { font-size: 16px; }
 
 .statement-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+.batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
 
-/* 🌟 表格樣式（全體字體微幅放大更清晰） */
+/* 🌟 表格樣式（全體字體微調放大） */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; min-width: 1100px; }
-.data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; min-width: 1100px; }
+.data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13.5px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 🌟 單行狀態標籤與選單（格子適中不鬆散，字體調大至 13px） */
+/* 🌟 狀態標籤與選單（格子適中不鬆散，字體 13px） */
 .nowrap-col { white-space: nowrap; min-width: 76px; }
 .nowrap-cell { white-space: nowrap !important; }
 .inline-badge {
@@ -4157,12 +4166,12 @@ input, select, textarea {
 .stacked-action-col { display: flex; flex-direction: column; gap: 5px; }
 
 .cozy-btn {
-  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12.5px; font-weight: 700;
+  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700;
   white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .icon-only-btn {
-  padding: 4px 8px !important; font-size: 14px !important; min-width: 32px;
+  padding: 4px 8px !important; font-size: 14.5px !important; min-width: 32px;
 }
 
 .badge { padding: 3px 6px; border-radius: 4px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
@@ -4181,7 +4190,7 @@ input, select, textarea {
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
 
-/* 🌟 出貨派送進度全新膠囊式按鈕組 */
+/* 🌟 出貨派送進度膠囊式按鈕組 */
 .shipping-tab-header {
   display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
 }
@@ -4189,7 +4198,7 @@ input, select, textarea {
   display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 30px; gap: 4px;
 }
 .pill-tab-item {
-  border: none; background: transparent; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;
+  border: none; background: transparent; padding: 6px 14px; border-radius: 20px; font-size: 13.5px; font-weight: bold;
   color: #475569; cursor: pointer; transition: all 0.2s ease;
 }
 .pill-tab-item:hover {
@@ -4199,7 +4208,7 @@ input, select, textarea {
   background: #1e293b; color: #ffffff; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
 }
 
-/* 🌟 簽收單管理：現場手寫簽名板全新高雅卡片面板 */
+/* 🌟 簽收單管理：現場手寫簽名板高雅卡片面板 */
 .modern-sign-card {
   background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 10px !important; padding: 12px !important;
 }
@@ -4207,11 +4216,11 @@ input, select, textarea {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
 }
 .modern-sign-title {
-  font-size: 13px; font-weight: bold; color: #1e293b;
+  font-size: 13.5px; font-weight: bold; color: #1e293b;
 }
 .modern-clean-sign-btn {
   background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 3px 8px; border-radius: 4px;
-  font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.15s ease;
+  font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.15s ease;
 }
 .modern-clean-sign-btn:hover {
   background: #fee2e2; color: #dc2626; border-color: #fca5a5;
@@ -4232,12 +4241,12 @@ input, select, textarea {
 .photo-preview-wrap {
   display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px dashed #cbd5e1;
 }
-.preview-label { font-size: 12px; font-weight: bold; color: #475569; }
+.preview-label { font-size: 12.5px; font-weight: bold; color: #475569; }
 .preview-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
-.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11.5px; cursor: pointer; }
 .photo-col { width: 60px; text-align: center; }
 .table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
-.no-photo-badge { font-size: 11px; color: #94a3b8; }
+.no-photo-badge { font-size: 11.5px; color: #94a3b8; }
 
 /* 照片彈窗 */
 .image-modal-overlay {
@@ -4262,20 +4271,20 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #334155; line-height: 1.5; width: 100%;
 }
 
-/* 草稿與新花卡按鈕 */
+/* 🌟 草稿與新花卡按鈕（淺紫色漸層按鈕） */
 .draft-manage-panel {
   background: #fdfefe !important; border: 1.5px solid #dbeafe !important;
 }
 .draft-action-btns {
   display: flex; gap: 8px; margin-top: 6px;
 }
-.modern-cloud-save-purple-btn {
-  flex: 1.3; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;
+.modern-cloud-save-light-purple-btn {
+  flex: 1.3; background: linear-gradient(135deg, #b49ef7 0%, #a78bfa 100%); color: #2e1065; border: 1px solid #8b5cf6;
   padding: 8px 10px; border-radius: 6px; font-size: 12.5px; font-weight: bold; cursor: pointer;
-  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2); transition: all 0.15s ease-in-out;
+  box-shadow: 0 2px 4px rgba(167, 139, 250, 0.25); transition: all 0.15s ease-in-out;
 }
-.modern-cloud-save-purple-btn:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); transform: translateY(-1px);
+.modern-cloud-save-light-purple-btn:hover {
+  background: linear-gradient(135deg, #a78bfa 0%, #9061f9 100%); color: #ffffff; transform: translateY(-1px);
 }
 .modern-new-card-btn {
   flex: 0.9; background: #ffffff; color: #2563eb; border: 1.5px solid #93c5fd;
@@ -4289,10 +4298,10 @@ input, select, textarea {
   display: flex; gap: 6px; align-items: center;
 }
 .mini-refresh-btn {
-  background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 11px; padding: 2px 6px; cursor: pointer;
+  background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 11.5px; padding: 2px 6px; cursor: pointer;
 }
 .mini-del-draft-btn {
-  background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13px;
+  background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13.5px;
 }
 
 /* 字級輸入框精巧化 */
@@ -4300,7 +4309,7 @@ input, select, textarea {
   display: flex; align-items: center; gap: 3px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px;
 }
 .compact-size-lbl {
-  font-size: 11px; font-weight: bold; color: #64748b;
+  font-size: 11.5px; font-weight: bold; color: #64748b;
 }
 .compact-size-input {
   width: 44px !important; padding: 1px 2px !important; font-size: 12px !important; font-weight: bold !important; text-align: center; border: none !important; outline: none;
@@ -4314,36 +4323,36 @@ input, select, textarea {
 }
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
-.bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
+.bold-select { font-weight: bold; font-size: 14.5px; border-color: #3b82f6; }
 
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .mini-weight-select {
-  width: auto !important; padding: 2px 5px !important; font-size: 11px !important; font-weight: bold !important;
+  width: auto !important; padding: 2px 5px !important; font-size: 11.5px !important; font-weight: bold !important;
   color: #1e3a8a !important; background: #eff6ff !important; border: 1px solid #bfdbfe !important; border-radius: 4px !important;
 }
 .flex-input { flex: 1; }
 
 .stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
 .seal-choose-btn {
-  width: 100%; margin-top: 6px; padding: 8px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
+  width: 100%; margin-top: 6px; padding: 8px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer;
 }
 
-.section-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; }
+.section-title { font-size: 13.5px; font-weight: bold; margin-bottom: 6px; display: block; }
 .form-group { margin-bottom: 10px; }
-.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #334155; }
+.form-group label { display: block; font-size: 12.5px; font-weight: bold; margin-bottom: 4px; color: #334155; }
 .bottom-input-group { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.line-num { font-size: 12px; font-weight: bold; color: #64748b; width: 38px; }
+.line-num { font-size: 12.5px; font-weight: bold; color: #64748b; width: 38px; }
 .form-row, .btn-group { display: flex; gap: 6px; }
 .btn-group button {
-  flex: 1; padding: 7px; border: 1px solid #2563eb; background: white; color: #2563eb; border-radius: 4px; cursor: pointer; font-weight: bold;
+  flex: 1; padding: 7px; border: 1px solid #2563eb; background: white; color: #2563eb; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13.5px;
 }
 .btn-group button.active { background: #2563eb; color: white; }
-.radio-row { display: flex; gap: 14px; font-size: 13px; }
+.radio-row { display: flex; gap: 14px; font-size: 13.5px; }
 .tags-container { display: flex; flex-wrap: wrap; gap: 4px; }
 .tag-btn {
-  background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 6px; font-size: 12px; border-radius: 4px; cursor: pointer;
+  background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 6px; font-size: 12.5px; border-radius: 4px; cursor: pointer;
 }
-.reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; }
+.reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; font-size: 13px; }
 
 /* 畫布視窗與自適應 */
 .canvas-viewport {
@@ -4360,7 +4369,7 @@ input, select, textarea {
 }
 .zoom-btn { width: 26px; height: 26px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 50%; cursor: pointer; }
 .zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
-.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12.5px; cursor: pointer; }
 
 /* 花卡看板主體 */
 .card-scaler-container { position: relative; margin-bottom: 40px; flex-shrink: 0; }
@@ -4386,36 +4395,36 @@ input, select, textarea {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
 }
 
-/* A5 橫式簽收單完整美觀樣式 */
+/* 🌟 A5 橫式簽收單單據上字體稍微調大 */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 38px 45px; box-sizing: border-box;
+  width: 794px; height: 560px; background: #ffffff; padding: 36px 42px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
   color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
 .sheet-header {
   display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px;
 }
-.shop-name-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
-.sheet-main-title { font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
-.header-meta { font-size: 13px; line-height: 1.5; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 15px; table-layout: fixed; }
+.shop-name-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.sheet-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.header-meta { font-size: 14px; line-height: 1.5; text-align: right; color: #334155; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 16px; table-layout: fixed; }
 .receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
-.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; }
-.receipt-table .val { width: 35%; }
-.receipt-table .val-bold { font-weight: bold; font-size: 16px; }
-.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
+.receipt-table .val { width: 35%; font-size: 16px; }
+.receipt-table .val-bold { font-weight: bold; font-size: 17px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17.5px; }
 
 .sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
-.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-.footer-tip { font-size: 12px; color: #64748b; }
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 15px; padding: 4px 0; }
+.footer-tip { font-size: 13px; color: #64748b; }
 .footer-sign-box {
   width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
 }
-.sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
+.sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
 .sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
 
-/* 農民出售農產品收據完整美觀樣式 */
+/* 🌟 農民出售農產品收據單據上字體稍微調大 */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
@@ -4423,27 +4432,27 @@ input, select, textarea {
   box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
 .f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
-.f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
-.f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 10px; }
+.f-main-title { font-size: 27px; font-weight: 900; letter-spacing: 5px; text-align: center; }
+.f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
 
-.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 14.5px; }
-.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 29px; }
+.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0;
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 16px;
 }
-.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; }
+.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 16px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
-.f-row-top { min-height: 62px; }
+.f-row-top { min-height: 64px; }
 .f-col-buyer-group { display: flex; flex-direction: column; width: 58%; border-right: 1px solid #000; }
 .f-sub-row { display: flex; flex: 1; border-bottom: 1px solid #000; }
 .f-sub-row:last-child { border-bottom: none; }
 .f-w-head { width: 145px; }
 .f-w-addr-tag { width: 36px; line-height: 1.4; }
-.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 14.5px; line-height: 1.5; border-right: none !important; }
-.f-tax-clean { font-size: 17px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
+.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 16px; line-height: 1.5; border-right: none !important; }
+.f-tax-clean { font-size: 18px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
 
 .col-p-name { width: 25%; }
 .col-p-spec { width: 16%; }
@@ -4452,19 +4461,19 @@ input, select, textarea {
 .col-p-amt  { width: 18%; }
 .col-p-note { width: 17%; border-right: none !important; }
 
-.f-header-row { font-weight: bold; height: 28px; }
-.f-data-row { height: 30px; }
+.f-header-row { font-weight: bold; height: 30px; }
+.f-data-row { height: 32px; }
 .f-empty-row { height: 28px; }
 
-.f-w-total-lbl { width: 195px; white-space: nowrap; font-size: 14.5px; }
+.f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 16px; }
 .f-amount-val-cell { flex: 1; border-right: none !important; padding: 3px 12px; }
 .f-chinese-amount-line {
-  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16px; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 17px; font-weight: bold;
 }
-.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 17px; display: inline-block; }
+.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 18px; display: inline-block; }
 
 .f-farmer-stamp-cell { border-right: none !important; padding-left: 28px !important; display: flex; align-items: center; gap: 16px; }
-.f-farmer-name-clean { font-size: 18px; letter-spacing: 6px; font-weight: bold; }
+.f-farmer-name-clean { font-size: 19px; letter-spacing: 6px; font-weight: bold; }
 .cai-real-stamp-img { width: 50px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
 
 .f-w-id-lbl { width: 190px; }
@@ -4475,11 +4484,11 @@ input, select, textarea {
 .f-bold { font-weight: bold; }
 .f-pr { padding-right: 12px !important; }
 
-.f-statement { font-size: 12px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
-.f-footer-note { font-size: 10px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
+.f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
+.f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
 
 .print-action-btn {
-  width: 100%; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
+  width: 100%; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15.5px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
