@@ -128,9 +128,10 @@
               </div>
               
               <div class="form-grid">
-                <div class="field highlight-date-field single-line-date-row">
-                  <span class="single-line-label">📅 下單日期：</span>
-                  <input v-model="formOrder.order_date" type="date" class="bold-date-input single-line-date-control" />
+                <!-- 🌟 下單日期：自然排入網格，不再單獨佔整行 -->
+                <div class="field highlight-date-field">
+                  <label>📅 下單日期：</label>
+                  <input v-model="formOrder.order_date" type="date" class="bold-date-input" />
                 </div>
                 <div class="field">
                   <label>預計出貨 / 送達日：</label>
@@ -361,7 +362,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：#F9F0F0，淺淡柔和紅字體 -->
+                      <!-- 花卡未製作：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -376,7 +377,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：#F9F0F0，淺淡柔和紅字體 -->
+                      <!-- 簽收單未列印：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -416,21 +417,21 @@
                         </select>
                       </td>
 
-                      <!-- 操作按鈕 -->
+                      <!-- 🌟 操作按鈕：簽收單全面換色為 #FEFCAD -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
                             <button 
-                              class="cozy-btn" 
-                              style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
+                              class="cozy-btn clean-btn-noborder" 
+                              style="background-color: #FEFCAD !important; color: #5a5410 !important;" 
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
                               🖨️ 簽收單
                             </button>
                             <button 
-                              class="cozy-btn" 
-                              style="background-color: #DEE2FF !important; color: #28305c !important; border: 1px solid #c2c9fa !important;" 
+                              class="cozy-btn clean-btn-noborder" 
+                              style="background-color: #DEE2FF !important; color: #28305c !important;" 
                               @click="fillFarmerReceiptFromOrder(ord)" 
                               title="帶入農民收據"
                             >
@@ -439,16 +440,16 @@
                           </div>
                           <div class="stacked-action-col">
                             <button 
-                              class="cozy-btn icon-only-btn" 
-                              style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" 
+                              class="cozy-btn icon-only-btn clean-btn-noborder" 
+                              style="background-color: #E0FBFC !important; color: #155e75 !important;" 
                               @click="startEditOrder(ord)" 
                               title="修改此訂單"
                             >
                               ✏️
                             </button>
                             <button 
-                              class="cozy-btn icon-only-btn" 
-                              style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" 
+                              class="cozy-btn icon-only-btn clean-btn-noborder" 
+                              style="background-color: #ebd8da !important; color: #6e2e34 !important;" 
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
@@ -590,10 +591,23 @@
                           <option value="已結">已結</option>
                         </select>
                       </td>
+                      <!-- 🌟 對帳單操作欄：邊框優化乾淨無雜線，簽收單 #FEFCAD -->
                       <td>
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                          <button class="cozy-btn" style="background-color: #DEE2FF !important; color: #28305c !important;" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                          <button 
+                            class="cozy-btn clean-btn-noborder" 
+                            style="background-color: #FEFCAD !important; color: #5a5410 !important;" 
+                            @click="fillReceiptFromOrder(ord)"
+                          >
+                            🖨️ 簽收單
+                          </button>
+                          <button 
+                            class="cozy-btn clean-btn-noborder" 
+                            style="background-color: #DEE2FF !important; color: #28305c !important;" 
+                            @click="fillFarmerReceiptFromOrder(ord)"
+                          >
+                            🧾 農民收據
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -627,8 +641,8 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -657,8 +671,8 @@
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -686,8 +700,8 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrchid(item)">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -709,8 +723,8 @@
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditRet(ret)">✏️</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -759,8 +773,8 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
-                          <button class="cozy-btn icon-only-btn" style="background-color: #E0FBFC !important; color: #155e75 !important; border: 1px solid #b6e9eb !important;" @click="startEditOrder(ord)">✏️</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #FEFCAD !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
                     </tr>
@@ -777,6 +791,7 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
+          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -785,6 +800,7 @@
             </div>
           </div>
 
+          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
@@ -806,6 +822,7 @@
             </div>
           </div>
 
+          <!-- 字體與粗細同一行 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
@@ -844,6 +861,7 @@
             </select>
           </div>
 
+          <!-- 上款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞（獨立一格）：</span>
@@ -1024,7 +1042,6 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1078,7 +1095,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 完整左側編輯面板) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1267,7 +1284,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (🌟 完整左側編輯面板) ================= -->
+      <!-- ================= 模式 4：農民收據 ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -2203,9 +2220,7 @@ const batchMarkPaid = async () => {
   }
 }
 
-// ==========================================
-// 3. A5 橫式簽收單 (完整資料與方法)
-// ==========================================
+// 3. A5 橫式簽收單
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -2436,8 +2451,6 @@ const shareReceiptToBuyerDirect = () => {
   ctx.moveTo(tLeft + col1W, tTop)
   ctx.lineTo(tLeft + col1W, tTop + rowHeight * 4)
   ctx.moveTo(tLeft + col1W + col2W, tTop)
-  ctx.lineTo(tLeft + col1W + col2W + rowHeight)
-  ctx.moveTo(tLeft + col1W + col2W + col3W, tTop)
   ctx.lineTo(tLeft + col1W + col2W + col3W, tTop + rowHeight)
   ctx.stroke()
 
@@ -2518,9 +2531,7 @@ const shareReceiptToBuyerDirect = () => {
   }
 }
 
-// ==========================================
-// 4. 農民收據 (完整資料與方法)
-// ==========================================
+// 4. 農民收據
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115',
@@ -3615,28 +3626,6 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🌟 下單日期絕對單行鎖死樣式 */
-.single-line-date-row {
-  grid-column: 1 / -1 !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 10px !important;
-  flex-wrap: nowrap !important;
-}
-.single-line-label {
-  margin-bottom: 0 !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  font-size: 13px !important;
-  font-weight: bold !important;
-  color: #15803d !important;
-}
-.single-line-date-control {
-  max-width: 220px !important;
-  flex: 0 0 220px !important;
-}
-
 /* 多規格花禮卡片設計 */
 .items-section {
   background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;
@@ -3724,7 +3713,13 @@ input, select, textarea {
 
 .cozy-btn {
   padding: 4px 7px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700;
-  white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out;
+}
+
+/* 🌟 去除奇怪多餘外框 */
+.clean-btn-noborder {
+  border: none !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
 .icon-only-btn {
@@ -3990,7 +3985,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute; right: -7px; bottom: -7px; width: 16px; height: 16px;
+  position: absolute right: -7px; bottom: -7px; width: 16px; height: 16px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
@@ -4100,8 +4095,6 @@ input, select, textarea {
   .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
   .control-panel { width: 100%; max-height: 46vh; }
   .form-grid { grid-template-columns: 1fr; }
-  .single-line-date-row { flex-direction: column !important; align-items: flex-start !important; }
-  .single-line-date-control { max-width: 100% !important; flex: 1 !important; width: 100% !important; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
