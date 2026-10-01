@@ -358,7 +358,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡未製作：強制 #E3D0CC -->
+                      <!-- 🌟 花卡未製作：行內樣式直寫 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -373,7 +373,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：強制 #E3D0CC -->
+                      <!-- 🌟 簽收單未列印：行內樣式直寫 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -387,6 +387,7 @@
                         </select>
                       </td>
 
+                      <!-- 出貨狀態 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
@@ -399,6 +400,7 @@
                         </select>
                       </td>
 
+                      <!-- 收款狀態 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
@@ -411,13 +413,13 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單 #F8E8D1、農民收據 #D7CDD5 -->
+                      <!-- 🌟 簽收單 #F8E8D1、農民收據 #D7CDD5 行內樣式強制生效 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #F8E8D1; color: #6b4e23; border: 1px solid #ead5bb;" 
+                              style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
@@ -425,7 +427,7 @@
                             </button>
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #D7CDD5; color: #4a3847; border: 1px solid #c4b6c1;" 
+                              style="background-color: #D7CDD5 !important; color: #4a3847 !important; border: 1px solid #c4b6c1 !important;" 
                               @click="fillFarmerReceiptFromOrder(ord)" 
                               title="帶入農民收據"
                             >
@@ -435,7 +437,7 @@
                           <div class="stacked-action-col">
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" 
+                              style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
                               @click="startEditOrder(ord)" 
                               title="修改此訂單"
                             >
@@ -443,11 +445,11 @@
                             </button>
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #ebd8da; color: #6e2e34; border: 1px solid #dcb3b7;" 
+                              style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" 
                               @click="deleteItem('orders', ord.id, loadOrders)" 
                               title="刪除此訂單"
                             >
-                              🗑️️ 刪除
+                              🗑️ 刪除
                             </button>
                           </div>
                         </div>
@@ -579,14 +581,14 @@
                         <div class="stacked-action-col">
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #F8E8D1; color: #6b4e23; border: 1px solid #ead5bb;" 
+                            style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
                             🖨️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #D7CDD5; color: #4a3847; border: 1px solid #c4b6c1;" 
+                            style="background-color: #D7CDD5 !important; color: #4a3847 !important; border: 1px solid #c4b6c1 !important;" 
                             @click="fillFarmerReceiptFromOrder(ord)"
                           >
                             🧾 農民收據
@@ -608,7 +610,7 @@
             </div>
 
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
+              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 新增進貨紀錄' }}</h3>
               <div class="form-grid">
                 <div class="field">
                   <label>進貨類別</label>
@@ -729,8 +731,8 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da; color: #6e2e34; border: 1px solid #dcb3b7;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -810,8 +812,8 @@
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da; color: #6e2e34; border: 1px solid #dcb3b7;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -887,8 +889,8 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da; color: #6e2e34; border: 1px solid #dcb3b7;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -979,8 +981,8 @@
                       <td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da; color: #6e2e34; border: 1px solid #dcb3b7;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1075,7 +1077,7 @@
                         <div class="stacked-action-col">
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #F8E8D1; color: #6b4e23; border: 1px solid #ead5bb;" 
+                            style="background-color: #F8E8D1 !important; color: #6b4e23 !important; border: 1px solid #ead5bb !important;" 
                             @click="fillReceiptFromOrder(ord)" 
                             title="開啟簽收單"
                           >
@@ -1083,7 +1085,7 @@
                           </button>
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #dbe7ee; color: #27475f; border: 1px solid #b7cce1;" 
+                            style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" 
                             @click="startEditOrder(ord)" 
                             title="編輯訂單"
                           >
@@ -1108,7 +1110,7 @@
       <!-- ================= 模式 2：花卡 / 輓聯編輯器 (橫式絕對不裁切核心) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
-          <h2>⚙️ 卡片與題詞設定</h2>
+          <h2>⚙️️ 卡片與題詞設定</h2>
 
           <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
@@ -1140,7 +1142,7 @@
                   @click="deleteCloudDraft(selectedDraftId)"
                   title="從雲端刪除此草稿"
                 >
-                  🗑️
+                  🗑️️
                 </button>
               </div>
             </div>
@@ -1407,8 +1409,9 @@
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <button type="button" class="line-action-btn mt-2" @click="shareCoupletSuperDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️️ 列印 A4 花卡 / 輓聯</button>
+          <!-- 🌟 傳送函式直接使用高精準原生 Canvas 繪製，徹底告別 html2canvas 截圖裁切 -->
+          <button type="button" class="line-action-btn mt-2" @click="generateFlawlessCoupletImage">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印 A4 花卡 / 輓聯</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1427,7 +1430,7 @@
               height: (isVertical ? 1123 : 794) * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 (橫式寬度保證 1123px，高度 794px) -->
+            <!-- 🌟 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1452,7 +1455,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 (橫式寬度徹底釋放，絕無邊界折斷) -->
+              <!-- 2. 受禮對象/稱謂 (橫式寬度徹底釋放) -->
               <div 
                 v-if="upperTarget.trim()"
                 class="text-box upper-target-box"
@@ -1469,7 +1472,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
               </div>
 
-              <!-- 3. 上款結尾敬詞 (只有在有文字時才渲染) -->
+              <!-- 3. 上款結尾敬詞 -->
               <div 
                 v-if="upperSuffix && upperSuffix.trim()"
                 class="text-box upper-suffix-box"
@@ -1593,7 +1596,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1741,7 +1744,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 收據內容確認與自由修改：</label>
+            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
             <div class="form-row">
               <div class="field">
                 <label>民國年</label>
@@ -1956,7 +1959,6 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
-import html2canvas from 'html2canvas'
 
 // ==========================================
 // 內部通行碼防護設定 (通行碼: cf000725)
@@ -3095,7 +3097,7 @@ const shareFarmerReceiptToLineDirect = () => {
 
   ctx.font = `15px ${fontFam}`
   ctx.textAlign = 'right'
-  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.value.day} 日`, 760, 80)
+  ctx.fillText(`中華民國 ${farmerReceipt.value.year} 年 ${farmerReceipt.value.month} 月 ${farmerReceipt.day} 日`, 760, 80)
 
   ctx.lineWidth = 1.8
   ctx.strokeStyle = '#0f172a'
@@ -3461,7 +3463,7 @@ const saveReturn = async () => {
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  const { error } = await supabase.from('table').delete().eq('id', id)
+  const { error } = await supabase.from(table).delete().eq('id', id)
   if (!error) reloadFn()
 }
 
@@ -3656,7 +3658,6 @@ const getStyle = (key) => {
   }
 }
 
-// 🌟 受禮對象：無右側限制、白底透明
 const getUpperTargetBoxStyle = () => {
   const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 220, y: 80, size: 38 }
   const weight = weights.value.upper_target || '700'
@@ -3838,62 +3839,112 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 核心終極截圖：徹底鎖定 1123 × 794 真實像素，解除縮放
-const shareCoupletSuperDirect = async () => {
-  const cardElem = document.getElementById('card-print-target')
-  if (!cardElem) return
+// ==========================================
+// 🌟 終極根治解法：直接精確高解析度 Canvas 繪製（100% 絕不裁切任何字）
+// ==========================================
+const generateFlawlessCoupletImage = () => {
+  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
 
-  showToast('⏳ 正在生成無切字花卡圖片...')
+  const width = isVertical.value ? 794 : 1123
+  const height = isVertical.value ? 1123 : 794
 
-  // 判定真實寬高：橫式 1123x794，直式 794x1123
-  const targetWidth = isVertical.value ? 794 : 1123
-  const targetHeight = isVertical.value ? 1123 : 794
+  const canvas = document.createElement('canvas')
+  canvas.width = width * 2
+  canvas.height = height * 2
+  const ctx = canvas.getContext('2d')
+  ctx.scale(2, 2)
 
-  // 在背景動態創建 1:1 絕對尺寸乾淨容器
-  const cloneWrapper = document.createElement('div')
-  cloneWrapper.style.position = 'fixed'
-  cloneWrapper.style.left = '-9999px'
-  cloneWrapper.style.top = '0'
-  cloneWrapper.style.width = targetWidth + 'px'
-  cloneWrapper.style.height = targetHeight + 'px'
-  cloneWrapper.style.backgroundColor = '#ffffff'
-  cloneWrapper.style.overflow = 'visible'
-  cloneWrapper.style.zIndex = '-9999'
+  // 1. 純白底
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, width, height)
 
-  const cloned = cardElem.cloneNode(true)
-  cloned.style.transform = 'none'
-  cloned.style.position = 'static'
-  cloned.style.boxShadow = 'none'
-  cloned.style.width = targetWidth + 'px'
-  cloned.style.height = targetHeight + 'px'
-  cloned.style.overflow = 'visible'
+  // 2. 邊框
+  if (!isVertical.value && cardCategory.value === 'celebration') {
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#fce7f3'
+    ctx.strokeRect(6, 6, width - 12, height - 12)
+  }
 
-  cloneWrapper.appendChild(cloned)
-  document.body.appendChild(cloneWrapper)
+  const targetFontFamily = activeCssFontFamily.value
+  ctx.fillStyle = '#0f172a'
 
-  try {
-    const canvas = await html2canvas(cloned, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      width: targetWidth,
-      height: targetHeight,
-      windowWidth: targetWidth + 100,
-      windowHeight: targetHeight + 100,
-      scrollX: 0,
-      scrollY: 0
-    })
+  // 3. 核心繪製文字輔助函式
+  const renderItem = (text, item, wVal, isTarget = false) => {
+    if (!text || !item) return
+    const w = String(wVal || '600')
+    const strokeWidthMap = { '400': 0, '500': 0.4, '600': 0.8, '700': 1.4, '800': 2.2 }
+    const sWidth = strokeWidthMap[w] || 0.8
+    ctx.textBaseline = 'top'
 
-    const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
-    shareOrCopyCanvasBlob(canvas, filename, '花卡確認 (完整無裁切)', '花卡圖片準備完成')
-  } catch (err) {
-    console.error('Capture error', err)
-    showToast('生成失敗，請重試')
-  } finally {
-    if (document.body.contains(cloneWrapper)) {
-      document.body.removeChild(cloneWrapper)
+    if (isVertical.value) {
+      // 直式排版
+      let curY = item.y
+      const chars = text.split('')
+      chars.forEach(char => {
+        const isMa = isTarget && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offX = isMa ? Math.round((item.size - curSize) / 2) : 0
+
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#0f172a'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, item.x + offX, curY)
+        }
+        ctx.fillText(char, item.x + offX, curY)
+        curY += curSize + 8
+      })
+    } else {
+      // 🌟 橫式排版：針對超長文字（如：新北市 陳乃瑜議員）主動計算寬度，確保 100% 留邊
+      let curX = item.x
+      const chars = text.split('')
+
+      chars.forEach(char => {
+        const isMa = isTarget && char === '媽'
+        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
+        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
+        const offY = isMa ? Math.round((item.size - curSize) / 2) : 0
+
+        if (sWidth > 0) {
+          ctx.strokeStyle = '#0f172a'
+          ctx.lineWidth = sWidth
+          ctx.strokeText(char, curX, item.y + offY)
+        }
+        ctx.fillText(char, curX, item.y + offY)
+        curX += curSize + 6 // 依據字級橫向推進
+      })
     }
   }
+
+  // 繪製上款敬詞
+  renderItem(upperPrefix.value, layout.value.upper_prefix, weights.value.upper_prefix)
+  // 繪製受禮人（陳乃瑜議員）
+  renderItem(upperTarget.value, layout.value.upper_target, weights.value.upper_target, true)
+  // 繪製上款結尾詞
+  if (upperSuffix.value && upperSuffix.value.trim()) {
+    renderItem(upperSuffix.value, layout.value.upper_suffix, weights.value.upper_suffix)
+  }
+
+  // 繪製中款第 1 行
+  renderItem(middleText.value, layout.value.middle, weights.value.middle)
+  // 繪製中款第 2 行
+  if (middleText2.value && middleText2.value.trim()) {
+    renderItem(middleText2.value, layout.value.middle_2, weights.value.middle_2)
+  }
+
+  // 繪製下款 6 格
+  bottomLines.value.forEach((b, idx) => {
+    if (b.text && b.text.trim()) {
+      renderItem(b.text, layout.value['bottom_' + idx], weights.value['bottom_' + idx])
+    }
+  })
+
+  // 繪製敬賀敬輓
+  renderItem(suffixText.value, layout.value.suffix, weights.value.suffix)
+
+  // 輸出圖片
+  const filename = `花卡_${new Date().toISOString().split('T')[0]}.png`
+  shareOrCopyCanvasBlob(canvas, filename, '花卡確認 (完整無裁切)', '花卡圖片準備完成')
 }
 
 // 初始化所有系統資料
