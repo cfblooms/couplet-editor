@@ -30,16 +30,6 @@
 
     <!-- ================= 系統主畫面 ================= -->
     <template v-else>
-      <!-- 動態列印樣式 -->
-      <component :is="'style'">
-        @media print {
-          @page {
-            size: {{ getDynamicPrintPageSize }} !important;
-            margin: 0 !important;
-          }
-        }
-      </component>
-
       <!-- 頂端主導覽列 -->
       <header class="no-print top-nav">
         <div class="nav-title">🌸 宸豐蘭藝</div>
@@ -591,7 +581,6 @@
                           {{ ord.card_status || '未製作' }}
                         </span>
                       </td>
-                      <!-- 🌟 簽收單未列印：指定色碼 #FDE1DE -->
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FDE1DE !important', color: '#682e2b !important', border: '1px solid #f8c3be !important' } : {}"
@@ -852,7 +841,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1021,7 +1010,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1120,7 +1109,7 @@
                             @click="fillReceiptFromOrder(ord)" 
                             title="開啟簽收單"
                           >
-                            🖨️️ 簽收單
+                            🖨️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn" 
@@ -1146,7 +1135,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (橫式絕對不裁切核心) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -3893,7 +3882,7 @@ const saveCurrentAsCloudDraft = async () => {
       data: draftPayload
     }])
     if (!error) {
-      showToast(`☁️ 花卡已成功存至雲端！\n草稿名稱：「${draftTitle}」\n其他電腦或手機點開都能同步看到！`)
+      showToast(`☁️️ 花卡已成功存至雲端！\n草稿名稱：「${draftTitle}」\n其他電腦或手機點開都能同步看到！`)
       await loadCloudDrafts()
       selectedDraftId.value = draftId
     } else {
