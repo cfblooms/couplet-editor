@@ -30,7 +30,7 @@
 
     <!-- ================= 系統主畫面 ================= -->
     <template v-else>
-      <!-- 動態列印樣式（A4 / A5 與直式 / 橫式自動匹配） -->
+      <!-- 動態列印樣式 -->
       <component :is="'style'">
         @media print {
           @page {
@@ -383,11 +383,11 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單未列印：行內樣式寫死 #E3D0CC -->
+                      <!-- 🌟 簽收單未列印：指定色碼 #E4B1AB -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E4B1AB !important', color: '#5c322d !important', border: '1px solid #d49a94 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
                           class="status-select-box"
@@ -472,7 +472,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區（可直接更改未結/已結） -->
+          <!-- 模組 2：客戶未結對帳專區（可自訂日期區間，顯示總金額/總盆數/總訂單數） -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -480,7 +480,7 @@
                 <div class="field">
                   <label>選擇對帳客戶：</label>
                   <select v-model="statementCustomer">
-                    <option value="">-- 請選擇客戶 (全部未結) --</option>
+                    <option value="">-- 請選擇客戶 (全部客戶) --</option>
                     <option v-for="c in customers" :key="c.id" :value="c.name">
                       {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
                     </option>
@@ -489,32 +489,48 @@
                 <div class="field">
                   <label>統計期間：</label>
                   <select v-model="statementPeriod">
-                    <option value="all">全部歷史未結</option>
+                    <option value="all">全部歷史紀錄</option>
                     <option value="thisWeek">本週 (週一至週日)</option>
                     <option value="thisMonth">本月 (1日至今)</option>
                     <option value="lastMonth">上月全月</option>
+                    <option value="custom">🗓️ 自訂日期區間</option>
                   </select>
+                </div>
+                <!-- 🌟 自訂日期區間選擇器 -->
+                <div v-if="statementPeriod === 'custom'" class="field custom-date-range-field">
+                  <label>開始日期：</label>
+                  <input type="date" v-model="statementStartDate" />
+                </div>
+                <div v-if="statementPeriod === 'custom'" class="field custom-date-range-field">
+                  <label>結束日期：</label>
+                  <input type="date" v-model="statementEndDate" />
                 </div>
                 <div class="field">
                   <label>收款狀態篩選：</label>
                   <select v-model="statementPaymentFilter">
                     <option value="未結">僅顯示未結帳款 (對帳用)</option>
                     <option value="all">顯示全部 (含已結)</option>
+                    <option value="已結">僅顯示已結帳款</option>
                   </select>
                 </div>
               </div>
 
+              <!-- 🌟 統計資訊三大指標卡片：總金額、總盆數、總訂單數 -->
               <div class="statement-summary-cards mt-3">
                 <div class="sum-card red-card">
-                  <div class="sum-label">對帳總金額</div>
+                  <div class="sum-label">💰 對帳總金額</div>
                   <div class="sum-value">${{ statementTotalAmount.toLocaleString() }} 元</div>
                 </div>
+                <div class="sum-card purple-card">
+                  <div class="sum-label">🌸 總盆數</div>
+                  <div class="sum-value">{{ statementTotalPots }} 盆</div>
+                </div>
                 <div class="sum-card blue-card">
-                  <div class="sum-label">訂單筆數</div>
+                  <div class="sum-label">📑 總訂單數</div>
                   <div class="sum-value">{{ statementOrders.length }} 筆</div>
                 </div>
                 <div class="sum-card green-card">
-                  <div class="sum-label">客戶週期 / 類別</div>
+                  <div class="sum-label">👤 客戶週期 / 類別</div>
                   <div class="sum-value font-medium">{{ currentCustomerInfoText }}</div>
                 </div>
               </div>
@@ -547,6 +563,7 @@
                       <th>客戶名稱</th>
                       <th>統編</th>
                       <th>開收據</th>
+                      <th>總盆數</th>
                       <th>規格明細</th>
                       <th>金額</th>
                       <th class="nowrap-col">花卡狀態</th>
@@ -562,28 +579,30 @@
                       <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>{{ ord.need_receipt || '不需收據' }}</td>
+                      <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
                           {{ ord.card_status || '未製作' }}
                         </span>
                       </td>
+                      <!-- 🌟 簽收單未列印：指定色碼 #E4B1AB -->
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC', color: '#5c3832', border: '1px solid #ceb3ad' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E4B1AB !important', color: '#5c322d !important', border: '1px solid #d49a94 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
                         </span>
                       </td>
                       
-                      <!-- 🌟 收款狀態：直接以下拉選單修改未結與已結 -->
+                      <!-- 收款狀態：直接下拉選單修改未結與已結 -->
                       <td class="nowrap-cell">
                         <select 
                           v-model="ord.payment_status" 
@@ -608,7 +627,7 @@
                           <button 
                             class="cozy-btn" 
                             style="background-color: #B392AC !important; color: #361730 !important; border: 1px solid #9e7997 !important;" 
-                            @click="fillFarmerReceiptFromOrder(ord)"
+                            @click="fillFarmerReceiptFromOrder(ord)" 
                           >
                             🧾 農民收據
                           </button>
@@ -751,7 +770,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditInv(inv)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('inventory', inv.id, loadInventory)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -908,7 +927,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -1001,7 +1020,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1075,7 +1094,7 @@
                       </td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#E4B1AB !important', color: '#5c322d !important', border: '1px solid #d49a94 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
@@ -1126,12 +1145,12 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5自由切換) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (橫式絕對不裁切核心) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 新增 A4 / A5 尺寸自由切換 -->
+          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -1182,7 +1201,7 @@
                   @click="deleteCloudDraft(selectedDraftId)"
                   title="從雲端刪除此草稿"
                 >
-                  🗑️️
+                  🗑️
                 </button>
               </div>
             </div>
@@ -2044,13 +2063,11 @@ const showToast = (msg) => {
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 
-// 🌟 新增 A4 / A5 紙張切換狀態（預設 A4）
 const cardPaperSize = ref('A4')
 const isVertical = ref(false)
 const zoomLevel = ref(0.7)
 const viewportRef = ref(null)
 
-// 計算動態畫布尺寸（支援 A4 與 A5）
 const currentCardDimensions = computed(() => {
   if (cardPaperSize.value === 'A5') {
     return isVertical.value ? { w: 560, h: 794 } : { w: 794, h: 560 }
@@ -2058,7 +2075,6 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 計算動態列印尺寸指令
 const getDynamicPrintPageSize = computed(() => {
   if (currentTab.value === 'couplet') {
     if (cardPaperSize.value === 'A5') {
@@ -2349,7 +2365,7 @@ const removeOrderItemRow = (idx) => {
 
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
 
-// 🌟 訂單載入：一律按照單號（ID）由大到小嚴格遞減排序
+// 訂單載入：按單號（ID）由大到小嚴格排序
 const loadOrders = async () => {
   try {
     const { data, error } = await supabase.from('orders').select('*')
@@ -2573,7 +2589,7 @@ const saveOrder = async () => {
   }
 }
 
-// 🌟 即時更新資料欄位（含對帳專區切換付款狀態）
+// 即時更新資料欄位
 const updateOrderField = async (ord, field, value) => {
   const updateObj = {}
   updateObj[field] = value
@@ -2609,15 +2625,19 @@ const getCustomerAddress = (ord) => {
   return c?.line_note || ord.note || '—'
 }
 
-// 2. 客戶未結對帳專區
+// ==========================================
+// 2. 客戶未結對帳專區（支援自訂日期區間與總盆數統計）
+// ==========================================
 const statementCustomer = ref('')
 const statementPeriod = ref('all')
+const statementStartDate = ref(new Date().toISOString().split('T')[0])
+const statementEndDate = ref(new Date().toISOString().split('T')[0])
 const statementPaymentFilter = ref('未結')
 
 const statementOrders = computed(() => {
   return orderList.value.filter(o => {
     if (statementCustomer.value && o.customer !== statementCustomer.value) return false
-    if (statementPaymentFilter.value === '未結' && o.payment_status !== '未結') return false
+    if (statementPaymentFilter.value !== 'all' && o.payment_status !== statementPaymentFilter.value) return false
     if (statementPeriod.value === 'all') return true
 
     const orderDate = new Date(o.order_date + 'T00:00:00')
@@ -2645,12 +2665,26 @@ const statementOrders = computed(() => {
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
       return orderDate >= firstDay && orderDate <= lastMonthEnd
     }
+
+    // 🌟 自訂日期區間篩選
+    if (statementPeriod.value === 'custom') {
+      if (!statementStartDate.value || !statementEndDate.value) return true
+      const sDate = new Date(statementStartDate.value + 'T00:00:00')
+      const eDate = new Date(statementEndDate.value + 'T23:59:59')
+      return orderDate >= sDate && orderDate <= eDate
+    }
+
     return true
   })
 })
 
 const statementTotalAmount = computed(() => {
   return statementOrders.value.reduce((sum, o) => sum + (Number(o.price) || 0), 0)
+})
+
+// 🌟 統計對帳區間內的總盆數
+const statementTotalPots = computed(() => {
+  return statementOrders.value.reduce((sum, o) => sum + getOrderTotalPots(o), 0)
 })
 
 const currentCustomerInfoText = computed(() => {
@@ -2662,16 +2696,21 @@ const currentCustomerInfoText = computed(() => {
 const copyLineStatement = () => {
   if (statementOrders.value.length === 0) return alert('目前無訂單可複製對帳資料！')
   const custTitle = statementCustomer.value || '全部客戶'
-  const periodTextMap = { all: '歷史累計未結', thisWeek: '本週未結', thisMonth: '本月未結', lastMonth: '上月未結' }
-  const periodText = periodTextMap[statementPeriod.value] || '對帳區間'
+  let periodText = '對帳區間'
+  if (statementPeriod.value === 'all') periodText = '歷史累計'
+  else if (statementPeriod.value === 'thisWeek') periodText = '本週'
+  else if (statementPeriod.value === 'thisMonth') periodText = '本月'
+  else if (statementPeriod.value === 'lastMonth') periodText = '上月全月'
+  else if (statementPeriod.value === 'custom') periodText = `${statementStartDate.value} 至 ${statementEndDate.value}`
 
   let text = `🌸【宸豐蘭藝 - 對帳明細】\n`
   text += `--------------------------------\n`
   text += `客戶名稱：${custTitle}\n`
   text += `帳務週期：${currentCustomerInfoText.value}\n`
   text += `統計區間：${periodText}\n`
-  text += `待結筆數：${statementOrders.value.length} 筆\n`
-  text += `未結總額：NT$ ${statementTotalAmount.value.toLocaleString()} 元\n`
+  text += `訂單筆數：${statementOrders.value.length} 筆\n`
+  text += `花禮總數：${statementTotalPots.value} 盆\n`
+  text += `對帳總額：NT$ ${statementTotalAmount.value.toLocaleString()} 元\n`
   text += `--------------------------------\n`
   text += `出貨明細清單：\n`
   statementOrders.value.forEach((o, index) => {
@@ -3535,7 +3574,7 @@ const saveReturn = async () => {
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  const { error } = await supabase.from(table).delete().eq('id', id)
+  const { error } = await supabase.from('table').delete().eq('id', id)
   if (!error) reloadFn()
 }
 
@@ -3730,7 +3769,6 @@ const getStyle = (key) => {
   }
 }
 
-// 🌟 受禮對象專屬：白底透明、無邊界阻擋
 const getUpperTargetBoxStyle = () => {
   const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 220, y: 80, size: 38 }
   const weight = weights.value.upper_target || '700'
@@ -3914,7 +3952,7 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 終極根治解法：直接以 Canvas 繪製輸出真實比例圖檔
+// 🌟 純 Canvas 輸出：根據當前紙張尺寸 (A4 / A5) 1:1 繪出，絕不切字
 const generateFlawlessCoupletImage = () => {
   showToast('⏳ 正在生成完整花卡高畫質圖片...')
 
@@ -3931,7 +3969,7 @@ const generateFlawlessCoupletImage = () => {
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
 
-  // 2. 邊框
+  // 2. 慶典外框
   if (!isVertical.value && cardCategory.value === 'celebration') {
     ctx.lineWidth = 12
     ctx.strokeStyle = '#fce7f3'
@@ -3941,7 +3979,7 @@ const generateFlawlessCoupletImage = () => {
   const targetFontFamily = activeCssFontFamily.value
   ctx.fillStyle = '#0f172a'
 
-  // 3. 核心繪製文字輔助函式
+  // 3. 核心文字繪製函式
   const renderItem = (text, item, wVal, isTarget = false) => {
     if (!text || !item) return
     const w = String(wVal || '600')
@@ -4585,10 +4623,17 @@ input, select, textarea {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px; background: #f8fafc; padding: 12px; border-radius: 6px;
 }
-.statement-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.custom-date-range-field {
+  background: #fefce8;
+  border: 1.5px solid #fde047;
+  border-radius: 6px;
+  padding: 6px;
+}
+.statement-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .sum-card { padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
 .red-card { background: #fef2f2; border-color: #fecaca; }
 .blue-card { background: #eff6ff; border-color: #bfdbfe; }
+.purple-card { background: #faf5ff; border-color: #e9d5ff; }
 .green-card { background: #f0fdf4; border-color: #bbf7d0; }
 .sum-label { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 .sum-value { font-size: 20px; font-weight: 900; color: #0f172a; }
