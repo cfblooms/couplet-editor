@@ -356,13 +356,14 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
-                      <td class="text-blue font-bold">${{ ord.price }}</td>
+                      <!-- 🌟 金額字體加粗 -->
+                      <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 花卡未製作：行內樣式寫死 #E3D0CC -->
+                      <!-- 🌟 花卡未製作：強制 #FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
                           class="status-select-box"
@@ -373,11 +374,11 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單未列印：指定色碼 #FDE1DE -->
+                      <!-- 🌟 簽收單未列印：強制 #FEF0EF -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FDE1DE !important', color: '#682e2b !important', border: '1px solid #f8c3be !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
                           class="status-select-box"
@@ -413,7 +414,7 @@
                         </select>
                       </td>
 
-                      <!-- 按鈕：簽收單 #F8E8D1、農民收據 #AAA1C8 -->
+                      <!-- 🌟 按鈕：簽收單 #F8E8D1、農民收據 #DEE2FF -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -427,7 +428,7 @@
                             </button>
                             <button 
                               class="cozy-btn" 
-                              style="background-color: #AAA1C8 !important; color: #2e2640 !important; border: 1px solid #9187b0 !important;" 
+                              style="background-color: #DEE2FF !important; color: #28305c !important; border: 1px solid #c2c9fa !important;" 
                               @click="fillFarmerReceiptFromOrder(ord)" 
                               title="帶入農民收據"
                             >
@@ -508,15 +509,15 @@
               <div class="statement-summary-cards mt-3">
                 <div class="sum-card red-card">
                   <div class="sum-label">💰 對帳總金額</div>
-                  <div class="sum-value">${{ statementTotalAmount.toLocaleString() }} 元</div>
+                  <div class="sum-value font-heavy">${{ statementTotalAmount.toLocaleString() }} 元</div>
                 </div>
                 <div class="sum-card purple-card">
                   <div class="sum-label">🌸 總盆數</div>
-                  <div class="sum-value">{{ statementTotalPots }} 盆</div>
+                  <div class="sum-value font-heavy">{{ statementTotalPots }} 盆</div>
                 </div>
                 <div class="sum-card blue-card">
                   <div class="sum-label">📑 總訂單數</div>
-                  <div class="sum-value">{{ statementOrders.length }} 筆</div>
+                  <div class="sum-value font-heavy">{{ statementOrders.length }} 筆</div>
                 </div>
                 <div class="sum-card green-card">
                   <div class="sum-label">👤 客戶週期 / 類別</div>
@@ -557,7 +558,8 @@
                       <th>金額</th>
                       <th class="nowrap-col">花卡狀態</th>
                       <th class="nowrap-col">簽收單狀態</th>
-                      <th class="nowrap-col">收款狀態 (可直接更改)</th>
+                      <!-- 🌟 乾淨的表頭文字 -->
+                      <th class="nowrap-col">收款狀態</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -570,20 +572,24 @@
                       <td>{{ ord.need_receipt || '不需收據' }}</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
-                      <td class="text-blue font-bold">${{ ord.price }}</td>
+                      <!-- 🌟 金額字體加粗 -->
+                      <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
+                      <!-- 🌟 花卡未製作：強制 #FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
                           {{ ord.card_status || '未製作' }}
                         </span>
                       </td>
+
+                      <!-- 🌟 簽收單未列印：強制 #FEF0EF -->
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FDE1DE !important', color: '#682e2b !important', border: '1px solid #f8c3be !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
@@ -615,7 +621,7 @@
                           </button>
                           <button 
                             class="cozy-btn" 
-                            style="background-color: #AAA1C8 !important; color: #2e2640 !important; border: 1px solid #9187b0 !important;" 
+                            style="background-color: #DEE2FF !important; color: #28305c !important; border: 1px solid #c2c9fa !important;" 
                             @click="fillFarmerReceiptFromOrder(ord)" 
                             title="帶入農民收據"
                           >
@@ -841,7 +847,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1010,7 +1016,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditRet(ret)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('returns', ret.id, loadReturns)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -1075,7 +1081,7 @@
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#E3D0CC !important', color: '#5c3832 !important', border: '1px solid #ceb3ad !important' } : {}"
+                          :style="ord.card_status === '未製作' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
                           class="inline-badge"
                         >
@@ -1084,7 +1090,7 @@
                       </td>
                       <td class="nowrap-cell">
                         <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FDE1DE !important', color: '#682e2b !important', border: '1px solid #f8c3be !important' } : {}"
+                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#FEF0EF !important', color: '#682e2b !important', border: '1px solid #f6cfcc !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
                         >
                           {{ ord.receipt_status || '未列印' }}
@@ -1135,7 +1141,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (純白底無框) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1459,7 +1465,7 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="generateFlawlessCoupletImage">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1478,7 +1484,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 (完全純白底，徹底移除粉紅框) -->
+            <!-- 🌟 花卡看板主體 (純白底，無粉紅邊框) -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1502,7 +1508,7 @@
                 <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
               </div>
 
-              <!-- 2. 受禮對象/稱謂 (取消所有阻擋邊界，給予絕對充足空間) -->
+              <!-- 2. 受禮對象/稱謂 -->
               <div 
                 v-if="upperTarget.trim()"
                 class="text-box upper-target-box"
@@ -1580,7 +1586,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (完整結構) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1690,7 +1696,7 @@
             :disabled="!receiptForm.recipient && !selectedOrderId"
             @click="printReceiptAndMarkDone"
           >
-            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+            🖨️️ 列印 A5 橫式簽收單 (自動標記已列印)
           </button>
         </div>
 
@@ -1767,7 +1773,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 ================= -->
+      <!-- ================= 模式 4：農民收據 (完整結構) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -3882,7 +3888,7 @@ const saveCurrentAsCloudDraft = async () => {
       data: draftPayload
     }])
     if (!error) {
-      showToast(`☁️️ 花卡已成功存至雲端！\n草稿名稱：「${draftTitle}」\n其他電腦或手機點開都能同步看到！`)
+      showToast(`☁️ 花卡已成功存至雲端！\n草稿名稱：「${draftTitle}」\n其他電腦或手機點開都能同步看到！`)
       await loadCloudDrafts()
       selectedDraftId.value = draftId
     } else {
@@ -4203,6 +4209,7 @@ input, select, textarea {
 .bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
 .bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
 .text-purple { color: #7e22ce; }
+.font-heavy { font-weight: 800 !important; font-size: 15px !important; }
 
 .btn-action-row { display: flex; gap: 8px; }
 .primary-btn { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
