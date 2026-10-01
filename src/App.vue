@@ -368,7 +368,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-bold">${{ ord.price }}</td>
                       
-                      <!-- 花卡未製作：行內樣式直寫 #E3D0CC -->
+                      <!-- 花卡未製作：行內樣式寫死 #E3D0CC -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -852,7 +852,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditCust(c)" title="修改">✏️ 修改</button>
-                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️️ 刪除</button>
+                          <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('customers', c.id, loadCustomers)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
                     </tr>
@@ -928,7 +928,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -1120,7 +1120,7 @@
                             @click="fillReceiptFromOrder(ord)" 
                             title="開啟簽收單"
                           >
-                            🖨️ 簽收單
+                            🖨️️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn" 
@@ -1469,7 +1469,6 @@
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <!-- 🌟 傳送函式直接使用高精準原生 Canvas 繪製，徹底告別邊界裁切 -->
           <button type="button" class="line-action-btn mt-2" @click="generateFlawlessCoupletImage">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
           <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
@@ -2027,7 +2026,6 @@ const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
 const inputPasscode = ref('')
 const authError = ref(false)
 
-// 🌟 登入核心：第一時間切換登入狀態並寫入 LocalStorage，避免卡在輸入框
 const handleLogin = () => {
   const entered = inputPasscode.value.trim().toLowerCase()
   if (entered === INTERNAL_PASSCODE.toLowerCase()) {
@@ -3955,7 +3953,7 @@ const startNewCard = () => {
 
 // 🌟 純 Canvas 輸出：根據當前紙張尺寸 (A4 / A5) 1:1 繪出，絕不切字
 const generateFlawlessCoupletImage = () => {
-  showToast('⏳ 正在生成完整花卡高畫質圖片...')
+  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
 
   const width = currentCardDimensions.value.w
   const height = currentCardDimensions.value.h
@@ -3999,7 +3997,7 @@ const generateFlawlessCoupletImage = () => {
         curY += curSize + 8
       })
     } else {
-      // 🌟 橫式排版核心修復：精確計算總長度，如果右端會超出邊界，系統自動將起始點往左移！
+      // 橫式排版核心修復：精確計算總長度，如果右端會超出邊界，系統自動將起始點往左移
       const chars = text.split('')
       let totalTextWidth = 0
       chars.forEach(char => {
@@ -4031,20 +4029,26 @@ const generateFlawlessCoupletImage = () => {
     }
   }
 
+  // 繪製上款敬詞
   renderItem(upperPrefix.value, layout.value.upper_prefix, weights.value.upper_prefix)
+  // 繪製受禮對象（新北市 陳乃瑜議員）
   renderItem(upperTarget.value, layout.value.upper_target, weights.value.upper_target, true)
+  // 繪製上款結尾詞
   if (upperSuffix.value && upperSuffix.value.trim()) {
     renderItem(upperSuffix.value, layout.value.upper_suffix, weights.value.upper_suffix)
   }
+  // 繪製中款
   renderItem(middleText.value, layout.value.middle, weights.value.middle)
   if (middleText2.value && middleText2.value.trim()) {
     renderItem(middleText2.value, layout.value.middle_2, weights.value.middle_2)
   }
+  // 繪製下款 6 格
   bottomLines.value.forEach((b, idx) => {
     if (b.text && b.text.trim()) {
       renderItem(b.text, layout.value['bottom_' + idx], weights.value['bottom_' + idx])
     }
   })
+  // 繪製敬詞
   renderItem(suffixText.value, layout.value.suffix, weights.value.suffix)
 
   const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
@@ -4163,14 +4167,202 @@ onMounted(() => {
 .sub-nav button.active { background: #10b981; color: white; border-color: #10b981; }
 .manage-content { flex: 1; overflow-y: auto; padding: 16px; }
 
-/* 表格與按鈕樣式 */
+/* 編輯提示橫條 */
+.edit-banner {
+  background: #fef3c7; border: 1.5px solid #f59e0b; color: #92400e;
+  padding: 10px 16px; border-radius: 8px; margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 14px;
+}
+.cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; }
+
+/* 通用卡片外觀與表單排版 */
+.card-box { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.card-box h3 { margin: 0; font-size: 16px; color: #1e293b; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.field label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+input, select, textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
+  border-radius: 6px; font-size: 13px; box-sizing: border-box;
+}
+
+/* 多規格花禮卡片設計 */
+.items-section {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;
+}
+.items-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.items-header h4 { margin: 0; font-size: 14px; color: #1e293b; font-weight: bold; }
+.add-item-btn {
+  background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer;
+}
+.order-item-card {
+  background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+}
+.item-card-title {
+  display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
+}
+.remove-item-btn {
+  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+}
+.item-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;
+}
+
+.highlight-field { background-color: #f0fdf4; padding: 6px; border-radius: 6px; border: 1px solid #bbf7d0; }
+.highlight-field label { color: #15803d; }
+.bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
+.bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
+.text-purple { color: #7e22ce; }
+
+.btn-action-row { display: flex; gap: 8px; }
+.primary-btn { background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.secondary-btn { background: #94a3b8; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.excel-btn { background: #059669; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+.line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; width: 100%; }
+
+/* 對帳專區樣式 */
+.statement-filter-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: #f8fafc; padding: 12px; border-radius: 6px;
+}
+.custom-date-range-field {
+  background: #fefce8; border: 1.5px solid #fde047; border-radius: 6px; padding: 6px;
+}
+.statement-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.sum-card { padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.red-card { background: #fef2f2; border-color: #fecaca; }
+.blue-card { background: #eff6ff; border-color: #bfdbfe; }
+.purple-card { background: #faf5ff; border-color: #e9d5ff; }
+.green-card { background: #f0fdf4; border-color: #bbf7d0; }
+.sum-label { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+.sum-value { font-size: 20px; font-weight: 900; color: #0f172a; }
+.sum-value.font-medium { font-size: 15px; }
+
+.statement-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.line-btn { background: #06c755; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.batch-pay-btn { background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+/* 表格樣式 */
+.table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; min-width: 1100px; }
 .data-table th { background: #f8fafc; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; white-space: nowrap; }
 .data-table td { padding: 8px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+
+/* 單行禁止折行類別 */
 .nowrap-col { white-space: nowrap; min-width: 86px; }
 .nowrap-cell { white-space: nowrap !important; }
+.inline-badge { display: inline-block; white-space: nowrap; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+.status-select-box { min-width: 82px; padding: 4px 6px; font-size: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+.spec-cell-wrap { max-width: 240px; line-height: 1.4; word-break: break-all; }
 
-/* 花卡畫布（🌟 徹底移除任何粉紅邊框） */
+/* 操作按鈕上下兩排卡片排列 */
+.action-cell { white-space: nowrap; }
+.stacked-action-container { display: flex; gap: 6px; align-items: center; }
+.stacked-action-col { display: flex; flex-direction: column; gap: 5px; }
+
+.cozy-btn {
+  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;
+  white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; }
+.badge-purple { background: #f3e8ff; color: #7e22ce; }
+.badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badge-soft-green { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #a7f3d0 !important; }
+
+.text-red { color: #dc2626; }
+.text-blue { color: #2563eb; }
+.text-green { color: #16a34a; }
+.text-center { text-align: center; }
+.text-gray { color: #94a3b8; }
+.py-4 { padding: 16px 0; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+
+/* 蘭花品種照片上傳 */
+.photo-preview-wrap {
+  display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px dashed #cbd5e1;
+}
+.preview-label { font-size: 12px; font-weight: bold; color: #475569; }
+.preview-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.photo-col { width: 60px; text-align: center; }
+.table-orchid-img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
+.no-photo-badge { font-size: 11px; color: #94a3b8; }
+
+/* 照片燈箱 */
+.image-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65);
+  display: flex; justify-content: center; align-items: center; z-index: 9999;
+}
+.image-modal-content {
+  background: white; border-radius: 12px; padding: 16px; max-width: 90vw; max-height: 90vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; }
+.close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+.image-modal-img { max-width: 80vw; max-height: 75vh; object-fit: contain; border-radius: 8px; }
+
+/* 簽收單與收據控制面板 */
+.app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
+.couplet-screen-wrapper { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 52px); }
+.control-panel {
+  width: 420px; background: white; padding: 16px; box-shadow: 2px 0 10px rgba(0,0,0,0.06); overflow-y: auto; flex-shrink: 0;
+}
+.panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+.highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
+.bold-select { font-weight: bold; font-size: 14px; border-color: #3b82f6; }
+
+.section-title-with-weight { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.mini-weight-select {
+  width: auto !important; padding: 2px 5px !important; font-size: 11px !important; font-weight: bold !important;
+  color: #1e3a8a !important; background: #eff6ff !important; border: 1px solid #bfdbfe !important; border-radius: 4px !important;
+}
+.flex-input { flex: 1; }
+
+.stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
+.seal-choose-btn {
+  width: 100%; margin-top: 6px; padding: 8px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
+}
+
+.section-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #334155; }
+.bottom-input-group { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.line-num { font-size: 12px; font-weight: bold; color: #64748b; width: 38px; }
+.form-row, .btn-group { display: flex; gap: 6px; }
+.btn-group button {
+  flex: 1; padding: 7px; border: 1px solid #2563eb; background: white; color: #2563eb; border-radius: 4px; cursor: pointer; font-weight: bold;
+}
+.btn-group button.active { background: #2563eb; color: white; }
+.radio-row { display: flex; gap: 14px; font-size: 13px; }
+.tags-container { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag-btn {
+  background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 6px; font-size: 12px; border-radius: 4px; cursor: pointer;
+}
+.reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; }
+
+/* 畫布視窗與自適應 */
+.canvas-viewport {
+  flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto;
+  padding: 20px 20px 80px 20px; position: relative; background-color: #cbd5e1; -webkit-overflow-scrolling: touch;
+}
+.receipt-preview-area {
+  flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto;
+  padding: 16px; position: relative; background-color: #cbd5e1; -webkit-overflow-scrolling: touch;
+}
+.zoom-toolbar {
+  display: flex; align-items: center; gap: 6px; background: white; padding: 5px 12px;
+  border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 12px; position: sticky; top: 0; z-index: 10;
+}
+.zoom-btn { width: 26px; height: 26px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 50%; cursor: pointer; }
+.zoom-text { font-size: 13px; font-weight: bold; min-width: 44px; text-align: center; }
+.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+
+/* 花卡看板主體 */
 .card-scaler-container { position: relative; margin-bottom: 40px; flex-shrink: 0; }
 .card-board {
   background: #ffffff !important; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; border: none !important;
@@ -4181,14 +4373,117 @@ onMounted(() => {
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .card-board.mode-horizontal .middle-box,
 .card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
-.card-board.style-floral { border: none !important; }
 
 .text-box { position: absolute; cursor: move; padding: 4px 6px; white-space: nowrap; line-height: 1.25; color: #0f172a; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
   position: absolute; right: -7px; bottom: -7px; width: 17px; height: 17px;
-  background: #2563eb; color: white; border-radius: 3px; font-size: 11px;
-  display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
+  background: #2563eb; color: white; border-radius: 3px; font-size: 11px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
+}
+
+/* A5 橫式簽收單完整美觀樣式 */
+.receipt-scaler-container { position: relative; }
+.a5-landscape-sheet {
+  width: 794px; height: 560px; background: #ffffff; padding: 38px 45px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
+  color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
+}
+.sheet-header {
+  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px;
+}
+.shop-name-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.sheet-main-title { font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.header-meta { font-size: 13px; line-height: 1.5; text-align: right; color: #334155; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 15px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; }
+.receipt-table .val { width: 35%; }
+.receipt-table .val-bold { font-weight: bold; font-size: 16px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; }
+
+.sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+.footer-tip { font-size: 12px; color: #64748b; }
+.footer-sign-box {
+  width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
+}
+.sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
+.sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
+
+/* 農民出售農產品收據完整美觀樣式 */
+.farmer-scaler-container { position: relative; }
+.farmer-receipt-sheet {
+  width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; color: #000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
+}
+.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
+.f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
+.f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 10px; }
+
+.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 14.5px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 29px; }
+.f-grid-row:last-child { border-bottom: none; }
+.f-grid-lbl {
+  display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0;
+}
+.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; }
+.f-grid-val:last-child { border-right: none; }
+.f-flex-1 { flex: 1; }
+.f-row-top { min-height: 62px; }
+.f-col-buyer-group { display: flex; flex-direction: column; width: 58%; border-right: 1px solid #000; }
+.f-sub-row { display: flex; flex: 1; border-bottom: 1px solid #000; }
+.f-sub-row:last-child { border-bottom: none; }
+.f-w-head { width: 145px; }
+.f-w-addr-tag { width: 36px; line-height: 1.4; }
+.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 14.5px; line-height: 1.5; border-right: none !important; }
+.f-tax-clean { font-size: 17px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
+
+.col-p-name { width: 25%; }
+.col-p-spec { width: 16%; }
+.col-p-qty  { width: 10%; }
+.col-p-price{ width: 14%; }
+.col-p-amt  { width: 18%; }
+.col-p-note { width: 17%; border-right: none !important; }
+
+.f-header-row { font-weight: bold; height: 28px; }
+.f-data-row { height: 30px; }
+.f-empty-row { height: 28px; }
+
+.f-w-total-lbl { width: 195px; white-space: nowrap; font-size: 14.5px; }
+.f-amount-val-cell { flex: 1; border-right: none !important; padding: 3px 12px; }
+.f-chinese-amount-line {
+  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16px; font-weight: bold;
+}
+.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 17px; display: inline-block; }
+
+.f-farmer-stamp-cell { border-right: none !important; padding-left: 28px !important; display: flex; align-items: center; gap: 16px; }
+.f-farmer-name-clean { font-size: 18px; letter-spacing: 6px; font-weight: bold; }
+.cai-real-stamp-img { width: 50px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
+
+.f-w-id-lbl { width: 190px; }
+.f-w-id-val { width: 190px; border-right: none !important; }
+
+.f-text-center { justify-content: center; text-align: center; }
+.f-text-right { justify-content: flex-end; text-align: right; }
+.f-bold { font-weight: bold; }
+.f-pr { padding-right: 12px !important; }
+
+.f-statement { font-size: 12px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
+.f-footer-note { font-size: 10px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
+
+.print-action-btn {
+  width: 100%; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
+}
+.print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+@media (max-width: 768px) {
+  .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
+  .control-panel { width: 100%; max-height: 46vh; }
+  .form-grid { grid-template-columns: 1fr; }
+  .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
+  .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
 @media print {
@@ -4204,5 +4499,8 @@ onMounted(() => {
     position: absolute !important; top: 0 !important; left: 0 !important; transform: none !important; box-shadow: none !important; margin: 0 !important; display: block !important; visibility: visible !important; border: none !important;
   }
   #card-print-target * { visibility: visible !important; }
+  .a5-landscape-sheet, .farmer-receipt-sheet { 
+    position: relative !important; transform: none !important; box-shadow: none !important; width: 210mm !important; height: 148mm !important; margin: 0 auto !important; 
+  }
 }
 </style>
