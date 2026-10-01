@@ -14,9 +14,9 @@
             placeholder="請輸入內部通行密碼" 
             class="lock-input"
             autofocus
-            @keyup.enter="handleLogin"
+            @keydown.enter.prevent="handleLogin"
           />
-          <button type="button" class="lock-btn" @click="handleLogin">
+          <button type="button" class="lock-btn" @click.prevent="handleLogin">
             驗證並進入系統 ➔
           </button>
         </div>
@@ -205,7 +205,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️ 刪除此組
+                      🗑️️ 刪除此組
                     </button>
                   </div>
                   <div class="item-grid">
@@ -310,7 +310,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單（嚴格依單號順序排序） -->
+            <!-- 訂單總覽清單（依單號順序排序） -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -921,7 +921,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️ 修改</button>
+                          <button class="cozy-btn" style="background-color: #dbe7ee !important; color: #27475f !important; border: 1px solid #b7cce1 !important;" @click="startEditOrchid(item)" title="修改">✏️️ 修改</button>
                           <button class="cozy-btn" style="background-color: #ebd8da !important; color: #6e2e34 !important; border: 1px solid #dcb3b7 !important;" @click="deleteItem('orchids', item.id, loadOrchids)" title="刪除">🗑️ 刪除</button>
                         </div>
                       </td>
@@ -1168,7 +1168,7 @@
           <!-- 花卡雲端即時草稿庫 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <label class="section-title">☁️️ 花卡全裝置雲端草稿庫：</label>
+              <label class="section-title">☁️ 花卡全裝置雲端草稿庫：</label>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts" title="重新整理草稿清單">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
@@ -2019,6 +2019,7 @@ const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
 const inputPasscode = ref('')
 const authError = ref(false)
 
+// 登入方法（置於最前，防止 TDZ 錯誤）
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
   if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
@@ -2093,7 +2094,7 @@ const updateDynamicPrintStyle = () => {
   styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0 !important; } }`
 }
 
-watch([currentTab, isVertical, cardPaperSize], updateDynamicPrintStyle, { immediate: true })
+watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
 
 const switchPaperSize = (size) => {
   cardPaperSize.value = size
@@ -3919,7 +3920,10 @@ const generateFlawlessCoupletImage = () => {
   shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
 }
 
-const shareCoupletDirect = generateFlawlessCoupletImage
+// 支援直接傳送函式
+const shareCoupletDirect = () => {
+  generateFlawlessCoupletImage()
+}
 
 // 初始化所有系統資料
 const initSystemData = () => {
