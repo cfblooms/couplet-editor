@@ -177,11 +177,6 @@
                   <label>聯絡電話</label>
                   <input v-model="formOrder.phone" type="text" placeholder="電話號碼" />
                 </div>
-                <!-- 🚚 新增送貨地址欄位 -->
-                <div class="field highlight-field">
-                  <label>🚚 送貨地址：</label>
-                  <input v-model="formOrder.shipping_address" type="text" placeholder="例: 桃園市中壢區... 或門市自取" />
-                </div>
                 <div class="field">
                   <label>統一編號 (8碼)</label>
                   <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
@@ -192,6 +187,17 @@
                     <option value="不需收據">不需收據</option>
                     <option value="需開收據">需開收據</option>
                   </select>
+                </div>
+
+                <!-- 🚚 送貨地址移到「是否開收據」後面，並使用 full-width-field 跨行拉長滿版 -->
+                <div class="field highlight-field full-width-field">
+                  <label>🚚 送貨地址 (輸入完整送達地點/樓層)：</label>
+                  <input 
+                    v-model="formOrder.shipping_address" 
+                    type="text" 
+                    placeholder="例: 桃園市中壢區培英路...號 3樓 或 門市自取" 
+                    class="long-address-input"
+                  />
                 </div>
               </div>
 
@@ -225,7 +231,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️️
+                      🗑
                     </button>
                   </div>
                   <div class="item-grid">
@@ -611,7 +617,7 @@
                             style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
-                            🖨️️ 簽收單
+                            🖨️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn clean-btn-noborder" 
@@ -1313,7 +1319,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1372,6 +1378,7 @@
             <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
+          <!-- 🌟 保留最完美的縮放容器，螢幕外觀絕不變形 -->
           <div 
             class="receipt-scaler-container" 
             :style="{
@@ -2018,7 +2025,7 @@ const onOrderCustSelect = () => {
   }
 }
 
-// 抽取訂單中的地址資訊（支援相容舊資料中存在備註的情況）
+// 抽取訂單中的地址資訊（支援相容舊資料）
 const extractOrderAddress = (ord) => {
   if (!ord) return ''
   if (ord.shipping_address && ord.shipping_address.trim()) return ord.shipping_address.trim()
@@ -2050,7 +2057,6 @@ const startEditOrder = (ord) => {
   })
   if (parsedItems.length === 0) parsedItems.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
   
-  // 清理備註中可能夾帶的 meta 標籤
   const cleanNote = String(ord.note || '')
     .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
     .replace(/\[送達地址[:：].*?\]/g, '')
@@ -2101,7 +2107,6 @@ const saveOrder = async () => {
     receipt_status: formOrder.value.receipt_status, shipped_status: formOrder.value.shipped_status, payment_status: formOrder.value.payment_status,
     order_date: formOrder.value.order_date, expected_date: formOrder.value.expected_date
   }
-  // 如果資料表有 shipping_address 欄位也會同步寫入
   payload.shipping_address = formOrder.value.shipping_address
 
   if (editingOrderId.value) {
@@ -2111,7 +2116,6 @@ const saveOrder = async () => {
       cancelEditOrder()
       loadOrders()
     } else {
-      // 若因資料庫無 shipping_address 欄位報錯，自動降級透過 note 保存
       delete payload.shipping_address
       await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
       alert(`訂單 ${editingOrderId.value} 修改成功！`)
@@ -2553,7 +2557,7 @@ const saveCurrentAsCloudDraft = async () => {
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
   await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
-  showToast(`☁️ 花卡已成功存至雲端！`)
+  showToast(`☁️️ 花卡已成功存至雲端！`)
   await loadCloudDrafts()
   selectedDraftId.value = draftId
 }
@@ -2897,6 +2901,16 @@ onMounted(() => {
 input, select, textarea {
   width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1;
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
+}
+
+/* 🚚 滿版跨行地址欄位樣式 */
+.full-width-field {
+  grid-column: 1 / -1 !important;
+}
+.long-address-input {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #1e3a8a !important;
 }
 
 .items-section {
