@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️ 密碼錯誤，請重新輸入！
+          ⚠️️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -189,7 +189,7 @@
                   </select>
                 </div>
 
-                <!-- 🚚 送貨地址：在「是否開收據」同一行後方，寬度約 3 格大 -->
+                <!-- 🚚 送貨地址：在「是否開收據」正後方，寬度約 3 格大 -->
                 <div class="field highlight-field triple-width-field">
                   <label>🚚 送貨地址：</label>
                   <input 
@@ -616,7 +616,7 @@
                             style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
-                            🖨️ 簽收單
+                            🖨 簽收單
                           </button>
                           <button 
                             class="cozy-btn clean-btn-noborder" 
@@ -634,10 +634,24 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 -->
+          <!-- 模組 3：進貨與庫存 (🌟 耗材可自由輸入品項與規格) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
+              
+              <!-- 耗材專用預設選項 datalist -->
+              <datalist id="supply-item-suggestions">
+                <option value="特選水苔 (水草)" />
+                <option value="透明軟盆 (育苗盆)" />
+                <option value="鐵線 / 花支" />
+                <option value="水管 / 膠帶 / 束帶" />
+                <option value="花卡插籤 / 支架" />
+                <option value="包裝紙 / 禮盒 / 提袋" />
+                <option value="專用緞帶 (紅/金/粉)" />
+                <option value="蘭花專用長效肥 / 粒肥" />
+                <option value="防撞保護網 / 氣泡布" />
+              </datalist>
+
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>進貨類別：</label>
@@ -647,10 +661,14 @@
                     <option value="耗材/配件">耗材/配件</option>
                   </select>
                 </div>
+
+                <!-- 蘭花品項名稱 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>品項名稱：</label>
-                  <input v-model="formInv.item_name" placeholder="例: 滿天紅" />
+                  <label>品種名稱：</label>
+                  <input v-model="formInv.item_name" placeholder="例: 滿天紅、大辣椒" />
                 </div>
+
+                <!-- 陶瓷盆規格 -->
                 <div v-if="formInv.category === '陶瓷盆'" class="field">
                   <label>盆器規格：</label>
                   <select v-model="formInv.pot_type" @change="onPotTypeChange">
@@ -661,6 +679,27 @@
                     <option value="快捷盆 (70)">快捷盆 (成本70)</option>
                   </select>
                 </div>
+
+                <!-- 🌟 耗材品項名稱：開放手動輸入＋下拉推薦 -->
+                <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
+                  <label>耗材品名 (可手打或下拉)：</label>
+                  <input 
+                    v-model="formInv.item_name" 
+                    list="supply-item-suggestions" 
+                    placeholder="輸入或選取耗材 (例: 水苔、透明軟盆)" 
+                  />
+                </div>
+
+                <!-- 🌟 耗材規格與包裝單位：開放詳細填寫 -->
+                <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
+                  <label>耗材規格 / 包裝單位：</label>
+                  <input 
+                    v-model="formInv.spec_supply" 
+                    placeholder="例: 5kg/包、3.5吋 100入/袋、50米/捲" 
+                  />
+                </div>
+
+                <!-- 蘭花規格細項 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>花梗：</label>
                   <select v-model="formInv.spec_spike">
@@ -683,8 +722,9 @@
                     <option value="高">高</option><option value="中">中</option><option value="矮">矮</option>
                   </select>
                 </div>
+
                 <div class="field highlight-field">
-                  <label>進貨數量 (棵/個)：</label>
+                  <label>進貨數量 (棵/個/包/捲)：</label>
                   <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
                 </div>
                 <div class="field">
@@ -696,7 +736,7 @@
                   <input v-model.number="formInv.cost" type="number" min="0" />
                 </div>
                 <div class="field">
-                  <label>供應商 / 花農：</label>
+                  <label>供應商 / 廠商：</label>
                   <input v-model="formInv.supplier" placeholder="供應商名稱" />
                 </div>
                 <div class="field">
@@ -715,7 +755,7 @@
               <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
-                    <tr><th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th></tr>
+                    <tr><th>編號</th><th>類別</th><th>品項名稱</th><th>規格明細</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th></tr>
                   </thead>
                   <tbody>
                     <tr v-for="inv in inventoryList" :key="inv.id">
@@ -723,7 +763,7 @@
                       <td><span class="badge">{{ inv.category }}</span></td>
                       <td><b>{{ inv.item_name }}</b></td>
                       <td>{{ inv.spec }}</td>
-                      <td><b>{{ inv.qty }} {{ inv.category === '陶瓷盆' ? '個' : '棵' }}</b></td>
+                      <td><b>{{ inv.qty }} {{ inv.category === '陶瓷盆' ? '個' : (inv.category === '蘭花' ? '棵' : '件') }}</b></td>
                       <td class="text-blue">${{ inv.unit_cost || (inv.qty ? Math.round(inv.cost / inv.qty) : 0) }}</td>
                       <td class="text-red"><b>${{ inv.cost }}</b></td>
                       <td>{{ inv.supplier }}</td>
@@ -1926,11 +1966,11 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義 (🚚 加入 shipping_address)
+// 模組表單定義 (🌟 耗材加入 spec_supply)
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
-  category: '蘭花', item_name: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中',
+  category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中',
   pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0]
 })
 const formRet = ref({
@@ -2017,14 +2057,12 @@ const onOrderCustSelect = () => {
     formOrder.value.phone = matched.phone || ''
     formOrder.value.cust_type = matched.type === '批發商' ? '批發' : matched.type
     formOrder.value.billing_cycle = matched.billing_cycle || '每單結'
-    // 自動帶入該客戶常用地址
     if (!formOrder.value.shipping_address) {
       formOrder.value.shipping_address = matched.line_note || ''
     }
   }
 }
 
-// 抽取訂單中的地址資訊（支援相容舊資料）
 const extractOrderAddress = (ord) => {
   if (!ord) return ''
   if (ord.shipping_address && ord.shipping_address.trim()) return ord.shipping_address.trim()
@@ -2151,7 +2189,6 @@ const unshippedOrders = computed(() => orderList.value.filter(o => o.shipped_sta
 const shippedOrders = computed(() => orderList.value.filter(o => o.shipped_status === '已出貨'))
 const displayedShippingOrders = computed(() => shippingViewFilter.value === 'unshipped' ? unshippedOrders.value : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value))
 
-// 🚚 出貨派送進度：優先取得訂單專屬送貨地址
 const getCustomerAddress = (ord) => {
   const addr = extractOrderAddress(ord)
   return addr || '同訂購人地址 / 門市取貨'
@@ -2231,7 +2268,7 @@ const batchMarkPaid = async () => {
   loadOrders()
 }
 
-// 模組 3：進貨函式
+// 模組 3：進貨函式 (🌟 耗材可詳細儲存)
 const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
 const onPotTypeChange = () => {
   const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
@@ -2240,31 +2277,65 @@ const onPotTypeChange = () => {
 }
 const startEditInv = (inv) => {
   editingInvId.value = inv.id
-  formInv.value = { ...inv, spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)' }
+  formInv.value = { 
+    ...inv, 
+    spec_supply: inv.category === '耗材/配件' ? inv.spec : '',
+    spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', 
+    pot_type: inv.category === '陶瓷盆' ? inv.item_name : '桌上盆 (100)' 
+  }
   nextTick(() => document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' }))
 }
 const cancelEditInv = () => {
   editingInvId.value = null
-  formInv.value = { category: '蘭花', item_name: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] }
+  formInv.value = { 
+    category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', 
+    spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, 
+    cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] 
+  }
 }
 const saveInventory = async () => {
   const isFlower = formInv.value.category === '蘭花'
-  const itemName = isFlower ? formInv.value.item_name : formInv.value.pot_type.split(' ')[0]
-  if (!itemName) return alert('請輸入品項名稱！')
-  const payload = {
-    category: formInv.value.category, item_name: itemName,
-    spec: isFlower ? `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}` : '固定規格',
-    qty: formInv.value.qty, unit_cost: formInv.value.unit_cost, cost: formInv.value.cost, supplier: formInv.value.supplier, date: formInv.value.date
+  const isPot = formInv.value.category === '陶瓷盆'
+  const isSupply = formInv.value.category === '耗材/配件'
+
+  let finalName = ''
+  let finalSpec = ''
+
+  if (isFlower) {
+    finalName = formInv.value.item_name || '特選蘭花'
+    finalSpec = `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}`
+  } else if (isPot) {
+    finalName = formInv.value.pot_type.split(' ')[0]
+    finalSpec = '盆器固定規格'
+  } else if (isSupply) {
+    finalName = formInv.value.item_name || '一般耗材'
+    finalSpec = formInv.value.spec_supply ? formInv.value.spec_supply.trim() : '常用耗材規格'
   }
+
+  if (!finalName) return alert('請輸入品項名稱！')
+
+  const payload = {
+    category: formInv.value.category, 
+    item_name: finalName,
+    spec: finalSpec,
+    qty: formInv.value.qty, 
+    unit_cost: formInv.value.unit_cost, 
+    cost: formInv.value.cost, 
+    supplier: formInv.value.supplier, 
+    date: formInv.value.date
+  }
+
   if (editingInvId.value) {
     await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
     cancelEditInv()
     loadInventory()
+    showToast('✅ 進貨紀錄修改成功！')
   } else {
     const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
     await supabase.from('inventory').insert([{ id: newId, ...payload }])
     cancelEditInv()
     loadInventory()
+    showToast(`✅ 進貨已入庫！編號：${newId}`)
   }
 }
 
@@ -2730,7 +2801,7 @@ const shareFarmerReceiptDirect = async () => {
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
     shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   } catch (err) {
-    showToast('⚠️ 圖片生成失敗，請重試！')
+    showToast('⚠️️ 圖片生成失敗，請重試！')
   }
 }
 
@@ -2902,7 +2973,7 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🚚 送貨地址寬度調整為約 3 個欄位大小 (同一行後方) */
+/* 🚚 送貨地址寬度：在同一行後方跨約 3 個欄位大小 */
 .triple-width-field {
   grid-column: span 3 !important;
 }
@@ -3266,7 +3337,7 @@ input, select, textarea {
 .f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
 
 .f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
-.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
+.f-grid-row { display: border-bottom: 1px solid #000; min-height: 31px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
