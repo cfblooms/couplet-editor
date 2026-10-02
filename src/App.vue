@@ -99,6 +99,19 @@
         </div>
       </div>
 
+      <!-- 品種照片放大檢視彈窗 -->
+      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
+        <div class="image-modal-content" @click.stop>
+          <div class="image-modal-header">
+            <span>🌸 {{ activeModalTitle }}</span>
+            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
+          </div>
+          <div class="share-modal-body">
+            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
+          </div>
+        </div>
+      </div>
+
       <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
@@ -421,7 +434,7 @@
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
-                              🖨️️ 簽收單
+                              🖨️ 簽收單
                             </button>
                             <button 
                               class="cozy-btn clean-btn-noborder" 
@@ -611,16 +624,88 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 -->
+          <!-- 模組 3：進貨與庫存 (🌟 完整補齊輸入表單與清單) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
+              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
+              <div class="form-grid mt-2">
+                <div class="field">
+                  <label>進貨類別：</label>
+                  <select v-model="formInv.category">
+                    <option value="蘭花">蘭花</option>
+                    <option value="陶瓷盆">陶瓷盆</option>
+                    <option value="耗材/配件">耗材/配件</option>
+                  </select>
+                </div>
+                <div v-if="formInv.category === '蘭花'" class="field">
+                  <label>品項名稱：</label>
+                  <input v-model="formInv.item_name" placeholder="例: 滿天紅" />
+                </div>
+                <div v-if="formInv.category === '陶瓷盆'" class="field">
+                  <label>盆器規格：</label>
+                  <select v-model="formInv.pot_type" @change="onPotTypeChange">
+                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
+                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
+                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
+                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                    <option value="快捷盆 (70)">快捷盆 (成本70)</option>
+                  </select>
+                </div>
+                <div v-if="formInv.category === '蘭花'" class="field">
+                  <label>花梗：</label>
+                  <select v-model="formInv.spec_spike">
+                    <option value="單梗">單梗</option><option value="雙梗">雙梗</option><option value="多梗">多梗</option>
+                  </select>
+                </div>
+                <div v-if="formInv.category === '蘭花'" class="field">
+                  <label>花色：</label>
+                  <input v-model="formInv.spec_color" placeholder="紅/粉/白/黃" />
+                </div>
+                <div v-if="formInv.category === '蘭花'" class="field">
+                  <label>花朵大小：</label>
+                  <select v-model="formInv.spec_size">
+                    <option value="大">大花</option><option value="中">中花</option><option value="小">小花</option>
+                  </select>
+                </div>
+                <div v-if="formInv.category === '蘭花'" class="field">
+                  <label>株高：</label>
+                  <select v-model="formInv.spec_height">
+                    <option value="高">高</option><option value="中">中</option><option value="矮">矮</option>
+                  </select>
+                </div>
+                <div class="field highlight-field">
+                  <label>進貨數量 (棵/個)：</label>
+                  <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
+                </div>
+                <div class="field">
+                  <label>單價 (元)：</label>
+                  <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
+                </div>
+                <div class="field">
+                  <label>進貨總成本 (元)：</label>
+                  <input v-model.number="formInv.cost" type="number" min="0" />
+                </div>
+                <div class="field">
+                  <label>供應商 / 花農：</label>
+                  <input v-model="formInv.supplier" placeholder="供應商名稱" />
+                </div>
+                <div class="field">
+                  <label>進貨日期：</label>
+                  <input v-model="formInv.date" type="date" />
+                </div>
+              </div>
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveInventory">{{ editingInvId ? '確認更新進貨' : '確認入庫' }}</button>
+                <button v-if="editingInvId" class="secondary-btn" @click="cancelEditInv">取消</button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
               <h3>📦 進貨與庫存清單 ({{ inventoryList.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
-                    <tr>
-                      <th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th>
-                    </tr>
+                    <tr><th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th></tr>
                   </thead>
                   <tbody>
                     <tr v-for="inv in inventoryList" :key="inv.id">
@@ -646,9 +731,34 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 -->
+          <!-- 模組 4：客戶資料庫 (🌟 完整補齊輸入表單與清單) -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
+              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
+              <div class="form-grid mt-2">
+                <div class="field"><label>客戶/公司名稱：</label><input v-model="formCust.name" placeholder="名稱" /></div>
+                <div class="field">
+                  <label>客戶類型：</label>
+                  <select v-model="formCust.type">
+                    <option value="批發商">批發商</option><option value="零售客">零售客</option><option value="合作花店">合作花店</option><option value="其他">其他</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>結帳週期：</label>
+                  <select v-model="formCust.billing_cycle">
+                    <option value="每單結">每單結</option><option value="週結">週結</option><option value="月結">月結</option>
+                  </select>
+                </div>
+                <div class="field"><label>聯絡電話：</label><input v-model="formCust.phone" placeholder="電話" /></div>
+                <div class="field"><label>常用送達地址 / 備註：</label><input v-model="formCust.line_note" placeholder="送花地址或LINE暱稱" /></div>
+              </div>
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveCustomer">{{ editingCustId ? '確認更新客戶' : '確認建立客戶' }}</button>
+                <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">取消</button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
               <h3>👥 客戶名冊資料庫 ({{ customers.length }} 位)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -676,9 +786,29 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 -->
+          <!-- 模組 5：蘭花品種庫 (🌟 完整補齊照片上傳與清單) -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
+              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
+              <div class="form-grid mt-2">
+                <div class="field"><label>品種名稱：</label><input v-model="formOrchid.name" placeholder="例: 大辣椒、滿天紅" /></div>
+                <div class="field"><label>花型特色 / 備註：</label><input v-model="formOrchid.note" placeholder="特色說明" /></div>
+                <div class="field">
+                  <label>品種花照：</label>
+                  <input type="file" accept="image/*" @change="onPhotoFileChange" />
+                </div>
+              </div>
+              <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
+                <img :src="formOrchid.photo_url" class="preview-thumb" />
+                <button type="button" class="remove-photo-btn" @click="formOrchid.photo_url = ''">移除照片</button>
+              </div>
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveOrchid">{{ editingOrchidId ? '確認更新品種' : '確認儲存品種' }}</button>
+                <button v-if="editingOrchidId" class="secondary-btn" @click="cancelEditOrchid">取消</button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
               <h3>🌸 蘭花品種清單 ({{ orchids.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -695,7 +825,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -705,9 +835,33 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 -->
+          <!-- 模組 6：退貨管理區 (🌟 完整補齊退貨登記表單與清單) -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
+              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <div class="form-grid mt-2">
+                <div class="field">
+                  <label>退貨類型：</label>
+                  <select v-model="formRet.return_type">
+                    <option value="退給花農">退給花農 (瑕疵不良退貨)</option>
+                    <option value="客戶退回">客戶退回 (客戶退貨退款)</option>
+                  </select>
+                </div>
+                <div class="field"><label>對象名稱：</label><input v-model="formRet.party_name" placeholder="花農或客戶名稱" /></div>
+                <div class="field"><label>退貨品項：</label><input v-model="formRet.target_item" placeholder="品項名稱" /></div>
+                <div class="field"><label>株數：</label><input v-model.number="formRet.qty" type="number" min="1" @input="calcRetTotal" /></div>
+                <div class="field"><label>單價 (元)：</label><input v-model.number="formRet.unit_price" type="number" min="0" @input="calcRetTotal" /></div>
+                <div class="field"><label>退貨總額 (元)：</label><input v-model.number="formRet.total_amount" type="number" min="0" /></div>
+                <div class="field"><label>退貨日期：</label><input v-model="formRet.date" type="date" /></div>
+                <div class="field"><label>原因說明：</label><input v-model="formRet.reason" placeholder="原因" /></div>
+              </div>
+              <div class="btn-action-row mt-2">
+                <button class="primary-btn" @click="saveReturn">{{ editingRetId ? '確認更新退貨' : '確認儲存退貨' }}</button>
+                <button v-if="editingRetId" class="secondary-btn" @click="cancelEditRet">取消</button>
+              </div>
+            </div>
+
+            <div class="card-box mt-3">
               <h3>🔄 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -728,7 +882,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 -->
+          <!-- 模組 7：出貨派送進度分頁 (🌟 完整補齊膠囊過濾與清單) -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -767,7 +921,7 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -1416,7 +1570,7 @@
                 </div>
               </div>
 
-              <!-- 農民收據原始手刻格線 -->
+              <!-- 農民收據手刻格線 -->
               <div class="f-receipt-grid-table">
                 <div class="f-grid-row f-row-top">
                   <div class="f-col-buyer-group">
@@ -1550,7 +1704,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 列印最小邊界樣式注入 (0mm)
+// 🖨️ 動態注入最小邊距列印樣式 (0mm)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1609,7 +1763,7 @@ const authError = ref(false)
 
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
-  if (entered === INTERNAL_PASSCODE || entered === 'cf000725') {
+  if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
     isAuthenticated.value = true
     authError.value = false
     try { localStorage.setItem('cf_admin_auth', 'true') } catch (e) {}
@@ -1762,6 +1916,7 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
+// 模組表單定義
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -1786,7 +1941,7 @@ const flowerInventory = computed(() => inventoryList.value.filter(i => i.categor
 
 const loadOrders = async () => {
   try {
-    const { data } = await supabase.from('orders').select('*')
+    const { data, error } = await supabase.from('orders').select('*')
     if (data) orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
   } catch (err) {}
 }
@@ -2024,12 +2179,127 @@ const batchMarkPaid = async () => {
 }
 
 // 模組 3：進貨函式
+const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
+const onPotTypeChange = () => {
+  const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
+  formInv.value.unit_cost = potCostMap[formInv.value.pot_type] || 100
+  calcInvCost()
+}
 const startEditInv = (inv) => {
   editingInvId.value = inv.id
-  formInv.value = { ...inv }
+  formInv.value = { ...inv, spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)' }
+  nextTick(() => document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' }))
 }
+const cancelEditInv = () => {
+  editingInvId.value = null
+  formInv.value = { category: '蘭花', item_name: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] }
+}
+const saveInventory = async () => {
+  const isFlower = formInv.value.category === '蘭花'
+  const itemName = isFlower ? formInv.value.item_name : formInv.value.pot_type.split(' ')[0]
+  if (!itemName) return alert('請輸入品項名稱！')
+  const payload = {
+    category: formInv.value.category, item_name: itemName,
+    spec: isFlower ? `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}` : '固定規格',
+    qty: formInv.value.qty, unit_cost: formInv.value.unit_cost, cost: formInv.value.cost, supplier: formInv.value.supplier, date: formInv.value.date
+  }
+  if (editingInvId.value) {
+    await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
+    cancelEditInv()
+    loadInventory()
+  } else {
+    const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
+    await supabase.from('inventory').insert([{ id: newId, ...payload }])
+    cancelEditInv()
+    loadInventory()
+  }
+}
+
+// 模組 4：客戶函式
+const startEditCust = (c) => {
+  editingCustId.value = c.id
+  formCust.value = { ...c }
+  nextTick(() => document.getElementById('cust-form-box')?.scrollIntoView({ behavior: 'smooth' }))
+}
+const cancelEditCust = () => {
+  editingCustId.value = null
+  formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
+}
+const saveCustomer = async () => {
+  if (!formCust.value.name) return alert('請輸入客戶名稱！')
+  if (editingCustId.value) {
+    await supabase.from('customers').update({ ...formCust.value }).eq('id', editingCustId.value)
+    cancelEditCust()
+    loadCustomers()
+  } else {
+    const newId = generateDateSeqIdByDate('CU', '', customers.value)
+    await supabase.from('customers').insert([{ id: newId, ...formCust.value }])
+    cancelEditCust()
+    loadCustomers()
+  }
+}
+
+// 模組 5：品種函式
+const onPhotoFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    formOrchid.value.photo_url = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+const startEditOrchid = (item) => {
+  editingOrchidId.value = item.id
+  formOrchid.value = { ...item }
+  nextTick(() => document.getElementById('orchid-form-box')?.scrollIntoView({ behavior: 'smooth' }))
+}
+const cancelEditOrchid = () => {
+  editingOrchidId.value = null
+  formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
+}
+const saveOrchid = async () => {
+  if (!formOrchid.value.name) return alert('請輸入品種名稱！')
+  if (editingOrchidId.value) {
+    await supabase.from('orchids').update({ ...formOrchid.value }).eq('id', editingOrchidId.value)
+    cancelEditOrchid()
+    loadOrchids()
+  } else {
+    const newId = generateDateSeqIdByDate('FL', '', orchids.value)
+    await supabase.from('orchids').insert([{ id: newId, ...formOrchid.value }])
+    cancelEditOrchid()
+    loadOrchids()
+  }
+}
+
+// 模組 6：退貨函式
+const calcRetTotal = () => { formRet.value.total_amount = (Number(formRet.value.qty) || 0) * (Number(formRet.value.unit_price) || 0) }
+const startEditRet = (ret) => {
+  editingRetId.value = ret.id
+  formRet.value = { ...ret }
+  nextTick(() => document.getElementById('return-form-box')?.scrollIntoView({ behavior: 'smooth' }))
+}
+const cancelEditRet = () => {
+  editingRetId.value = null
+  formRet.value = { return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300, date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良' }
+}
+const saveReturn = async () => {
+  if (!formRet.value.party_name) return alert('請輸入對象名稱！')
+  calcRetTotal()
+  if (editingRetId.value) {
+    await supabase.from('returns').update({ ...formRet.value }).eq('id', editingRetId.value)
+    cancelEditRet()
+    loadReturns()
+  } else {
+    const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
+    await supabase.from('returns').insert([{ id: newId, ...formRet.value }])
+    cancelEditRet()
+    loadReturns()
+  }
+}
+
 const deleteItem = async (table, id, reloadFn) => {
-  if (!confirm(`確定要刪除編號 ${id} 嗎？`)) return
+  if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
   await supabase.from(table).delete().eq('id', id)
   reloadFn()
 }
@@ -2245,18 +2515,18 @@ const loadCloudDraft = (id) => {
     upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
     middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
     bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
-    showToast(`📂 已載入「${item.title}」！`)
+    showToast(`📂 已從雲端載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
 }
 const deleteCloudDraft = async (id) => {
-  if (!confirm('確定刪除草稿？')) return
+  if (!confirm('確定要從雲端刪除這張暫存草稿嗎？')) return
   await supabase.from('card_drafts').delete().eq('id', id)
   cloudDrafts.value = cloudDrafts.value.filter(d => d.id !== id)
   selectedDraftId.value = ''
 }
 const startNewCard = () => {
-  upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 空白花卡建立完成')
+  upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 已為您建立空白花卡！')
 }
 
 // ==========================================
@@ -2985,6 +3255,11 @@ input, select, textarea {
 .f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
 .f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
 
+.stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
+.seal-choose-btn {
+  width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
+}
+
 .print-action-btn {
   width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
 }
@@ -2999,7 +3274,7 @@ input, select, textarea {
 }
 
 /* =========================================================
-   🌟 列印模式專用修復：螢幕 100% 不變，只在印表機輸出時適配單頁
+   🌟 列印專用修復：完全保持螢幕外觀，只在列印層確保單頁不截斷
 ========================================================= */
 @media print {
   html, body {
@@ -3007,7 +3282,7 @@ input, select, textarea {
     padding: 0 !important;
     background: white !important;
     overflow: visible !important;
-    height: 100% !important;
+    height: auto !important;
   }
   .main-wrapper, .couplet-screen-wrapper, .system-root { 
     margin: 0 !important; 
@@ -3030,6 +3305,8 @@ input, select, textarea {
     margin: 0 !important; 
     padding: 0 !important; 
   }
+
+  /* 花卡列印 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -3059,7 +3336,6 @@ input, select, textarea {
     box-sizing: border-box !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
-    page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 }
