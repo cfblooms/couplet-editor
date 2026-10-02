@@ -128,7 +128,6 @@
               </div>
               
               <div class="form-grid">
-                <!-- 🌟 下單日期：自然排入網格，不再單獨佔整行 -->
                 <div class="field highlight-date-field">
                   <label>📅 下單日期：</label>
                   <input v-model="formOrder.order_date" type="date" class="bold-date-input" />
@@ -313,7 +312,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單 -->
+            <!-- 訂單總覽清單（🌟 所有狀態欄位大小完全一致且不切字） -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -346,12 +345,13 @@
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
+                      <!-- 🌟 開收據：統一大小、絕不切字 -->
                       <td>
                         <select 
                           v-model="ord.need_receipt" 
                           :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
                           @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
-                          class="status-select-box"
+                          class="uniform-status-select"
                         >
                           <option value="不需收據">不需收據</option>
                           <option value="需開收據">需開收據</option>
@@ -362,14 +362,14 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 花卡未製作：#F9F0F0，淺淡柔和紅字體 -->
+                      <!-- 🌟 花卡：統一大小、#F9F0F0 淺淡紅字 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
-                          class="short-status-select"
+                          class="uniform-status-select"
                         >
                           <option value="未製作">未製作</option>
                           <option value="已製作">已製作</option>
@@ -377,47 +377,47 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單未列印：#F9F0F0，淺淡柔和紅字體 -->
+                      <!-- 🌟 簽收單：統一大小、#F9F0F0 淺淡紅字 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
-                          class="short-status-select"
+                          class="uniform-status-select"
                         >
                           <option value="未列印">未列印</option>
                           <option value="已列印">已列印</option>
                         </select>
                       </td>
 
-                      <!-- 出貨狀態 -->
+                      <!-- 🌟 出貨狀態：統一大小 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="short-status-select"
+                          class="uniform-status-select"
                         >
                           <option value="未出貨">未出貨</option>
                           <option value="已出貨">已出貨</option>
                         </select>
                       </td>
 
-                      <!-- 收款狀態 -->
+                      <!-- 🌟 收款狀態：統一大小 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="short-status-select"
+                          class="uniform-status-select"
                         >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
                         </select>
                       </td>
 
-                      <!-- 🌟 操作按鈕：簽收單全面換色為 #FEFCAD -->
+                      <!-- 操作按鈕 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -567,7 +567,7 @@
                         <span 
                           :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
                           :class="getCardStatusClass(ord.card_status)" 
-                          class="inline-badge"
+                          class="uniform-status-badge"
                         >
                           {{ ord.card_status || '未製作' }}
                         </span>
@@ -575,7 +575,8 @@
                       <td class="nowrap-cell">
                         <span 
                           :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
-                          :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'"
+                          :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
+                          class="uniform-status-badge"
                         >
                           {{ ord.receipt_status || '未列印' }}
                         </span>
@@ -585,13 +586,12 @@
                           v-model="ord.payment_status" 
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="short-status-select"
+                          class="uniform-status-select"
                         >
                           <option value="未結">未結</option>
                           <option value="已結">已結</option>
                         </select>
                       </td>
-                      <!-- 🌟 對帳單操作欄：邊框優化乾淨無雜線，簽收單 #FEFCAD -->
                       <td>
                         <div class="stacked-action-col">
                           <button 
@@ -761,19 +761,19 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
-                        <span :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="getCardStatusClass(ord.card_status)" class="inline-badge">{{ ord.card_status || '未製作' }}</span>
+                        <span :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="getCardStatusClass(ord.card_status)" class="uniform-status-badge">{{ ord.card_status || '未製作' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <span :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="ord.receipt_status === '已列印' ? 'inline-badge badge-soft-green' : 'inline-badge'">{{ ord.receipt_status || '未列印' }}</span>
+                        <span :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'" class="uniform-status-badge">{{ ord.receipt_status || '未列印' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <select v-model="ord.shipped_status" :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)" class="short-status-select">
+                        <select v-model="ord.shipped_status" :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)" class="uniform-status-select">
                           <option value="未出貨">未出貨</option><option value="已出貨">已出貨</option>
                         </select>
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #FEFCAD !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #FEFCAD !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -1031,7 +1031,6 @@
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
             <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
@@ -2451,6 +2450,8 @@ const shareReceiptToBuyerDirect = () => {
   ctx.moveTo(tLeft + col1W, tTop)
   ctx.lineTo(tLeft + col1W, tTop + rowHeight * 4)
   ctx.moveTo(tLeft + col1W + col2W, tTop)
+  ctx.lineTo(tLeft + col1W + col2W + rowHeight)
+  ctx.moveTo(tLeft + col1W + col2W + col3W, tTop)
   ctx.lineTo(tLeft + col1W + col2W + col3W, tTop + rowHeight)
   ctx.stroke()
 
@@ -3619,7 +3620,7 @@ onMounted(() => {
   margin-left: auto;
 }
 
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .field label { display: block; font-size: 12.5px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 input, select, textarea {
   width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1;
@@ -3691,17 +3692,32 @@ input, select, textarea {
 .data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 狀態標籤與選單格子縮短 */
-.nowrap-col { white-space: nowrap; width: 66px; }
-.nowrap-cell { white-space: nowrap !important; }
-.inline-badge {
-  display: inline-block; white-space: nowrap; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; font-weight: bold;
+/* 🌟 所有狀態選單統一大小（絕不切字、大小一致） */
+.col-status, .col-receipt {
+  width: 82px !important;
+  min-width: 82px !important;
+  text-align: center;
 }
-.short-status-select {
-  width: 64px !important; min-width: 64px !important; padding: 2px 2px !important; font-size: 12.5px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
+.uniform-status-select {
+  width: 78px !important;
+  min-width: 78px !important;
+  padding: 3px 2px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
-.status-select-box {
-  width: 72px !important; min-width: 72px !important; padding: 2px 2px !important; font-size: 12.5px !important; font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center;
+.uniform-status-badge {
+  display: inline-block !important;
+  width: 74px !important;
+  padding: 3px 2px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  border-radius: 4px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 
 .spec-cell-wrap { max-width: 220px; line-height: 1.35; word-break: break-all; font-size: 13px; }
@@ -3716,7 +3732,7 @@ input, select, textarea {
   white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out;
 }
 
-/* 🌟 去除奇怪多餘外框 */
+/* 去除生硬外框 */
 .clean-btn-noborder {
   border: none !important;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
@@ -3985,7 +4001,7 @@ input, select, textarea {
 .text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
-  position: absolute right: -7px; bottom: -7px; width: 16px; height: 16px;
+  position: absolute; right: -7px; bottom: -7px; width: 16px; height: 16px;
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
