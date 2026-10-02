@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️ 密碼錯誤，請重新輸入！
+          ⚠️️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -1030,6 +1030,7 @@
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
             <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
@@ -1040,7 +1041,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1382,7 +1383,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️️ 列印農民收據
+            🖨️ 列印農民收據
           </button>
         </div>
 
@@ -3145,7 +3146,7 @@ const maFontSize = computed(() => {
   return Math.max(12, (layout.value.upper_target?.size || 40) - 20)
 })
 
-// 🌟 安全預設排版：調高底部 Y 座標，遠離列印咬紙區，確保絕不切字
+// 安全預設排版
 const defaultVertical = {
   upper_prefix: { x: 620, y: 100, size: 36 },
   upper_target: { x: 620, y: 220, size: 42 },
@@ -3373,6 +3374,7 @@ const startNewCard = () => {
   }
 }
 
+// 🌟 純 Canvas 輸出：100% 絕對等比例對齊畫面座標（移除 safeRightMargin 強制推擠邏輯，確保左右空白完全一致）
 const generateFlawlessCoupletImage = () => {
   showToast('⏳ 正在生成無切字花卡高畫質圖片...')
 
@@ -3426,18 +3428,7 @@ const generateFlawlessCoupletImage = () => {
       })
     } else {
       const chars = text.split('')
-      let totalTextWidth = 0
-      chars.forEach(char => {
-        const isMa = isTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        totalTextWidth += curSize + 6
-      })
-
-      let curX = item.x
-      const safeRightMargin = 45
-      if (curX + totalTextWidth > width - safeRightMargin) {
-        curX = width - safeRightMargin - totalTextWidth
-      }
+      let curX = item.x  // 🌟 完全依照畫面設定的精確 X 座標繪製，不擅自推擠文字！
 
       chars.forEach(char => {
         const isMa = isTarget && char === '媽'
@@ -3694,7 +3685,7 @@ input, select, textarea {
 .data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 所有狀態選單統一大小 */
+/* 狀態選單統一大小 */
 .col-status, .col-receipt {
   width: 82px !important;
   min-width: 82px !important;
@@ -4117,7 +4108,6 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* 🌟 全新印表機列印自適應：邊界最小化、防切字防換頁 */
 @media print {
   html, body {
     margin: 0 !important;
