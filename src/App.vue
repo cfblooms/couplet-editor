@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️️ 密碼錯誤，請重新輸入！
+          ⚠️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -416,7 +416,6 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單按鈕換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -641,7 +640,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -816,7 +815,7 @@
                   <option value="">-- 請選擇要調出的雲端草稿 --</option>
                   <option v-for="d in cloudDrafts" :key="d.id" :value="d.id">{{ d.title }}</option>
                 </select>
-                <button v-if="selectedDraftId" type="button" class="mini-del-draft-btn" @click="deleteCloudDraft(selectedDraftId)">🗑️</button>
+                <button v-if="selectedDraftId" type="button" class="mini-del-draft-btn" @click="deleteCloudDraft(selectedDraftId)">🗑️️</button>
               </div>
             </div>
           </div>
@@ -1040,7 +1039,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1094,7 +1093,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 簽名區往上移，防止跨頁) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 絕對單頁列印保護) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1266,7 +1265,7 @@
                 </tbody>
               </table>
 
-              <!-- 🌟 簽收單底部：整體上提約 30px，防客人簽名溢出導致跨頁 -->
+              <!-- 緊湊簽收單底部 -->
               <div class="sheet-footer compact-footer">
                 <div class="footer-left">
                   <div>送貨司機 / 經手人：______________</div>
@@ -1588,7 +1587,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 自動印表機自適應切換 (A4/A5, 直/橫, 邊界最小 0mm)
+// 🖨️ 自動印表機自適應切換 (精準單頁 A5 橫向)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -2221,9 +2220,7 @@ const batchMarkPaid = async () => {
   }
 }
 
-// ==========================================
 // 3. A5 橫式簽收單
-// ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -2499,7 +2496,6 @@ const shareReceiptToBuyerDirect = () => {
   ctx.font = `14.5px ${fontFam}`
   drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 22, tWidth - col1W - 24, 21, 2)
 
-  // 🌟 下方經手人與簽名欄向上提
   ctx.fillStyle = '#334155'
   ctx.font = `15px ${fontFam}`
   drawWrappedText(ctx, '送貨司機 / 經手人：______________', 45, 415, 300, 20, 1)
@@ -3377,7 +3373,6 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 100% 所見即所得：自動過濾編輯藍點與選取外框，輸出純淨像預覽列印般的完美圖檔！
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return alert('找不到花卡畫面！')
@@ -3943,10 +3938,10 @@ input, select, textarea {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
 }
 
-/* 🌟 A5 橫式簽收單完整美觀樣式（調整緊湊度與內距，簽名區上移） */
+/* 🌟 A5 橫式簽收單螢幕預覽樣式 */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 24px 38px 20px 38px !important; box-sizing: border-box;
+  width: 794px; height: 530px; background: #ffffff; padding: 22px 34px 16px 34px !important; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
   color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
@@ -3955,56 +3950,56 @@ input, select, textarea {
 }
 .shop-name-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
 .sheet-main-title { font-size: 23px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
-.header-meta { font-size: 13.5px; line-height: 1.4; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 6px 0 8px 0; font-size: 15.5px; table-layout: fixed; }
-.receipt-table td { border: 1.5px solid #334155; padding: 6px 10px; word-break: break-all; }
-.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 15.5px; }
-.receipt-table .val { width: 35%; font-size: 15.5px; }
-.receipt-table .val-bold { font-weight: bold; font-size: 16px; }
-.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 16.5px; }
+.header-meta { font-size: 13px; line-height: 1.4; text-align: right; color: #334155; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 15px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 6px 8px; word-break: break-all; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 15px; }
+.receipt-table .val { width: 35%; font-size: 15px; }
+.receipt-table .val-bold { font-weight: bold; font-size: 15.5px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 16px; }
 
-/* 🌟 簽名區向上拉抬，避免溢出 */
+/* 簽收單底部緊湊配置 */
 .compact-footer {
-  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 2px; margin-bottom: 4px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 2px; margin-bottom: 2px;
 }
-.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; font-size: 14.5px; padding-top: 6px; }
-.footer-tip { font-size: 12.5px; color: #64748b; }
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 5px; font-size: 14px; padding-top: 4px; }
+.footer-tip { font-size: 12px; color: #64748b; }
 .compact-sign-box {
-  width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
+  width: 210px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
 }
-.sign-box-title { background: #e2e8f0; font-size: 12.5px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
-.compact-sign-area { height: 75px; min-height: 75px; max-height: 75px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-.live-signature-img { max-height: 70px; max-width: 95%; object-fit: contain; }
+.sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 2px 0; color: #334155; }
+.compact-sign-area { height: 70px; min-height: 70px; max-height: 70px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.live-signature-img { max-height: 65px; max-width: 95%; object-fit: contain; }
 
-/* 農民出售農產品收據完整美觀樣式 */
+/* 農民出售農產品收據螢幕預覽樣式 */
 .farmer-scaler-container { position: relative; }
 .farmer-receipt-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
+  width: 794px; height: 530px; background: #ffffff; padding: 16px 26px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; color: #000;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
-.f-main-title { font-size: 27px; font-weight: 900; letter-spacing: 5px; text-align: center; }
-.f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
+.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 8px; }
+.f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
+.f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 6px; }
 
-.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
-.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
+.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 15px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 29px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 16px;
+  text-align: center; border-right: 1px solid #000; padding: 2px 4px; box-sizing: border-box; flex-shrink: 0; font-size: 15px;
 }
-.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 16px; }
+.f-grid-val { display: flex; align-items: center; padding-left: 8px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
-.f-row-top { min-height: 64px; }
+.f-row-top { min-height: 58px; }
 .f-col-buyer-group { display: flex; flex-direction: column; width: 58%; border-right: 1px solid #000; }
 .f-sub-row { display: flex; flex: 1; border-bottom: 1px solid #000; }
 .f-sub-row:last-child { border-bottom: none; }
-.f-w-head { width: 145px; }
-.f-w-addr-tag { width: 36px; line-height: 1.4; }
-.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 16px; line-height: 1.5; border-right: none !important; }
-.f-tax-clean { font-size: 18px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
+.f-w-head { width: 140px; }
+.f-w-addr-tag { width: 34px; line-height: 1.4; }
+.f-full-addr-box { flex: 1; padding: 6px 10px; font-size: 15px; line-height: 1.4; border-right: none !important; }
+.f-tax-clean { font-size: 17px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
 
 .col-p-name { width: 25%; }
 .col-p-spec { width: 16%; }
@@ -4013,31 +4008,31 @@ input, select, textarea {
 .col-p-amt  { width: 18%; }
 .col-p-note { width: 17%; border-right: none !important; }
 
-.f-header-row { font-weight: bold; height: 30px; }
-.f-data-row { height: 32px; }
-.f-empty-row { height: 28px; }
+.f-header-row { font-weight: bold; height: 28px; }
+.f-data-row { height: 30px; }
+.f-empty-row { height: 26px; }
 
-.f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 16px; }
-.f-amount-val-cell { flex: 1; border-right: none !important; padding: 3px 12px; }
+.f-w-total-lbl { width: 200px; white-space: nowrap; font-size: 15px; }
+.f-amount-val-cell { flex: 1; border-right: none !important; padding: 2px 10px; }
 .f-chinese-amount-line {
-  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 17px; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16px; font-weight: bold;
 }
-.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 18px; display: inline-block; }
+.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 24px; text-align: center; font-size: 17px; display: inline-block; }
 
-.f-farmer-stamp-cell { border-right: none !important; padding-left: 28px !important; display: flex; align-items: center; gap: 16px; }
-.f-farmer-name-clean { font-size: 19px; letter-spacing: 6px; font-weight: bold; }
-.cai-real-stamp-img { width: 50px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
+.f-farmer-stamp-cell { border-right: none !important; padding-left: 24px !important; display: flex; align-items: center; gap: 14px; }
+.f-farmer-name-clean { font-size: 18px; letter-spacing: 6px; font-weight: bold; }
+.cai-real-stamp-img { width: 46px; height: 46px; object-fit: contain; mix-blend-mode: multiply; }
 
-.f-w-id-lbl { width: 190px; }
-.f-w-id-val { width: 190px; border-right: none !important; }
+.f-w-id-lbl { width: 185px; }
+.f-w-id-val { width: 185px; border-right: none !important; }
 
 .f-text-center { justify-content: center; text-align: center; }
 .f-text-right { justify-content: flex-end; text-align: right; }
 .f-bold { font-weight: bold; }
-.f-pr { padding-right: 12px !important; }
+.f-pr { padding-right: 10px !important; }
 
-.f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
-.f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
+.f-statement { font-size: 12.5px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 3px; }
+.f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
 .print-action-btn {
   width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
@@ -4052,7 +4047,9 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* 🌟 列印絕對防跨頁保護 */
+/* ========================================================
+   🌟 核心修復：列印防跨頁全面鎖死（強制單頁不分頁）
+======================================================== */
 @media print {
   html, body {
     margin: 0 !important;
@@ -4060,6 +4057,7 @@ input, select, textarea {
     background: white !important;
     overflow: hidden !important;
     height: 100% !important;
+    width: 100% !important;
   }
   .main-wrapper, .couplet-screen-wrapper, .system-root, .receipt-container { 
     margin: 0 !important; 
@@ -4068,20 +4066,30 @@ input, select, textarea {
     overflow: hidden !important; 
     display: block !important; 
     height: 100% !important;
+    width: 100% !important;
+    float: none !important;
   }
   .no-print { display: none !important; }
+
+  /* 消除預覽容器的外邊距與填補像素 */
   .canvas-viewport, .receipt-preview-area { 
     padding: 0 !important; 
     margin: 0 !important; 
     background: white !important; 
     overflow: hidden !important; 
     display: block !important; 
+    width: 100% !important;
+    height: 100% !important;
   }
   .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { 
     position: static !important; 
     margin: 0 !important; 
     padding: 0 !important; 
+    width: 100% !important;
+    height: 100% !important;
   }
+
+  /* 花卡列印樣式 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -4094,21 +4102,30 @@ input, select, textarea {
     border: none !important;
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
   }
   #card-print-target * { visibility: visible !important; }
+
+  /* 🌟 簽收單與農民收據：設定 200mm × 138mm（黃金安全尺寸，留 5mm 安全白邊，100% 絕對不跳第二頁） */
   .a5-landscape-sheet, .farmer-receipt-sheet { 
     position: absolute !important; 
-    top: 0 !important;
-    left: 0 !important;
+    top: 3mm !important;
+    left: 4mm !important;
     transform: none !important; 
     box-shadow: none !important; 
-    width: 210mm !important; 
-    height: 148mm !important; 
-    max-height: 148mm !important;
+    width: 200mm !important; 
+    max-width: 200mm !important;
+    height: 138mm !important; 
+    max-height: 138mm !important;
     margin: 0 !important; 
+    padding: 10mm 12mm !important;
+    box-sizing: border-box !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
+    page-break-before: avoid !important;
     page-break-inside: avoid !important;
+    break-after: avoid !important;
     break-inside: avoid !important;
   }
 }
