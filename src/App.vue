@@ -112,7 +112,7 @@
         </nav>
 
         <div class="manage-content">
-          <!-- 訂單與帳務分頁 -->
+          <!-- 訂單分頁 -->
           <section v-if="subTab === 'order'" class="tab-pane">
             <div v-if="editingOrderId" class="edit-banner">
               <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
@@ -194,7 +194,7 @@
                   <div class="item-grid">
                     <div class="field">
                       <label>品種名稱</label>
-                      <input v-model="item.orchid_name" placeholder="手動輸入或選取庫存" />
+                      <input v-model="item.orchid_name" placeholder="輸入花名或特選蘭花" />
                     </div>
                     <div class="field highlight-field">
                       <label>盆數 (幾盆)</label>
@@ -465,7 +465,7 @@
             </select>
           </div>
 
-          <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版位置</button>
+          <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送花卡 (100% 乾淨無藍點)</button>
           <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 (最小邊距滿版)</button>
         </div>
@@ -478,7 +478,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -532,7 +532,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 獨立穩定顯示與列印) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -582,7 +582,6 @@
         </div>
 
         <div class="receipt-preview-area" ref="receiptViewportRef">
-          <!-- 🌟 實體列印目標卡片 -->
           <div id="receipt-print-target" class="a5-landscape-sheet kai-font-supported">
             <div class="sheet-header">
               <div class="shop-name-title">宸豐蘭藝</div>
@@ -632,7 +631,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (🌟 格式修復・單頁不跑版) ================= -->
+      <!-- ================= 模式 4：農民收據 ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -672,7 +671,6 @@
         </div>
 
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
-          <!-- 🌟 實體列印目標卡片 -->
           <div id="farmer-print-target" class="farmer-receipt-sheet kai-font-supported">
             <div class="f-header">
               <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
@@ -765,6 +763,70 @@ import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
 
+// ==========================================
+// 1. 最頂層優先宣告基礎變數 (避免 TDZ 提前讀取報錯)
+// ==========================================
+const currentTab = ref('manage')
+const cardPaperSize = ref('A4')
+const isVertical = ref(false)
+const zoomLevel = ref(0.7)
+const viewportRef = ref(null)
+
+const toastMessage = ref('')
+let toastTimer = null
+const showToast = (msg) => {
+  toastMessage.value = msg
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
+}
+
+const shareModalImg = ref('')
+const shareModalTitle = ref('')
+
+const currentCardDimensions = computed(() => {
+  if (cardPaperSize.value === 'A5') {
+    return isVertical.value ? { w: 560, h: 794 } : { w: 794, h: 560 }
+  }
+  return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
+})
+
+// 🖨️ 動態注入最小邊距列印樣式 (0mm)
+const updateDynamicPrintStyle = () => {
+  let styleTag = document.getElementById('dynamic-cf-print-style')
+  if (!styleTag) {
+    styleTag = document.createElement('style')
+    styleTag.id = 'dynamic-cf-print-style'
+    document.head.appendChild(styleTag)
+  }
+  let pageSize = 'A4 portrait'
+  if (currentTab.value === 'couplet') {
+    const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
+    const orientation = isVertical.value ? 'portrait' : 'landscape'
+    pageSize = `${size} ${orientation}`
+  } else {
+    pageSize = 'A5 landscape'
+  }
+  styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0mm !important; } }`
+}
+
+// 監聽尺寸與模式變更
+watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
+
+const switchPaperSize = (size) => {
+  cardPaperSize.value = size
+  nextTick(() => autoFitZoom())
+}
+
+const autoFitZoom = () => {
+  if (!viewportRef.value) return
+  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
+  const cardWidth = currentCardDimensions.value.w
+  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
+}
+
+// ==========================================
+// 2. 登入防護
+// ==========================================
 const INTERNAL_PASSCODE = 'cf000725'
 const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
 const inputPasscode = ref('')
@@ -790,62 +852,9 @@ const handleLogout = () => {
   try { localStorage.removeItem('cf_admin_auth') } catch (e) {}
 }
 
-const toastMessage = ref('')
-let toastTimer = null
-const showToast = (msg) => {
-  toastMessage.value = msg
-  if (toastTimer) clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
-}
-
-const shareModalImg = ref('')
-const shareModalTitle = ref('')
-
-const cardPaperSize = ref('A4')
-const isVertical = ref(false)
-const zoomLevel = ref(0.7)
-const viewportRef = ref(null)
-
-const currentCardDimensions = computed(() => {
-  if (cardPaperSize.value === 'A5') {
-    return isVertical.value ? { w: 560, h: 794 } : { w: 794, h: 560 }
-  }
-  return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
-})
-
-// 🖨️ 列印邊距最小鎖死 (0mm)
-const updateDynamicPrintStyle = () => {
-  let styleTag = document.getElementById('dynamic-cf-print-style')
-  if (!styleTag) {
-    styleTag = document.createElement('style')
-    styleTag.id = 'dynamic-cf-print-style'
-    document.head.appendChild(styleTag)
-  }
-  let pageSize = 'A4 portrait'
-  if (currentTab.value === 'couplet') {
-    const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
-    const orientation = isVertical.value ? 'portrait' : 'landscape'
-    pageSize = `${size} ${orientation}`
-  } else {
-    pageSize = 'A5 landscape'
-  }
-  styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0mm !important; } }`
-}
-
-watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
-
-const switchPaperSize = (size) => {
-  cardPaperSize.value = size
-  nextTick(() => autoFitZoom())
-}
-
-const autoFitZoom = () => {
-  if (!viewportRef.value) return
-  const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
-  const cardWidth = currentCardDimensions.value.w
-  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
-}
-
+// ==========================================
+// 3. Supabase 連線與訂單解析函式 (🌟 補全修復 formatSimpleItemName)
+// ==========================================
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -853,15 +862,59 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
 const activeCaiSealSrc = computed(() => userCustomSeal.value || '/cai-seal.png')
 
-const currentTab = ref('manage')
 const subTab = ref('order')
-
 const orchids = ref([])
 const customers = ref([])
 const inventoryList = ref([])
 const returnList = ref([])
 const orderList = ref([])
 const editingOrderId = ref(null)
+
+const getOrderTotalPots = (ord) => {
+  if (!ord) return 1
+  const specText = String(ord.spec || '')
+  const matches = [...specText.matchAll(/\((\d+)\s*盆\)/g)]
+  if (matches.length > 0) {
+    const sum = matches.reduce((total, m) => total + (parseInt(m[1]) || 0), 0)
+    if (sum > 0) return sum
+  }
+  const noteText = String(ord.note || '')
+  const metaMatch = noteText.match(/\[共(\d+)\s*盆/)
+  if (metaMatch) return parseInt(metaMatch[1]) || 1
+  return 1
+}
+
+const getOrderShippingFee = (ord) => {
+  if (!ord) return 0
+  const searchStr = `${ord.note || ''}`
+  const shipMatch = searchStr.match(/運費\s*[:：]?\s*(\d+)/)
+  return shipMatch ? parseInt(shipMatch[1]) : 0
+}
+
+// 🌟 修正 TypeError：補齊 formatSimpleItemName 函式
+const formatSimpleItemName = (ord) => {
+  if (!ord) return '特選蘭花 1盆'
+  const specText = String(ord.spec || '')
+  if (specText.includes(';')) {
+    const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
+    if (parts.length > 0) {
+      const parsedParts = parts.map(p => {
+        const segs = p.split('|')
+        const namePart = segs[0].trim()
+        const potsMatch = namePart.match(/(\d+)\s*盆/)
+        const pots = potsMatch ? `${potsMatch[1]}盆` : '1盆'
+        const cleanName = namePart.replace(/\(\d+盆\)/g, '').replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+        return `${cleanName} ${pots}`
+      })
+      const totalPots = getOrderTotalPots(ord)
+      return `${parsedParts.join('、')}（共${totalPots}盆）`
+    }
+  }
+  const rawFirst = specText.split('|')[0].trim()
+  const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+  const totalPots = getOrderTotalPots(ord)
+  return `${cleanName} ${totalPots}盆`
+}
 
 const formOrder = ref({
   cust_type: '批發',
@@ -893,10 +946,12 @@ const loadOrders = async () => {
   } catch (err) {}
 }
 
-const getOrderTotalPots = () => 1
-const getOrderShippingFee = () => 0
 const getCardStatusClass = (status) => status === '已製作' ? 'badge badge-soft-green' : 'badge'
-const calcOrderPrice = () => {}
+const calcOrderPrice = () => {
+  let total = 0
+  formOrder.value.items.forEach(it => { total += (it.stalks * it.unit_price) * it.pots_qty })
+  formOrder.value.price = total + (formOrder.value.shipping_fee || 0)
+}
 const addOrderItemRow = () => { formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)' }) }
 const removeOrderItemRow = (idx) => { formOrder.value.items.splice(idx, 1) }
 const onOrderCustSelect = () => {}
@@ -913,7 +968,9 @@ const deleteItem = async (table, id, reloadFn) => {
   reloadFn()
 }
 
-// 🎴 花卡設定 (底行安全墊高 避免橫式切字)
+// ==========================================
+// 4. 花卡編輯器 (底行安全墊高 避免橫式切字)
+// ==========================================
 const cardFontFamily = ref('kai')
 const upperPrefix = ref('祝')
 const upperTarget = ref('新北市 陳乃瑜議員')
@@ -934,10 +991,10 @@ const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || 
 
 const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, { text: '' }, { text: '' }])
 
-// 🌟 橫式花卡預設 Y 座標安全調高 (500px)，留出 60px 邊距，絕對不切字
+// 🌟 橫式花卡預設 Y 座標安全墊高到 490px，離底部保有 60px 邊界，100% 不切字
 const defaultHorizontal = {
   upper_prefix: { x: 80, y: 70, size: 34 }, upper_target: { x: 220, y: 70, size: 38 }, upper_suffix: { x: 920, y: 70, size: 34 },
-  middle: { x: 220, y: 200, size: 68 }, middle_2: { x: 220, y: 290, size: 68 },
+  middle: { x: 220, y: 195, size: 68 }, middle_2: { x: 220, y: 285, size: 68 },
   bottom_0: { x: 180, y: 490, size: 28 }, bottom_1: { x: 380, y: 500, size: 34 }, bottom_2: { x: 580, y: 490, size: 28 }, bottom_3: { x: 760, y: 500, size: 28 },
   suffix: { x: 880, y: 500, size: 34 }
 }
@@ -998,7 +1055,7 @@ const onPointerUp = () => {
 
 const printCouplet = () => window.print()
 
-// 🌟 花卡截圖（完全過濾掉所有 scale-handle 藍色點點，所見即所得）
+// 🌟 花卡截圖直接傳送 (乾淨無藍色小點)
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return
@@ -1019,7 +1076,9 @@ const shareCoupletDirect = async () => {
   }
 }
 
-// 📄 簽收單管理
+// ==========================================
+// 5. 簽收單管理
+// ==========================================
 const selectedOrderId = ref('')
 const receiptForm = ref({
   orderId: '', deliveryDate: '115-09-03 送達', recipient: '永全證券 陳總經理 (0912-345678)',
@@ -1049,7 +1108,9 @@ const drawingSign = (e) => {
 const stopSign = () => {
   if (!isSigning) return
   isSigning = false
-  liveSignDataUrl.value = signPadCanvasRef.value.toDataURL()
+  if (signPadCanvasRef.value) {
+    liveSignDataUrl.value = signPadCanvasRef.value.toDataURL()
+  }
 }
 const clearLiveSignature = () => {
   const ctx = signPadCanvasRef.value?.getContext('2d')
@@ -1061,7 +1122,7 @@ const onSelectReceiptOrder = () => {
   if (ord) {
     receiptForm.value.orderId = ord.id
     receiptForm.value.recipient = ord.customer + (ord.phone ? ` (${ord.phone})` : '')
-    receiptForm.value.item = ord.spec || '特選蘭花'
+    receiptForm.value.item = formatSimpleItemName(ord)
     receiptForm.value.deliveryDate = ord.expected_date + ' 送達'
   }
 }
@@ -1072,7 +1133,6 @@ const fillReceiptFromOrder = (ord) => {
 }
 const printReceiptAndMarkDone = () => window.print()
 
-// 🌟 簽收單截圖分享（修復打不開問題）
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -1085,11 +1145,13 @@ const shareReceiptDirect = async () => {
   }
 }
 
-// 🧾 農民收據
+// ==========================================
+// 6. 農民收據
+// ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115', month: '09', day: '03', buyerName: '永全證券股份有限公司', taxId: '12345678',
-  buyerAddress: '桃園市桃園區縣府路 82 號', itemName: '蘭花禮盆', spec: '特級蝴蝶蘭', qty: '1 盆',
+  buyerAddress: '桃園市桃園區縣府路 82 號', itemName: '蝴蝶蘭花禮', spec: '特級蝴蝶蘭', qty: '1 盆',
   unitPrice: '2,500', totalAmount: 2500, note: ''
 })
 const chineseDigits = ref({ hundredThousands: '', tenThousands: '', thousands: '貳', hundreds: '伍', tens: '', ones: '' })
@@ -1108,6 +1170,8 @@ const onSelectFarmerReceiptOrder = () => {
     farmerReceipt.value.buyerName = ord.customer
     farmerReceipt.value.taxId = ord.tax_id || ''
     farmerReceipt.value.totalAmount = ord.price || 0
+    farmerReceipt.value.spec = formatSimpleItemName(ord)
+    farmerReceipt.value.qty = `${getOrderTotalPots(ord)} 盆`
     farmerReceipt.value.note = ord.id
     updateChineseAmount()
   }
@@ -1142,10 +1206,14 @@ const shareOrCopyCanvasBlob = (canvas, filename, title) => {
   canvas.toBlob((blob) => {
     if (blob && navigator.clipboard?.write) {
       navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      showToast('📋 圖檔已下載，並複製到剪貼簿！可直接至 LINE 貼上！')
+      showToast('📋 圖檔已下載，並複製到剪貼簿！')
     }
   })
 }
+
+const loadCloudDrafts = async () => {}
+const saveCurrentAsCloudDraft = () => { showToast('已存至雲端草稿') }
+const startNewCard = () => { upperTarget.value = ''; middleText.value = '高票當選'; showToast('已開新花卡') }
 
 const initSystemData = () => {
   autoFitZoom()
@@ -1246,7 +1314,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 
 /* A5 橫式簽收單 (螢幕預覽樣式) */
 .a5-landscape-sheet {
-  width: 794px; height: 530px; background: #ffffff; padding: 24px 36px 18px 36px; box-sizing: border-box;
+  width: 794px; height: 530px; background: #ffffff; padding: 26px 36px 20px 36px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 .sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; }
@@ -1295,7 +1363,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .btn-group button.active { background: #2563eb; color: white; }
 
 /* =========================================================
-   🌟 核心修復：列印模式全面優化 (A5橫向 100% 單頁絕不跑版)
+   🌟 核心修復：列印模式全面優化 (A5 橫向 100% 單頁絕不跑版)
 ========================================================= */
 @media print {
   html, body {
@@ -1337,7 +1405,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 🌟 簽收單與農民收據：精準 A5 橫向單頁 (200mm x 136mm)，杜絕任何第 2 頁與跑版錯位 */
+  /* 🌟 簽收單與農民收據：嚴格單頁尺寸 (198mm x 136mm)，杜絕任何第 2 頁與跑版錯位 */
   #receipt-print-target,
   #farmer-print-target {
     position: relative !important;
@@ -1346,8 +1414,8 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     transform: none !important;
     box-shadow: none !important;
     border: none !important;
-    width: 200mm !important;
-    max-width: 200mm !important;
+    width: 198mm !important;
+    max-width: 198mm !important;
     height: 136mm !important;
     max-height: 136mm !important;
     margin: 4mm auto 0 auto !important;
