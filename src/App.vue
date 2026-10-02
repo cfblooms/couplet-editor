@@ -720,7 +720,7 @@
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
@@ -788,7 +788,6 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -797,7 +796,6 @@
             </div>
           </div>
 
-          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
@@ -809,7 +807,6 @@
             </div>
           </div>
 
-          <!-- 字體與粗細 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
@@ -873,7 +870,6 @@
             <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空不顯示" />
           </div>
 
-          <!-- 中款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">中款第 1 行：</span>
@@ -892,7 +888,6 @@
             <input type="text" v-model="middleText2" class="full-input mt-1" />
           </div>
 
-          <!-- 下款設定 -->
           <div class="panel-section">
             <label class="section-title">下款設定：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
@@ -907,10 +902,17 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送花卡 (100% 乾淨無藍點)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 (最小邊距滿版)</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
+          </div>
+
           <div 
             class="card-scaler-container" 
             :style="{
@@ -972,7 +974,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 經典原汁原味高雅排版) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 100% 恢復原本精緻看板排版) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1018,53 +1020,76 @@
           </div>
 
           <button type="button" class="line-action-btn mt-2" @click="shareReceiptDirect">📤 直接傳送簽收單圖片 (LINE / 複製)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printReceiptAndMarkDone">🖨️ 列印 A5 橫式簽收單 (單頁保證)</button>
+          <button type="button" class="print-action-btn mt-2" @click="printReceiptAndMarkDone">🖨️ 列印 A5 橫式簽收單</button>
         </div>
 
         <div class="receipt-preview-area" ref="receiptViewportRef">
-          <!-- 🌟 實體列印目標卡片 (緊湊收邊、司機與簽名絕對完整保留在單頁) -->
-          <div id="receipt-print-target" class="a5-landscape-sheet kai-font-supported">
-            <div class="sheet-header">
-              <div class="shop-name-title">宸豐蘭藝</div>
-              <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
-              <div class="header-meta">
-                <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場開單' }}</div>
-                <div><b>送達日期：</b>{{ receiptForm.deliveryDate }}</div>
-              </div>
-            </div>
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          </div>
 
-            <table class="receipt-table">
-              <tbody>
-                <tr>
-                  <td class="lbl">收件單位/人</td>
-                  <td class="val val-bold">{{ receiptForm.recipient }}</td>
-                  <td class="lbl">送達地址</td>
-                  <td class="val">{{ receiptForm.address }}</td>
-                </tr>
-                <tr>
-                  <td class="lbl">花禮品項</td>
-                  <td class="val val-highlight" colspan="3">{{ receiptForm.item }}</td>
-                </tr>
-                <tr>
-                  <td class="lbl">致贈/賀詞</td>
-                  <td class="val" colspan="3">{{ receiptForm.giver }}</td>
-                </tr>
-                <tr>
-                  <td class="lbl">備註說明</td>
-                  <td class="val" colspan="3">{{ receiptForm.notes }}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="sheet-footer compact-footer">
-              <div class="footer-left">
-                <div>送貨司機 / 經手人：______________</div>
-                <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
+          <!-- 🌟 恢復原本的縮放容器，預覽絕不被壓扁 -->
+          <div 
+            class="receipt-scaler-container" 
+            :style="{
+              width: (794 * receiptZoom) + 'px',
+              height: (560 * receiptZoom) + 'px'
+            }"
+          >
+            <div 
+              id="receipt-print-target" 
+              class="a5-landscape-sheet kai-font-supported"
+              :style="{
+                transform: `scale(${receiptZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="sheet-header">
+                <div class="shop-name-title">宸豐蘭藝</div>
+                <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
+                <div class="header-meta">
+                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場開單' }}</div>
+                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate }}</div>
+                </div>
               </div>
-              <div class="footer-sign-box compact-sign-box">
-                <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
-                <div class="sign-box-area compact-sign-area">
-                  <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" />
+
+              <table class="receipt-table">
+                <tbody>
+                  <tr>
+                    <td class="lbl">收件單位/人</td>
+                    <td class="val val-bold">{{ receiptForm.recipient }}</td>
+                    <td class="lbl">送達地址</td>
+                    <td class="val">{{ receiptForm.address }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">花禮品項</td>
+                    <td class="val val-highlight" colspan="3">{{ receiptForm.item }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">致贈/賀詞</td>
+                    <td class="val" colspan="3">{{ receiptForm.giver }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">備註說明</td>
+                    <td class="val" colspan="3">{{ receiptForm.notes }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- 底部經手人與簽名欄，完整呈現絕不被截斷 -->
+              <div class="sheet-footer compact-footer">
+                <div class="footer-left">
+                  <div>送貨司機 / 經手人：______________</div>
+                  <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
+                </div>
+                <div class="footer-sign-box compact-sign-box">
+                  <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
+                  <div class="sign-box-area compact-sign-area">
+                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1072,7 +1097,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (🌟 100% 恢復原本精緻官方格線樣式) ================= -->
+      <!-- ================= 模式 4：農民收據 (🌟 100% 恢復原本精緻官方格線結構) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1116,107 +1141,130 @@
           </div>
 
           <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptDirect">💬 直接傳送收據圖片 (LINE/複製)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printFarmerReceipt">🖨️ 列印農民收據 (單頁保證)</button>
+          <button type="button" class="print-action-btn mt-2" @click="printFarmerReceipt">🖨️ 列印農民收據</button>
         </div>
 
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
-          <!-- 🌟 實體列印目標卡片 (完全恢復原本高質感的 f-receipt-grid-table 結構) -->
-          <div id="farmer-print-target" class="farmer-receipt-sheet kai-font-supported">
-            <div class="f-header">
-              <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
-              <div class="f-date-wrap">
-                中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
-              </div>
-            </div>
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+          </div>
 
-            <div class="f-receipt-grid-table">
-              <div class="f-grid-row f-row-top">
-                <div class="f-col-buyer-group">
-                  <div class="f-sub-row">
-                    <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
-                    <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
+          <!-- 🌟 恢復原本的縮放容器，預覽絕不變形 -->
+          <div 
+            class="farmer-scaler-container" 
+            :style="{
+              width: (794 * farmerZoom) + 'px',
+              height: (560 * farmerZoom) + 'px'
+            }"
+          >
+            <div 
+              id="farmer-print-target" 
+              class="farmer-receipt-sheet kai-font-supported"
+              :style="{
+                transform: `scale(${farmerZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="f-header">
+                <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+                <div class="f-date-wrap">
+                  中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
+                </div>
+              </div>
+
+              <!-- 原本精緻專業的手刻收據 DIV 網格 -->
+              <div class="f-receipt-grid-table">
+                <div class="f-grid-row f-row-top">
+                  <div class="f-col-buyer-group">
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
+                      <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
+                    </div>
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">統一編號</div>
+                      <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
+                    </div>
                   </div>
-                  <div class="f-sub-row">
-                    <div class="f-grid-lbl f-w-head">統一編號</div>
-                    <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
+                  <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
+                  <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
+                </div>
+
+                <div class="f-grid-row f-header-row">
+                  <div class="f-grid-lbl col-p-name">品 名</div>
+                  <div class="f-grid-lbl col-p-spec">規 格</div>
+                  <div class="f-grid-lbl col-p-qty">數 量</div>
+                  <div class="f-grid-lbl col-p-price">單 價</div>
+                  <div class="f-grid-lbl col-p-amt">金 額</div>
+                  <div class="f-grid-lbl col-p-note">備 註</div>
+                </div>
+
+                <div class="f-grid-row f-data-row">
+                  <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
+                  <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
+                  <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
+                  <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
+                    {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
+                  </div>
+                  <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-amount-row">
+                  <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
+                  <div class="f-grid-val f-amount-val-cell">
+                    <div class="f-chinese-amount-line">
+                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
+                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
+                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
+                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
+                    </div>
                   </div>
                 </div>
-                <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
-                <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
-              </div>
 
-              <div class="f-grid-row f-header-row">
-                <div class="f-grid-lbl col-p-name">品 名</div>
-                <div class="f-grid-lbl col-p-spec">規 格</div>
-                <div class="f-grid-lbl col-p-qty">數 量</div>
-                <div class="f-grid-lbl col-p-price">單 價</div>
-                <div class="f-grid-lbl col-p-amt">金 額</div>
-                <div class="f-grid-lbl col-p-note">備 註</div>
-              </div>
-
-              <div class="f-grid-row f-data-row">
-                <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
-                <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
-                <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
-                <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
-                <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
-                  {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
-                </div>
-                <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
-              </div>
-
-              <div class="f-grid-row f-data-row f-empty-row">
-                <div class="f-grid-val col-p-name"></div>
-                <div class="f-grid-val col-p-spec"></div>
-                <div class="f-grid-val col-p-qty"></div>
-                <div class="f-grid-val col-p-price"></div>
-                <div class="f-grid-val col-p-amt"></div>
-                <div class="f-grid-val col-p-note"></div>
-              </div>
-
-              <div class="f-grid-row f-data-row f-empty-row">
-                <div class="f-grid-val col-p-name"></div>
-                <div class="f-grid-val col-p-spec"></div>
-                <div class="f-grid-val col-p-qty"></div>
-                <div class="f-grid-val col-p-price"></div>
-                <div class="f-grid-val col-p-amt"></div>
-                <div class="f-grid-val col-p-note"></div>
-              </div>
-
-              <div class="f-grid-row f-amount-row">
-                <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
-                <div class="f-grid-val f-amount-val-cell">
-                  <div class="f-chinese-amount-line">
-                    <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
-                    <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
-                    <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
-                    <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
-                    <span class="d-val">{{ chineseDigits.tens }}</span> 拾
-                    <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
+                <!-- 蔡鎮遠姓名與印章 -->
+                <div class="f-grid-row f-farmer-info-row">
+                  <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
+                  <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
+                    <span class="f-farmer-name-clean">蔡鎮遠</span>
+                    <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
                   </div>
                 </div>
-              </div>
 
-              <!-- 蔡鎮遠姓名與印章 -->
-              <div class="f-grid-row f-farmer-info-row">
-                <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
-                <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
-                  <span class="f-farmer-name-clean">蔡鎮遠</span>
-                  <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
+                <div class="f-grid-row f-id-addr-row">
+                  <div class="f-grid-lbl f-w-head">住 址</div>
+                  <div class="f-grid-val f-flex-1"></div>
+                  <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
+                  <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
                 </div>
               </div>
 
-              <div class="f-grid-row f-id-addr-row">
-                <div class="f-grid-lbl f-w-head">住 址</div>
-                <div class="f-grid-val f-flex-1"></div>
-                <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
-                <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
+              <div class="f-statement">本收據之農民身分確實無誤，若有不實者願依法受罰。</div>
+              <div class="f-footer-note">
+                <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
               </div>
-            </div>
-
-            <div class="f-statement">本收據之農民身分確實無誤，若有不實者願依法受罰。</div>
-            <div class="f-footer-note">
-              <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
             </div>
           </div>
         </div>
@@ -1289,6 +1337,22 @@ const autoFitZoom = () => {
   const availableWidth = Math.max(viewportRef.value.clientWidth - 40, 280)
   const cardWidth = currentCardDimensions.value.w
   zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.28), 1.0)
+}
+
+const receiptViewportRef = ref(null)
+const receiptZoom = ref(1)
+const autoFitReceipt = () => {
+  if (!receiptViewportRef.value) return
+  const availWidth = Math.max(receiptViewportRef.value.clientWidth - 28, 280)
+  receiptZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.35), 1.0)
+}
+
+const farmerReceiptViewportRef = ref(null)
+const farmerZoom = ref(1)
+const autoFitFarmerReceipt = () => {
+  if (!farmerReceiptViewportRef.value) return
+  const availWidth = Math.max(farmerReceiptViewportRef.value.clientWidth - 28, 280)
+  farmerZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.35), 1.0)
 }
 
 // ==========================================
@@ -1425,7 +1489,7 @@ const formOrder = ref({
   payment_status: '未結',
   order_date: new Date().toISOString().split('T')[0],
   expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-  items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)' }]
+  items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
 })
 
 const previewNextOrderId = computed(() => 'OR-' + formOrder.value.order_date.replace(/-/g, '') + '-01')
@@ -1444,7 +1508,7 @@ const calcOrderPrice = () => {
   formOrder.value.items.forEach(it => { total += (it.stalks * it.unit_price) * it.pots_qty })
   formOrder.value.price = total + (formOrder.value.shipping_fee || 0)
 }
-const addOrderItemRow = () => { formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)' }) }
+const addOrderItemRow = () => { formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }) }
 const removeOrderItemRow = (idx) => { formOrder.value.items.splice(idx, 1) }
 const onOrderCustSelect = () => {}
 const saveOrder = () => { showToast('訂單已儲存') }
@@ -1464,6 +1528,7 @@ const deleteItem = async (table, id, reloadFn) => {
 // 4. 花卡編輯器
 // ==========================================
 const cardFontFamily = ref('kai')
+const cardCategory = ref('celebration')
 const upperPrefix = ref('祝')
 const upperTarget = ref('新北市 陳乃瑜議員')
 const upperSuffix = ref('')
@@ -1474,7 +1539,7 @@ const suffixText = ref('敬賀')
 const weights = ref({ upper_prefix: '700', upper_target: '700', upper_suffix: '700', middle: '800', middle_2: '800', suffix: '700' })
 const getWeightStyle = (wVal) => ({ fontWeight: String(wVal || '600') })
 const fontMapping = {
-  kai: '"TW-Kai", "標楷體", serif',
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif',
   notosong: '"Noto Serif TC", serif',
   fangsong: '"FangSong", serif',
   notosans: '"Noto Sans TC", sans-serif'
@@ -1491,6 +1556,7 @@ const parsedUpperTargetTokens = computed(() => {
 })
 const maFontSize = computed(() => Math.max(12, (layout.value.upper_target?.size || 40) - 20))
 
+// 橫式花卡安全高度
 const defaultHorizontal = {
   upper_prefix: { x: 80, y: 70, size: 34 }, upper_target: { x: 220, y: 70, size: 38 }, upper_suffix: { x: 920, y: 70, size: 34 },
   middle: { x: 220, y: 195, size: 68 }, middle_2: { x: 220, y: 285, size: 68 },
@@ -1628,23 +1694,29 @@ const fillReceiptFromOrder = (ord) => {
   selectedOrderId.value = ord.id
   onSelectReceiptOrder()
   currentTab.value = 'receipt'
+  nextTick(() => autoFitReceipt())
 }
 const printReceiptAndMarkDone = () => {
   window.print()
 }
 
-// 🌟 簽收單使用 html2canvas 截圖直接傳送 (穩定不卡死)
+// 🌟 簽收單使用 html2canvas 截圖直接傳送 (100% 穩定)
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
   showToast('⏳ 正在生成簽收單圖片...')
   try {
+    const origTransform = targetEl.style.transform
+    targetEl.style.transform = 'none'
+
     const canvas = await html2canvas(targetEl, { 
       scale: 2, 
       backgroundColor: '#ffffff', 
       useCORS: true,
       logging: false 
     })
+
+    targetEl.style.transform = origTransform
     shareOrCopyCanvasBlob(canvas, `簽收單_${receiptForm.value.orderId || '開單'}.png`, '簽收單確認')
   } catch (err) {
     console.error('簽收單截圖錯誤', err)
@@ -1687,6 +1759,7 @@ const fillFarmerReceiptFromOrder = (ord) => {
   selectedFarmerOrderId.value = ord.id
   onSelectFarmerReceiptOrder()
   currentTab.value = 'farmer_receipt'
+  nextTick(() => autoFitFarmerReceipt())
 }
 const printFarmerReceipt = () => window.print()
 
@@ -1695,15 +1768,20 @@ const shareFarmerReceiptDirect = async () => {
   if (!targetEl) return alert('找不到農民收據！')
   showToast('⏳ 正在生成收據圖片...')
   try {
+    const origTransform = targetEl.style.transform
+    targetEl.style.transform = 'none'
+
     const canvas = await html2canvas(targetEl, { 
       scale: 2, 
       backgroundColor: '#ffffff', 
       useCORS: true,
       logging: false 
     })
+
+    targetEl.style.transform = origTransform
     shareOrCopyCanvasBlob(canvas, `農民收據_${farmerReceipt.value.buyerName}.png`, '農民收據確認')
   } catch (err) {
-    showToast('⚠️️ 圖片生成失敗')
+    showToast('⚠️ 圖片生成失敗')
   }
 }
 
@@ -1731,12 +1809,18 @@ const startNewCard = () => { upperTarget.value = ''; middleText.value = '高票�
 
 const initSystemData = () => {
   autoFitZoom()
+  autoFitReceipt()
+  autoFitFarmerReceipt()
   loadOrders()
 }
 
 onMounted(() => {
   if (isAuthenticated.value) initSystemData()
-  window.addEventListener('resize', autoFitZoom)
+  window.addEventListener('resize', () => {
+    autoFitZoom()
+    autoFitReceipt()
+    autoFitFarmerReceipt()
+  })
 })
 </script>
 
@@ -1826,54 +1910,61 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .compact-size-input { width: 45px !important; padding: 2px !important; text-align: center; }
 
-/* A5 橫式簽收單 (螢幕預覽樣式 - 緊湊高度，防止吃字) */
+/* 🌟 A5 橫式簽收單 (恢復原本完美比例 794x560，支援動態縮放) */
+.receipt-scaler-container { position: relative; flex-shrink: 0; }
 .a5-landscape-sheet {
-  width: 794px; height: 530px; background: #ffffff; padding: 22px 34px 16px 34px; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  width: 794px; height: 560px; background: #ffffff; padding: 28px 42px 22px 42px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  position: absolute; top: 0; left: 0;
 }
-.sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; }
-.shop-name-title { font-size: 26px; font-weight: 900; color: #0f172a; }
-.sheet-main-title { font-size: 23px; font-weight: bold; color: #dc2626; letter-spacing: 3px; }
-.header-meta { font-size: 13px; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 15px; }
-.receipt-table td { border: 1.5px solid #334155; padding: 5px 8px; }
-.receipt-table .lbl { width: 15%; background: #f1f5f9; font-weight: bold; text-align: center; }
+.sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px; }
+.shop-name-title { font-size: 28px; font-weight: 900; color: #0f172a; letter-spacing: 2px; }
+.sheet-main-title { font-size: 24px; font-weight: bold; color: #dc2626; letter-spacing: 4px; }
+.header-meta { font-size: 14px; text-align: right; color: #334155; line-height: 1.5; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 16px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 7px 10px; word-break: break-all; }
+.receipt-table .lbl { width: 15%; background: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
+.receipt-table .val { width: 35%; font-size: 16px; }
+.receipt-table .val-bold { font-weight: bold; font-size: 17px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17.5px; }
+
 .compact-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px; }
-.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 4px; font-size: 14px; padding-top: 2px; }
-.footer-tip { font-size: 12px; color: #64748b; }
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; font-size: 15px; padding-top: 4px; }
+.footer-tip { font-size: 13px; color: #64748b; }
 .compact-sign-box { width: 220px; border: 1.5px dashed #475569; border-radius: 6px; background: #fafafa; }
-.sign-box-title { background: #e2e8f0; font-size: 12px; font-weight: bold; text-align: center; padding: 2px 0; }
-.compact-sign-area { height: 70px; display: flex; justify-content: center; align-items: center; }
-.live-signature-img { max-height: 65px; max-width: 95%; object-fit: contain; }
+.sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
+.compact-sign-area { height: 78px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.live-signature-img { max-height: 72px; max-width: 95%; object-fit: contain; }
 
-/* 🌟 農民收據 (100% 恢復原本的高雅 f-receipt-grid-table 結構樣式) */
+/* 🌟 農民收據 (100% 恢復原本的高雅手刻 f-receipt-grid-table 結構) */
+.farmer-scaler-container { position: relative; flex-shrink: 0; }
 .farmer-receipt-sheet {
-  width: 794px; height: 530px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
+  width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; color: #000;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18); position: absolute; top: 0; left: 0;
 }
-.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 8px; }
-.f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
-.f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 6px; }
+.f-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+.f-main-title { font-size: 27px; font-weight: 900; letter-spacing: 5px; text-align: center; }
+.f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 6px; }
 
-.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 15px; }
-.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 29px; }
+.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 2px 4px; box-sizing: border-box; flex-shrink: 0; font-size: 15px;
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 16px;
 }
-.f-grid-val { display: flex; align-items: center; padding-left: 8px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15px; }
+.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 16px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
-.f-row-top { min-height: 58px; }
+.f-row-top { min-height: 64px; }
 .f-col-buyer-group { display: flex; flex-direction: column; width: 58%; border-right: 1px solid #000; }
 .f-sub-row { display: flex; flex: 1; border-bottom: 1px solid #000; }
 .f-sub-row:last-child { border-bottom: none; }
-.f-w-head { width: 140px; }
-.f-w-addr-tag { width: 34px; line-height: 1.4; }
-.f-full-addr-box { flex: 1; padding: 6px 10px; font-size: 15px; line-height: 1.4; border-right: none !important; }
-.f-tax-clean { font-size: 17px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
+.f-w-head { width: 145px; }
+.f-w-addr-tag { width: 36px; line-height: 1.4; }
+.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 16px; line-height: 1.5; border-right: none !important; }
+.f-tax-clean { font-size: 18px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
 
 .col-p-name { width: 25%; }
 .col-p-spec { width: 16%; }
@@ -1882,36 +1973,45 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .col-p-amt  { width: 18%; }
 .col-p-note { width: 17%; border-right: none !important; }
 
-.f-header-row { font-weight: bold; height: 28px; }
-.f-data-row { height: 30px; }
-.f-empty-row { height: 26px; }
+.f-header-row { font-weight: bold; height: 30px; }
+.f-data-row { height: 32px; }
+.f-empty-row { height: 28px; }
 
-.f-w-total-lbl { width: 200px; white-space: nowrap; font-size: 15px; }
-.f-amount-val-cell { flex: 1; border-right: none !important; padding: 2px 10px; }
+.f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 16px; }
+.f-amount-val-cell { flex: 1; border-right: none !important; padding: 3px 12px; }
 .f-chinese-amount-line {
-  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16px; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 17px; font-weight: bold;
 }
-.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 24px; text-align: center; font-size: 17px; display: inline-block; }
+.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 18px; display: inline-block; }
 
-.f-farmer-stamp-cell { border-right: none !important; padding-left: 24px !important; display: flex; align-items: center; gap: 14px; }
-.f-farmer-name-clean { font-size: 18px; letter-spacing: 6px; font-weight: bold; }
-.cai-real-stamp-img { width: 46px; height: 46px; object-fit: contain; mix-blend-mode: multiply; }
+.f-farmer-stamp-cell { border-right: none !important; padding-left: 28px !important; display: flex; align-items: center; gap: 16px; }
+.f-farmer-name-clean { font-size: 19px; letter-spacing: 6px; font-weight: bold; }
+.cai-real-stamp-img { width: 50px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
 
-.f-w-id-lbl { width: 185px; }
-.f-w-id-val { width: 185px; border-right: none !important; }
+.f-w-id-lbl { width: 190px; }
+.f-w-id-val { width: 190px; border-right: none !important; }
 
 .f-text-center { justify-content: center; text-align: center; }
 .f-text-right { justify-content: flex-end; text-align: right; }
 .f-bold { font-weight: bold; }
-.f-pr { padding-right: 10px !important; }
+.f-pr { padding-right: 12px !important; }
 
-.f-statement { font-size: 12.5px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 3px; }
-.f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
+.f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
+.f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
 
 .stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
 .seal-choose-btn {
   width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
 }
+
+/* 縮放工具列 */
+.zoom-toolbar {
+  display: flex; align-items: center; gap: 5px; background: white; padding: 4px 10px;
+  border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 12px; position: sticky; top: 0; z-index: 10;
+}
+.zoom-btn { width: 24px; height: 24px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 50%; cursor: pointer; }
+.zoom-text { font-size: 12.5px; font-weight: bold; min-width: 40px; text-align: center; }
+.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
 /* 彈窗 */
 .image-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 99999; }
@@ -1925,7 +2025,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .btn-group button.active { background: #2563eb; color: white; }
 
 /* =========================================================
-   🌟 核心列印模式：A5 橫向 100% 單頁完整不截斷
+   🌟 列印模式：完全單頁輸出，螢幕預覽 100% 不受影響
 ========================================================= */
 @media print {
   html, body {
@@ -1952,7 +2052,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     overflow: visible !important;
   }
 
-  /* 花卡列印 */
+  /* 花卡列印樣式 */
   #card-print-target {
     position: absolute !important;
     top: 0 !important;
@@ -1967,7 +2067,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 簽收單與農民收據：198mm x 134mm 單頁完全保留，絕無第二頁 */
+  /* 簽收單與農民收據：精準 A5 橫向單頁列印 */
   #receipt-print-target,
   #farmer-print-target {
     position: relative !important;
@@ -1976,17 +2076,14 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     transform: none !important;
     box-shadow: none !important;
     border: none !important;
-    width: 198mm !important;
-    max-width: 198mm !important;
-    height: 134mm !important;
-    max-height: 134mm !important;
-    margin: 2mm auto 0 auto !important;
-    padding: 5mm 8mm !important;
+    width: 200mm !important;
+    max-width: 200mm !important;
+    height: 136mm !important;
+    max-height: 136mm !important;
+    margin: 3mm auto 0 auto !important;
+    padding: 6mm 10mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
     page-break-after: avoid !important;
     page-break-before: avoid !important;
     page-break-inside: avoid !important;
