@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️️ 密碼錯誤，請重新輸入！
+          ⚠️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單按鈕換色為 #F3EEC3 -->
+                      <!-- 簽收單全面換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -1041,7 +1041,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1112,7 +1112,7 @@
 
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
-              <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
+              <span class="modern-sign-title">✍️️ 收件人現場手寫簽名</span>
               <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
                 ↺ 清除重簽
               </button>
@@ -1160,7 +1160,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1524,6 +1524,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
+import html2canvas from 'html2canvas' // 🌟 引入 html2canvas 截圖核心
 
 // ==========================================
 // 內部通行碼防護設定 (通行碼: cf000725)
@@ -1603,7 +1604,6 @@ const updateDynamicPrintStyle = () => {
   } else if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
     pageSize = 'A5 landscape'
   }
-  // 🌟 將邊界鎖死為 0mm（最小邊距），徹底避免最後一排字被切掉
   styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0mm !important; } }`
 }
 
@@ -3374,101 +3374,32 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 純 Canvas 輸出：100% 絕對等比例對齊畫面座標（移除 safeRightMargin 強制推擠邏輯，確保左右空白完全一致）
-const generateFlawlessCoupletImage = () => {
-  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
+// 🌟 100% 所見即所得：使用 html2canvas 直接截圖畫面上的花卡 DOM，絕對不切字、位置與邊距百分之百相同！
+const shareCoupletDirect = async () => {
+  const targetEl = document.getElementById('card-print-target')
+  if (!targetEl) return alert('找不到花卡畫面！')
 
-  const width = currentCardDimensions.value.w
-  const height = currentCardDimensions.value.h
+  showToast('⏳ 正在生成高畫質花卡圖片 (100% 所見即所得)...')
 
-  const canvas = document.createElement('canvas')
-  canvas.width = width * 2
-  canvas.height = height * 2
-  const ctx = canvas.getContext('2d')
-  ctx.scale(2, 2)
+  try {
+    const originalTransform = targetEl.style.transform
+    targetEl.style.transform = 'none'
 
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, width, height)
+    const canvas = await html2canvas(targetEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    })
 
-  const targetFontFamily = activeCssFontFamily.value
-  ctx.fillStyle = '#0f172a'
+    targetEl.style.transform = originalTransform
 
-  const strokeWidthMap = {
-    '400': 0,
-    '500': 0.4,
-    '550': 0.6,
-    '600': 0.8,
-    '650': 1.1,
-    '700': 1.4,
-    '800': 2.2
+    const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
+    shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
+  } catch (err) {
+    console.error('截圖失敗', err)
+    showToast('⚠️ 圖片生成失敗，請重試！')
   }
-
-  const renderItem = (text, item, wVal, isTarget = false) => {
-    if (!text || !item) return
-    const w = String(wVal || '600')
-    const sWidth = strokeWidthMap[w] || 0.8
-    ctx.textBaseline = 'top'
-
-    if (isVertical.value) {
-      let curY = item.y
-      const chars = text.split('')
-      chars.forEach(char => {
-        const isMa = isTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offX = isMa ? Math.round((item.size - curSize) / 2) : 0
-
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#0f172a'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, item.x + offX, curY)
-        }
-        ctx.fillText(char, item.x + offX, curY)
-        curY += curSize + 8
-      })
-    } else {
-      const chars = text.split('')
-      let curX = item.x  // 🌟 完全依照畫面設定的精確 X 座標繪製，不擅自推擠文字！
-
-      chars.forEach(char => {
-        const isMa = isTarget && char === '媽'
-        const curSize = isMa ? Math.max(12, item.size - 20) : item.size
-        ctx.font = `${w} ${curSize}px ${targetFontFamily}`
-        const offY = isMa ? Math.round((item.size - curSize) / 2) : 0
-
-        if (sWidth > 0) {
-          ctx.strokeStyle = '#0f172a'
-          ctx.lineWidth = sWidth
-          ctx.strokeText(char, curX, item.y + offY)
-        }
-        ctx.fillText(char, curX, item.y + offY)
-        curX += curSize + 6
-      })
-    }
-  }
-
-  renderItem(upperPrefix.value, layout.value.upper_prefix, weights.value.upper_prefix)
-  renderItem(upperTarget.value, layout.value.upper_target, weights.value.upper_target, true)
-  if (upperSuffix.value && upperSuffix.value.trim()) {
-    renderItem(upperSuffix.value, layout.value.upper_suffix, weights.value.upper_suffix)
-  }
-  renderItem(middleText.value, layout.value.middle, weights.value.middle)
-  if (middleText2.value && middleText2.value.trim()) {
-    renderItem(middleText2.value, layout.value.middle_2, weights.value.middle_2)
-  }
-  bottomLines.value.forEach((b, idx) => {
-    if (b.text && b.text.trim()) {
-      renderItem(b.text, layout.value['bottom_' + idx], weights.value['bottom_' + idx])
-    }
-  })
-  renderItem(suffixText.value, layout.value.suffix, weights.value.suffix)
-
-  const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
-  shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
-}
-
-const shareCoupletDirect = () => {
-  generateFlawlessCoupletImage()
 }
 
 // 初始化所有系統資料
