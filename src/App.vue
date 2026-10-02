@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 簽收單全面換色為 #F3EEC3 -->
+                      <!-- 簽收單按鈕換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -671,7 +671,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️️</button>
                         </div>
                       </td>
                     </tr>
@@ -1030,7 +1030,6 @@
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="zoomLevel = 1.0">🔍 100% 檢視</button>
             <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
@@ -1112,7 +1111,7 @@
 
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
-              <span class="modern-sign-title">✍️️ 收件人現場手寫簽名</span>
+              <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
               <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
                 ↺ 清除重簽
               </button>
@@ -1160,7 +1159,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1383,7 +1382,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️ 列印農民收據
+            🖨️️ 列印農民收據
           </button>
         </div>
 
@@ -1524,7 +1523,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
-import html2canvas from 'html2canvas' // 🌟 引入 html2canvas 截圖核心
+import html2canvas from 'html2canvas'
 
 // ==========================================
 // 內部通行碼防護設定 (通行碼: cf000725)
@@ -3374,22 +3373,29 @@ const startNewCard = () => {
   }
 }
 
-// 🌟 100% 所見即所得：使用 html2canvas 直接截圖畫面上的花卡 DOM，絕對不切字、位置與邊距百分之百相同！
+// 🌟 100% 所見即所得：自動過濾編輯藍點與選取外框，輸出純淨像預覽列印般的完美圖檔！
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return alert('找不到花卡畫面！')
 
-  showToast('⏳ 正在生成高畫質花卡圖片 (100% 所見即所得)...')
+  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
 
   try {
     const originalTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
+    // 🌟 核心過濾：ignoreElements 排除所有 .scale-handle（編輯藍點），並忽略 .no-print 元素
     const canvas = await html2canvas(targetEl, {
-      scale: 2,
+      scale: 2, // 2倍高解析度
       useCORS: true,
       backgroundColor: '#ffffff',
-      logging: false
+      logging: false,
+      ignoreElements: (element) => {
+        return element.classList && (
+          element.classList.contains('scale-handle') || 
+          element.classList.contains('no-print')
+        )
+      }
     })
 
     targetEl.style.transform = originalTransform
@@ -4039,6 +4045,7 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
+/* 印表機列印自適應：邊界 0mm、防切字防換頁 */
 @media print {
   html, body {
     margin: 0 !important;
