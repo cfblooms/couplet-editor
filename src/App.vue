@@ -121,7 +121,7 @@
 
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
-                <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <h3>{{ editingOrderId ? '✏️️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
                 <span class="preview-seq-badge right-aligned-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
@@ -312,7 +312,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單（🌟 所有狀態欄位大小完全一致且不切字） -->
+            <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -345,7 +345,6 @@
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
-                      <!-- 🌟 開收據：統一大小、絕不切字 -->
                       <td>
                         <select 
                           v-model="ord.need_receipt" 
@@ -362,7 +361,7 @@
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       
-                      <!-- 🌟 花卡：統一大小、#F9F0F0 淺淡紅字 -->
+                      <!-- 花卡未製作：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.card_status" 
@@ -377,7 +376,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單：統一大小、#F9F0F0 淺淡紅字 -->
+                      <!-- 簽收單未列印：#F9F0F0，淺淡柔和紅字體 -->
                       <td>
                         <select 
                           v-model="ord.receipt_status" 
@@ -391,7 +390,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 出貨狀態：統一大小 -->
+                      <!-- 出貨狀態 -->
                       <td>
                         <select 
                           v-model="ord.shipped_status" 
@@ -404,7 +403,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 收款狀態：統一大小 -->
+                      <!-- 收款狀態 -->
                       <td>
                         <select 
                           v-model="ord.payment_status" 
@@ -417,17 +416,17 @@
                         </select>
                       </td>
 
-                      <!-- 操作按鈕 -->
+                      <!-- 🌟 簽收單全面換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
                             <button 
                               class="cozy-btn clean-btn-noborder" 
-                              style="background-color: #FEFCAD !important; color: #5a5410 !important;" 
+                              style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
-                              🖨️ 簽收單
+                              🖨️️ 簽收單
                             </button>
                             <button 
                               class="cozy-btn clean-btn-noborder" 
@@ -592,11 +591,12 @@
                           <option value="已結">已結</option>
                         </select>
                       </td>
+                      <!-- 🌟 簽收單按鈕換色為 #F3EEC3 -->
                       <td>
                         <div class="stacked-action-col">
                           <button 
                             class="cozy-btn clean-btn-noborder" 
-                            style="background-color: #FEFCAD !important; color: #5a5410 !important;" 
+                            style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
                             🖨️ 簽收單
@@ -641,7 +641,7 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
                         </div>
                       </td>
@@ -771,9 +771,10 @@
                           <option value="未出貨">未出貨</option><option value="已出貨">已出貨</option>
                         </select>
                       </td>
+                      <!-- 🌟 簽收單按鈕換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #FEFCAD !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -1041,6 +1042,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
+            <!-- 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -2497,10 +2499,10 @@ const shareReceiptToBuyerDirect = () => {
 
   ctx.fillStyle = '#334155'
   ctx.font = `15px ${fontFam}`
-  ctx.fillText('送貨司機 / 經手人：______________', 45, 435)
+  drawWrappedText(ctx, '送貨司機 / 經手人：______________', 45, 435, 300, 20, 1)
   ctx.font = `13px ${fontFam}`
   ctx.fillStyle = '#64748b'
-  ctx.fillText('※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465)
+  drawWrappedText(ctx, '※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465, 450, 20, 1)
 
   const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
   ctx.lineWidth = 1.5
