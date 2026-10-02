@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️️ 密碼錯誤，請重新輸入！
+          ⚠️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -335,7 +335,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單（不顯示送貨地址欄，維持簡潔） -->
+            <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -616,12 +616,12 @@
                             style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
-                            🖨 簽收單
+                            🖨️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn clean-btn-noborder" 
                             style="background-color: #DEE2FF !important; color: #28305c !important;" 
-                            @click="fillFarmerReceiptFromOrder(ord)"
+                            @click="fillFarmerReceiptFromOrder(ord)" 
                           >
                             🧾 農民收據
                           </button>
@@ -634,23 +634,10 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (🌟 耗材可自由輸入品項與規格) -->
+          <!-- 模組 3：進貨與庫存 (🌟 耗材品項名稱與規格完全純自由輸入，不擋注音) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
-              
-              <!-- 耗材專用預設選項 datalist -->
-              <datalist id="supply-item-suggestions">
-                <option value="特選水苔 (水草)" />
-                <option value="透明軟盆 (育苗盆)" />
-                <option value="鐵線 / 花支" />
-                <option value="水管 / 膠帶 / 束帶" />
-                <option value="花卡插籤 / 支架" />
-                <option value="包裝紙 / 禮盒 / 提袋" />
-                <option value="專用緞帶 (紅/金/粉)" />
-                <option value="蘭花專用長效肥 / 粒肥" />
-                <option value="防撞保護網 / 氣泡布" />
-              </datalist>
 
               <div class="form-grid mt-2">
                 <div class="field">
@@ -662,7 +649,7 @@
                   </select>
                 </div>
 
-                <!-- 蘭花品項名稱 -->
+                <!-- 蘭花品種名稱 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>品種名稱：</label>
                   <input v-model="formInv.item_name" placeholder="例: 滿天紅、大辣椒" />
@@ -680,21 +667,22 @@
                   </select>
                 </div>
 
-                <!-- 🌟 耗材品項名稱：開放手動輸入＋下拉推薦 -->
+                <!-- 🌟 耗材品名：純文字輸入框，完全開放自由打字，不鎖注音 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
-                  <label>耗材品名 (可手打或下拉)：</label>
+                  <label>耗材品名 (直接自行輸入)：</label>
                   <input 
                     v-model="formInv.item_name" 
-                    list="supply-item-suggestions" 
-                    placeholder="輸入或選取耗材 (例: 水苔、透明軟盆)" 
+                    type="text"
+                    placeholder="例: 水苔、透明軟盆、花卡插籤、肥料、鐵線" 
                   />
                 </div>
 
-                <!-- 🌟 耗材規格與包裝單位：開放詳細填寫 -->
+                <!-- 🌟 耗材詳細規格 / 包裝單位：純文字輸入框 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
-                  <label>耗材規格 / 包裝單位：</label>
+                  <label>詳細規格 / 包裝單位：</label>
                   <input 
                     v-model="formInv.spec_supply" 
+                    type="text"
                     placeholder="例: 5kg/包、3.5吋 100入/袋、50米/捲" 
                   />
                 </div>
@@ -989,7 +977,6 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -998,7 +985,6 @@
             </div>
           </div>
 
-          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
               <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
@@ -1020,7 +1006,6 @@
             </div>
           </div>
 
-          <!-- 字體與粗細同一行 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
@@ -1966,7 +1951,7 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義 (🌟 耗材加入 spec_supply)
+// 模組表單定義 (🌟 耗材純自由輸入)
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -2268,7 +2253,7 @@ const batchMarkPaid = async () => {
   loadOrders()
 }
 
-// 模組 3：進貨函式 (🌟 耗材可詳細儲存)
+// 模組 3：進貨函式 (🌟 耗材純自由輸入)
 const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
 const onPotTypeChange = () => {
   const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
@@ -2302,14 +2287,14 @@ const saveInventory = async () => {
   let finalSpec = ''
 
   if (isFlower) {
-    finalName = formInv.value.item_name || '特選蘭花'
+    finalName = formInv.value.item_name ? formInv.value.item_name.trim() : '特選蘭花'
     finalSpec = `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}`
   } else if (isPot) {
     finalName = formInv.value.pot_type.split(' ')[0]
     finalSpec = '盆器固定規格'
   } else if (isSupply) {
-    finalName = formInv.value.item_name || '一般耗材'
-    finalSpec = formInv.value.spec_supply ? formInv.value.spec_supply.trim() : '常用耗材規格'
+    finalName = formInv.value.item_name ? formInv.value.item_name.trim() : '常用耗材'
+    finalSpec = formInv.value.spec_supply ? formInv.value.spec_supply.trim() : '一般規格'
   }
 
   if (!finalName) return alert('請輸入品項名稱！')
@@ -2654,7 +2639,7 @@ const startNewCard = () => {
 }
 
 // ==========================================
-// 5. 簽收單管理 (🌟 100% 精準優先使用該訂單填寫之送貨地址)
+// 5. 簽收單管理
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -2699,7 +2684,6 @@ const clearLiveSignature = () => {
   showToast('已清除簽名')
 }
 
-// 🚚 自動帶入：優先使用訂單填寫的送貨地址
 const onSelectReceiptOrder = () => {
   const ord = orderList.value.find(o => o.id === selectedOrderId.value)
   if (ord) {
@@ -2725,7 +2709,6 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 簽收單使用 html2canvas 完整截圖
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -2801,7 +2784,7 @@ const shareFarmerReceiptDirect = async () => {
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
     shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   } catch (err) {
-    showToast('⚠️️ 圖片生成失敗，請重試！')
+    showToast('⚠️ 圖片生成失敗，請重試！')
   }
 }
 
@@ -3337,7 +3320,7 @@ input, select, textarea {
 .f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
 
 .f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
-.f-grid-row { display: border-bottom: 1px solid #000; min-height: 31px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
