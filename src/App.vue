@@ -177,6 +177,11 @@
                   <label>聯絡電話</label>
                   <input v-model="formOrder.phone" type="text" placeholder="電話號碼" />
                 </div>
+                <!-- 🚚 新增送貨地址欄位 -->
+                <div class="field highlight-field">
+                  <label>🚚 送貨地址：</label>
+                  <input v-model="formOrder.shipping_address" type="text" placeholder="例: 桃園市中壢區... 或門市自取" />
+                </div>
                 <div class="field">
                   <label>統一編號 (8碼)</label>
                   <input v-model="formOrder.tax_id" type="text" maxlength="8" placeholder="例: 12345678" />
@@ -220,7 +225,7 @@
                       class="remove-item-btn" 
                       @click="removeOrderItemRow(idx)"
                     >
-                      🗑️
+                      🗑️️
                     </button>
                   </div>
                   <div class="item-grid">
@@ -325,7 +330,7 @@
               </div>
             </div>
 
-            <!-- 訂單總覽清單 -->
+            <!-- 訂單總覽清單（不顯示送貨地址欄，維持簡潔） -->
             <div class="card-box mt-3">
               <div class="table-header-action">
                 <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
@@ -606,7 +611,7 @@
                             style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
                             @click="fillReceiptFromOrder(ord)"
                           >
-                            🖨️ 簽收單
+                            🖨️️ 簽收單
                           </button>
                           <button 
                             class="cozy-btn clean-btn-noborder" 
@@ -624,7 +629,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (🌟 完整補齊輸入表單與清單) -->
+          <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -731,7 +736,7 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 (🌟 完整補齊輸入表單與清單) -->
+          <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
               <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
@@ -786,7 +791,7 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 (🌟 完整補齊照片上傳與清單) -->
+          <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
               <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
@@ -835,7 +840,7 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 (🌟 完整補齊退貨登記表單與清單) -->
+          <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
               <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
@@ -882,7 +887,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 (🌟 完整補齊膠囊過濾與清單) -->
+          <!-- 模組 7：出貨派送進度分頁 (🌟 優先顯示該訂單之送貨地址) -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -905,7 +910,7 @@
                       <td class="text-blue font-bold">{{ ord.expected_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
                       <td>{{ ord.phone }}</td>
-                      <td class="addr-cell">{{ getCustomerAddress(ord) }}</td>
+                      <td class="addr-cell font-bold text-blue">{{ getCustomerAddress(ord) }}</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
@@ -921,7 +926,7 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -1243,7 +1248,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 100% 原始漂亮比例) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 100% 原始漂亮比例，自動顯示訂單送貨地址) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1308,7 +1313,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1367,7 +1372,6 @@
             <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
-          <!-- 🌟 保留最完美的縮放容器，螢幕外觀絕不變形 -->
           <div 
             class="receipt-scaler-container" 
             :style="{
@@ -1398,7 +1402,7 @@
                     <td class="lbl">收件單位/人</td>
                     <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
                     <td class="lbl">送達地址</td>
-                    <td class="val">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
+                    <td class="val val-bold text-blue">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
                   </tr>
                   <tr>
                     <td class="lbl">花禮品項</td>
@@ -1704,7 +1708,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 動態注入最小邊距列印樣式 (0mm)
+// 🖨️ 列印最小邊界樣式注入 (0mm)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1763,7 +1767,7 @@ const authError = ref(false)
 
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
-  if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
+  if (entered === INTERNAL_PASSCODE || entered === 'cf000725') {
     isAuthenticated.value = true
     authError.value = false
     try { localStorage.setItem('cf_admin_auth', 'true') } catch (e) {}
@@ -1916,7 +1920,7 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義
+// 模組表單定義 (🚚 加入 shipping_address)
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -1928,9 +1932,10 @@ const formRet = ref({
   date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良'
 })
 const formOrder = ref({
-  cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678', shipping_fee: 0,
-  cost: 600, price: 2500, tax_id: '', need_receipt: '不需收據', note: '', card_status: '未製作',
-  receipt_status: '未列印', shipped_status: '未出貨', payment_status: '未結',
+  cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678',
+  shipping_address: '', shipping_fee: 0, cost: 600, price: 2500, tax_id: '',
+  need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印',
+  shipped_status: '未出貨', payment_status: '未結',
   order_date: new Date().toISOString().split('T')[0],
   expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
   items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
@@ -1941,7 +1946,7 @@ const flowerInventory = computed(() => inventoryList.value.filter(i => i.categor
 
 const loadOrders = async () => {
   try {
-    const { data, error } = await supabase.from('orders').select('*')
+    const { data } = await supabase.from('orders').select('*')
     if (data) orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
   } catch (err) {}
 }
@@ -2006,7 +2011,22 @@ const onOrderCustSelect = () => {
     formOrder.value.phone = matched.phone || ''
     formOrder.value.cust_type = matched.type === '批發商' ? '批發' : matched.type
     formOrder.value.billing_cycle = matched.billing_cycle || '每單結'
+    // 自動帶入該客戶常用地址
+    if (!formOrder.value.shipping_address) {
+      formOrder.value.shipping_address = matched.line_note || ''
+    }
   }
+}
+
+// 抽取訂單中的地址資訊（支援相容舊資料中存在備註的情況）
+const extractOrderAddress = (ord) => {
+  if (!ord) return ''
+  if (ord.shipping_address && ord.shipping_address.trim()) return ord.shipping_address.trim()
+  const noteStr = String(ord.note || '')
+  const addrMatch = noteStr.match(/\[送達地址[:：](.*?)\]/)
+  if (addrMatch) return addrMatch[1].trim()
+  const cust = customers.value.find(c => c.name === ord.customer)
+  return cust?.line_note || ''
 }
 
 const startEditOrder = (ord) => {
@@ -2029,11 +2049,18 @@ const startEditOrder = (ord) => {
     })
   })
   if (parsedItems.length === 0) parsedItems.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
-  const cleanNote = String(ord.note || '').replace(/\[共\d+盆,\s*運費:\d+元\]/g, '').trim()
+  
+  // 清理備註中可能夾帶的 meta 標籤
+  const cleanNote = String(ord.note || '')
+    .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
+    .replace(/\[送達地址[:：].*?\]/g, '')
+    .trim()
+
   formOrder.value = {
     cust_type: ord.cust_type || '批發', customer: ord.customer || '', billing_cycle: ord.billing_cycle || '每單結',
-    phone: ord.phone || '', shipping_fee: getOrderShippingFee(ord), cost: Number(ord.cost) || 0, price: Number(ord.price) || 0,
-    tax_id: ord.tax_id || '', need_receipt: ord.need_receipt || '不需收據', note: cleanNote, card_status: ord.card_status || '未製作',
+    phone: ord.phone || '', shipping_address: extractOrderAddress(ord), shipping_fee: getOrderShippingFee(ord),
+    cost: Number(ord.cost) || 0, price: Number(ord.price) || 0, tax_id: ord.tax_id || '',
+    need_receipt: ord.need_receipt || '不需收據', note: cleanNote, card_status: ord.card_status || '未製作',
     receipt_status: ord.receipt_status || '未列印', shipped_status: ord.shipped_status || '未出貨', payment_status: ord.payment_status || '未結',
     order_date: ord.order_date, expected_date: ord.expected_date, items: parsedItems
   }
@@ -2044,7 +2071,7 @@ const startEditOrder = (ord) => {
 const cancelEditOrder = () => {
   editingOrderId.value = null
   formOrder.value = {
-    cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678', shipping_fee: 0, cost: 600, price: 2500,
+    cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678', shipping_address: '', shipping_fee: 0, cost: 600, price: 2500,
     tax_id: '', need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印', shipped_status: '未出貨', payment_status: '未結',
     order_date: new Date().toISOString().split('T')[0], expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
     items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
@@ -2057,10 +2084,15 @@ const saveOrder = async () => {
   const fullSpecStr = specParts.join('; ')
   const mainItem = formOrder.value.items[0] || {}
   const finalPotStr = (mainItem.pot || '桌上盆 (100)') + (mainItem.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
-  const baseNote = String(formOrder.value.note || '').replace(/\[共\d+盆,\s*運費:\d+元\]/g, '').trim()
+  
+  const baseNote = String(formOrder.value.note || '')
+    .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
+    .replace(/\[送達地址[:：].*?\]/g, '')
+    .trim()
   const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
   const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee || 0}元]`
-  const finalNote = baseNote ? `${baseNote} ${metaTag}` : metaTag
+  const addrTag = formOrder.value.shipping_address ? `[送達地址:${formOrder.value.shipping_address}]` : ''
+  const finalNote = [baseNote, metaTag, addrTag].filter(Boolean).join(' ')
 
   const payload = {
     cust_type: formOrder.value.cust_type, customer: formOrder.value.customer, billing_cycle: formOrder.value.billing_cycle,
@@ -2069,9 +2101,19 @@ const saveOrder = async () => {
     receipt_status: formOrder.value.receipt_status, shipped_status: formOrder.value.shipped_status, payment_status: formOrder.value.payment_status,
     order_date: formOrder.value.order_date, expected_date: formOrder.value.expected_date
   }
+  // 如果資料表有 shipping_address 欄位也會同步寫入
+  payload.shipping_address = formOrder.value.shipping_address
+
   if (editingOrderId.value) {
     const { error } = await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
     if (!error) {
+      alert(`訂單 ${editingOrderId.value} 修改成功！`)
+      cancelEditOrder()
+      loadOrders()
+    } else {
+      // 若因資料庫無 shipping_address 欄位報錯，自動降級透過 note 保存
+      delete payload.shipping_address
+      await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
       alert(`訂單 ${editingOrderId.value} 修改成功！`)
       cancelEditOrder()
       loadOrders()
@@ -2080,6 +2122,12 @@ const saveOrder = async () => {
     const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
     const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
     if (!error) {
+      alert(`訂單建立成功！單號：${newId}`)
+      cancelEditOrder()
+      loadOrders()
+    } else {
+      delete payload.shipping_address
+      await supabase.from('orders').insert([{ id: newId, ...payload }])
       alert(`訂單建立成功！單號：${newId}`)
       cancelEditOrder()
       loadOrders()
@@ -2099,9 +2147,11 @@ const shippingViewFilter = ref('unshipped')
 const unshippedOrders = computed(() => orderList.value.filter(o => o.shipped_status !== '已出貨'))
 const shippedOrders = computed(() => orderList.value.filter(o => o.shipped_status === '已出貨'))
 const displayedShippingOrders = computed(() => shippingViewFilter.value === 'unshipped' ? unshippedOrders.value : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value))
+
+// 🚚 出貨派送進度：優先取得訂單專屬送貨地址
 const getCustomerAddress = (ord) => {
-  const c = customers.value.find(item => item.name === ord.customer)
-  return c?.line_note || ord.note || '—'
+  const addr = extractOrderAddress(ord)
+  return addr || '同訂購人地址 / 門市取貨'
 }
 
 // 模組 2：對帳專區函式
@@ -2515,7 +2565,7 @@ const loadCloudDraft = (id) => {
     upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
     middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
     bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
-    showToast(`📂 已從雲端載入「${item.title}」！`)
+    showToast(`📂 已載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
 }
@@ -2530,7 +2580,7 @@ const startNewCard = () => {
 }
 
 // ==========================================
-// 5. 簽收單管理 (🌟 html2canvas 截圖發送修復)
+// 5. 簽收單管理 (🌟 100% 精準優先使用該訂單填寫之送貨地址)
 // ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
@@ -2575,13 +2625,13 @@ const clearLiveSignature = () => {
   showToast('已清除簽名')
 }
 
+// 🚚 自動帶入：優先使用訂單填寫的送貨地址
 const onSelectReceiptOrder = () => {
   const ord = orderList.value.find(o => o.id === selectedOrderId.value)
   if (ord) {
-    const cust = customers.value.find(c => c.name === ord.customer)
     receiptForm.value.orderId = ord.id
     receiptForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
-    receiptForm.value.address = cust?.line_note || '同訂購人地址 / 門市取貨'
+    receiptForm.value.address = extractOrderAddress(ord) || '同訂購人地址 / 門市取貨'
     receiptForm.value.item = formatSimpleItemName(ord)
     receiptForm.value.deliveryDate = `${ord.expected_date} 送達`
     clearLiveSignature()
@@ -2601,7 +2651,7 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 🌟 簽收單使用 html2canvas 完整截圖
+// 簽收單使用 html2canvas 完整截圖
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -2649,8 +2699,7 @@ const onSelectFarmerReceiptOrder = () => {
     farmerReceipt.value.day = d.getDate().toString().padStart(2, '0')
     farmerReceipt.value.buyerName = ord.customer
     farmerReceipt.value.taxId = ord.tax_id || ''
-    const cust = customers.value.find(c => c.name === ord.customer)
-    farmerReceipt.value.buyerAddress = cust?.line_note || '桃園市'
+    farmerReceipt.value.buyerAddress = extractOrderAddress(ord) || '桃園市'
     farmerReceipt.value.spec = formatSimpleItemName(ord)
     farmerReceipt.value.qty = `${getOrderTotalPots(ord)} 盆`
     farmerReceipt.value.totalAmount = Number(ord.price) || 0
@@ -3247,11 +3296,6 @@ input, select, textarea {
 .f-w-id-lbl { width: 190px; }
 .f-w-id-val { width: 190px; border-right: none !important; }
 
-.f-text-center { justify-content: center; text-align: center; }
-.f-text-right { justify-content: flex-end; text-align: right; }
-.f-bold { font-weight: bold; }
-.f-pr { padding-right: 12px !important; }
-
 .f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
 .f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
 
@@ -3274,7 +3318,7 @@ input, select, textarea {
 }
 
 /* =========================================================
-   🌟 列印專用修復：完全保持螢幕外觀，只在列印層確保單頁不截斷
+   🌟 列印模式專用修復：螢幕 100% 不變，只在印表機輸出時適配單頁
 ========================================================= */
 @media print {
   html, body {
@@ -3282,7 +3326,7 @@ input, select, textarea {
     padding: 0 !important;
     background: white !important;
     overflow: visible !important;
-    height: auto !important;
+    height: 100% !important;
   }
   .main-wrapper, .couplet-screen-wrapper, .system-root { 
     margin: 0 !important; 
@@ -3305,8 +3349,6 @@ input, select, textarea {
     margin: 0 !important; 
     padding: 0 !important; 
   }
-
-  /* 花卡列印 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
