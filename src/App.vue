@@ -189,14 +189,13 @@
                   </select>
                 </div>
 
-                <!-- 🚚 送貨地址移到「是否開收據」後面，並使用 full-width-field 跨行拉長滿版 -->
-                <div class="field highlight-field full-width-field">
-                  <label>🚚 送貨地址 (輸入完整送達地點/樓層)：</label>
+                <!-- 🚚 送貨地址：在「是否開收據」同一行後方，寬度約 3 格大 -->
+                <div class="field highlight-field triple-width-field">
+                  <label>🚚 送貨地址：</label>
                   <input 
                     v-model="formOrder.shipping_address" 
                     type="text" 
-                    placeholder="例: 桃園市中壢區培英路...號 3樓 或 門市自取" 
-                    class="long-address-input"
+                    placeholder="例: 桃園市中壢區培英路...號 或 門市自取" 
                   />
                 </div>
               </div>
@@ -2557,7 +2556,7 @@ const saveCurrentAsCloudDraft = async () => {
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
   await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
-  showToast(`☁️️ 花卡已成功存至雲端！`)
+  showToast(`☁️ 花卡已成功存至雲端！`)
   await loadCloudDrafts()
   selectedDraftId.value = draftId
 }
@@ -2903,14 +2902,14 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🚚 滿版跨行地址欄位樣式 */
-.full-width-field {
-  grid-column: 1 / -1 !important;
+/* 🚚 送貨地址寬度調整為約 3 個欄位大小 (同一行後方) */
+.triple-width-field {
+  grid-column: span 3 !important;
 }
-.long-address-input {
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  color: #1e3a8a !important;
+@media (max-width: 900px) {
+  .triple-width-field {
+    grid-column: span 1 !important;
+  }
 }
 
 .items-section {
