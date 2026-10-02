@@ -121,7 +121,7 @@
 
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
-                <h3>{{ editingOrderId ? '✏️️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
                 <span class="preview-seq-badge right-aligned-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
@@ -416,7 +416,7 @@
                         </select>
                       </td>
 
-                      <!-- 🌟 簽收單全面換色為 #F3EEC3 -->
+                      <!-- 簽收單按鈕換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
@@ -426,7 +426,7 @@
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
-                              🖨️️ 簽收單
+                              🖨️ 簽收單
                             </button>
                             <button 
                               class="cozy-btn clean-btn-noborder" 
@@ -591,7 +591,6 @@
                           <option value="已結">已結</option>
                         </select>
                       </td>
-                      <!-- 🌟 簽收單按鈕換色為 #F3EEC3 -->
                       <td>
                         <div class="stacked-action-col">
                           <button 
@@ -641,7 +640,7 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
                         </div>
                       </td>
@@ -771,7 +770,6 @@
                           <option value="未出貨">未出貨</option><option value="已出貨">已出貨</option>
                         </select>
                       </td>
-                      <!-- 🌟 簽收單按鈕換色為 #F3EEC3 -->
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
@@ -1042,7 +1040,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board" 
@@ -1384,7 +1382,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️ 列印農民收據
+            🖨️️ 列印農民收據
           </button>
         </div>
 
@@ -1588,7 +1586,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 自動印表機自適應切換 (A4/A5, 直/橫)
+// 🖨️ 自動印表機自適應切換 (A4/A5, 直/橫, 邊界最小 0mm)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1604,7 +1602,8 @@ const updateDynamicPrintStyle = () => {
   } else if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
     pageSize = 'A5 landscape'
   }
-  styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0 !important; } }`
+  // 🌟 將邊界鎖死為 0mm（最小邊距），徹底避免最後一排字被切掉
+  styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0mm !important; } }`
 }
 
 watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
@@ -3146,19 +3145,20 @@ const maFontSize = computed(() => {
   return Math.max(12, (layout.value.upper_target?.size || 40) - 20)
 })
 
+// 🌟 安全預設排版：調高底部 Y 座標，遠離列印咬紙區，確保絕不切字
 const defaultVertical = {
   upper_prefix: { x: 620, y: 100, size: 36 },
   upper_target: { x: 620, y: 220, size: 42 },
   upper_suffix: { x: 620, y: 720, size: 36 },
   middle:       { x: 380, y: 220, size: 76 },
   middle_2:     { x: 280, y: 220, size: 76 },
-  bottom_0:     { x: 155, y: 520, size: 30 },
-  bottom_1:     { x: 155, y: 680, size: 36 },
-  bottom_2:     { x: 95,  y: 520, size: 30 },
-  bottom_3:     { x: 95,  y: 680, size: 32 },
-  bottom_4:     { x: 40,  y: 520, size: 30 },
-  bottom_5:     { x: 40,  y: 680, size: 30 },
-  suffix:       { x: 155, y: 920, size: 34 }
+  bottom_0:     { x: 155, y: 480, size: 30 },
+  bottom_1:     { x: 155, y: 640, size: 36 },
+  bottom_2:     { x: 95,  y: 480, size: 30 },
+  bottom_3:     { x: 95,  y: 640, size: 32 },
+  bottom_4:     { x: 40,  y: 480, size: 30 },
+  bottom_5:     { x: 40,  y: 640, size: 30 },
+  suffix:       { x: 155, y: 860, size: 34 }
 }
 
 const defaultHorizontal = {
@@ -3167,13 +3167,13 @@ const defaultHorizontal = {
   upper_suffix: { x: 920, y: 80,  size: 34 },
   middle:       { x: 220, y: 220, size: 68 },
   middle_2:     { x: 220, y: 310, size: 68 },
-  bottom_0:     { x: 180, y: 580, size: 28 },
-  bottom_1:     { x: 380, y: 640, size: 34 },
-  bottom_2:     { x: 380, y: 580, size: 28 },
-  bottom_3:     { x: 580, y: 580, size: 28 },
-  bottom_4:     { x: 580, y: 640, size: 28 },
-  bottom_5:     { x: 780, y: 640, size: 28 },
-  suffix:       { x: 880, y: 640, size: 34 }
+  bottom_0:     { x: 180, y: 520, size: 28 },
+  bottom_1:     { x: 380, y: 530, size: 34 },
+  bottom_2:     { x: 380, y: 520, size: 28 },
+  bottom_3:     { x: 580, y: 520, size: 28 },
+  bottom_4:     { x: 580, y: 530, size: 28 },
+  bottom_5:     { x: 760, y: 530, size: 28 },
+  suffix:       { x: 880, y: 530, size: 34 }
 }
 
 const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
@@ -3694,7 +3694,7 @@ input, select, textarea {
 .data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
 
-/* 🌟 所有狀態選單統一大小（絕不切字、大小一致） */
+/* 所有狀態選單統一大小 */
 .col-status, .col-receipt {
   width: 82px !important;
   min-width: 82px !important;
@@ -4117,21 +4117,58 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
+/* 🌟 全新印表機列印自適應：邊界最小化、防切字防換頁 */
 @media print {
-  html, body, .main-wrapper, .couplet-screen-wrapper { 
-    margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; display: block !important; 
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    height: 100% !important;
+  }
+  .main-wrapper, .couplet-screen-wrapper, .system-root { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    background: white !important; 
+    overflow: visible !important; 
+    display: block !important; 
+    height: auto !important;
   }
   .no-print { display: none !important; }
   .canvas-viewport, .receipt-preview-area { 
-    padding: 0 !important; margin: 0 !important; background: white !important; overflow: visible !important; display: block !important; 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    background: white !important; 
+    overflow: visible !important; 
+    display: block !important; 
   }
-  .card-scaler-container { position: static !important; margin: 0 !important; padding: 0 !important; }
+  .card-scaler-container { 
+    position: static !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+  }
   #card-print-target { 
-    position: absolute !important; top: 0 !important; left: 0 !important; transform: none !important; box-shadow: none !important; margin: 0 !important; display: block !important; visibility: visible !important; border: none !important;
+    position: absolute !important; 
+    top: 0 !important; 
+    left: 0 !important; 
+    transform: none !important; 
+    box-shadow: none !important; 
+    margin: 0 !important; 
+    display: block !important; 
+    visibility: visible !important; 
+    border: none !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
   }
   #card-print-target * { visibility: visible !important; }
   .a5-landscape-sheet, .farmer-receipt-sheet { 
-    position: relative !important; transform: none !important; box-shadow: none !important; width: 210mm !important; height: 148mm !important; margin: 0 auto !important; 
+    position: relative !important; 
+    transform: none !important; 
+    box-shadow: none !important; 
+    width: 210mm !important; 
+    height: 148mm !important; 
+    margin: 0 auto !important; 
+    page-break-after: avoid !important;
   }
 }
 </style>
