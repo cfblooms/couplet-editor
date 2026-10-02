@@ -21,7 +21,7 @@
           </button>
         </div>
         <div v-if="authError" class="lock-error-text">
-          ⚠️ 密碼錯誤，請重新輸入！
+          ⚠️️ 密碼錯誤，請重新輸入！
         </div>
         <div class="lock-tip">
           💡 自己人的手機與電腦登入後會自動保持登入，下次開啟無需重複輸入。
@@ -641,7 +641,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️️</button>
                         </div>
                       </td>
                     </tr>
@@ -671,7 +671,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -1094,7 +1094,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 簽名區往上移，防止跨頁) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1266,14 +1266,15 @@
                 </tbody>
               </table>
 
-              <div class="sheet-footer">
+              <!-- 🌟 簽收單底部：整體上提約 30px，防客人簽名溢出導致跨頁 -->
+              <div class="sheet-footer compact-footer">
                 <div class="footer-left">
                   <div>送貨司機 / 經手人：______________</div>
                   <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
                 </div>
-                <div class="footer-sign-box">
+                <div class="footer-sign-box compact-sign-box">
                   <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
-                  <div class="sign-box-area">
+                  <div class="sign-box-area compact-sign-area">
                     <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
                   </div>
                 </div>
@@ -1382,7 +1383,7 @@
             class="print-action-btn mt-2" 
             @click="printFarmerReceipt"
           >
-            🖨️️ 列印農民收據
+            🖨️ 列印農民收據
           </button>
         </div>
 
@@ -2220,7 +2221,9 @@ const batchMarkPaid = async () => {
   }
 }
 
+// ==========================================
 // 3. A5 橫式簽收單
+// ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -2434,7 +2437,7 @@ const shareReceiptToBuyerDirect = () => {
   ctx.stroke()
 
   const tLeft = 45, tTop = 95, tWidth = 704
-  const rowHeight = 75
+  const rowHeight = 72
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#334155'
   ctx.strokeRect(tLeft, tTop, tWidth, rowHeight * 4)
@@ -2478,43 +2481,44 @@ const shareReceiptToBuyerDirect = () => {
 
   ctx.fillStyle = '#0f172a'
   ctx.font = `bold 16.5px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 18, col2W - 24, 23, 2)
+  drawWrappedText(ctx, receiptForm.value.recipient || '—', tLeft + col1W + 12, tTop + 16, col2W - 24, 23, 2)
 
   ctx.fillStyle = '#334155'
   ctx.font = `15px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 18, tWidth - (col1W + col2W + col3W) - 24, 22, 2)
+  drawWrappedText(ctx, receiptForm.value.address || '同訂購人地址 / 門市取貨', tLeft + col1W + col2W + col3W + 12, tTop + 16, tWidth - (col1W + col2W + col3W) - 24, 22, 2)
 
   ctx.fillStyle = '#1e3a8a'
   ctx.font = `bold 17.5px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 24, tWidth - col1W - 24, 25, 2)
+  drawWrappedText(ctx, receiptForm.value.item || '特選蘭花 1盆', tLeft + col1W + 12, tTop + rowHeight + 22, tWidth - col1W - 24, 25, 2)
 
   ctx.fillStyle = '#111827'
   ctx.font = `16px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 24, tWidth - col1W - 24, 23, 2)
+  drawWrappedText(ctx, receiptForm.value.giver || '敬領 誌慶 / 宸豐蘭藝 敬製', tLeft + col1W + 12, tTop + rowHeight * 2 + 22, tWidth - col1W - 24, 23, 2)
 
   ctx.fillStyle = '#475569'
   ctx.font = `14.5px ${fontFam}`
-  drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 24, tWidth - col1W - 24, 21, 2)
+  drawWrappedText(ctx, receiptForm.value.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。', tLeft + col1W + 12, tTop + rowHeight * 3 + 22, tWidth - col1W - 24, 21, 2)
 
+  // 🌟 下方經手人與簽名欄向上提
   ctx.fillStyle = '#334155'
   ctx.font = `15px ${fontFam}`
-  drawWrappedText(ctx, '送貨司機 / 經手人：______________', 45, 435, 300, 20, 1)
+  drawWrappedText(ctx, '送貨司機 / 經手人：______________', 45, 415, 300, 20, 1)
   ctx.font = `13px ${fontFam}`
   ctx.fillStyle = '#64748b'
-  drawWrappedText(ctx, '※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 465, 450, 20, 1)
+  drawWrappedText(ctx, '※ 專車親送・現場點交確認・花禮已送達 (收件人已線上簽收)', 45, 442, 450, 20, 1)
 
-  const sBoxLeft = 529, sBoxTop = 410, sBoxW = 220, sBoxH = 80
+  const sBoxLeft = 529, sBoxTop = 390, sBoxW = 220, sBoxH = 75
   ctx.lineWidth = 1.5
   ctx.strokeStyle = '#475569'
   ctx.strokeRect(sBoxLeft, sBoxTop, sBoxW, sBoxH)
   ctx.fillStyle = '#e2e8f0'
-  ctx.fillRect(sBoxLeft + 1, sBoxTop + 1, sBoxW - 2, 22)
+  ctx.fillRect(sBoxLeft + 1, sBoxTop + 1, sBoxW - 2, 20)
 
   ctx.fillStyle = '#334155'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `bold 13px ${fontFam}`
-  ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 12)
+  ctx.font = `bold 12.5px ${fontFam}`
+  ctx.fillText('客戶簽收章 / 線上簽名處', sBoxLeft + sBoxW / 2, sBoxTop + 10)
 
   const finishShare = () => {
     const filename = `已簽收單據_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
@@ -2524,7 +2528,7 @@ const shareReceiptToBuyerDirect = () => {
   if (liveSignDataUrl.value) {
     const signImg = new Image()
     signImg.onload = () => {
-      ctx.drawImage(signImg, sBoxLeft + 10, sBoxTop + 24, sBoxW - 20, sBoxH - 28)
+      ctx.drawImage(signImg, sBoxLeft + 8, sBoxTop + 22, sBoxW - 16, sBoxH - 26)
       finishShare()
     }
     signImg.src = liveSignDataUrl.value
@@ -3384,9 +3388,8 @@ const shareCoupletDirect = async () => {
     const originalTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
-    // 🌟 核心過濾：ignoreElements 排除所有 .scale-handle（編輯藍點），並忽略 .no-print 元素
     const canvas = await html2canvas(targetEl, {
-      scale: 2, // 2倍高解析度
+      scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
@@ -3940,34 +3943,38 @@ input, select, textarea {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
 }
 
-/* A5 橫式簽收單完整美觀樣式 */
+/* 🌟 A5 橫式簽收單完整美觀樣式（調整緊湊度與內距，簽名區上移） */
 .receipt-scaler-container { position: relative; }
 .a5-landscape-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 36px 42px; box-sizing: border-box;
+  width: 794px; height: 560px; background: #ffffff; padding: 24px 38px 20px 38px !important; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
   color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
 .sheet-header {
-  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; margin-bottom: 4px;
 }
-.shop-name-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
-.sheet-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
-.header-meta { font-size: 14px; line-height: 1.5; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 16px; table-layout: fixed; }
-.receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
-.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
-.receipt-table .val { width: 35%; font-size: 16px; }
-.receipt-table .val-bold { font-weight: bold; font-size: 17px; }
-.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17.5px; }
+.shop-name-title { font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.sheet-main-title { font-size: 23px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.header-meta { font-size: 13.5px; line-height: 1.4; text-align: right; color: #334155; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 6px 0 8px 0; font-size: 15.5px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 6px 10px; word-break: break-all; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 15.5px; }
+.receipt-table .val { width: 35%; font-size: 15.5px; }
+.receipt-table .val-bold { font-weight: bold; font-size: 16px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 16.5px; }
 
-.sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
-.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 15px; padding: 4px 0; }
-.footer-tip { font-size: 13px; color: #64748b; }
-.footer-sign-box {
+/* 🌟 簽名區向上拉抬，避免溢出 */
+.compact-footer {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 2px; margin-bottom: 4px;
+}
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; font-size: 14.5px; padding-top: 6px; }
+.footer-tip { font-size: 12.5px; color: #64748b; }
+.compact-sign-box {
   width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
 }
-.sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
-.sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
+.sign-box-title { background: #e2e8f0; font-size: 12.5px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
+.compact-sign-area { height: 75px; min-height: 75px; max-height: 75px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.live-signature-img { max-height: 70px; max-width: 95%; object-fit: contain; }
 
 /* 農民出售農產品收據完整美觀樣式 */
 .farmer-scaler-container { position: relative; }
@@ -4045,32 +4052,32 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* 印表機列印自適應：邊界 0mm、防切字防換頁 */
+/* 🌟 列印絕對防跨頁保護 */
 @media print {
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     height: 100% !important;
   }
-  .main-wrapper, .couplet-screen-wrapper, .system-root { 
+  .main-wrapper, .couplet-screen-wrapper, .system-root, .receipt-container { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    overflow: visible !important; 
+    overflow: hidden !important; 
     display: block !important; 
-    height: auto !important;
+    height: 100% !important;
   }
   .no-print { display: none !important; }
   .canvas-viewport, .receipt-preview-area { 
     padding: 0 !important; 
     margin: 0 !important; 
     background: white !important; 
-    overflow: visible !important; 
+    overflow: hidden !important; 
     display: block !important; 
   }
-  .card-scaler-container { 
+  .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { 
     position: static !important; 
     margin: 0 !important; 
     padding: 0 !important; 
@@ -4090,13 +4097,19 @@ input, select, textarea {
   }
   #card-print-target * { visibility: visible !important; }
   .a5-landscape-sheet, .farmer-receipt-sheet { 
-    position: relative !important; 
+    position: absolute !important; 
+    top: 0 !important;
+    left: 0 !important;
     transform: none !important; 
     box-shadow: none !important; 
     width: 210mm !important; 
     height: 148mm !important; 
-    margin: 0 auto !important; 
+    max-height: 148mm !important;
+    margin: 0 !important; 
+    overflow: hidden !important;
     page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 </style>
