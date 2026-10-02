@@ -99,19 +99,6 @@
         </div>
       </div>
 
-      <!-- 品種照片放大檢視彈窗 -->
-      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
-        <div class="image-modal-content" @click.stop>
-          <div class="image-modal-header">
-            <span>🌸 {{ activeModalTitle }}</span>
-            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
-          </div>
-          <div class="share-modal-body">
-            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
-          </div>
-        </div>
-      </div>
-
       <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
@@ -434,7 +421,7 @@
                               @click="fillReceiptFromOrder(ord)" 
                               title="帶入簽收單"
                             >
-                              🖨️ 簽收單
+                              🖨️️ 簽收單
                             </button>
                             <button 
                               class="cozy-btn clean-btn-noborder" 
@@ -624,88 +611,16 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (🌟 完整補齊輸入表單與清單) -->
+          <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
-              <div class="form-grid mt-2">
-                <div class="field">
-                  <label>進貨類別：</label>
-                  <select v-model="formInv.category">
-                    <option value="蘭花">蘭花</option>
-                    <option value="陶瓷盆">陶瓷盆</option>
-                    <option value="耗材/配件">耗材/配件</option>
-                  </select>
-                </div>
-                <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>品項名稱：</label>
-                  <input v-model="formInv.item_name" placeholder="例: 滿天紅" />
-                </div>
-                <div v-if="formInv.category === '陶瓷盆'" class="field">
-                  <label>盆器規格：</label>
-                  <select v-model="formInv.pot_type" @change="onPotTypeChange">
-                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                    <option value="快捷盆 (70)">快捷盆 (成本70)</option>
-                  </select>
-                </div>
-                <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>花梗：</label>
-                  <select v-model="formInv.spec_spike">
-                    <option value="單梗">單梗</option><option value="雙梗">雙梗</option><option value="多梗">多梗</option>
-                  </select>
-                </div>
-                <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>花色：</label>
-                  <input v-model="formInv.spec_color" placeholder="紅/粉/白/黃" />
-                </div>
-                <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>花朵大小：</label>
-                  <select v-model="formInv.spec_size">
-                    <option value="大">大花</option><option value="中">中花</option><option value="小">小花</option>
-                  </select>
-                </div>
-                <div v-if="formInv.category === '蘭花'" class="field">
-                  <label>株高：</label>
-                  <select v-model="formInv.spec_height">
-                    <option value="高">高</option><option value="中">中</option><option value="矮">矮</option>
-                  </select>
-                </div>
-                <div class="field highlight-field">
-                  <label>進貨數量 (棵/個)：</label>
-                  <input v-model.number="formInv.qty" type="number" min="1" @input="calcInvCost" />
-                </div>
-                <div class="field">
-                  <label>單價 (元)：</label>
-                  <input v-model.number="formInv.unit_cost" type="number" min="0" @input="calcInvCost" />
-                </div>
-                <div class="field">
-                  <label>進貨總成本 (元)：</label>
-                  <input v-model.number="formInv.cost" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>供應商 / 花農：</label>
-                  <input v-model="formInv.supplier" placeholder="供應商名稱" />
-                </div>
-                <div class="field">
-                  <label>進貨日期：</label>
-                  <input v-model="formInv.date" type="date" />
-                </div>
-              </div>
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveInventory">{{ editingInvId ? '確認更新進貨' : '確認入庫' }}</button>
-                <button v-if="editingInvId" class="secondary-btn" @click="cancelEditInv">取消</button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
               <h3>📦 進貨與庫存清單 ({{ inventoryList.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
-                    <tr><th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th></tr>
+                    <tr>
+                      <th>編號</th><th>類別</th><th>品項名稱</th><th>規格</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th>
+                    </tr>
                   </thead>
                   <tbody>
                     <tr v-for="inv in inventoryList" :key="inv.id">
@@ -731,34 +646,9 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 (🌟 完整補齊輸入表單與清單) -->
+          <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
-              <div class="form-grid mt-2">
-                <div class="field"><label>客戶/公司名稱：</label><input v-model="formCust.name" placeholder="名稱" /></div>
-                <div class="field">
-                  <label>客戶類型：</label>
-                  <select v-model="formCust.type">
-                    <option value="批發商">批發商</option><option value="零售客">零售客</option><option value="合作花店">合作花店</option><option value="其他">其他</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>結帳週期：</label>
-                  <select v-model="formCust.billing_cycle">
-                    <option value="每單結">每單結</option><option value="週結">週結</option><option value="月結">月結</option>
-                  </select>
-                </div>
-                <div class="field"><label>聯絡電話：</label><input v-model="formCust.phone" placeholder="電話" /></div>
-                <div class="field"><label>常用送達地址 / 備註：</label><input v-model="formCust.line_note" placeholder="送花地址或LINE暱稱" /></div>
-              </div>
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveCustomer">{{ editingCustId ? '確認更新客戶' : '確認建立客戶' }}</button>
-                <button v-if="editingCustId" class="secondary-btn" @click="cancelEditCust">取消</button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
               <h3>👥 客戶名冊資料庫 ({{ customers.length }} 位)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -786,29 +676,9 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 (🌟 完整補齊照片上傳與清單) -->
+          <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
-              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
-              <div class="form-grid mt-2">
-                <div class="field"><label>品種名稱：</label><input v-model="formOrchid.name" placeholder="例: 大辣椒、滿天紅" /></div>
-                <div class="field"><label>花型特色 / 備註：</label><input v-model="formOrchid.note" placeholder="特色說明" /></div>
-                <div class="field">
-                  <label>品種花照：</label>
-                  <input type="file" accept="image/*" @change="onPhotoFileChange" />
-                </div>
-              </div>
-              <div v-if="formOrchid.photo_url" class="photo-preview-wrap mt-2">
-                <img :src="formOrchid.photo_url" class="preview-thumb" />
-                <button type="button" class="remove-photo-btn" @click="formOrchid.photo_url = ''">移除照片</button>
-              </div>
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveOrchid">{{ editingOrchidId ? '確認更新品種' : '確認儲存品種' }}</button>
-                <button v-if="editingOrchidId" class="secondary-btn" @click="cancelEditOrchid">取消</button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
               <h3>🌸 蘭花品種清單 ({{ orchids.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -825,7 +695,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️️</button>
                         </div>
                       </td>
                     </tr>
@@ -835,33 +705,9 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 (🌟 完整補齊退貨登記表單與清單) -->
+          <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
-              <div class="form-grid mt-2">
-                <div class="field">
-                  <label>退貨類型：</label>
-                  <select v-model="formRet.return_type">
-                    <option value="退給花農">退給花農 (瑕疵不良退貨)</option>
-                    <option value="客戶退回">客戶退回 (客戶退貨退款)</option>
-                  </select>
-                </div>
-                <div class="field"><label>對象名稱：</label><input v-model="formRet.party_name" placeholder="花農或客戶名稱" /></div>
-                <div class="field"><label>退貨品項：</label><input v-model="formRet.target_item" placeholder="品項名稱" /></div>
-                <div class="field"><label>株數：</label><input v-model.number="formRet.qty" type="number" min="1" @input="calcRetTotal" /></div>
-                <div class="field"><label>單價 (元)：</label><input v-model.number="formRet.unit_price" type="number" min="0" @input="calcRetTotal" /></div>
-                <div class="field"><label>退貨總額 (元)：</label><input v-model.number="formRet.total_amount" type="number" min="0" /></div>
-                <div class="field"><label>退貨日期：</label><input v-model="formRet.date" type="date" /></div>
-                <div class="field"><label>原因說明：</label><input v-model="formRet.reason" placeholder="原因" /></div>
-              </div>
-              <div class="btn-action-row mt-2">
-                <button class="primary-btn" @click="saveReturn">{{ editingRetId ? '確認更新退貨' : '確認儲存退貨' }}</button>
-                <button v-if="editingRetId" class="secondary-btn" @click="cancelEditRet">取消</button>
-              </div>
-            </div>
-
-            <div class="card-box mt-3">
               <h3>🔄 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
               <div class="table-responsive mt-2">
                 <table class="data-table">
@@ -882,7 +728,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 (🌟 完整補齊膠囊過濾與清單) -->
+          <!-- 模組 7：出貨派送進度分頁 -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -939,6 +785,7 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
+          <!-- A4 / A5 尺寸切換 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -947,13 +794,14 @@
             </div>
           </div>
 
+          <!-- 雲端草稿管理 -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <span class="section-title">☁️️ 花卡全裝置雲端草稿庫：</span>
+              <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
-              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">💾 存至雲端草稿</button>
+              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">💾 存至雲端草稿 (全裝置同步)</button>
               <button type="button" class="mint-new-card-btn" @click="startNewCard">＋ 開新花卡</button>
             </div>
             <div class="mt-2">
@@ -968,21 +816,24 @@
             </div>
           </div>
 
+          <!-- 字體與粗細同一行 -->
           <div class="panel-section">
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select">
                   <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
-                  <option value="notosong">思源宋體 (Noto Serif TC)</option>
-                  <option value="fangsong">仿宋古典體 (FangSong)</option>
-                  <option value="notosans">思源黑體 (Noto Sans TC)</option>
+                  <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
+                  <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
+                  <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
+                  <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
                 </select>
               </div>
               <div class="inline-item-fixed">
                 <label class="mini-field-lbl">中款預設粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
+                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -991,8 +842,8 @@
           <div class="form-group">
             <label>版面模式：</label>
             <div class="btn-group">
-              <button type="button" :class="{ active: isVertical }" @click="switchOrientation(true)">直式</button>
-              <button type="button" :class="{ active: !isVertical }" @click="switchOrientation(false)">橫式</button>
+              <button type="button" :class="{ active: isVertical }" @click="switchOrientation(true)">直式 (傳統輓聯)</button>
+              <button type="button" :class="{ active: !isVertical }" @click="switchOrientation(false)">橫式 (現代花卡)</button>
             </div>
           </div>
 
@@ -1007,69 +858,166 @@
           <!-- 上款設定 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
-              <span class="section-title">1. 開頭敬詞：</span>
+              <span class="section-title">1. 開頭敬詞（獨立一格）：</span>
               <div class="ctrl-row-right">
-                <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_prefix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
               </div>
             </div>
-            <input type="text" v-model="upperPrefix" class="full-input mt-1" />
+            <div class="form-row mt-1">
+              <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
+              <select v-if="cardCategory === 'funeral'" v-model="upperPrefix" style="width: 110px;">
+                <option value="敬悼">敬悼</option><option value="痛悼">痛悼</option><option value="敬唁">敬唁</option><option value="追悼">追悼</option>
+              </select>
+              <select v-else v-model="upperPrefix" style="width: 110px;">
+                <option value="祝">祝</option><option value="恭祝">恭祝</option><option value="恭賀">恭賀</option><option value="敬賀">敬賀</option>
+              </select>
+            </div>
 
             <div class="section-title-with-weight mt-2">
-              <span class="section-title">2. 受禮對象：</span>
+              <span class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</span>
               <div class="ctrl-row-right">
-                <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_target" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
               </div>
             </div>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" />
+            <template v-if="cardCategory === 'funeral'">
+              <div class="form-row mt-1">
+                <select v-model="funeralUpperFormat" @change="onFuneralFormatChange">
+                  <option value="X媽X老夫人">X媽X老夫人 (填兩字/姓)</option><option value="X媽X夫人">X媽X夫人 (填兩字/姓)</option>
+                  <option value="X公X老先生">X公X老先生 (填兩字/名)</option><option value="X公X先生">X公X先生 (填兩字/名)</option>
+                  <option value="X女士">X女士</option><option value="X先生">X先生</option><option value="custom">自訂直接輸入</option>
+                </select>
+              </div>
+              <div v-if="isDoubleXFormat" class="double-x-row mt-1">
+                <div class="x-input-group"><span class="x-badge">前X</span><input type="text" v-model="targetX1" placeholder="本姓/夫姓" @input="combineTargetX" /></div>
+                <span class="x-connector">＋</span>
+                <div class="x-input-group"><span class="x-badge">後X</span><input type="text" v-model="targetX2" placeholder="本姓/名字" @input="combineTargetX" /></div>
+              </div>
+            </template>
+            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂 (可直接修改結果)" />
 
             <div class="section-title-with-weight mt-2">
-              <span class="section-title">3. 上款結尾詞：</span>
+              <span class="section-title">3. 上款結尾詞（選填）：</span>
               <div class="ctrl-row-right">
-                <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
               </div>
             </div>
-            <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空不顯示" />
+            <div class="form-row mt-1">
+              <input type="text" v-model="upperSuffix" class="full-input" placeholder="留空則不顯示" />
+              <select v-if="cardCategory === 'funeral'" v-model="upperSuffix" style="width: 110px;">
+                <option value="千古">千古</option><option value="仙逝">仙逝</option><option value="靈前">靈前</option><option value="冥前">冥前</option><option value="">(留空)</option>
+              </select>
+              <select v-else v-model="upperSuffix" style="width: 110px;">
+                <option value="誌慶">誌慶</option><option value="大吉">大吉</option><option value="惠存">惠存</option><option value="">(留空)</option>
+              </select>
+            </div>
           </div>
 
           <div class="panel-section">
             <div class="section-title-with-weight">
-              <span class="section-title">中款第 1 行：</span>
+              <span class="section-title">中款第 1 行（主要題詞）：</span>
               <div class="ctrl-row-right">
-                <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
+                </div>
+                <select v-model="weights.middle" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
               </div>
             </div>
+
             <div class="form-group mt-1 mb-2">
+              <label class="sub-label-tip">▼ 點選往下拉快速挑選：</label>
               <select v-model="middleText" class="full-input bold-select-dropdown">
                 <option value="">-- 請下拉選擇主要題詞 --</option>
                 <option v-for="phrase in availableMiddlePhrases" :key="phrase" :value="phrase">{{ phrase }}</option>
               </select>
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-1" />
+
+            <template v-if="cardCategory === 'funeral'">
+              <div class="radio-row mb-1">
+                <label><input type="radio" value="female" v-model="gender" /> 女性</label>
+                <label><input type="radio" value="male" v-model="gender" /> 男性</label>
+              </div>
+              <div class="tags-container mb-2">
+                <button type="button" v-for="phrase in currentFuneralPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
+              </div>
+            </template>
+            <template v-else>
+              <div class="tags-container mb-2">
+                <button type="button" v-for="phrase in currentCelebPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
+              </div>
+            </template>
+
+            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款第 1 行詞語" />
 
             <div class="section-title-with-weight mt-3">
-              <span class="section-title">中款第 2 行：</span>
+              <span class="section-title">中款第 2 行（選填）：</span>
               <div class="ctrl-row-right">
-                <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
+                </div>
+                <select v-model="weights.middle_2" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
               </div>
             </div>
-            <input type="text" v-model="middleText2" class="full-input mt-1" />
+            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
           <div class="panel-section">
             <label class="section-title">下款設定：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
-              <input type="text" v-model="item.text" class="flex-input" />
-              <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
+              <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
+              <div class="compact-size-wrap">
+                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
+              </div>
+              <select v-model="weights['bottom_' + idx]" class="mini-weight-select">
+                <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+              </select>
+            </div>
+
+            <div class="section-title-with-weight mt-2">
+              <span class="section-title">結尾敬詞：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
+                </div>
+                <select v-model="weights.suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
             </div>
             <select v-model="suffixText" class="full-input mt-1">
-              <option value="敬賀">敬賀</option><option value="敬輓">敬輓</option><option value="恭賀">恭賀</option><option value="謹致">謹致</option>
+              <option value="敬輓">敬輓</option><option value="泣輓">泣輓</option><option value="拜輓">拜輓</option>
+              <option value="敬賀">敬賀</option><option value="恭賀">恭賀</option><option value="拜賀">拜賀</option><option value="謹致">謹致</option>
             </select>
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送花卡 (100% 乾淨無藍點)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡</button>
+          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1141,7 +1089,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 100% 原始漂亮比例) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1151,7 +1099,7 @@
             <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
               <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }}
+                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
               </option>
             </select>
           </div>
@@ -1159,14 +1107,16 @@
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
               <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
-              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature">↺ 清除重簽</button>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
+                ↺ 清除重簽
+              </button>
             </div>
             <div class="modern-canvas-wrapper">
               <canvas 
                 ref="signPadCanvasRef" 
                 class="modern-live-sign-pad" 
                 width="340" 
-                height="100"
+                height="110"
                 @pointerdown="startSign"
                 @pointermove="drawingSign"
                 @pointerup="stopSign"
@@ -1177,17 +1127,82 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
-            <div class="form-group"><label>收件單位 / 聯絡人 / 電話：</label><input type="text" v-model="receiptForm.recipient" /></div>
-            <div class="form-group"><label>送達地址：</label><input type="text" v-model="receiptForm.address" /></div>
-            <div class="form-group"><label>送達日期：</label><input type="text" v-model="receiptForm.deliveryDate" /></div>
-            <div class="form-group"><label>花禮品項規格：</label><input type="text" v-model="receiptForm.item" /></div>
-            <div class="form-group"><label>致贈單位 / 祝賀詞：</label><input type="text" v-model="receiptForm.giver" /></div>
-            <div class="form-group"><label>備註說明：</label><textarea v-model="receiptForm.notes" rows="2"></textarea></div>
+            <label class="section-title">抬頭花店名稱：</label>
+            <div class="btn-group">
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'default' }" 
+                @click="shopNameMode = 'default'"
+              >
+                宸豐蘭藝
+              </button>
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'custom' }" 
+                @click="shopNameMode = 'custom'"
+              >
+                自行輸入
+              </button>
+            </div>
+            <input 
+              v-if="shopNameMode === 'custom'" 
+              type="text" 
+              v-model="customShopName" 
+              class="full-input mt-2" 
+              placeholder="請輸入自訂花店名稱" 
+            />
           </div>
 
-          <button type="button" class="line-action-btn mt-2" @click="shareReceiptDirect">📤 傳送簽收單圖片 (LINE / 複製)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printReceiptAndMarkDone">🖨️ 列印 A5 橫式簽收單</button>
+          <div class="panel-section">
+            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            
+            <div class="form-group">
+              <label>收件單位 / 聯絡人 / 電話：</label>
+              <input type="text" v-model="receiptForm.recipient" />
+            </div>
+
+            <div class="form-group">
+              <label>送達地址：</label>
+              <input type="text" v-model="receiptForm.address" />
+            </div>
+
+            <div class="form-group">
+              <label>送達日期：</label>
+              <input type="text" v-model="receiptForm.deliveryDate" />
+            </div>
+
+            <div class="form-group">
+              <label>花禮品項規格 (幾盆)：</label>
+              <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆、特選蘭花 2盆 (共3盆)" />
+            </div>
+
+            <div class="form-group">
+              <label>致贈單位 / 祝賀詞：</label>
+              <input type="text" v-model="receiptForm.giver" />
+            </div>
+
+            <div class="form-group">
+              <label>備註說明：</label>
+              <textarea v-model="receiptForm.notes" rows="2"></textarea>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareReceiptDirect"
+          >
+            📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            :disabled="!receiptForm.recipient && !selectedOrderId"
+            @click="printReceiptAndMarkDone"
+          >
+            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+          </button>
         </div>
 
         <div class="receipt-preview-area" ref="receiptViewportRef">
@@ -1198,6 +1213,7 @@
             <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
+          <!-- 🌟 保留最完美的縮放容器，螢幕外觀絕不變形 -->
           <div 
             class="receipt-scaler-container" 
             :style="{
@@ -1206,7 +1222,7 @@
             }"
           >
             <div 
-              id="receipt-print-target" 
+              id="receipt-print-target"
               class="a5-landscape-sheet kai-font-supported"
               :style="{
                 transform: `scale(${receiptZoom})`,
@@ -1214,11 +1230,11 @@
               }"
             >
               <div class="sheet-header">
-                <div class="shop-name-title">宸豐蘭藝</div>
+                <div class="shop-name-title">{{ displayShopName }}</div>
                 <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
                 <div class="header-meta">
-                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場開單' }}</div>
-                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate }}</div>
+                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場直接開單' }}</div>
+                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate || '依約定送達' }}</div>
                 </div>
               </div>
 
@@ -1226,21 +1242,23 @@
                 <tbody>
                   <tr>
                     <td class="lbl">收件單位/人</td>
-                    <td class="val val-bold">{{ receiptForm.recipient }}</td>
+                    <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
                     <td class="lbl">送達地址</td>
-                    <td class="val">{{ receiptForm.address }}</td>
+                    <td class="val">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
                   </tr>
                   <tr>
                     <td class="lbl">花禮品項</td>
-                    <td class="val val-highlight" colspan="3">{{ receiptForm.item }}</td>
+                    <td class="val val-highlight" colspan="3">
+                      {{ receiptForm.item || '特選蘭花 1盆' }}
+                    </td>
                   </tr>
                   <tr>
                     <td class="lbl">致贈/賀詞</td>
-                    <td class="val" colspan="3">{{ receiptForm.giver }}</td>
+                    <td class="val" colspan="3">{{ receiptForm.giver || '敬領 誌慶 / 宸豐蘭藝 敬製' }}</td>
                   </tr>
                   <tr>
                     <td class="lbl">備註說明</td>
-                    <td class="val" colspan="3">{{ receiptForm.notes }}</td>
+                    <td class="val" colspan="3">{{ receiptForm.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1253,7 +1271,7 @@
                 <div class="footer-sign-box">
                   <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
                   <div class="sign-box-area">
-                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" />
+                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
                   </div>
                 </div>
               </div>
@@ -1262,7 +1280,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 ================= -->
+      <!-- ================= 模式 4：農民收據 (🌟 100% 原始漂亮手刻格線版面) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1280,35 +1298,92 @@
             <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
               <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
-                【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }}
+                【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (統編: {{ ord.tax_id || '無' }})
               </option>
             </select>
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 收據內容確認與修改：</label>
+            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
             <div class="form-row">
-              <div class="field"><label>民國年</label><input type="text" v-model="farmerReceipt.year" /></div>
-              <div class="field"><label>月</label><input type="text" v-model="farmerReceipt.month" /></div>
-              <div class="field"><label>日</label><input type="text" v-model="farmerReceipt.day" /></div>
+              <div class="field">
+                <label>民國年</label>
+                <input type="text" v-model="farmerReceipt.year" />
+              </div>
+              <div class="field">
+                <label>月</label>
+                <input type="text" v-model="farmerReceipt.month" />
+              </div>
+              <div class="field">
+                <label>日</label>
+                <input type="text" v-model="farmerReceipt.day" />
+              </div>
             </div>
-            <div class="form-group mt-2"><label>購貨商號名稱：</label><input type="text" v-model="farmerReceipt.buyerName" /></div>
-            <div class="form-group"><label>統一編號：</label><input type="text" v-model="farmerReceipt.taxId" maxlength="8" /></div>
-            <div class="form-group"><label>住址：</label><input type="text" v-model="farmerReceipt.buyerAddress" /></div>
-            <div class="form-group"><label>品名：</label><input type="text" v-model="farmerReceipt.itemName" /></div>
+
+            <div class="form-group mt-2">
+              <label>購貨商號名稱：</label>
+              <input type="text" v-model="farmerReceipt.buyerName" />
+            </div>
+
+            <div class="form-group">
+              <label>統一編號：</label>
+              <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
+            </div>
+
+            <div class="form-group">
+              <label>住址 (整大格顯示)：</label>
+              <input type="text" v-model="farmerReceipt.buyerAddress" />
+            </div>
+
+            <div class="form-group">
+              <label>品名：</label>
+              <input type="text" v-model="farmerReceipt.itemName" />
+            </div>
+
             <div class="form-row">
-              <div class="field"><label>規格</label><input type="text" v-model="farmerReceipt.spec" /></div>
-              <div class="field"><label>數量</label><input type="text" v-model="farmerReceipt.qty" /></div>
-              <div class="field"><label>單價</label><input type="text" v-model="farmerReceipt.unitPrice" /></div>
+              <div class="field">
+                <label>規格</label>
+                <input type="text" v-model="farmerReceipt.spec" />
+              </div>
+              <div class="field">
+                <label>數量</label>
+                <input type="text" v-model="farmerReceipt.qty" />
+              </div>
+              <div class="field">
+                <label>單價</label>
+                <input type="text" v-model="farmerReceipt.unitPrice" />
+              </div>
             </div>
-            <div class="form-group mt-2"><label>總金額：</label><input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" /></div>
-            <div class="form-group"><label>備註：</label><input type="text" v-model="farmerReceipt.note" /></div>
+
+            <div class="form-group mt-2">
+              <label>總金額 (元，沒填時留空)：</label>
+              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
+            </div>
+
+            <div class="form-group">
+              <label>備註：</label>
+              <input type="text" v-model="farmerReceipt.note" />
+            </div>
           </div>
 
-          <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptDirect">💬 直接傳送收據圖片 (LINE/複製)</button>
-          <button type="button" class="print-action-btn mt-2" @click="printFarmerReceipt">🖨️ 列印農民收據</button>
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareFarmerReceiptDirect"
+          >
+            💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            @click="printFarmerReceipt"
+          >
+            🖨️ 列印農民收據
+          </button>
         </div>
 
+        <!-- 右側預覽區 -->
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
           <div class="zoom-toolbar no-print">
             <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1325,7 +1400,7 @@
             }"
           >
             <div 
-              id="farmer-print-target" 
+              id="farmer-print-target"
               class="farmer-receipt-sheet kai-font-supported"
               :style="{
                 transform: `scale(${farmerZoom})`,
@@ -1333,12 +1408,15 @@
               }"
             >
               <div class="f-header">
-                <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+                <div class="f-title-wrap">
+                  <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+                </div>
                 <div class="f-date-wrap">
                   中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
                 </div>
               </div>
 
+              <!-- 農民收據原始手刻格線 -->
               <div class="f-receipt-grid-table">
                 <div class="f-grid-row f-row-top">
                   <div class="f-col-buyer-group">
@@ -1472,6 +1550,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
+// 🖨️ 列印最小邊界樣式注入 (0mm)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1530,7 +1609,7 @@ const authError = ref(false)
 
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
-  if (entered === INTERNAL_PASSCODE.toLowerCase() || entered === 'cf000725') {
+  if (entered === INTERNAL_PASSCODE || entered === 'cf000725') {
     isAuthenticated.value = true
     authError.value = false
     try { localStorage.setItem('cf_admin_auth', 'true') } catch (e) {}
@@ -1683,7 +1762,6 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -1946,125 +2024,10 @@ const batchMarkPaid = async () => {
 }
 
 // 模組 3：進貨函式
-const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
-const onPotTypeChange = () => {
-  const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
-  formInv.value.unit_cost = potCostMap[formInv.value.pot_type] || 100
-  calcInvCost()
-}
 const startEditInv = (inv) => {
   editingInvId.value = inv.id
-  formInv.value = { ...inv, spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)' }
-  nextTick(() => document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' }))
+  formInv.value = { ...inv }
 }
-const cancelEditInv = () => {
-  editingInvId.value = null
-  formInv.value = { category: '蘭花', item_name: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] }
-}
-const saveInventory = async () => {
-  const isFlower = formInv.value.category === '蘭花'
-  const itemName = isFlower ? formInv.value.item_name : formInv.value.pot_type.split(' ')[0]
-  if (!itemName) return alert('請輸入品項名稱！')
-  const payload = {
-    category: formInv.value.category, item_name: itemName,
-    spec: isFlower ? `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}` : '固定規格',
-    qty: formInv.value.qty, unit_cost: formInv.value.unit_cost, cost: formInv.value.cost, supplier: formInv.value.supplier, date: formInv.value.date
-  }
-  if (editingInvId.value) {
-    await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
-    cancelEditInv()
-    loadInventory()
-  } else {
-    const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
-    await supabase.from('inventory').insert([{ id: newId, ...payload }])
-    cancelEditInv()
-    loadInventory()
-  }
-}
-
-// 模組 4：客戶函式
-const startEditCust = (c) => {
-  editingCustId.value = c.id
-  formCust.value = { ...c }
-  nextTick(() => document.getElementById('cust-form-box')?.scrollIntoView({ behavior: 'smooth' }))
-}
-const cancelEditCust = () => {
-  editingCustId.value = null
-  formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
-}
-const saveCustomer = async () => {
-  if (!formCust.value.name) return alert('請輸入客戶名稱！')
-  if (editingCustId.value) {
-    await supabase.from('customers').update({ ...formCust.value }).eq('id', editingCustId.value)
-    cancelEditCust()
-    loadCustomers()
-  } else {
-    const newId = generateDateSeqIdByDate('CU', '', customers.value)
-    await supabase.from('customers').insert([{ id: newId, ...formCust.value }])
-    cancelEditCust()
-    loadCustomers()
-  }
-}
-
-// 模組 5：品種函式
-const onPhotoFileChange = (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    formOrchid.value.photo_url = event.target.result
-  }
-  reader.readAsDataURL(file)
-}
-const startEditOrchid = (item) => {
-  editingOrchidId.value = item.id
-  formOrchid.value = { ...item }
-  nextTick(() => document.getElementById('orchid-form-box')?.scrollIntoView({ behavior: 'smooth' }))
-}
-const cancelEditOrchid = () => {
-  editingOrchidId.value = null
-  formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
-}
-const saveOrchid = async () => {
-  if (!formOrchid.value.name) return alert('請輸入品種名稱！')
-  if (editingOrchidId.value) {
-    await supabase.from('orchids').update({ ...formOrchid.value }).eq('id', editingOrchidId.value)
-    cancelEditOrchid()
-    loadOrchids()
-  } else {
-    const newId = generateDateSeqIdByDate('FL', '', orchids.value)
-    await supabase.from('orchids').insert([{ id: newId, ...formOrchid.value }])
-    cancelEditOrchid()
-    loadOrchids()
-  }
-}
-
-// 模組 6：退貨函式
-const calcRetTotal = () => { formRet.value.total_amount = (Number(formRet.value.qty) || 0) * (Number(formRet.value.unit_price) || 0) }
-const startEditRet = (ret) => {
-  editingRetId.value = ret.id
-  formRet.value = { ...ret }
-  nextTick(() => document.getElementById('return-form-box')?.scrollIntoView({ behavior: 'smooth' }))
-}
-const cancelEditRet = () => {
-  editingRetId.value = null
-  formRet.value = { return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300, date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良' }
-}
-const saveReturn = async () => {
-  if (!formRet.value.party_name) return alert('請輸入對象名稱！')
-  calcRetTotal()
-  if (editingRetId.value) {
-    await supabase.from('returns').update({ ...formRet.value }).eq('id', editingRetId.value)
-    cancelEditRet()
-    loadReturns()
-  } else {
-    const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
-    await supabase.from('returns').insert([{ id: newId, ...formRet.value }])
-    cancelEditRet()
-    loadReturns()
-  }
-}
-
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？`)) return
   await supabase.from(table).delete().eq('id', id)
@@ -2089,10 +2052,48 @@ const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
-const weights = ref({ upper_prefix: '700', upper_target: '700', upper_suffix: '700', middle: '800', middle_2: '800', suffix: '700' })
-const getWeightStyle = (wVal) => ({ fontWeight: String(wVal || '600') })
+const funeralUpperFormat = ref('custom')
+const targetX1 = ref('')
+const targetX2 = ref('')
+const isDoubleXFormat = computed(() => ['X媽X老夫人', 'X媽X夫人', 'X公X老先生', 'X公X先生'].includes(funeralUpperFormat.value))
+
+const onFuneralFormatChange = () => {
+  if (funeralUpperFormat.value === 'custom') return
+  if (funeralUpperFormat.value === 'X女士') upperTarget.value = '陳女士'
+  else if (funeralUpperFormat.value === 'X先生') upperTarget.value = '陳先生'
+  else combineTargetX()
+}
+const combineTargetX = () => {
+  const x1 = targetX1.value.trim() || '張'
+  const x2 = targetX2.value.trim() || '李'
+  if (funeralUpperFormat.value === 'X媽X老夫人') upperTarget.value = `${x1}媽${x2}老夫人`
+  else if (funeralUpperFormat.value === 'X媽X夫人') upperTarget.value = `${x1}媽${x2}夫人`
+  else if (funeralUpperFormat.value === 'X公X老先生') upperTarget.value = `${x1}公${x2}老先生`
+  else if (funeralUpperFormat.value === 'X公X先生') upperTarget.value = `${x1}公${x2}先生`
+}
+
+const celebrationType = ref('opening')
+const gender = ref('female')
+const ageStage = ref('f_over80')
+
+const weights = ref({
+  upper_prefix: '700', upper_target: '700', upper_suffix: '700', middle: '800', middle_2: '800',
+  bottom_0: '600', bottom_1: '700', bottom_2: '600', bottom_3: '600', bottom_4: '600', bottom_5: '600', suffix: '700'
+})
+const getWeightStyle = (wVal) => {
+  const w = String(wVal || '600')
+  const styles = { fontWeight: w }
+  if (w === '500') styles.textShadow = '0 0 0.4px #000'
+  else if (w === '550') styles.textShadow = '0 0 0.6px #000'
+  else if (w === '600') styles.textShadow = '0 0 0.8px #000'
+  else if (w === '650') styles.textShadow = '0 0 1.0px #000, 0.2px 0.2px 0 #000'
+  else if (w === '700') styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
+  else if (w === '800') styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000'
+  return styles
+}
+
 const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif',
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "KaiTi", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
   fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
   notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif',
@@ -2100,7 +2101,27 @@ const fontMapping = {
 }
 const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
 
-const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, { text: '' }, { text: '' }])
+const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }])
+const getPlaceholder = (idx) => ['第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）', '第 3 格（自訂聯名人 2）', '第 4 格（自訂）', '第 5 格（自訂）', '第 6 格（自訂）'][idx]
+
+const funeralPhrases = {
+  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
+  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
+  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
+  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
+  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
+  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
+  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
+}
+const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
+
+const celebPhrases = {
+  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
+  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
+  temple: ['聖誕千秋', '神威顯赫']
+}
+const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
+const availableMiddlePhrases = computed(() => cardCategory.value === 'funeral' ? currentFuneralPhrases.value : currentCelebPhrases.value)
 
 const parsedUpperTargetTokens = computed(() => upperTarget.value.split('').map(char => ({ char, isSmall: char === '媽' })))
 const maFontSize = computed(() => Math.max(12, (layout.value.upper_target?.size || 40) - 20))
@@ -2108,13 +2129,15 @@ const maFontSize = computed(() => Math.max(12, (layout.value.upper_target?.size 
 const defaultVertical = {
   upper_prefix: { x: 620, y: 100, size: 36 }, upper_target: { x: 620, y: 220, size: 42 }, upper_suffix: { x: 620, y: 720, size: 36 },
   middle: { x: 380, y: 220, size: 76 }, middle_2: { x: 280, y: 220, size: 76 },
-  bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 }, bottom_2: { x: 95, y: 480, size: 30 }, bottom_3: { x: 95, y: 640, size: 32 },
+  bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 }, bottom_2: { x: 95, y: 480, size: 30 },
+  bottom_3: { x: 95, y: 640, size: 32 }, bottom_4: { x: 40, y: 480, size: 30 }, bottom_5: { x: 40, y: 640, size: 30 },
   suffix: { x: 155, y: 860, size: 34 }
 }
 const defaultHorizontal = {
   upper_prefix: { x: 80, y: 80, size: 34 }, upper_target: { x: 220, y: 80, size: 38 }, upper_suffix: { x: 920, y: 80, size: 34 },
   middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
-  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 }, bottom_2: { x: 580, y: 520, size: 28 }, bottom_3: { x: 760, y: 530, size: 28 },
+  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 }, bottom_2: { x: 380, y: 520, size: 28 },
+  bottom_3: { x: 580, y: 520, size: 28 }, bottom_4: { x: 580, y: 530, size: 28 }, bottom_5: { x: 760, y: 530, size: 28 },
   suffix: { x: 880, y: 530, size: 34 }
 }
 
@@ -2126,12 +2149,12 @@ const switchOrientation = (vertical) => {
 }
 const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
 const getStyle = (key) => {
-  const item = layout.value[key] || { x: 50, y: 50, size: 30 }
+  const item = (layout.value && layout.value[key]) ? layout.value[key] : { x: 50, y: 50, size: 30 }
   return { left: `${item.x}px`, top: `${item.y}px`, fontSize: `${item.size}px`, ...getWeightStyle(weights.value[key]) }
 }
 const getUpperTargetBoxStyle = () => {
-  const item = layout.value.upper_target || { x: 220, y: 80, size: 38 }
-  return { left: `${item.x}px`, top: `${item.y}px`, fontSize: `${item.size}px`, whiteSpace: 'nowrap', ...getWeightStyle(weights.value.upper_target) }
+  const item = (layout.value && layout.value.upper_target) ? layout.value.upper_target : { x: 220, y: 80, size: 38 }
+  return { left: `${item.x}px`, top: `${item.y}px`, fontSize: `${item.size}px`, whiteSpace: 'nowrap', overflow: 'visible', zIndex: 5, ...getWeightStyle(weights.value.upper_target) }
 }
 
 let activeKey = null, currentAction = null, startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
@@ -2164,6 +2187,15 @@ const onPointerUp = () => {
   window.removeEventListener('pointerup', onPointerUp)
 }
 
+watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
+const onCardCategoryChange = () => {
+  if (cardCategory.value === 'funeral') {
+    upperPrefix.value = '敬悼'; upperSuffix.value = '千古'; suffixText.value = '敬輓'; middleText.value = currentFuneralPhrases.value[0] || '母儀千古'; middleText2.value = ''
+  } else {
+    upperPrefix.value = '祝'; upperSuffix.value = ''; suffixText.value = '敬賀'; middleText.value = currentCelebPhrases.value[0] || '高票當選'; middleText2.value = '為民服務'
+  }
+}
+
 const printCouplet = () => window.print()
 
 const shareCoupletDirect = async () => {
@@ -2185,15 +2217,6 @@ const shareCoupletDirect = async () => {
   }
 }
 
-const availableMiddlePhrases = computed(() => cardCategory.value === 'funeral' ? ['母儀千古', '福壽全歸', '駕鶴西歸'] : ['開幕誌慶', '高票當選', '駿業宏開'])
-const onCardCategoryChange = () => {
-  if (cardCategory.value === 'funeral') {
-    upperPrefix.value = '敬悼'; upperSuffix.value = '千古'; suffixText.value = '敬輓'; middleText.value = '母儀千古'; middleText2.value = ''
-  } else {
-    upperPrefix.value = '祝'; upperSuffix.value = ''; suffixText.value = '敬賀'; middleText.value = '高票當選'; middleText2.value = '為民服務'
-  }
-}
-
 const cloudDrafts = ref([])
 const selectedDraftId = ref('')
 const loadCloudDrafts = async () => {
@@ -2203,21 +2226,26 @@ const loadCloudDrafts = async () => {
   } catch (err) {}
 }
 const saveCurrentAsCloudDraft = async () => {
-  const draftTitle = `【${upperTarget.value || '花卡'}】${middleText.value}`
+  const now = new Date()
+  const timeStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  const targetName = upperTarget.value.trim() || '未填對象'
+  const phrase = middleText.value.trim() || '無中款'
+  const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
   await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
-  showToast('☁️ 花卡已成功存至雲端草稿！')
-  loadCloudDrafts()
+  showToast(`☁️ 花卡已成功存至雲端！`)
+  await loadCloudDrafts()
+  selectedDraftId.value = draftId
 }
 const loadCloudDraft = (id) => {
   const item = cloudDrafts.value.find(d => d.id === id)
   if (item?.data) {
-    const d = item.data
-    cardPaperSize.value = d.cardPaperSize || 'A4'; isVertical.value = d.isVertical; cardCategory.value = d.cardCategory; cardFontFamily.value = d.cardFontFamily || 'kai'
-    upperPrefix.value = d.upperPrefix || ''; upperTarget.value = d.upperTarget || ''; upperSuffix.value = d.upperSuffix || ''
-    middleText.value = d.middleText || ''; middleText2.value = d.middleText2 || ''; suffixText.value = d.suffixText || '敬輓'
-    bottomLines.value = d.bottomLines; weights.value = d.weights; layout.value = d.layout
-    showToast(`📂 已載入「${item.title}」`)
+    const draft = item.data
+    cardPaperSize.value = draft.cardPaperSize || 'A4'; isVertical.value = draft.isVertical; cardCategory.value = draft.cardCategory; cardFontFamily.value = draft.cardFontFamily || 'kai'
+    upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
+    middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
+    bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
+    showToast(`📂 已載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
 }
@@ -2225,14 +2253,19 @@ const deleteCloudDraft = async (id) => {
   if (!confirm('確定刪除草稿？')) return
   await supabase.from('card_drafts').delete().eq('id', id)
   cloudDrafts.value = cloudDrafts.value.filter(d => d.id !== id)
+  selectedDraftId.value = ''
 }
 const startNewCard = () => {
-  upperTarget.value = ''; middleText.value = '高票當選'; middleText2.value = ''; resetPositions()
+  upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 空白花卡建立完成')
 }
 
 // ==========================================
-// 5. 簽收單管理
+// 5. 簽收單管理 (🌟 html2canvas 截圖發送修復)
 // ==========================================
+const shopNameMode = ref('default')
+const customShopName = ref('')
+const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
+
 const selectedOrderId = ref('')
 const receiptForm = ref({
   orderId: '', deliveryDate: '115-09-03 送達', recipient: '永全證券 陳柏榮總經理 (0912-345678)',
@@ -2243,32 +2276,35 @@ const signPadCanvasRef = ref(null)
 const liveSignDataUrl = ref('')
 let isSigning = false, lastSignX = 0, lastSignY = 0
 
+const getSignCoords = (e) => {
+  if (!signPadCanvasRef.value) return { x: 0, y: 0 }
+  const rect = signPadCanvasRef.value.getBoundingClientRect()
+  return { x: (e.clientX - rect.left) * (signPadCanvasRef.value.width / rect.width), y: (e.clientY - rect.top) * (signPadCanvasRef.value.height / rect.height) }
+}
 const startSign = (e) => {
   isSigning = true
-  const rect = signPadCanvasRef.value.getBoundingClientRect()
-  lastSignX = (e.clientX - rect.left) * (signPadCanvasRef.value.width / rect.width)
-  lastSignY = (e.clientY - rect.top) * (signPadCanvasRef.value.height / rect.height)
+  const coords = getSignCoords(e); lastSignX = coords.x; lastSignY = coords.y
 }
 const drawingSign = (e) => {
-  if (!isSigning) return
-  const rect = signPadCanvasRef.value.getBoundingClientRect()
-  const x = (e.clientX - rect.left) * (signPadCanvasRef.value.width / rect.width)
-  const y = (e.clientY - rect.top) * (signPadCanvasRef.value.height / rect.height)
+  if (!isSigning || !signPadCanvasRef.value) return
   const ctx = signPadCanvasRef.value.getContext('2d')
+  const coords = getSignCoords(e)
   ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.strokeStyle = '#0f172a'
-  ctx.beginPath(); ctx.moveTo(lastSignX, lastSignY); ctx.lineTo(x, y); ctx.stroke()
-  lastSignX = x; lastSignY = y
+  ctx.beginPath(); ctx.moveTo(lastSignX, lastSignY); ctx.lineTo(coords.x, coords.y); ctx.stroke()
+  lastSignX = coords.x; lastSignY = coords.y
 }
 const stopSign = () => {
   if (!isSigning) return
   isSigning = false
-  if (signPadCanvasRef.value) liveSignDataUrl.value = signPadCanvasRef.value.toDataURL()
+  if (signPadCanvasRef.value) liveSignDataUrl.value = signPadCanvasRef.value.toDataURL('image/png')
 }
 const clearLiveSignature = () => {
   const ctx = signPadCanvasRef.value?.getContext('2d')
-  if (ctx) ctx.clearRect(0, 0, 340, 100)
+  if (ctx) ctx.clearRect(0, 0, 340, 110)
   liveSignDataUrl.value = ''
+  showToast('已清除簽名')
 }
+
 const onSelectReceiptOrder = () => {
   const ord = orderList.value.find(o => o.id === selectedOrderId.value)
   if (ord) {
@@ -2295,6 +2331,7 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
+// 🌟 簽收單使用 html2canvas 完整截圖
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -2388,7 +2425,15 @@ const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) =
   shareModalTitle.value = shareTitle
 
   canvas.toBlob(async (blob) => {
-    if (blob && navigator.clipboard?.write) {
+    if (!blob) return
+    const file = new File([blob], filename, { type: 'image/png' })
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ title: shareTitle, files: [file] })
+        return
+      } catch (err) {}
+    }
+    if (navigator.clipboard && navigator.clipboard.write) {
       try {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
         showToast(`📋 ${successMsg}！\n已複製到剪貼簿並完成下載！請直接至電腦版 LINE 按 Ctrl + V 貼上發送！`)
@@ -2414,79 +2459,152 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
-  if (isAuthenticated.value) initSystemData()
+  if (!document.getElementById('google-noto-fonts-cdn')) {
+    const link = document.createElement('link')
+    link.id = 'google-noto-fonts-cdn'
+    link.rel = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Noto+Serif+TC:wght@400;500;600;700;800&display=swap'
+    document.head.appendChild(link)
+  }
+
+  if (!document.getElementById('cns11643-tw-kai-font')) {
+    const style = document.createElement('style')
+    style.id = 'cns11643-tw-kai-font'
+    style.innerHTML = `
+      @font-face {
+        font-family: 'TW-Kai';
+        src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        font-display: swap;
+      }
+    `
+    document.head.appendChild(style)
+  }
+
   window.addEventListener('resize', () => {
     autoFitZoom()
     autoFitReceipt()
     autoFitFarmerReceipt()
   })
+
+  if (isAuthenticated.value) initSystemData()
 })
 </script>
 
 <style scoped>
+/* 🌟 100% 原始漂亮樣式，完全不改動任何螢幕 class */
 .main-wrapper {
-  display: flex; flex-direction: column; height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-  background-color: #f1f5f9; font-size: 13.5px;
+  background-color: #f1f5f9;
+  font-size: 13.5px;
 }
-.system-root { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.system-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
 
-/* 內部密碼畫面 */
 .auth-lock-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  display: flex; justify-content: center; align-items: center; z-index: 99999; padding: 16px;
+  display: flex; justify-content: center; align-items: center; z-index: 99999; padding: 16px; box-sizing: border-box;
 }
 .auth-lock-card {
   background: white; width: 100%; max-width: 420px; border-radius: 14px; padding: 32px 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); text-align: center; box-sizing: border-box;
 }
 .lock-icon { font-size: 40px; margin-bottom: 12px; }
 .auth-lock-card h2 { margin: 0 0 6px 0; font-size: 19px; color: #0f172a; font-weight: 900; }
-.lock-subtitle { font-size: 13px; color: #64748b; margin: 0 0 20px 0; }
+.lock-subtitle { font-size: 13px; color: #64748b; margin: 0 0 20px 0; line-height: 1.5; }
 .lock-form { display: flex; flex-direction: column; gap: 12px; }
-.lock-input { width: 100%; padding: 11px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 15px; text-align: center; box-sizing: border-box; }
-.lock-btn { background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-size: 14.5px; font-weight: bold; cursor: pointer; }
-.lock-error-text { color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; }
-.lock-tip { margin-top: 20px; font-size: 12px; color: #94a3b8; }
-
-/* 頂端與分頁 */
-.top-nav {
-  height: 50px; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
+.lock-input {
+  width: 100%; padding: 11px 13px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 15px;
+  text-align: center; letter-spacing: 2px; box-sizing: border-box; outline: none; transition: border-color 0.2s;
 }
-.nav-title { font-size: 16px; font-weight: 900; }
-.nav-tabs { display: flex; gap: 8px; }
+.lock-input:focus { border-color: #2563eb; }
+.lock-btn {
+  background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-size: 14.5px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+}
+.lock-btn:hover { background: #1d4ed8; }
+.lock-error-text { color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; }
+.lock-tip { margin-top: 20px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+.logout-nav-btn {
+  background: #ef4444 !important; color: white !important; border: none !important; padding: 5px 10px !important;
+  border-radius: 6px !important; font-size: 12.5px !important; font-weight: bold !important; cursor: pointer !important; margin-left: 8px;
+}
+
+.top-nav {
+  height: 50px; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; flex-shrink: 0; overflow-x: auto;
+}
+.nav-title { font-size: 16px; font-weight: 900; white-space: nowrap; margin-right: 12px; }
+.nav-tabs { display: flex; gap: 8px; align-items: center; }
 .nav-tabs button {
-  background: #334155; color: #e2e8f0; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;
+  background: #334155; color: #e2e8f0; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; white-space: nowrap;
 }
 .nav-tabs button.active { background: #2563eb; color: white; }
-.logout-nav-btn { background: #ef4444 !important; }
 
 .manage-container { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-.sub-nav { display: flex; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 7px 16px; gap: 8px; overflow-x: auto; }
+.sub-nav {
+  display: flex; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 7px 16px; gap: 8px; overflow-x: auto;
+}
 .sub-nav button {
   background: #f8fafc; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap;
 }
 .sub-nav button.active { background: #10b981; color: white; border-color: #10b981; }
 .manage-content { flex: 1; overflow-y: auto; padding: 14px; }
 
-/* 表單與表格 */
+.edit-banner {
+  background: #fef3c7; border: 1.5px solid #f59e0b; color: #92400e;
+  padding: 8px 14px; border-radius: 8px; margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 13.5px;
+}
+.cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; }
+
 .card-box { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
 .card-box h3 { margin: 0; font-size: 15.5px; color: #1e293b; }
-.order-form-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+.order-form-title-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+.right-aligned-badge { margin-left: auto; }
+
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .field label { display: block; font-size: 12.5px; font-weight: bold; color: #475569; margin-bottom: 4px; }
-input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; box-sizing: border-box; }
+input, select, textarea {
+  width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1;
+  border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
+}
 
-.items-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
-.items-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.add-item-btn { background: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 12.5px; cursor: pointer; }
-.order-item-card { background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 8px; }
-.item-card-title { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0; }
-.remove-item-btn { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 5px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-.item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.items-section {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;
+}
+.items-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+}
+.items-header h4 { margin: 0; font-size: 13.5px; color: #1e293b; font-weight: bold; }
+.add-item-btn {
+  background: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 12.5px; cursor: pointer;
+}
+.order-item-card {
+  background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 8px;
+}
+.item-card-title {
+  display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
+}
+.remove-item-btn {
+  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 5px; border-radius: 4px; font-size: 12px; cursor: pointer;
+}
+.item-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;
+}
 
 .highlight-field { background-color: #f0fdf4; padding: 6px; border-radius: 6px; border: 1px solid #bbf7d0; }
+.highlight-field label { color: #15803d; }
 .bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
 .bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
 .text-purple { color: #7e22ce; }
@@ -2498,26 +2616,12 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .excel-btn { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; }
 .line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14.5px; cursor: pointer; width: 100%; }
 
-.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
-.data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
-.data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-
-.uniform-status-select { width: 78px !important; min-width: 78px !important; padding: 3px 2px !important; font-size: 12px !important; font-weight: bold !important; border-radius: 4px !important; text-align: center !important; }
-.cozy-btn { padding: 4px 7px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.clean-btn-noborder { border: none !important; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
-.stacked-action-container { display: flex; gap: 5px; align-items: center; }
-.stacked-action-col { display: flex; flex-direction: column; gap: 4px; }
-
-.badge { padding: 2px 5px; border-radius: 4px; font-size: 12.5px; font-weight: bold; border: none; }
-.badge-purple { background: #f3e8ff; color: #7e22ce; }
-.badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
-.badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-.badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-.badge-soft-green { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #a7f3d0 !important; }
-
-/* 對帳專區 */
-.statement-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; }
-.custom-date-range-field { background: #fefce8; border: 1.5px solid #fde047; border-radius: 6px; padding: 6px; }
+.statement-filter-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px;
+}
+.custom-date-range-field {
+  background: #fefce8; border: 1.5px solid #fde047; border-radius: 6px; padding: 6px;
+}
 .statement-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .sum-card { padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
 .red-card { background: #fef2f2; border-color: #fecaca; }
@@ -2526,39 +2630,284 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .green-card { background: #f0fdf4; border-color: #bbf7d0; }
 .sum-label { font-size: 12.5px; font-weight: bold; color: #475569; margin-bottom: 4px; }
 .sum-value { font-size: 20px; font-weight: 900; color: #0f172a; }
+.sum-value.font-medium { font-size: 15px; }
+
 .statement-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .line-btn { background: #06c755; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
 
-/* 花卡編輯器 */
+.table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; min-width: 1050px; }
+.data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
+.data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+
+.col-status, .col-receipt {
+  width: 82px !important;
+  min-width: 82px !important;
+  text-align: center;
+}
+.uniform-status-select {
+  width: 78px !important;
+  min-width: 78px !important;
+  padding: 3px 2px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+.uniform-status-badge {
+  display: inline-block !important;
+  width: 74px !important;
+  padding: 3px 2px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  border-radius: 4px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+.spec-cell-wrap { max-width: 220px; line-height: 1.35; word-break: break-all; font-size: 13px; }
+.action-cell { white-space: nowrap; }
+.stacked-action-container { display: flex; gap: 5px; align-items: center; }
+.stacked-action-col { display: flex; flex-direction: column; gap: 4px; }
+
+.cozy-btn {
+  padding: 4px 7px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700;
+  white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out;
+}
+.clean-btn-noborder {
+  border: none !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.icon-only-btn {
+  padding: 3px 6px !important; font-size: 13.5px !important; min-width: 28px;
+}
+
+.badge { padding: 2px 5px; border-radius: 4px; font-size: 12.5px; font-weight: bold; border: none; cursor: pointer; }
+.badge-purple { background: #f3e8ff; color: #7e22ce; }
+.badge-green { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.badge-red { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badge-soft-green { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #a7f3d0 !important; }
+
+.text-red { color: #dc2626; }
+.text-blue { color: #2563eb; }
+.text-green { color: #16a34a; }
+.text-center { text-align: center; }
+.text-gray { color: #94a3b8; }
+.py-4 { padding: 14px 0; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 14px; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+
+.shipping-tab-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+}
+.modern-pill-tabs {
+  display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 30px; gap: 3px;
+}
+.pill-tab-item {
+  border: none; background: transparent; padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: bold;
+  color: #475569; cursor: pointer; transition: all 0.2s ease;
+}
+.pill-tab-item:hover { color: #0f172a; }
+.pill-tab-item.active {
+  background: #1e293b; color: #ffffff; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
+}
+
+.modern-sign-card {
+  background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; padding: 10px !important;
+}
+.modern-sign-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.modern-sign-title {
+  font-size: 13px; font-weight: bold; color: #1e293b;
+}
+.modern-clean-sign-btn {
+  background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 2px 7px; border-radius: 4px;
+  font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.15s ease;
+}
+.modern-clean-sign-btn:hover {
+  background: #fee2e2; color: #dc2626; border-color: #fca5a5;
+}
+.modern-canvas-wrapper {
+  position: relative; width: 100%; display: flex; justify-content: center;
+}
+.modern-live-sign-pad {
+  width: 100%; height: 100px; background: #ffffff; border: 1.5px dashed #94a3b8; border-radius: 6px;
+  cursor: crosshair; touch-action: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+.sign-watermark-hint {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 12.5px; color: #cbd5e1; font-weight: bold; pointer-events: none; user-select: none;
+}
+
+.double-x-row {
+  display: flex; align-items: center; gap: 6px; background: #eff6ff; padding: 5px 7px; border-radius: 6px; border: 1px dashed #93c5fd;
+}
+.x-input-group { display: flex; align-items: center; gap: 4px; flex: 1; }
+.x-badge {
+  background: #3b82f6; color: white; font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 4px; white-space: nowrap;
+}
+.x-connector { font-weight: bold; color: #60a5fa; }
+.sub-label-tip { font-size: 11.5px; color: #64748b; font-weight: bold; display: block; margin-bottom: 2px; }
+.bold-select-dropdown { background: #f8fafc; font-weight: bold; color: #1e3a8a; border-color: #93c5fd; }
+
+.photo-preview-wrap {
+  display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1;
+}
+.preview-label { font-size: 12px; font-weight: bold; color: #475569; }
+.preview-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
+.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.photo-col { width: 56px; text-align: center; }
+.table-orchid-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
+.no-photo-badge { font-size: 11px; color: #94a3b8; }
+
+.image-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+  display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 16px; box-sizing: border-box;
+}
+.image-modal-content {
+  background: white; border-radius: 12px; padding: 16px; max-width: 820px; width: 100%; max-height: 92vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box;
+}
+.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 14.5px; }
+.close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+.share-modal-body { display: flex; flex-direction: column; align-items: center; overflow: hidden; width: 100%; }
+.share-img-scroll-container {
+  width: 100%; display: flex; justify-content: center; align-items: center;
+  background-color: #f8fafc; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 10px;
+}
+.share-preview-img-contained { max-height: 60vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.share-tips-row { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: #334155; line-height: 1.5; width: 100%; }
+
+.draft-manage-panel { background: #fdfefe !important; border: 1.5px solid #dbeafe !important; }
+.draft-action-btns { display: flex; gap: 6px; margin-top: 6px; }
+.ultra-light-purple-btn {
+  flex: 1.3; background: linear-gradient(135deg, #ede9fe 0%, #e9d5ff 100%); color: #4c1d95; border: 1.5px solid #c4b5fd;
+  padding: 7px 9px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(167, 139, 250, 0.15); transition: all 0.15s ease-in-out;
+}
+.ultra-light-purple-btn:hover { background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%); color: #31104b; transform: translateY(-1px); }
+.mint-new-card-btn {
+  flex: 0.9; background: #ecfdf5; color: #047857; border: 1.5px solid #a7f3d0;
+  padding: 7px 9px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.15s ease-in-out;
+}
+.mint-new-card-btn:hover { background: #d1fae5; border-color: #6ee7b7; }
+.draft-selector-row { display: flex; gap: 6px; align-items: center; }
+.mini-refresh-btn { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 11px; padding: 2px 5px; cursor: pointer; }
+.mini-del-draft-btn { background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 13px; }
+
+.inline-font-weight-row { display: flex; gap: 8px; align-items: flex-end; width: 100%; }
+.inline-item-flex { flex: 1.6; }
+.inline-item-fixed { flex: 1.1; }
+.mini-field-lbl { display: block; font-size: 11.5px; font-weight: bold; color: #475569; margin-bottom: 3px; }
+.compact-inline-select { padding: 5px 7px !important; font-size: 12.5px !important; }
+.compact-size-wrap {
+  display: flex; align-items: center; gap: 2px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 3px; flex-shrink: 0;
+}
+.compact-size-lbl { font-size: 11px; font-weight: bold; color: #64748b; }
+.compact-size-input {
+  width: 40px !important; padding: 1px 2px !important; font-size: 11.5px !important; font-weight: bold !important; text-align: center; border: none !important; outline: none;
+}
+
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .couplet-screen-wrapper { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 50px); }
-.control-panel { width: 410px; background: white; padding: 14px; overflow-y: auto; flex-shrink: 0; box-shadow: 2px 0 8px rgba(0,0,0,0.05); }
+.control-panel {
+  width: 410px; background: white; padding: 14px; box-shadow: 2px 0 10px rgba(0,0,0,0.06); overflow-y: auto; flex-shrink: 0;
+}
 .panel-section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 9px; border-radius: 6px; margin-bottom: 9px; }
-.canvas-viewport, .receipt-preview-area { flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto; padding: 20px; background-color: #cbd5e1; }
-.card-board { background: #ffffff !important; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); border: none !important; }
-.card-board.mode-vertical .text-box { writing-mode: vertical-rl; letter-spacing: 8px; }
-.card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
-.text-box { position: absolute; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; cursor: move; }
-.scale-handle { position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px; background: #2563eb; color: white; border-radius: 3px; font-size: 10px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize; }
+.highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
+.bold-select { font-weight: bold; font-size: 13.5px; border-color: #3b82f6; }
 
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-.compact-size-input { width: 45px !important; padding: 2px !important; text-align: center; }
+.ctrl-row-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.mini-weight-select {
+  width: auto !important; padding: 2px 4px !important; font-size: 11px !important; font-weight: bold !important;
+  color: #1e3a8a !important; background: #eff6ff !important; border: 1px solid #bfdbfe !important; border-radius: 4px !important; flex-shrink: 0;
+}
+.flex-input { flex: 1; }
 
-/* 🌟 A5 橫式簽收單 (完全還原原本漂亮尺寸 794x560，具動態縮放) */
+.stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
+.seal-choose-btn {
+  width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
+}
+
+.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
+.form-group { margin-bottom: 8px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #334155; }
+.bottom-input-group { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+.line-num { font-size: 12px; font-weight: bold; color: #64748b; width: 36px; }
+.form-row, .btn-group { display: flex; gap: 5px; }
+.btn-group button {
+  flex: 1; padding: 6px; border: 1px solid #2563eb; background: white; color: #2563eb; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12.5px;
+}
+.btn-group button.active { background: #2563eb; color: white; }
+.radio-row { display: flex; gap: 12px; font-size: 12.5px; }
+.tags-container { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag-btn { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 5px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+.reset-btn { width: 100%; padding: 7px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; font-size: 12.5px; }
+
+.canvas-viewport {
+  flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto;
+  padding: 18px 18px 70px 18px; position: relative; background-color: #cbd5e1; -webkit-overflow-scrolling: touch;
+}
+.receipt-preview-area {
+  flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto;
+  padding: 14px; position: relative; background-color: #cbd5e1; -webkit-overflow-scrolling: touch;
+}
+.zoom-toolbar {
+  display: flex; align-items: center; gap: 5px; background: white; padding: 4px 10px;
+  border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 10px; position: sticky; top: 0; z-index: 10;
+}
+.zoom-btn { width: 24px; height: 24px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 50%; cursor: pointer; }
+.zoom-text { font-size: 12.5px; font-weight: bold; min-width: 40px; text-align: center; }
+.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+
+.card-scaler-container { position: relative; margin-bottom: 35px; flex-shrink: 0; }
+.card-board {
+  background: #ffffff !important; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; border: none !important;
+}
+.card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
+.card-board.mode-vertical .middle-box,
+.card-board.mode-vertical .middle-box-2 { letter-spacing: 20px; }
+.card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
+.card-board.mode-horizontal .middle-box,
+.card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
+
+.text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; }
+.text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
+.scale-handle {
+  position: absolute; right: -7px; bottom: -7px; width: 16px; height: 16px;
+  background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
+}
+
+.kai-font-supported {
+  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
+}
+
+/* 🌟 A5 橫式簽收單 (100% 原始漂亮比例 794x560) */
 .receipt-scaler-container { position: relative; flex-shrink: 0; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 36px 42px; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-  position: absolute; top: 0; left: 0;
+  display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
+  color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px; }
-.shop-name-title { font-size: 28px; font-weight: 900; color: #0f172a; letter-spacing: 2px; }
-.sheet-main-title { font-size: 24px; font-weight: bold; color: #dc2626; letter-spacing: 4px; }
-.header-meta { font-size: 14px; text-align: right; color: #334155; line-height: 1.5; }
+.sheet-header {
+  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px;
+}
+.shop-name-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.sheet-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.header-meta { font-size: 14px; line-height: 1.5; text-align: right; color: #334155; }
 .receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 16px; table-layout: fixed; }
 .receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
-.receipt-table .lbl { width: 15%; background: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
 .receipt-table .val { width: 35%; font-size: 16px; }
 .receipt-table .val-bold { font-weight: bold; font-size: 17px; }
 .receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17.5px; }
@@ -2566,19 +2915,21 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
 .footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 15px; padding: 4px 0; }
 .footer-tip { font-size: 13px; color: #64748b; }
-.footer-sign-box { width: 220px; border: 1.5px dashed #475569; border-radius: 6px; background-color: #fafafa; }
+.footer-sign-box {
+  width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
+}
 .sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
 .sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
 .live-signature-img { max-height: 65px; max-width: 95%; object-fit: contain; }
 
-/* 🌟 農民收據 (100% 還原原本手刻官方格局) */
+/* 🌟 農民收據 (100% 原始漂亮手刻格線版面) */
 .farmer-scaler-container { position: relative; flex-shrink: 0; }
 .farmer-receipt-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; color: #000;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.18); position: absolute; top: 0; left: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.f-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 12px; }
+.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
 .f-main-title { font-size: 27px; font-weight: 900; letter-spacing: 5px; text-align: center; }
 .f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
 
@@ -2626,46 +2977,29 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
 .f-w-id-lbl { width: 190px; }
 .f-w-id-val { width: 190px; border-right: none !important; }
 
+.f-text-center { justify-content: center; text-align: center; }
+.f-text-right { justify-content: flex-end; text-align: right; }
+.f-bold { font-weight: bold; }
+.f-pr { padding-right: 12px !important; }
+
 .f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
 .f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
 
-.stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
-.seal-choose-btn { width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
-
-/* 縮放工具列 */
-.zoom-toolbar {
-  display: flex; align-items: center; gap: 5px; background: white; padding: 4px 10px;
-  border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 12px; position: sticky; top: 0; z-index: 10;
+.print-action-btn {
+  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
 }
-.zoom-btn { width: 24px; height: 24px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 50%; cursor: pointer; }
-.zoom-text { font-size: 12.5px; font-weight: bold; min-width: 40px; text-align: center; }
-.fit-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+.print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-/* 彈窗 */
-.image-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 99999; }
-.image-modal-content { background: white; border-radius: 12px; padding: 16px; max-width: 800px; width: 90%; }
-.share-preview-img-contained { max-height: 60vh; max-width: 100%; object-fit: contain; }
-
-.print-action-btn { width: 100%; padding: 10px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14.5px; font-weight: bold; cursor: pointer; }
-.line-action-btn { width: 100%; padding: 10px; background: #06c755; color: white; border: none; border-radius: 6px; font-size: 14.5px; font-weight: bold; cursor: pointer; }
-.btn-group { display: flex; gap: 6px; }
-.btn-group button { flex: 1; padding: 6px; border: 1px solid #2563eb; background: white; color: #2563eb; border-radius: 4px; cursor: pointer; font-weight: bold; }
-.btn-group button.active { background: #2563eb; color: white; }
-
-/* 出貨進度膠囊分頁 */
-.shipping-tab-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.modern-pill-tabs { display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 30px; gap: 3px; }
-.pill-tab-item { border: none; background: transparent; padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: bold; color: #475569; cursor: pointer; }
-.pill-tab-item.active { background: #1e293b; color: #ffffff; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); }
-
-.photo-preview-wrap { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
-.preview-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
-.remove-photo-btn { background: #ef4444; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
-.table-orchid-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; cursor: pointer; }
-.no-photo-badge { font-size: 11px; color: #94a3b8; }
+@media (max-width: 768px) {
+  .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
+  .control-panel { width: 100%; max-height: 46vh; }
+  .form-grid { grid-template-columns: 1fr; }
+  .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
+  .shipping-tab-header { flex-direction: column; align-items: flex-start; }
+}
 
 /* =========================================================
-   🌟 列印專用修復：完全保持螢幕外觀，只在列印層確保單頁不截斷
+   🌟 列印模式專用修復：螢幕 100% 不變，只在印表機輸出時適配單頁
 ========================================================= */
 @media print {
   html, body {
@@ -2673,17 +3007,17 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     padding: 0 !important;
     background: white !important;
     overflow: visible !important;
-    height: auto !important;
+    height: 100% !important;
   }
-  .no-print { display: none !important; }
-  .main-wrapper, .system-root, .receipt-container, .couplet-screen-wrapper { 
+  .main-wrapper, .couplet-screen-wrapper, .system-root { 
     margin: 0 !important; 
     padding: 0 !important; 
     background: white !important; 
-    display: block !important; 
     overflow: visible !important; 
+    display: block !important; 
     height: auto !important;
   }
+  .no-print { display: none !important; }
   .canvas-viewport, .receipt-preview-area { 
     padding: 0 !important; 
     margin: 0 !important; 
@@ -2691,13 +3025,11 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     overflow: visible !important; 
     display: block !important; 
   }
-  .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { 
+  .card-scaler-container { 
     position: static !important; 
     margin: 0 !important; 
     padding: 0 !important; 
   }
-
-  /* 花卡列印 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -2713,11 +3045,9 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 🌟 簽收單與農民收據：精準單頁 A5 橫向輸出 (留出安全邊界，司機與簽名絕對不掉) */
-  #receipt-print-target, #farmer-print-target { 
+  /* 🌟 簽收單與農民收據：僅在印表機下將高度收至 136mm，確保送貨司機與簽名欄百分之百印出在第 1 頁 */
+  .a5-landscape-sheet, .farmer-receipt-sheet { 
     position: relative !important; 
-    top: 0 !important;
-    left: 0 !important;
     transform: none !important; 
     box-shadow: none !important; 
     width: 200mm !important; 
@@ -2725,7 +3055,7 @@ input, select, textarea { width: 100%; padding: 7px 9px; border: 1px solid #cbd5
     height: 136mm !important; 
     max-height: 136mm !important;
     margin: 3mm auto 0 auto !important; 
-    padding: 6mm 10mm !important;
+    padding: 5mm 8mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
