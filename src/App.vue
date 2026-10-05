@@ -1233,7 +1233,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 (全平台標楷體強化) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1501,7 +1501,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 收據內容確認與自由修改：</label>
+            <label class="section-title">✏️️ 收據內容確認與自由修改：</label>
             <div class="form-row">
               <div class="field">
                 <label>民國年</label>
@@ -1737,7 +1737,6 @@ const showToast = (msg) => {
   toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
 }
 
-// 行動端分享彈窗變數
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 const shareModalFilename = ref('圖片.png')
@@ -1764,7 +1763,7 @@ const triggerNativeShare = async () => {
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
-      showToast('⚠️️ 分享取消或請改用長按圖片儲存')
+      showToast('⚠️ 分享取消或請改用長按圖片儲存')
     }
   }
 }
@@ -2518,7 +2517,7 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 跨平台標準楷書適配
+// 跨平台標準繁體書法楷書適配（iOS/Android/Windows 優先選正楷）
 const fontMapping = {
   kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -2876,7 +2875,7 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
-  // 自動載入書法正楷全字庫（保證手機與平板標楷體完整呈現）
+  // 自動載入字型全字庫（保證手機與平板標楷體完整呈現）
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
     link.id = 'google-noto-fonts-cdn'
@@ -3327,6 +3326,7 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
+/* 🌟 正楷字體全平台完美適配 */
 .standard-kai-font, .kai-font-supported {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
 }
@@ -3443,12 +3443,11 @@ input, select, textarea {
 }
 
 /* =========================================================================
-   🌟 全平台終極列印修復 (電腦、手機、平板通通精準印出 1 頁，絕不吐空白第二張)
+   🌟 全平台列印修復 (強制單頁、抑制頁尾網址、絕不吐白紙第二張)
 ========================================================================= */
 @media print {
-  /* 1. 徹底消除瀏覽器自動產生的網址、日期、頁碼等頁首頁尾 */
   @page {
-    margin: 0 !important;
+    margin: 0mm !important;
   }
 
   html, body {
@@ -3456,9 +3455,9 @@ input, select, textarea {
     padding: 0 !important;
     background: white !important;
     width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-    overflow: visible !important;
+    height: 99.5% !important;
+    max-height: 99.5vh !important;
+    overflow: hidden !important;
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
 
@@ -3476,14 +3475,13 @@ input, select, textarea {
     display: block !important; 
     position: static !important;
     width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
+    height: 99.5% !important;
+    max-height: 99.5vh !important;
+    overflow: hidden !important;
     transform: none !important;
   }
 
-  /* 花卡列印：滿版單頁輸出 */
+  /* 🌟 花卡列印：安全收斂至 99% 高度內，單頁輸出，禁止分頁 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -3495,12 +3493,14 @@ input, select, textarea {
     visibility: visible !important; 
     border: none !important;
     page-break-after: avoid !important;
+    page-break-before: avoid !important;
     page-break-inside: avoid !important;
+    break-after: avoid !important;
     break-inside: avoid !important;
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 🌟 A5 簽收單與農民收據：精準 192mm x 132mm（完美適配 A5 橫向，絕不跑版、絕不吐第二張白紙） */
+  /* 🌟 A5 簽收單與農民收據：高度收在 130mm 內，完全單頁輸出 */
   #receipt-print-target, #farmer-print-target { 
     position: relative !important; 
     top: 0 !important;
@@ -3509,20 +3509,21 @@ input, select, textarea {
     box-shadow: none !important; 
     width: 192mm !important; 
     max-width: 192mm !important;
-    height: 132mm !important; 
-    max-height: 132mm !important;
-    margin: 4mm auto 0 auto !important; 
+    height: 130mm !important; 
+    max-height: 130mm !important;
+    margin: 3mm auto 0 auto !important; 
     padding: 4mm 6mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
+    page-break-before: avoid !important;
     page-break-inside: avoid !important;
     break-after: avoid !important;
     break-inside: avoid !important;
   }
 
-  /* 確保列印時所有表格字體強制使用標楷體 */
-  #receipt-print-target *, #farmer-print-target * {
+  /* 強制標楷體 */
+  #receipt-print-target *, #farmer-print-target *, #card-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
 }
