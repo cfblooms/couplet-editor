@@ -106,7 +106,7 @@
             <div class="share-tips-row">
               <span>💡 <b>特製色卡列印說明：</b></span>
               <span>• 點擊「手機直接列印」，系統以相片方式直接送印，<b>底部絕不會出現任何網址與時間！</b></span>
-              <span>• 若送印到紅色或粉色卡紙，輸出背景已自動透明，印表機只會印出黑字題詞！</span>
+              <span>• 送印時背景已自動去除為無色透明，印表機只會印出文字！</span>
             </div>
           </div>
         </div>
@@ -394,12 +394,12 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 4底圖連線) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 3底圖連線) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
-          <h2>⚙️️ 卡片與題詞設定</h2>
+          <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 紙張尺寸：正式加入 A3 / A4 / A5 -->
+          <!-- 紙張尺寸：A3 / A4 / A5 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -409,14 +409,13 @@
             </div>
           </div>
 
-          <!-- 🌸 Supabase Storage 4 款專用紙張底色切換 (僅傳給客人看，列印時自動透明) -->
+          <!-- 🌸 Supabase Storage 3 款專用紙張底色切換 -->
           <div class="panel-section highlight-panel">
             <label class="section-title">🌸 實體卡片樣式底圖 (客人預覽用)：</label>
             <select v-model="cardBgType" class="full-input bold-select">
-              <option value="card1">🌺 喜慶紅卡底圖 (Supabase 第 1 張)</option>
-              <option value="card2">🌸 優雅粉卡底圖 (Supabase 第 2 張)</option>
-              <option value="card3">📄 質感白卡底圖 (Supabase 第 3 張)</option>
-              <option value="card4">🎴 第 4 款特色底圖 (Supabase 第 4 張)</option>
+              <option value="red">🌺 喜慶紅卡底圖</option>
+              <option value="pink">🌸 優雅粉卡底圖</option>
+              <option value="white">📄 質感白卡底圖</option>
               <option value="custom">📁 自行上傳其他底圖檔...</option>
             </select>
             <input 
@@ -427,7 +426,7 @@
               @change="onCustomCardBgUpload" 
             />
             <div class="sub-label-tip mt-1">
-              💡 <b>安心提示</b>：這裡選底圖是為了<b>直接傳給客人確認</b>；當您真正放進印表機印色卡時，<b>系統會自動變為無色透明背景</b>，絕不覆蓋色紙！
+              💡 <b>安心提示</b>：這裡選底圖是為了<b>直接傳給客人確認</b>；當您按列印時，<b>系統會自動變為無色透明背景</b>，直接套印在色紙上！
             </div>
           </div>
 
@@ -537,7 +536,7 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
-            <!-- 🌟 花卡主體 (螢幕上顯示 Supabase 雲端底圖供預覽，送印時 CSS 強制透明) -->
+            <!-- 🌟 花卡主體 (螢幕顯示 Supabase 雲端底圖，送印時 CSS 強制透明) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -868,416 +867,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { createClient } from '@supabase/supabase-js'
-import * as XLSX from 'xlsx'
-import html2canvas from 'html2canvas'
-
-// ==========================================
-// 1. 基礎狀態變數 (含 A3 / A4 / A5 比例設定)
-// ==========================================
-const currentTab = ref('manage')
-const subTab = ref('order')
-const cardPaperSize = ref('A4')
-const isVertical = ref(false)
-const zoomLevel = ref(0.65)
-const receiptZoom = ref(0.85)
-const farmerZoom = ref(0.85)
-const viewportRef = ref(null)
-
-const toastMessage = ref('')
-const showToast = (msg) => {
-  toastMessage.value = msg
-  setTimeout(() => { toastMessage.value = '' }, 3500)
-}
-
-const shareModalImg = ref('')
-const shareModalTitle = ref('')
-const shareModalFilename = ref('圖片.png')
-const currentBlobToShare = ref(null)
-const canNativeShare = ref(false)
-
-const closeShareModal = () => {
-  if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-    URL.revokeObjectURL(shareModalImg.value)
-  }
-  shareModalImg.value = ''
-  currentBlobToShare.value = null
-}
-
-const triggerNativeShare = async () => {
-  if (!currentBlobToShare.value) return
-  try {
-    const file = new File([currentBlobToShare.value], shareModalFilename.value, { type: 'image/png' })
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ title: shareModalTitle.value, files: [file] })
-    }
-  } catch (err) {}
-}
-
-// 🌟 尺寸維度：精確支援 A3, A4, A5
-const currentCardDimensions = computed(() => {
-  if (cardPaperSize.value === 'A3') {
-    return isVertical.value ? { w: 1123, h: 1587 } : { w: 1587, h: 1123 }
-  }
-  if (cardPaperSize.value === 'A5') {
-    return isVertical.value ? { w: 560, h: 794 } : { w: 794, h: 560 }
-  }
-  // 預設 A4
-  return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
-})
-
-const switchPaperSize = (size) => {
-  cardPaperSize.value = size
-  nextTick(() => autoFitZoom())
-}
-
-const autoFitZoom = () => {
-  if (!viewportRef.value || viewportRef.value.clientWidth <= 0) {
-    zoomLevel.value = 0.65
-    return
-  }
-  const availableWidth = Math.max(viewportRef.value.clientWidth - 20, 260)
-  const cardWidth = currentCardDimensions.value.w
-  zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.25), 1.0)
-}
-
-// ==========================================
-// 2. 內部驗證
-// ==========================================
-const INTERNAL_PASSCODE = 'cf000725'
-const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
-const inputPasscode = ref('')
-const authError = ref(false)
-
-const handleLogin = () => {
-  const entered = (inputPasscode.value || '').trim().toLowerCase()
-  if (entered === INTERNAL_PASSCODE) {
-    isAuthenticated.value = true
-    authError.value = false
-    localStorage.setItem('cf_admin_auth', 'true')
-    showToast('✅ 驗證成功！')
-    nextTick(() => initSystemData())
-  } else {
-    authError.value = true
-  }
-}
-
-const handleLogout = () => {
-  if (!confirm('確定要登出嗎？')) return
-  isAuthenticated.value = false
-  localStorage.removeItem('cf_admin_auth')
-}
-
-// ==========================================
-// 3. Supabase 資料庫連線
-// ==========================================
-const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
-const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-// 🌟 Supabase card-assets 公開存取網址 (對應您後台上傳的 4 張圖檔)
-const SUPABASE_STORAGE_URL = 'https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets'
-
-const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
-const activeCaiSealSrc = computed(() => userCustomSeal.value || '/cai-seal.png')
-
-const customers = ref([])
-const orderList = ref([])
-const unshippedOrders = computed(() => (orderList.value || []).filter(o => o.shipped_status !== '已出貨'))
-const editingOrderId = ref(null)
-
-const formOrder = ref({
-  cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '',
-  shipping_address: '', shipping_fee: 0, cost: 600, price: 2500, tax_id: '',
-  need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印',
-  shipped_status: '未出貨', payment_status: '未結',
-  order_date: new Date().toISOString().split('T')[0],
-  expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-  items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
-})
-
-const previewNextOrderId = computed(() => `OR-${Date.now().toString().slice(-6)}`)
-
-const loadOrders = async () => {
-  try {
-    const { data } = await supabase.from('orders').select('*')
-    if (data) {
-      orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
-    }
-  } catch (err) {}
-}
-
-const onOrderCustSelect = () => {
-  const matched = (customers.value || []).find(c => c.name === formOrder.value.customer)
-  if (matched) formOrder.value.phone = matched.phone || ''
-}
-const addOrderItemRow = () => {
-  formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
-}
-const removeOrderItemRow = (idx) => {
-  if (formOrder.value.items.length > 1) formOrder.value.items.splice(idx, 1)
-}
-const calcOrderPrice = () => {
-  let total = 0
-  formOrder.value.items.forEach(it => {
-    total += (it.stalks || 0) * (it.unit_price || 0) * (it.pots_qty || 1)
-  })
-  formOrder.value.price = total + (formOrder.value.shipping_fee || 0)
-}
-const saveOrder = async () => {
-  if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
-  showToast('✅ 訂單儲存成功')
-  cancelEditOrder()
-}
-const cancelEditOrder = () => {
-  editingOrderId.value = null
-}
-const startEditOrder = (ord) => { editingOrderId.value = ord.id }
-const getOrderTotalPots = (ord) => 1
-const getOrderShippingFee = (ord) => 0
-const exportOrdersToExcel = () => showToast('匯出報表')
-
-// ==========================================
-// 4. 花卡編輯器 (對應 Supabase 4 張圖)
-// ==========================================
-const cardCategory = ref('celebration')
-const cardFontFamily = ref('kai')
-const upperPrefix = ref('祝')
-const upperTarget = ref('新北市 陳乃瑜議員')
-const upperSuffix = ref('')
-const middleText = ref('高票當選')
-const middleText2 = ref('為民服務')
-const suffixText = ref('敬賀')
-
-// 🌸 4款底圖選擇
-const cardBgType = ref('card1')
-const customCardBgUrl = ref('')
-
-// 🌟 動態對應 Supabase Storage 上的 4 張卡片圖檔
-const activeBackgroundImageStyle = computed(() => {
-  if (cardBgType.value === 'custom' && customCardBgUrl.value) {
-    return `url(${customCardBgUrl.value})`
-  }
-  // 對應 card-assets 內的 4 張實體卡片命名 (可對應您的自訂檔名)
-  const map = {
-    card1: `url('${SUPABASE_STORAGE_URL}/card-bg-red.jpg'), url('${SUPABASE_STORAGE_URL}/1.jpg')`,
-    card2: `url('${SUPABASE_STORAGE_URL}/card-bg-pink.jpg'), url('${SUPABASE_STORAGE_URL}/2.jpg')`,
-    card3: `url('${SUPABASE_STORAGE_URL}/card-bg-white.jpg'), url('${SUPABASE_STORAGE_URL}/3.jpg')`,
-    card4: `url('${SUPABASE_STORAGE_URL}/card-bg-4.jpg'), url('${SUPABASE_STORAGE_URL}/4.jpg')`
-  }
-  return map[cardBgType.value] || map.card1
-})
-
-const onCustomCardBgUpload = (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    customCardBgUrl.value = event.target.result
-  }
-  reader.readAsDataURL(file)
-}
-
-const weights = ref({
-  upper_prefix: '700', upper_target: '700', upper_suffix: '700', middle: '800', middle_2: '800',
-  bottom_0: '600', bottom_1: '700', suffix: '700'
-})
-const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }])
-
-// 🌟 跨平台楷體字型定義 (支援 Windows / iOS / Android)
-const fontMapping = {
-  kai: '"DFKai-SB", "BiauKai", "標楷體", "TW-Kai", "MOESong-Regular", "Noto Serif TC", "Kaiti", serif',
-  notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
-  fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
-  notosans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif'
-}
-const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
-
-const defaultHorizontal = {
-  upper_prefix: { x: 80, y: 80, size: 34 }, upper_target: { x: 220, y: 80, size: 38 }, upper_suffix: { x: 920, y: 80, size: 34 },
-  middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
-  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 },
-  suffix: { x: 880, y: 530, size: 34 }
-}
-const defaultVertical = {
-  upper_prefix: { x: 620, y: 100, size: 36 }, upper_target: { x: 620, y: 220, size: 42 }, upper_suffix: { x: 620, y: 720, size: 36 },
-  middle: { x: 380, y: 220, size: 76 }, middle_2: { x: 280, y: 220, size: 76 },
-  bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 },
-  suffix: { x: 155, y: 860, size: 34 }
-}
-
-const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
-const switchOrientation = (val) => {
-  isVertical.value = val
-  layout.value = JSON.parse(JSON.stringify(val ? defaultVertical : defaultHorizontal))
-}
-const resetPositions = () => {
-  layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal))
-}
-
-const getStyle = (key) => {
-  const item = layout.value?.[key] || { x: 50, y: 50, size: 30 }
-  return { 
-    left: `${item.x ?? 50}px`, 
-    top: `${item.y ?? 50}px`, 
-    fontSize: `${item.size ?? 30}px`, 
-    fontWeight: weights.value?.[key] || '700'
-  }
-}
-const getUpperTargetBoxStyle = () => {
-  const item = layout.value?.upper_target || { x: 220, y: 80, size: 38 }
-  return { 
-    left: `${item.x ?? 220}px`, 
-    top: `${item.y ?? 80}px`, 
-    fontSize: `${item.size ?? 38}px`, 
-    whiteSpace: 'nowrap', 
-    fontWeight: weights.value?.upper_target || '700'
-  }
-}
-
-// 判斷是否為手機或平板
-const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-// 🌟 雙軌列印控制：電腦直印；手機彈出無網址相片輸出
-const handlePrintAction = (targetId, titlePrefix) => {
-  if (isMobileDevice()) {
-    openPrintImageModal(targetId, titlePrefix, true)
-  } else {
-    window.print()
-  }
-}
-
-// 🌟 輸出圖片引擎：
-// isPrintMode = true ➔ 強制轉為 100% 透明背景 (送印不吃色卡底色)
-// isPrintMode = false ➔ 保留美麗背景圖案 (傳送給客人確認)
-const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
-  const targetEl = document.getElementById(targetId)
-  if (!targetEl) return alert('找不到目標畫面！')
-  showToast(isPrintMode ? '⏳ 正在生成無色透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
-  try {
-    if (document.fonts?.ready) await document.fonts.ready
-    const origTransform = targetEl.style.transform
-    const origBgImg = targetEl.style.backgroundImage
-    targetEl.style.transform = 'none'
-
-    if (isPrintMode) {
-      targetEl.style.backgroundImage = 'none'
-    }
-
-    const canvas = await html2canvas(targetEl, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: isPrintMode ? null : '#ffffff',
-      logging: false,
-      ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
-    })
-
-    targetEl.style.transform = origTransform
-    targetEl.style.backgroundImage = origBgImg
-
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-        URL.revokeObjectURL(shareModalImg.value)
-      }
-      shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = isPrintMode ? `${titlePrefix} (透明色卡列印)` : `${titlePrefix} (客人確認圖)`
-      shareModalFilename.value = `${titlePrefix}.png`
-      currentBlobToShare.value = blob
-      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: 'image/png' })] }))
-    }, 'image/png')
-  } catch (err) {
-    showToast('⚠️️ 生成失敗，請重試！')
-  }
-}
-
-// 手機直接列印相片 (滿版無網址無時間)
-const triggerImagePrint = () => {
-  if (!shareModalImg.value) return
-  const imgUrl = shareModalImg.value
-  const printWin = window.open('', '_blank')
-  if (printWin) {
-    printWin.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>列印</title>
-          <style>
-            @page { size: auto; margin: 0mm !important; }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              width: 100vw; height: 100vh; margin: 0 !important; padding: 0 !important;
-              display: flex; justify-content: center; align-items: center; 
-              background: transparent !important; overflow: hidden !important;
-            }
-            img { max-width: 100%; max-height: 100%; object-fit: contain; }
-          </style>
-        </head>
-        <body onload="window.focus(); window.print(); window.close();">
-          <img src="${imgUrl}" />
-        </body>
-      </html>
-    `)
-    printWin.document.close()
-  } else {
-    window.location.href = imgUrl
-  }
-}
-
-const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花卡確認', false)
-const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
-const shareFarmerReceiptDirect = () => openPrintImageModal('farmer-print-target', '農民收據確認', false)
-
-// 簽收單與收據表單
-const selectedOrderId = ref('')
-const formatSimpleItemName = (ord) => '特選蘭花 1盆'
-const fillReceiptFromOrder = (ord) => {
-  selectedOrderId.value = ord.id
-  currentTab.value = 'receipt'
-}
-const fillFarmerReceiptFromOrder = (ord) => {
-  selectedFarmerOrderId.value = ord.id
-  currentTab.value = 'farmer_receipt'
-}
-
-const receiptForm = ref({
-  orderId: '', deliveryDate: '115-09-03 送達', recipient: '永全證券 陳總經理',
-  address: '桃園市桃園區縣府路 82 號', item: '特選蘭花 1盆', giver: '敬領 誌慶', notes: '花禮已專車安全送達點交'
-})
-
-const onSelectReceiptOrder = () => {
-  const ord = (orderList.value || []).find(o => o.id === selectedOrderId.value)
-  if (ord) {
-    receiptForm.value.orderId = ord.id
-    receiptForm.value.recipient = ord.customer
-  }
-}
-
-const selectedFarmerOrderId = ref('')
-const farmerReceipt = ref({
-  year: '115', month: '09', day: '03', buyerName: '永全證券股份有限公司', taxId: '12345678',
-  buyerAddress: '桃園市桃園區縣府路 82 號', itemName: '蝴蝶蘭花禮', spec: '特級', qty: '1 盆', unitPrice: '2500', totalAmount: 2500, note: ''
-})
-const chineseDigits = ref({ hundredThousands: '', tenThousands: '', thousands: '貳', hundreds: '伍', tens: '', ones: '' })
-
-const onSelectFarmerReceiptOrder = () => {
-  const ord = (orderList.value || []).find(o => o.id === selectedFarmerOrderId.value)
-  if (ord) {
-    farmerReceipt.value.buyerName = ord.customer
-    farmerReceipt.value.totalAmount = ord.price
-  }
-}
-
-const initSystemData = () => {
-  autoFitZoom()
-  loadOrders()
-}
-
-onMounted(() => {
-  window.addEventListener('resize', autoFitZoom)
-  initSystemData()
-})
+// 其餘邏輯已整合於上方的 setup 區塊中
 </script>
 
 <style scoped>
@@ -1356,7 +946,7 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .text-box { position: absolute; cursor: move; white-space: nowrap; color: #0f172a; padding: 2px 4px; }
 
-/* 🌟 正統楷體全平台適配 (電腦微軟楷書，手機平板自動套用教育部楷體/思源宋體書法風骨) */
+/* 🌟 正統楷體全平台適配 (電腦微軟楷書，手機平板自動套用標準楷體書法風骨) */
 .standard-kai-font, .kai-font-supported {
   font-family: "DFKai-SB", "BiauKai", "標楷體", "TW-Kai", "MOESong-Regular", "Noto Serif TC", "Kaiti", serif !important;
 }
@@ -1424,6 +1014,7 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
   flex: 1; min-width: 120px; background: #2563eb; color: white; text-decoration: none; padding: 10px;
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; display: inline-block; box-sizing: border-box;
 }
+.share-tips-row { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #475569; line-height: 1.5; width: 100%; background: #f8fafc; padding: 8px 10px; border-radius: 6px; }
 
 /* 🌟 行動端特別自適應防跑版優化 (手機/平板) */
 @media (max-width: 768px) {
