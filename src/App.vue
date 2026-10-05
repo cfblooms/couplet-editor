@@ -87,9 +87,9 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
-            <!-- 棋盤格代表底色 100% 透明 -->
+            <!-- 棋盤格背景代表底色 100% 透明無白底 -->
             <div class="share-img-scroll-container checkerboard-bg">
-              <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
+              <img :src="shareModalImg" class="share-preview-img-contained" alt="無底色透明預覽圖" />
             </div>
             
             <div class="share-btn-action-group">
@@ -105,7 +105,7 @@
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>列印與傳送提示：</b></span>
+              <span>💡 <b>特製紙張（紅色/粉紅色）列印提示：</b></span>
               <span>• <b>已設定無色透明</b>：圖檔完全不帶白底，印在紅色或粉紅紙上時<b>只會印出文字與印章，絕不吃底色！</b></span>
               <span>• <b>消除底部網址與日期</b>：點擊上方「直接列印」，手機將以單張照片滿版輸出，<b>底部絕不出現網址與時間！</b></span>
             </div>
@@ -113,20 +113,7 @@
         </div>
       </div>
 
-      <!-- 品種照片放大檢視彈窗 -->
-      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
-        <div class="image-modal-content" @click.stop>
-          <div class="image-modal-header">
-            <span>🌸 {{ activeModalTitle }}</span>
-            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
-          </div>
-          <div class="share-modal-body">
-            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= 模式 1：蘭花管理系統 ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 (標準管理字體) ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -135,7 +122,7 @@
           <button :class="{ active: subTab === 'customer' }" @click="subTab = 'customer'">👥 4. 客戶資料庫</button>
           <button :class="{ active: subTab === 'orchid' }" @click="subTab = 'orchid'">🌸 5. 蘭花品種庫</button>
           <button :class="{ active: subTab === 'return' }" @click="subTab = 'return'">🔄 6. 退貨管理</button>
-          <button :class="{ active: subTab === 'shipping' }" @click="subTab = 'shipping'" class="nav-shipping-highlight">🚚 7. 出貨派送進度 ({{ unshippedOrders.length }})</button>
+          <button :class="{ active: subTab === 'shipping' }" @click="subTab = 'shipping'" class="nav-shipping-highlight">🚚 7. 出貨派送進度 ({{ unshippedOrders?.length || 0 }})</button>
         </nav>
 
         <div class="manage-content">
@@ -148,7 +135,7 @@
 
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
-                <h3>{{ editingOrderId ? '✏️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <h3>{{ editingOrderId ? '✏️️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
                 <span class="preview-seq-badge right-aligned-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
@@ -275,7 +262,7 @@
                 </div>
               </div>
 
-              <!-- 費用與總計資訊 -->
+              <!-- 費用與總計 -->
               <div class="form-grid mt-3">
                 <div class="field highlight-field">
                   <label>額外運費 (元)</label>
@@ -337,7 +324,7 @@
             <!-- 訂單總覽清單 -->
             <div class="card-box mt-3">
               <div class="table-header-action">
-                <h3>📋 訂單總覽 ({{ orderList.length }} 筆)</h3>
+                <h3>📋 訂單總覽 ({{ orderList?.length || 0 }} 筆)</h3>
                 <button class="excel-btn" @click="exportOrdersToExcel">📊 下載全訂單 Excel 報表</button>
               </div>
 
@@ -349,7 +336,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="ord in orderList" :key="ord.id">
+                    <tr v-for="ord in (orderList || [])" :key="ord.id">
                       <td><b>{{ ord.id }}</b></td>
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
@@ -386,7 +373,7 @@
                   <label>選擇對帳客戶：</label>
                   <select v-model="statementCustomer">
                     <option value="">-- 請選擇客戶 (全部客戶) --</option>
-                    <option v-for="c in customers" :key="c.id" :value="c.name">
+                    <option v-for="c in (customers || [])" :key="c.id" :value="c.name">
                       {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
                     </option>
                   </select>
@@ -408,13 +395,13 @@
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box">
               <h3>📦 庫存管理</h3>
-              <p>庫存資料庫運作中。</p>
+              <p>庫存資料庫正常運作中。</p>
             </div>
           </section>
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援無底色透明輸出) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -432,7 +419,7 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / 書法楷書體 (全平台通用)</option>
+                  <option value="kai">標準標楷體 / 書法楷書體 (手機/電腦通用)</option>
                   <option value="song">古典宋體 / 明體風格</option>
                   <option value="fangsong">仿宋古典體 (FangSong)</option>
                   <option value="sans">現代簡約黑體</option>
@@ -461,19 +448,19 @@
               <span class="section-title">1. 開頭敬詞：</span>
               <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperPrefix" class="full-input mt-1" />
+            <input type="text" v-model="upperPrefix" class="full-input mt-1" placeholder="例: 敬悼 或 恭祝" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象：</span>
               <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" />
+            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人姓名稱謂" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞：</span>
               <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperSuffix" class="full-input mt-1" />
+            <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空則不顯示" />
           </div>
 
           <!-- 中款 -->
@@ -482,19 +469,19 @@
               <span class="section-title">中款第 1 行：</span>
               <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-1" />
+            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款題詞" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">中款第 2 行：</span>
               <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText2" class="full-input mt-1" />
+            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
           <!-- 下款 -->
           <div class="panel-section">
             <label class="section-title">下款設定：</label>
-            <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
+            <div v-for="(item, idx) in (bottomLines || [])" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" class="flex-input" />
             </div>
@@ -529,6 +516,7 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
+            <!-- 🌟 花卡主體 (透明底色設定) -->
             <div 
               id="card-print-target" 
               class="card-board target-kai-font transparent-target" 
@@ -556,7 +544,7 @@
               <div v-if="middleText2.trim()" class="text-box middle-box-2" :style="getStyle('middle_2')">
                 <span>{{ middleText2 }}</span>
               </div>
-              <template v-for="(item, idx) in bottomLines" :key="'bottom-' + idx">
+              <template v-for="(item, idx) in (bottomLines || [])" :key="'bottom-' + idx">
                 <div v-if="item.text.trim()" class="text-box" :style="getStyle('bottom_' + idx)">
                   <span>{{ item.text }}</span>
                 </div>
@@ -578,7 +566,7 @@
             <label class="section-title">依訂單快速帶入：</label>
             <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+              <option v-for="ord in (orderList || [])" :key="ord.id" :value="ord.id">
                 【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }}
               </option>
             </select>
@@ -700,7 +688,7 @@
             <label class="section-title">依訂單自動帶入：</label>
             <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 --</option>
-              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+              <option v-for="ord in (orderList || [])" :key="ord.id" :value="ord.id">
                 【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }}
               </option>
             </select>
@@ -858,13 +846,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+// 🌟 完整引入所有生命週期，絕無遺漏
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
 
 // ==========================================
-// 1. 基礎狀態變數
+// 1. 基礎狀態變數 (🌟 確保陣列初始值為 []，絕不為 undefined)
 // ==========================================
 const currentTab = ref('manage')
 const subTab = ref('order')
@@ -926,7 +915,7 @@ const handleLogin = () => {
     isAuthenticated.value = true
     authError.value = false
     localStorage.setItem('cf_admin_auth', 'true')
-    showToast('✅ 登入成功！')
+    showToast('✅ 驗證成功！')
     nextTick(() => initSystemData())
   } else {
     authError.value = true
@@ -940,7 +929,7 @@ const handleLogout = () => {
 }
 
 // ==========================================
-// 3. Supabase 資料庫連線
+// 3. Supabase 資料庫連線 (🌟 陣列安全初始化)
 // ==========================================
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
@@ -951,6 +940,8 @@ const activeCaiSealSrc = computed(() => userCustomSeal.value || '/cai-seal.png')
 
 const customers = ref([])
 const orderList = ref([])
+const unshippedOrders = ref([])
+const cloudDrafts = ref([])
 const editingOrderId = ref(null)
 
 const formOrder = ref({
@@ -968,12 +959,15 @@ const previewNextOrderId = computed(() => `OR-${Date.now().toString().slice(-6)}
 const loadOrders = async () => {
   try {
     const { data } = await supabase.from('orders').select('*')
-    if (data) orderList.value = data
+    if (data) {
+      orderList.value = data
+      unshippedOrders.value = data.filter(o => o.shipped_status !== '已出貨')
+    }
   } catch (err) {}
 }
 
 const onOrderCustSelect = () => {
-  const matched = customers.value.find(c => c.name === formOrder.value.customer)
+  const matched = (customers.value || []).find(c => c.name === formOrder.value.customer)
   if (matched) {
     formOrder.value.phone = matched.phone || ''
   }
@@ -1161,7 +1155,7 @@ const triggerTransparentPrint = () => {
             img { max-width: 100%; max-height: 100%; object-fit: contain; }
           </style>
         </head>
-        <body onload="window.focus(); window.print(); window.close();">
+        <body onload="window.print(); window.close();">
           <img src="${imgUrl}" />
         </body>
       </html>
@@ -1194,7 +1188,7 @@ const receiptForm = ref({
 })
 
 const onSelectReceiptOrder = () => {
-  const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+  const ord = (orderList.value || []).find(o => o.id === selectedOrderId.value)
   if (ord) {
     receiptForm.value.orderId = ord.id
     receiptForm.value.recipient = ord.customer
@@ -1210,7 +1204,7 @@ const chineseDigits = ref({ hundredThousands: '', tenThousands: '', thousands: '
 
 const updateChineseAmount = () => {}
 const onSelectFarmerReceiptOrder = () => {
-  const ord = orderList.value.find(o => o.id === selectedFarmerOrderId.value)
+  const ord = (orderList.value || []).find(o => o.id === selectedFarmerOrderId.value)
   if (ord) {
     farmerReceipt.value.buyerName = ord.customer
     farmerReceipt.value.totalAmount = ord.price
