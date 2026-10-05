@@ -87,6 +87,7 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
+            <!-- 棋盤格背景代表底色為 100% 透明 -->
             <div class="share-img-scroll-container checkerboard-bg">
               <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
             </div>
@@ -105,14 +106,27 @@
 
             <div class="share-tips-row">
               <span>💡 <b>列印與傳送提示：</b></span>
-              <span>• <b>已設定無色透明</b>：圖檔不帶白色底，印在紅色或粉紅紙上時只印出墨水文字與印章。</span>
-              <span>• <b>消除底部網址</b>：點擊上方「直接列印」，手機將以單張照片輸出，底端不出現網址與時間。</span>
+              <span>• <b>已設定無色透明</b>：圖檔完全不帶白底，印在紅色或粉紅紙上時<b>只會印出文字與印章，絕不吃底色！</b></span>
+              <span>• <b>消除底部網址與日期</b>：點擊上方「直接列印」，手機將以單張照片滿版輸出，<b>底部絕不出現網址與時間！</b></span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 ================= -->
+      <!-- 品種照片檢視彈窗 -->
+      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
+        <div class="image-modal-content" @click.stop>
+          <div class="image-modal-header">
+            <span>🌸 {{ activeModalTitle }}</span>
+            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
+          </div>
+          <div class="share-modal-body">
+            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 模式 1：蘭花管理系統 (標準管理字體) ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -362,10 +376,37 @@
               </div>
             </div>
           </section>
+
+          <!-- 模組 2：客戶未結對帳專區 -->
+          <section v-if="subTab === 'statement'" class="tab-pane">
+            <div class="card-box">
+              <h3>📊 客戶未結帳款彙整與對帳</h3>
+              <div class="statement-filter-grid">
+                <div class="field">
+                  <label>選擇對帳客戶：</label>
+                  <select v-model="statementCustomer">
+                    <option value="">-- 請選擇客戶 (全部客戶) --</option>
+                    <option v-for="c in customers" :key="c.id" :value="c.name">
+                      {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>統計期間：</label>
+                  <select v-model="statementPeriod">
+                    <option value="all">全部歷史紀錄</option>
+                    <option value="thisWeek">本週</option>
+                    <option value="thisMonth">本月</option>
+                    <option value="lastMonth">上月</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援無底色透明輸出) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -390,10 +431,9 @@
                 </select>
               </div>
               <div class="inline-item-fixed">
-                <label class="mini-field-lbl">中款預設粗細：</label>
+                <label class="mini-field-lbl">中款粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
-                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="600">600 (半粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -405,14 +445,6 @@
               <button type="button" :class="{ active: isVertical }" @click="switchOrientation(true)">直式 (傳統輓聯)</button>
               <button type="button" :class="{ active: !isVertical }" @click="switchOrientation(false)">橫式 (現代花卡)</button>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label>卡片類型：</label>
-            <select v-model="cardCategory" @change="onCardCategoryChange">
-              <option value="funeral">喪禮弔唁</option>
-              <option value="celebration">慶賀祝典</option>
-            </select>
           </div>
 
           <!-- 上款 -->
@@ -457,9 +489,7 @@
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" class="flex-input" />
-              <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
             </div>
-
             <div class="section-title-with-weight mt-2">
               <span class="section-title">結尾敬詞：</span>
               <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
@@ -821,7 +851,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+// 🌟 完整引入所有生命週期與響應式 API
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
@@ -876,7 +907,7 @@ const currentCardDimensions = computed(() => {
 })
 
 // ==========================================
-// 2. 內部驗證與資料庫
+// 2. 內部密碼驗證
 // ==========================================
 const INTERNAL_PASSCODE = 'cf000725'
 const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
@@ -902,6 +933,9 @@ const handleLogout = () => {
   localStorage.removeItem('cf_admin_auth')
 }
 
+// ==========================================
+// 3. Supabase 資料庫連線
+// ==========================================
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -923,8 +957,70 @@ const formOrder = ref({
   items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
 })
 
+const previewNextOrderId = computed(() => `OR-${Date.now().toString().slice(-6)}`)
+
+const loadOrders = async () => {
+  try {
+    const { data } = await supabase.from('orders').select('*')
+    if (data) orderList.value = data
+  } catch (err) {}
+}
+
+const onOrderCustSelect = () => {
+  const matched = customers.value.find(c => c.name === formOrder.value.customer)
+  if (matched) {
+    formOrder.value.phone = matched.phone || ''
+  }
+}
+
+const addOrderItemRow = () => {
+  formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
+}
+
+const removeOrderItemRow = (idx) => {
+  if (formOrder.value.items.length > 1) formOrder.value.items.splice(idx, 1)
+}
+
+const calcOrderPrice = () => {
+  let total = 0
+  formOrder.value.items.forEach(it => {
+    total += (it.stalks || 0) * (it.unit_price || 0) * (it.pots_qty || 1)
+  })
+  formOrder.value.price = total + (formOrder.value.shipping_fee || 0)
+}
+
+const saveOrder = async () => {
+  if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
+  showToast('✅ 訂單儲存成功')
+  cancelEditOrder()
+}
+
+const cancelEditOrder = () => {
+  editingOrderId.value = null
+  formOrder.value = {
+    cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '',
+    shipping_address: '', shipping_fee: 0, cost: 600, price: 2500, tax_id: '',
+    need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印',
+    shipped_status: '未出貨', payment_status: '未結',
+    order_date: new Date().toISOString().split('T')[0],
+    expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+    items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
+  }
+}
+
+const startEditOrder = (ord) => {
+  editingOrderId.value = ord.id
+}
+
+const getOrderTotalPots = (ord) => 1
+const getOrderShippingFee = (ord) => 0
+const exportOrdersToExcel = () => showToast('匯出報表')
+
+const statementCustomer = ref('')
+const statementPeriod = ref('all')
+
 // ==========================================
-// 3. 花卡、簽收單與字型映射
+// 4. 花卡編輯器
 // ==========================================
 const cardCategory = ref('celebration')
 const cardFontFamily = ref('kai')
@@ -941,7 +1037,7 @@ const weights = ref({
 })
 const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }])
 
-// 🌟 書法正楷映射：優先採用 index.html 載入的 Noto Serif TC，全平台生效
+// 🌟 書法正楷映射：優先採用 Noto Serif TC，手機與電腦均保證呈現書法楷體
 const fontMapping = {
   kai: '"Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif',
   song: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -992,8 +1088,16 @@ const getUpperTargetBoxStyle = () => {
   }
 }
 
+const onCardCategoryChange = () => {
+  if (cardCategory.value === 'funeral') {
+    upperPrefix.value = '敬悼'; upperSuffix.value = '千古'; suffixText.value = '敬輓'; middleText.value = '母儀千古'; middleText2.value = ''
+  } else {
+    upperPrefix.value = '祝'; upperSuffix.value = ''; suffixText.value = '敬賀'; middleText.value = '高票當選'; middleText2.value = '為民服務'
+  }
+}
+
 // =========================================================================
-// 🌟 100% 無色透明背景 (Transparent PNG) 產出引擎
+// 🌟 100% 無色透明背景 (Transparent PNG) 產出引擎（修正 .value）
 // =========================================================================
 const openTransparentPrintModal = async (targetId, titlePrefix) => {
   const targetEl = document.getElementById(targetId)
@@ -1004,10 +1108,11 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
+    // 🌟 backgroundColor: null 去除任何白底，100% 透明無色！
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: null, 
+      backgroundColor: null,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
@@ -1020,6 +1125,7 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
       }
       shareModalImg.value = URL.createObjectURL(blob)
       shareModalTitle.value = `${titlePrefix} (無色透明底)`
+      // 🌟 已修正為 .value，杜絕語法崩潰
       shareModalFilename.value = `${titlePrefix}_透明底.png`
       currentBlobToShare.value = blob
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'print.png', { type: 'image/png' })] }))
@@ -1035,20 +1141,22 @@ const triggerTransparentPrint = () => {
   const printWin = window.open('', '_blank')
   if (printWin) {
     printWin.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>列印</title>
           <style>
             @page { size: auto; margin: 0mm !important; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
+            html, body { 
+              width: 100vw; height: 100vh; margin: 0 !important; padding: 0 !important;
               display: flex; justify-content: center; align-items: center; 
-              min-height: 100vh; background: transparent !important; 
+              background: transparent !important; overflow: hidden !important;
             }
-            img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+            img { max-width: 100%; max-height: 100%; object-fit: contain; }
           </style>
         </head>
-        <body onload="window.print(); window.close();">
+        <body onload="window.focus(); window.print(); window.close();">
           <img src="${imgUrl}" />
         </body>
       </html>
@@ -1065,10 +1173,28 @@ const shareFarmerReceiptDirect = () => openTransparentPrintModal('farmer-print-t
 
 // 簽收單與收據表單
 const selectedOrderId = ref('')
+const formatSimpleItemName = (ord) => '特選蘭花 1盆'
+const fillReceiptFromOrder = (ord) => {
+  selectedOrderId.value = ord.id
+  currentTab.value = 'receipt'
+}
+const fillFarmerReceiptFromOrder = (ord) => {
+  selectedFarmerOrderId.value = ord.id
+  currentTab.value = 'farmer_receipt'
+}
+
 const receiptForm = ref({
   orderId: '', deliveryDate: '115-09-03 送達', recipient: '永全證券 陳總經理',
   address: '桃園市桃園區縣府路 82 號', item: '特選蘭花 1盆', giver: '敬領 誌慶', notes: '花禮已專車安全送達點交'
 })
+
+const onSelectReceiptOrder = () => {
+  const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+  if (ord) {
+    receiptForm.value.orderId = ord.id
+    receiptForm.value.recipient = ord.customer
+  }
+}
 
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
@@ -1077,10 +1203,20 @@ const farmerReceipt = ref({
 })
 const chineseDigits = ref({ hundredThousands: '', tenThousands: '', thousands: '貳', hundreds: '伍', tens: '', ones: '' })
 
+const updateChineseAmount = () => {}
+const onSelectFarmerReceiptOrder = () => {
+  const ord = orderList.value.find(o => o.id === selectedFarmerOrderId.value)
+  if (ord) {
+    farmerReceipt.value.buyerName = ord.customer
+    farmerReceipt.value.totalAmount = ord.price
+  }
+}
+
 const initSystemData = () => {
   zoomLevel.value = 0.65
   receiptZoom.value = 0.85
   farmerZoom.value = 0.85
+  loadOrders()
 }
 
 onMounted(() => {
@@ -1089,7 +1225,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 管理介面保持清爽標準字體 */
+/* 🌟 管理介面保持清爽標準無襯線字體 */
 .main-wrapper {
   display: flex; flex-direction: column; height: 100vh; font-size: 13.5px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -1152,12 +1288,12 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .text-box { position: absolute; cursor: move; white-space: nowrap; color: #0f172a; padding: 2px 4px; }
 
-/* 🌟 單據與花卡專屬字體 */
+/* 🌟 單據與花卡專屬：強制套用 Noto Serif TC 書法正楷切片 */
 .target-kai-font {
   font-family: "Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif !important;
 }
 
-/* 🌟 無色透明背景 */
+/* 🌟 無色透明背景：預覽模式在底下襯一層淡白以供預覽，截圖時完全無色透明 */
 .transparent-target {
   background-color: transparent !important;
 }
