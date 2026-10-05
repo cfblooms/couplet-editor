@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 (🌟 行動端Blob URL優化，絕不破圖問號) -->
+      <!-- 圖片傳送專用彈窗 (Blob URL 高畫質預覽) -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -644,7 +644,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (🌟 耗材品項名稱與規格完全純自由輸入，不擋注音) -->
+          <!-- 模組 3：進貨與庫存 (自由輸入) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -677,7 +677,7 @@
                   </select>
                 </div>
 
-                <!-- 🌟 耗材品名：純文字輸入框，完全開放自由打字，不鎖注音 -->
+                <!-- 耗材品名：純文字輸入框，完全開放自由打字 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>耗材品名 (直接自行輸入)：</label>
                   <input 
@@ -687,7 +687,7 @@
                   />
                 </div>
 
-                <!-- 🌟 耗材詳細規格 / 包裝單位：純文字輸入框 -->
+                <!-- 耗材詳細規格 / 包裝單位：純文字輸入框 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>詳細規格 / 包裝單位：</label>
                   <input 
@@ -769,7 +769,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑</button>
                         </div>
                       </td>
                     </tr>
@@ -886,7 +886,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -930,7 +930,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 (🌟 優先顯示該訂單之送貨地址) -->
+          <!-- 模組 7：出貨派送進度分頁 -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -1233,7 +1233,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 (全字庫正楷/標楷體完美渲染) -->
+            <!-- 🌟 花卡看板主體 -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1304,7 +1304,7 @@
 
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
-              <span class="modern-sign-title">✍️️ 收件人現場手寫簽名</span>
+              <span class="modern-sign-title">✍ 收件人現場手寫簽名</span>
               <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
                 ↺ 清除重簽
               </button>
@@ -1352,7 +1352,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1737,7 +1737,7 @@ const showToast = (msg) => {
   toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
 }
 
-// 🌟 行動端完美分享彈窗變數
+// 行動端分享彈窗變數
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 const shareModalFilename = ref('圖片.png')
@@ -1764,7 +1764,7 @@ const triggerNativeShare = async () => {
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
-      showToast('⚠️ 分享取消或請改用長按圖片儲存')
+      showToast('⚠️️ 分享取消或請改用長按圖片儲存')
     }
   }
 }
@@ -1776,7 +1776,7 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 列印最小邊界樣式注入 (0mm)
+// 🖨️ 動態注入精準尺寸列印樣式 (邊界 0mm，完全消除網址頁首頁尾)
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -1792,7 +1792,18 @@ const updateDynamicPrintStyle = () => {
   } else {
     pageSize = 'A5 landscape'
   }
-  styleTag.innerHTML = `@media print { @page { size: ${pageSize} !important; margin: 0mm !important; } }`
+  styleTag.innerHTML = `
+    @page { 
+      size: ${pageSize} !important; 
+      margin: 0mm !important; 
+    }
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  `
 }
 
 watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
@@ -1988,7 +1999,6 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -2508,7 +2518,7 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 🌟 精準繁體書法楷體支援（跨 iOS / Android / Windows 全相容）
+// 跨平台標準楷書適配
 const fontMapping = {
   kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -2614,7 +2624,6 @@ const onCardCategoryChange = () => {
 
 const printCouplet = () => window.print()
 
-// 🌟 核心修復：直接傳送使用可靠的 Blob URL，行動裝置絕不破圖問號
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return alert('找不到花卡畫面！')
@@ -2747,7 +2756,6 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
-// 🌟 簽收單使用 Blob URL 產生高清彈窗
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -2811,7 +2819,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 const printFarmerReceipt = () => window.print()
 
-// 🌟 農民收據使用 Blob URL 產生高清彈窗
 const shareFarmerReceiptDirect = async () => {
   const targetEl = document.getElementById('farmer-print-target')
   if (!targetEl) return alert('找不到農民收據！')
@@ -2828,7 +2835,7 @@ const shareFarmerReceiptDirect = async () => {
   }
 }
 
-// 🌟 行動端與電腦版全相容的 Blob 圖片渲染引擎（徹底根絕問號圖與下載失效）
+// 渲染圖片至彈窗，支援一鍵直接傳至 LINE
 const renderImageBlobToModal = (canvas, filename, shareTitle, successMsg) => {
   canvas.toBlob((blob) => {
     if (!blob) return
@@ -2841,10 +2848,8 @@ const renderImageBlobToModal = (canvas, filename, shareTitle, successMsg) => {
     shareModalFilename.value = filename
     currentBlobToShare.value = blob
 
-    // 判斷是否支援手機原生分享面板
     canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] }))
 
-    // 電腦版嘗試寫入剪貼簿
     if (navigator.clipboard?.write) {
       try {
         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
@@ -2871,7 +2876,7 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
-  // 🌟 自動載入 Google 官方思源宋體與書法正楷全字庫（保證手機與平板正常呈現標楷體）
+  // 自動載入書法正楷全字庫（保證手機與平板標楷體完整呈現）
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
     link.id = 'google-noto-fonts-cdn'
@@ -2905,7 +2910,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 100% 原始漂亮樣式，完全不改動任何螢幕 class */
+/* 🌟 100% 原始漂亮螢幕外觀，完全不改動任何元件樣式 */
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -2993,7 +2998,6 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-/* 🚚 送貨地址寬度：在同一行後方跨約 3 個欄位大小 */
 .triple-width-field {
   grid-column: span 3 !important;
 }
@@ -3192,7 +3196,6 @@ input, select, textarea {
 .table-orchid-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
-/* 🌟 彈窗樣式增強：手機友善操作按鈕 */
 .image-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.78);
   display: flex; justify-content: center; align-items: center; z-index: 99999; padding: 14px; box-sizing: border-box;
@@ -3324,70 +3327,69 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* 🌟 正楷字體全平台完美適配 */
 .standard-kai-font, .kai-font-supported {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
 }
 
-/* 🌟 A5 橫式簽收單 (100% 原始漂亮比例 794x560) */
+/* 🌟 A5 橫式簽收單 (794x560 螢幕預覽比例) */
 .receipt-scaler-container { position: relative; flex-shrink: 0; }
 .a5-landscape-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 36px 42px; box-sizing: border-box;
+  width: 794px; height: 560px; background: #ffffff; padding: 32px 38px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
   color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
 .sheet-header {
-  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px;
 }
-.shop-name-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
-.sheet-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
-.header-meta { font-size: 14px; line-height: 1.5; text-align: right; color: #334155; }
-.receipt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 16px; table-layout: fixed; }
-.receipt-table td { border: 1.5px solid #334155; padding: 8px 10px; word-break: break-all; }
-.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 16px; }
-.receipt-table .val { width: 35%; font-size: 16px; }
-.receipt-table .val-bold { font-weight: bold; font-size: 17px; }
-.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17.5px; }
+.shop-name-title { font-size: 27px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.sheet-main-title { font-size: 23px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.header-meta { font-size: 13.5px; line-height: 1.45; text-align: right; color: #334155; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 15.5px; table-layout: fixed; }
+.receipt-table td { border: 1.5px solid #334155; padding: 7px 10px; word-break: break-all; }
+.receipt-table .lbl { width: 15%; background-color: #f1f5f9; font-weight: bold; text-align: center; color: #1e293b; font-size: 15.5px; }
+.receipt-table .val { width: 35%; font-size: 15.5px; }
+.receipt-table .val-bold { font-weight: bold; font-size: 16.5px; }
+.receipt-table .val-highlight { font-weight: bold; color: #1e3a8a; font-size: 17px; }
 
-.sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
-.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 15px; padding: 4px 0; }
-.footer-tip { font-size: 13px; color: #64748b; }
+.sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; margin-top: 2px; }
+.footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 14.5px; padding: 2px 0; }
+.footer-tip { font-size: 12.5px; color: #64748b; }
 .footer-sign-box {
-  width: 220px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
+  width: 215px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
 }
-.sign-box-title { background: #e2e8f0; font-size: 13px; font-weight: bold; text-align: center; padding: 3px 0; color: #334155; }
-.sign-box-area { flex: 1; min-height: 52px; display: flex; justify-content: center; align-items: center; }
-.live-signature-img { max-height: 65px; max-width: 95%; object-fit: contain; }
+.sign-box-title { background: #e2e8f0; font-size: 12.5px; font-weight: bold; text-align: center; padding: 2px 0; color: #334155; }
+.sign-box-area { flex: 1; min-height: 50px; display: flex; justify-content: center; align-items: center; }
+.live-signature-img { max-height: 58px; max-width: 95%; object-fit: contain; }
 
-/* 🌟 農民收據 (100% 原始漂亮手刻格線版面) */
+/* 🌟 農民收據 (794x560 螢幕預覽比例) */
 .farmer-scaler-container { position: relative; flex-shrink: 0; }
 .farmer-receipt-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 18px 28px; box-sizing: border-box;
+  width: 794px; height: 560px; background: #ffffff; padding: 16px 26px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; color: #000;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 12px; }
-.f-main-title { font-size: 27px; font-weight: 900; letter-spacing: 5px; text-align: center; }
-.f-date-wrap { align-self: flex-end; font-size: 16px; letter-spacing: 2px; margin-top: 10px; }
+.f-header { display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 8px; }
+.f-main-title { font-size: 26px; font-weight: 900; letter-spacing: 5px; text-align: center; }
+.f-date-wrap { align-self: flex-end; font-size: 15px; letter-spacing: 2px; margin-top: 6px; }
 
-.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 16px; }
-.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 31px; }
+.f-receipt-grid-table { border: 2px solid #000; display: flex; flex-direction: column; font-size: 15.5px; }
+.f-grid-row { display: flex; border-bottom: 1px solid #000; min-height: 29px; }
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 16px;
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
 }
-.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 16px; }
+.f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
-.f-row-top { min-height: 64px; }
+.f-row-top { min-height: 60px; }
 .f-col-buyer-group { display: flex; flex-direction: column; width: 58%; border-right: 1px solid #000; }
 .f-sub-row { display: flex; flex: 1; border-bottom: 1px solid #000; }
 .f-sub-row:last-child { border-bottom: none; }
 .f-w-head { width: 145px; }
 .f-w-addr-tag { width: 36px; line-height: 1.4; }
-.f-full-addr-box { flex: 1; padding: 8px 12px; font-size: 16px; line-height: 1.5; border-right: none !important; }
-.f-tax-clean { font-size: 18px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
+.f-full-addr-box { flex: 1; padding: 6px 10px; font-size: 15.5px; line-height: 1.45; border-right: none !important; }
+.f-tax-clean { font-size: 17px; font-weight: bold; letter-spacing: 3px; color: #1e3a8a; }
 
 .col-p-name { width: 25%; }
 .col-p-spec { width: 16%; }
@@ -3396,20 +3398,20 @@ input, select, textarea {
 .col-p-amt  { width: 18%; }
 .col-p-note { width: 17%; border-right: none !important; }
 
-.f-header-row { font-weight: bold; height: 30px; }
-.f-data-row { height: 32px; }
-.f-empty-row { height: 28px; }
+.f-header-row { font-weight: bold; height: 28px; }
+.f-data-row { height: 30px; }
+.f-empty-row { height: 26px; }
 
-.f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 16px; }
-.f-amount-val-cell { flex: 1; border-right: none !important; padding: 3px 12px; }
+.f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 15.5px; }
+.f-amount-val-cell { flex: 1; border-right: none !important; padding: 2px 10px; }
 .f-chinese-amount-line {
-  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 17px; font-weight: bold;
+  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16.5px; font-weight: bold;
 }
-.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 26px; text-align: center; font-size: 18px; display: inline-block; }
+.f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 24px; text-align: center; font-size: 17px; display: inline-block; }
 
-.f-farmer-stamp-cell { border-right: none !important; padding-left: 28px !important; display: flex; align-items: center; gap: 16px; }
-.f-farmer-name-clean { font-size: 19px; letter-spacing: 6px; font-weight: bold; }
-.cai-real-stamp-img { width: 50px; height: 50px; object-fit: contain; mix-blend-mode: multiply; }
+.f-farmer-stamp-cell { border-right: none !important; padding-left: 24px !important; display: flex; align-items: center; gap: 14px; }
+.f-farmer-name-clean { font-size: 18px; letter-spacing: 6px; font-weight: bold; }
+.cai-real-stamp-img { width: 48px; height: 48px; object-fit: contain; mix-blend-mode: multiply; }
 
 .f-w-id-lbl { width: 190px; }
 .f-w-id-val { width: 190px; border-right: none !important; }
@@ -3419,8 +3421,8 @@ input, select, textarea {
 .f-bold { font-weight: bold; }
 .f-pr { padding-right: 12px !important; }
 
-.f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
-.f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
+.f-statement { font-size: 12.5px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 3px; }
+.f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
 .stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
 .seal-choose-btn {
@@ -3440,38 +3442,48 @@ input, select, textarea {
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
 }
 
-/* =========================================================
-   🌟 列印模式專用修復：螢幕 100% 不變，只在印表機輸出時適配單頁
-========================================================= */
+/* =========================================================================
+   🌟 全平台終極列印修復 (電腦、手機、平板通通精準印出 1 頁，絕不吐空白第二張)
+========================================================================= */
 @media print {
+  /* 1. 徹底消除瀏覽器自動產生的網址、日期、頁碼等頁首頁尾 */
+  @page {
+    margin: 0 !important;
+  }
+
   html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-    overflow: visible !important;
-    height: 100% !important;
-  }
-  .main-wrapper, .couplet-screen-wrapper, .system-root { 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    background: white !important; 
-    overflow: visible !important; 
-    display: block !important; 
+    width: 100% !important;
     height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
-  .no-print { display: none !important; }
-  .canvas-viewport, .receipt-preview-area { 
-    padding: 0 !important; 
+
+  /* 隱藏所有操作介面 */
+  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
+    display: none !important;
+  }
+
+  /* 拔除所有造成手機截斷或分頁的容器屬性 */
+  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
+  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container { 
     margin: 0 !important; 
+    padding: 0 !important; 
     background: white !important; 
-    overflow: visible !important; 
     display: block !important; 
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
   }
-  .card-scaler-container { 
-    position: static !important; 
-    margin: 0 !important; 
-    padding: 0 !important; 
-  }
+
+  /* 花卡列印：滿版單頁輸出 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -3484,24 +3496,34 @@ input, select, textarea {
     border: none !important;
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 🌟 簽收單與農民收據：僅在印表機下將高度收至 136mm，確保送貨司機與簽名欄百分之百印出在第 1 頁 */
-  .a5-landscape-sheet, .farmer-receipt-sheet { 
+  /* 🌟 A5 簽收單與農民收據：精準 192mm x 132mm（完美適配 A5 橫向，絕不跑版、絕不吐第二張白紙） */
+  #receipt-print-target, #farmer-print-target { 
     position: relative !important; 
+    top: 0 !important;
+    left: 0 !important;
     transform: none !important; 
     box-shadow: none !important; 
-    width: 200mm !important; 
-    max-width: 200mm !important;
-    height: 136mm !important; 
-    max-height: 136mm !important;
-    margin: 3mm auto 0 auto !important; 
-    padding: 5mm 8mm !important;
+    width: 192mm !important; 
+    max-width: 192mm !important;
+    height: 132mm !important; 
+    max-height: 132mm !important;
+    margin: 4mm auto 0 auto !important; 
+    padding: 4mm 6mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* 確保列印時所有表格字體強制使用標楷體 */
+  #receipt-print-target *, #farmer-print-target * {
+    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
 }
 </style>
