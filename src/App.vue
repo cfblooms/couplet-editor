@@ -104,10 +104,10 @@
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>傳送與列印小提示：</b></span>
+              <span>💡 <b>傳送小提示：</b></span>
               <span>• <b>手機/平板</b>：點擊「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
-              <span>• <b>手機直接列印</b>：輸出為<b>無網址、無時間的相片模式</b>；若為色卡紙送印，背景已自動透明！</span>
               <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
+              <span>• <b>手機直接列印</b>：以相片模式直接送印，<b>底部絕不出現網址與時間</b>；送印時背景自動透明！</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 (100% 完整原版) ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -497,7 +497,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區 (完整還原) -->
+          <!-- 模組 2：客戶未結對帳專區 -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -648,7 +648,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (完整還原) -->
+          <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -778,7 +778,7 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 (完整還原) -->
+          <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
               <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
@@ -833,7 +833,7 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 (完整還原) -->
+          <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
               <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
@@ -871,7 +871,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
@@ -882,10 +882,10 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 (完整還原) -->
+          <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <h3>{{ editingRetId ? '✏ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -918,7 +918,7 @@
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
@@ -929,7 +929,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 (完整還原) -->
+          <!-- 模組 7：出貨派送進度分頁 -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -981,22 +981,22 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 3底圖防擠壓) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 3款底圖防擠壓) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 紙張尺寸選擇：A3 / A4 / A5 -->
+          <!-- 🌟 1. 紙張尺寸選擇：A3 / A4 / A5 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
               <button type="button" :class="{ active: cardPaperSize === 'A3' }" @click="switchPaperSize('A3')">A3 (超大)</button>
-              <button type="button" :class="{ active: cardPaperSize === 'A4' }" @click="switchPaperSize('A4')">A4 (標準大)</button>
-              <button type="button" :class="{ active: cardPaperSize === 'A5' }" @click="switchPaperSize('A5')">A5 (小花卡)</button>
+              <button type="button" :class="{ active: cardPaperSize === 'A4' }" @click="switchPaperSize('A4')">A4 (大尺寸)</button>
+              <button type="button" :class="{ active: cardPaperSize === 'A5' }" @click="switchPaperSize('A5')">A5 (小尺寸花卡)</button>
             </div>
           </div>
 
-          <!-- 🌸 Supabase Storage 3 款專用紙張底色切換 (客人預覽用，列印自動透明) -->
+          <!-- 🌟 2. 實體底圖切換 (Supabase 3款實體卡，客人預覽用，列印自動透明) -->
           <div class="panel-section highlight-panel">
             <label class="section-title">🌸 實體卡片樣式底圖 (客人預覽用)：</label>
             <select v-model="cardBgType" class="full-input bold-select">
@@ -1022,7 +1022,7 @@
           <!-- 🌟 雲端草稿庫 (完整原版) -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <span class="section-title">☁️️ 花卡全裝置雲端草稿庫：</span>
+              <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
@@ -1242,10 +1242,7 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送帶底圖給客人確認</button>
-          
-          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('card-print-target', `花卡_${cardPaperSize}`)">
-            🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})
-          </button>
+          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('card-print-target', `花卡_${cardPaperSize}`)">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1265,7 +1262,7 @@
               minHeight: '280px'
             }"
           >
-            <!-- 🌟 花卡主體 (獨立背景層防橫向擠壓) -->
+            <!-- 🌟 花卡主體 (獨立背景層防橫向擠壓，送印自動隱藏) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1278,7 +1275,7 @@
                 fontFamily: activeCssFontFamily
               }"
             >
-              <!-- 獨立底圖層：橫式等比自動旋轉對齊，絕不擠壓變形 -->
+              <!-- 🌟 獨立底圖層：橫式等比自動旋轉對齊，絕不擠壓變形 -->
               <div 
                 class="card-dynamic-bg-layer"
                 :class="{ 'rotate-landscape-bg': !isVertical }"
@@ -1326,13 +1323,13 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (白底紙張，Word楷體) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (100% 原始漂亮呈現) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
 
           <div class="panel-section highlight-panel">
-            <label class="section-title">依訂單快速帶入：</label>
+            <label class="section-title">依訂單編號快速帶入：</label>
             <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
               <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
               <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
@@ -1518,7 +1515,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (白底紙張，Word楷體) ================= -->
+      <!-- ================= 模式 4：農民收據 (100% 原始手刻格線呈現) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1621,6 +1618,7 @@
           </button>
         </div>
 
+        <!-- 右側預覽區 -->
         <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
           <div class="zoom-toolbar no-print">
             <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
@@ -1856,6 +1854,7 @@ const switchPaperSize = (size) => {
   nextTick(() => autoFitZoom())
 }
 
+// 🌟 安全縮放：絕不允許為 0
 const autoFitZoom = () => {
   if (!viewportRef.value || viewportRef.value.clientWidth <= 0) {
     zoomLevel.value = 0.65
@@ -1885,7 +1884,7 @@ const autoFitFarmerReceipt = () => {
 }
 
 // ==========================================
-// 2. 內部密碼驗證 (強化容錯率，絕不卡死)
+// 2. 內部密碼驗證
 // ==========================================
 const INTERNAL_PASSCODE = 'cf000725'
 const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
@@ -1913,7 +1912,7 @@ const handleLogout = () => {
 }
 
 // ==========================================
-// 3. Supabase 連線與全模組完整資料函式
+// 3. Supabase 連線與全模組資料函式
 // ==========================================
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
@@ -1968,7 +1967,6 @@ const customers = ref([])
 const inventoryList = ref([])
 const returnList = ref([])
 const orderList = ref([])
-const cloudDrafts = ref([])
 
 const editingOrderId = ref(null)
 const editingInvId = ref(null)
@@ -2077,14 +2075,9 @@ const flowerInventory = computed(() => inventoryList.value.filter(i => i.categor
 const loadOrders = async () => {
   try {
     const { data } = await supabase.from('orders').select('*')
-    if (data) {
-      orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
-    }
+    if (data) orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
   } catch (err) {}
 }
-const unshippedOrders = computed(() => (orderList.value || []).filter(o => o.shipped_status !== '已出貨'))
-const shippedOrders = computed(() => (orderList.value || []).filter(o => o.shipped_status === '已出貨'))
-
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
   if (data) inventoryList.value = data
@@ -2279,6 +2272,8 @@ const getCardStatusClass = (status) => {
 }
 
 const shippingViewFilter = ref('unshipped')
+const unshippedOrders = computed(() => orderList.value.filter(o => o.shipped_status !== '已出貨'))
+const shippedOrders = computed(() => orderList.value.filter(o => o.shipped_status === '已出貨'))
 const displayedShippingOrders = computed(() => shippingViewFilter.value === 'unshipped' ? unshippedOrders.value : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value))
 
 const getCustomerAddress = (ord) => {
@@ -2538,10 +2533,11 @@ const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
+// 🌟 底圖選擇狀態 (預設紅卡)
 const cardBgType = ref('red')
 const customCardBgUrl = ref('')
 
-// 🌟 精確對應 Supabase card-assets bucket 裡的 3 張圖檔
+// 🌟 3. 精確指向 Supabase card-assets bucket 裡的 3 張圖檔
 const activeBackgroundImageStyle = computed(() => {
   if (cardBgType.value === 'custom' && customCardBgUrl.value) {
     return `url(${customCardBgUrl.value})`
@@ -2604,7 +2600,7 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 🌟 跨平台標準繁體書法楷書適配（iOS / Android / Windows 通用）
+// 🌟 1. 跨平台標準繁體書法楷書適配（教育部標準楷體優先，全平台 iOS/Android/PC 通用）
 const fontMapping = {
   kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -2723,7 +2719,7 @@ const onCardCategoryChange = () => {
   }
 }
 
-// 支援列印雙軌機制
+// 🌟 6. 支援列印雙軌機制 (手機/平板相片模式無網址無時間，電腦送印自動透明)
 const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
 const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
@@ -2738,7 +2734,7 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
   }
 }
 
-// 產出列印彈窗（若送印模式自動隱藏底圖透明輸出，若確認模式則保留底圖）
+// 🌟 5. 產出列印彈窗（若送印模式自動隱藏底圖透明輸出，若確認模式則保留底圖）
 const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
@@ -2784,7 +2780,7 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   }
 }
 
-// 手機直接列印相片
+// 🌟 6. 手機直接列印相片 (頁面無網址、無日期時間、單頁乾淨送印)
 const triggerImagePrint = () => {
   if (!shareModalImg.value) return
   const imgUrl = shareModalImg.value
@@ -3035,7 +3031,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 引入開源標準繁體楷體字型，確保 iOS 與 Android 手機平板百分之百正常呈現楷書書法風骨 */
+/* 🌟 1. 引入開源標準繁體楷書字型，確保全平台手機、平板、電腦皆能顯示標準正楷 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
 
 /* 🌟 100% 原始精美樣式（徹底清除全形空白，還原全部欄位與配色） */
@@ -3398,7 +3394,6 @@ input, select, textarea {
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 13.5px; border-color: #3b82f6; }
 
-.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .ctrl-row-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .mini-weight-select {
@@ -3412,6 +3407,7 @@ input, select, textarea {
   width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
 }
 
+.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .form-group { margin-bottom: 8px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #334155; }
 .bottom-input-group { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
@@ -3449,7 +3445,7 @@ input, select, textarea {
   overflow: hidden;
 }
 
-/* 🌟 防擠壓動態背景層：直式正常鋪滿，橫式等比自動旋轉對齊，絕不擠壓變形 */
+/* 🌟 4. 防擠壓動態背景層：直式正常鋪滿，橫式等比自動旋轉對齊，絕不擠壓變形 */
 .card-dynamic-bg-layer {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background-size: cover; background-position: center; background-repeat: no-repeat;
@@ -3463,7 +3459,12 @@ input, select, textarea {
 }
 
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; z-index: 2; }
+.card-board.mode-vertical .middle-box,
+.card-board.mode-vertical .middle-box-2 { letter-spacing: 20px; }
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; z-index: 2; }
+.card-board.mode-horizontal .middle-box,
+.card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
+
 .text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; z-index: 2; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
@@ -3522,7 +3523,8 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
+}
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -3587,7 +3589,7 @@ input, select, textarea {
 }
 
 /* =========================================================================
-   🌟 全平台列印防空白頁與單頁強制保證
+   🌟 5. 全平台列印防空白頁與單頁強制保證（送印時背景抽空為 100% 透明）
 ========================================================================= */
 @media print {
   @page {
@@ -3637,14 +3639,17 @@ input, select, textarea {
     background-color: transparent !important;
     max-height: 98vh !important; 
     page-break-after: avoid !important; 
+    page-break-before: avoid !important; 
+    page-break-inside: avoid !important; 
     break-after: avoid !important; 
+    break-inside: avoid !important; 
   }
   .card-dynamic-bg-layer {
     display: none !important; /* 送印時抽空底圖，只噴墨文字 */
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 簽收單與農民收據：送印時背景自動透明，完全單頁輸出 */
+  /* 簽收單與農民收據：高度收在 130mm 內，完全單頁輸出 */
   #receipt-print-target, #farmer-print-target { 
     position: relative !important; 
     top: 0 !important; 
@@ -3661,7 +3666,10 @@ input, select, textarea {
     box-sizing: border-box !important; 
     overflow: hidden !important; 
     page-break-after: avoid !important; 
+    page-break-before: avoid !important; 
+    page-break-inside: avoid !important; 
     break-after: avoid !important; 
+    break-inside: avoid !important; 
   }
 
   /* 強制標楷體 */
