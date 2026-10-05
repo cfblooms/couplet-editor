@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 (Blob URL 高畫質預覽) -->
+      <!-- 圖片傳送專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -199,7 +199,7 @@
                   </select>
                 </div>
 
-                <!-- 🚚 送貨地址：同一行後方，寬度約 3 格大 -->
+                <!-- 🚚 送貨地址 -->
                 <div class="field highlight-field triple-width-field">
                   <label>🚚 送貨地址：</label>
                   <input 
@@ -777,7 +777,7 @@
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
-              <h3>👥 客戶名冊資料庫 ({{ customers.length }} 位)</h3>
+              <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field"><label>客戶/公司名稱：</label><input v-model="formCust.name" placeholder="名稱" /></div>
                 <div class="field">
@@ -819,7 +819,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -832,7 +832,7 @@
           <!-- 模組 5：蘭花品種庫 -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
-              <h3>🌸 蘭花品種清單 ({{ orchids.length }} 筆)</h3>
+              <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field"><label>品種名稱：</label><input v-model="formOrchid.name" placeholder="例: 大辣椒、滿天紅" /></div>
                 <div class="field"><label>花型特色 / 備註：</label><input v-model="formOrchid.note" placeholder="特色說明" /></div>
@@ -867,7 +867,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
@@ -881,7 +881,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>🔄 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
+              <h3>{{ editingRetId ? '✏ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -1041,7 +1041,6 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-// 🖨️ 列印邊界壓制為 0mm
 const updateDynamicPrintStyle = () => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
@@ -2095,7 +2094,7 @@ const shareFarmerReceiptDirect = async () => {
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
     renderImageBlobToModal(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   } catch (err) {
-    showToast('⚠️️ 圖片生成失敗，請重試！')
+    showToast('⚠️ 圖片生成失敗，請重試！')
   }
 }
 
@@ -2568,9 +2567,9 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* 🌟 正楷字體全平台完美適配 */
+/* 🌟 正楷字體全平台適配 (以 Noto Serif TC 和繁體楷體為核心) */
 .standard-kai-font, .kai-font-supported {
-  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
+  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
 }
 
 /* A5 橫式簽收單 */
@@ -2619,8 +2618,7 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
-}
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -2685,7 +2683,7 @@ input, select, textarea {
 }
 
 /* =========================================================================
-   🌟 全平台列印防空白頁與單頁強制保證
+   🌟 全平台列印修復 (保證單張、無白紙溢出)
 ========================================================================= */
 @media print {
   @page {
@@ -2700,7 +2698,6 @@ input, select, textarea {
     height: 98vh !important;
     max-height: 98vh !important;
     overflow: hidden !important;
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
 
   .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
@@ -2721,7 +2718,7 @@ input, select, textarea {
     transform: none !important;
   }
 
-  /* 花卡列印：滿版單頁輸出，絕對禁止溢出到第二頁 */
+  /* 花卡列印：滿版單頁輸出 */
   #card-print-target { 
     position: absolute !important; 
     top: 0 !important; 
@@ -2761,11 +2758,6 @@ input, select, textarea {
     page-break-inside: avoid !important;
     break-after: avoid !important;
     break-inside: avoid !important;
-  }
-
-  /* 強制標楷體 */
-  #receipt-print-target *, #farmer-print-target *, #card-print-target * {
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
   }
 }
 </style>
