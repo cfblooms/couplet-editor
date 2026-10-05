@@ -1,6 +1,6 @@
 <template>
   <div class="main-wrapper">
-    <!-- ================= 內部通行碼驗證畫面 ================= -->
+    <!-- ================= 內部安全通行碼驗證畫面 ================= -->
     <div v-if="!isAuthenticated" class="auth-lock-overlay">
       <div class="auth-lock-card">
         <div class="lock-icon">🔒</div>
@@ -74,7 +74,7 @@
         </div>
       </header>
 
-      <!-- 提示橫條 -->
+      <!-- 浮動提示橫條 -->
       <div v-if="toastMessage" class="floating-toast no-print">
         {{ toastMessage }}
       </div>
@@ -87,7 +87,7 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
-            <!-- 棋盤格背景代表底色為 100% 透明 -->
+            <!-- 棋盤格代表底色 100% 透明 -->
             <div class="share-img-scroll-container checkerboard-bg">
               <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
             </div>
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <!-- 品種照片檢視彈窗 -->
+      <!-- 品種照片放大檢視彈窗 -->
       <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
         <div class="image-modal-content" @click.stop>
           <div class="image-modal-header">
@@ -126,7 +126,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 (標準管理字體) ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -403,10 +403,18 @@
               </div>
             </div>
           </section>
+
+          <!-- 模組 3：進貨與庫存 -->
+          <section v-if="subTab === 'inventory'" class="tab-pane">
+            <div class="card-box">
+              <h3>📦 庫存管理</h3>
+              <p>庫存資料庫運作中。</p>
+            </div>
+          </section>
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援無底色透明輸出) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -424,7 +432,7 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / 書法楷書體 (手機/電腦通用)</option>
+                  <option value="kai">標準標楷體 / 書法楷書體 (全平台通用)</option>
                   <option value="song">古典宋體 / 明體風格</option>
                   <option value="fangsong">仿宋古典體 (FangSong)</option>
                   <option value="sans">現代簡約黑體</option>
@@ -453,19 +461,19 @@
               <span class="section-title">1. 開頭敬詞：</span>
               <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperPrefix" class="full-input mt-1" placeholder="例: 敬悼 或 恭祝" />
+            <input type="text" v-model="upperPrefix" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象：</span>
               <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人姓名稱謂" />
+            <input type="text" v-model="upperTarget" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞：</span>
               <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空則不顯示" />
+            <input type="text" v-model="upperSuffix" class="full-input mt-1" />
           </div>
 
           <!-- 中款 -->
@@ -474,13 +482,13 @@
               <span class="section-title">中款第 1 行：</span>
               <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款題詞" />
+            <input type="text" v-model="middleText" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">中款第 2 行：</span>
               <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
+            <input type="text" v-model="middleText2" class="full-input mt-1" />
           </div>
 
           <!-- 下款 -->
@@ -521,7 +529,6 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
-            <!-- 🌟 花卡主體 (透明底色設定) -->
             <div 
               id="card-print-target" 
               class="card-board target-kai-font transparent-target" 
@@ -720,7 +727,7 @@
             </div>
             <div class="form-group">
               <label>總金額：</label>
-              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" />
+              <input type="number" v-model.number="farmerReceipt.totalAmount" />
             </div>
           </div>
 
@@ -851,8 +858,7 @@
 </template>
 
 <script setup>
-// 🌟 完整引入所有生命週期與響應式 API
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
@@ -920,7 +926,7 @@ const handleLogin = () => {
     isAuthenticated.value = true
     authError.value = false
     localStorage.setItem('cf_admin_auth', 'true')
-    showToast('✅ 驗證成功！')
+    showToast('✅ 登入成功！')
     nextTick(() => initSystemData())
   } else {
     authError.value = true
@@ -1097,7 +1103,7 @@ const onCardCategoryChange = () => {
 }
 
 // =========================================================================
-// 🌟 100% 無色透明背景 (Transparent PNG) 產出引擎（修正 .value）
+// 🌟 100% 無色透明背景 (Transparent PNG) 產出引擎
 // =========================================================================
 const openTransparentPrintModal = async (targetId, titlePrefix) => {
   const targetEl = document.getElementById(targetId)
@@ -1125,7 +1131,6 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
       }
       shareModalImg.value = URL.createObjectURL(blob)
       shareModalTitle.value = `${titlePrefix} (無色透明底)`
-      // 🌟 已修正為 .value，杜絕語法崩潰
       shareModalFilename.value = `${titlePrefix}_透明底.png`
       currentBlobToShare.value = blob
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'print.png', { type: 'image/png' })] }))
