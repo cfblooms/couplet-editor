@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送與送印專用彈窗 -->
+      <!-- 圖片傳送專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -88,12 +88,12 @@
           </div>
           <div class="share-modal-body">
             <div class="share-img-scroll-container">
-              <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
+              <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
             </div>
             
             <div class="share-btn-action-group">
               <button type="button" class="mobile-print-btn" @click="triggerImagePrint">
-                🖨️️ 手機直接列印 (無網址・無時間・一張紙)
+                🖨️ 手機直接列印 (無網址・無日期・一張紙)
               </button>
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
                 📲 一鍵直接傳送至 LINE / 其他應用
@@ -104,10 +104,10 @@
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>特製色卡列印與傳送說明：</b></span>
+              <span>💡 <b>傳送與列印小提示：</b></span>
               <span>• <b>手機/平板</b>：點擊「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
+              <span>• <b>手機直接列印</b>：輸出為<b>無網址、無時間的相片模式</b>；若為色卡紙送印，背景已自動透明！</span>
               <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
-              <span>• <b>列印色卡紙</b>：點選「手機直接列印」，送印時背景自動透明，<b>底部絕不出現網址與時間</b>！</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 (100% 精美完整原始版面) ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 (100% 完整原版) ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -497,7 +497,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區 (100% 完整原版) -->
+          <!-- 模組 2：客戶未結對帳專區 (完整還原) -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -648,7 +648,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (100% 完整原版) -->
+          <!-- 模組 3：進貨與庫存 (完整還原) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -778,7 +778,7 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 (100% 完整原版) -->
+          <!-- 模組 4：客戶資料庫 (完整還原) -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
               <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
@@ -833,7 +833,7 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 (100% 完整原版) -->
+          <!-- 模組 5：蘭花品種庫 (完整還原) -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
               <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
@@ -882,7 +882,7 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 (100% 完整原版) -->
+          <!-- 模組 6：退貨管理區 (完整還原) -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
               <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
@@ -929,7 +929,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 (100% 完整原版) -->
+          <!-- 模組 7：出貨派送進度分頁 (完整還原) -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -981,12 +981,12 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，精準對應 Supabase 3張底圖) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 3底圖防擠壓) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 紙張尺寸選擇：A3 / A4 / A5 -->
+          <!-- 紙張尺寸選擇：A3 / A4 / A5 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -1019,10 +1019,10 @@
             </div>
           </div>
 
-          <!-- 🌟 雲端草稿庫 (100% 原始完整功能回歸) -->
+          <!-- 🌟 雲端草稿庫 (完整原版) -->
           <div class="panel-section draft-manage-panel">
             <div class="section-title-with-weight">
-              <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
+              <span class="section-title">☁️️ 花卡全裝置雲端草稿庫：</span>
               <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts">🔄 刷新</button>
             </div>
             <div class="draft-action-btns">
@@ -1046,7 +1046,7 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / Word正楷 (書法楷體)</option>
+                  <option value="kai">標準標楷體 / Word正楷 (全平台書法標準)</option>
                   <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
                   <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
                   <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
@@ -2604,7 +2604,7 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 跨平台標準繁體書法楷書適配（iOS / Android / Windows 通用）
+// 🌟 跨平台標準繁體書法楷書適配（iOS / Android / Windows 通用）
 const fontMapping = {
   kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -2648,9 +2648,8 @@ const defaultVertical = {
 const defaultHorizontal = {
   upper_prefix: { x: 80, y: 80, size: 34 }, upper_target: { x: 220, y: 80, size: 38 }, upper_suffix: { x: 920, y: 80, size: 34 },
   middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
-  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 },
-  bottom_2: { x: 380, y: 520, size: 28 }, bottom_3: { x: 580, y: 520, size: 28 },
-  bottom_4: { x: 580, y: 530, size: 28 }, bottom_5: { x: 760, y: 530, size: 28 },
+  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 }, bottom_2: { x: 380, y: 520, size: 28 },
+  bottom_3: { x: 580, y: 520, size: 28 }, bottom_4: { x: 580, y: 530, size: 28 }, bottom_5: { x: 760, y: 530, size: 28 },
   suffix: { x: 880, y: 530, size: 34 }
 }
 
@@ -3036,6 +3035,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 🌟 引入開源標準繁體楷體字型，確保 iOS 與 Android 手機平板百分之百正常呈現楷書書法風骨 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
+
 /* 🌟 100% 原始精美樣式（徹底清除全形空白，還原全部欄位與配色） */
 .main-wrapper {
   display: flex;
@@ -3572,7 +3574,7 @@ input, select, textarea {
 }
 
 .print-action-btn {
-  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
+  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
