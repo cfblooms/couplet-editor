@@ -2539,11 +2539,14 @@ const activeBackgroundImageStyle = computed(() => {
   if (cardBgType.value === 'custom' && customCardBgUrl.value) {
     return `url(${customCardBgUrl.value})`
   }
-  // 加上 ?t 破除快取，精確對應 Supabase Storage
+  
+  // 直式用原檔名，橫式自動抓帶 -h 的橫圖檔名
+  const suffix = isVertical.value ? '' : '-h'
+  
   const map = {
-    red: `url('${SUPABASE_STORAGE_URL}/card-bg-red.jpg?v=2')`,
-    pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink.jpg?v=2')`,
-    white: `url('${SUPABASE_STORAGE_URL}/card-bg-white.jpg?v=2')`
+    red: `url('${SUPABASE_STORAGE_URL}/card-bg-red${suffix}.jpg?v=2')`,
+    pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink${suffix}.jpg?v=2')`,
+    white: `url('${SUPABASE_STORAGE_URL}/card-bg-white${suffix}.jpg?v=2')`
   }
   return map[cardBgType.value] || 'none'
 })
@@ -3439,15 +3442,9 @@ input, select, textarea {
   z-index: 1; pointer-events: none;
 }
 .rotate-landscape-bg {
-  /* 將底圖的寬高對調：寬度取卡片的高、高度取卡片的寬 */
-  width: 100vh !important; /* 或是依外層容器比例填滿 */
-  width: calc(100% * 1.414) !important;
-  height: calc(100% * 1.414) !important;
-  top: 50% !important;
-  left: 50% !important;
-  /* 🌟 -90deg 代表「逆時針旋轉 90 度」，translate(-50%, -50%) 保證旋轉後精確置中對齊 */
-  transform: translate(-50%, -50%) rotate(-90deg) !important;
-  transform-origin: center center !important;
+  /* 既然圖片本身就是橫的，直接鋪滿即可，不用任何旋轉 */
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; z-index: 2; }
