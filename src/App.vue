@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 (Blob URL 高畫質預覽) -->
+      <!-- 圖片傳送專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -102,7 +102,7 @@
 
             <div class="share-tips-row">
               <span>💡 <b>傳送小提示：</b></span>
-              <span>• <b>手機/平板</b>：點擊上方「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
+              <span>• <b>手機/平板</b>：點擊「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
               <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
             </div>
           </div>
@@ -644,7 +644,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (自由輸入) -->
+          <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -659,13 +659,11 @@
                   </select>
                 </div>
 
-                <!-- 蘭花品種名稱 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>品種名稱：</label>
                   <input v-model="formInv.item_name" placeholder="例: 滿天紅、大辣椒" />
                 </div>
 
-                <!-- 陶瓷盆規格 -->
                 <div v-if="formInv.category === '陶瓷盆'" class="field">
                   <label>盆器規格：</label>
                   <select v-model="formInv.pot_type" @change="onPotTypeChange">
@@ -677,7 +675,6 @@
                   </select>
                 </div>
 
-                <!-- 耗材品名：純文字輸入框，完全開放自由打字 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>耗材品名 (直接自行輸入)：</label>
                   <input 
@@ -687,7 +684,6 @@
                   />
                 </div>
 
-                <!-- 耗材詳細規格 / 包裝單位：純文字輸入框 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>詳細規格 / 包裝單位：</label>
                   <input 
@@ -697,7 +693,6 @@
                   />
                 </div>
 
-                <!-- 蘭花規格細項 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>花梗：</label>
                   <select v-model="formInv.spec_spike">
@@ -981,6 +976,735 @@
           </section>
         </div>
       </div>
+
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5 自動自適應印表機) ================= -->
+      <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
+        <div class="control-panel no-print">
+          <h2>⚙️ 卡片與題詞設定</h2>
+
+          <div class="panel-section">
+            <label class="section-title">📄 紙張尺寸選擇：</label>
+            <div class="btn-group">
+              <button type="button" :class="{ active: cardPaperSize === 'A4' }" @click="switchPaperSize('A4')">A4 (大尺寸)</button>
+              <button type="button" :class="{ active: cardPaperSize === 'A5' }" @click="switchPaperSize('A5')">A5 (小尺寸花卡)</button>
+            </div>
+          </div>
+
+          <div class="panel-section draft-manage-panel">
+            <div class="section-title-with-weight">
+              <span class="section-title">☁️ 花卡全裝置雲端草稿庫：</span>
+              <button type="button" class="mini-refresh-btn" @click="loadCloudDrafts">🔄 刷新</button>
+            </div>
+            <div class="draft-action-btns">
+              <button type="button" class="ultra-light-purple-btn" @click="saveCurrentAsCloudDraft">💾 存至雲端草稿 (全裝置同步)</button>
+              <button type="button" class="mint-new-card-btn" @click="startNewCard">＋ 開新花卡</button>
+            </div>
+            <div class="mt-2">
+              <label class="sub-lbl">跨電腦/手機讀取暫存草稿 ({{ cloudDrafts.length }} 張)：</label>
+              <div class="draft-selector-row">
+                <select v-model="selectedDraftId" @change="loadCloudDraft(selectedDraftId)" class="full-input bold-select">
+                  <option value="">-- 請選擇要調出的雲端草稿 --</option>
+                  <option v-for="d in cloudDrafts" :key="d.id" :value="d.id">{{ d.title }}</option>
+                </select>
+                <button v-if="selectedDraftId" type="button" class="mini-del-draft-btn" @click="deleteCloudDraft(selectedDraftId)">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="inline-font-weight-row">
+              <div class="inline-item-flex">
+                <label class="mini-field-lbl">字體選擇：</label>
+                <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
+                  <option value="kai">標準標楷體 (繁體書法正楷)</option>
+                  <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
+                  <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
+                  <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
+                </select>
+              </div>
+              <div class="inline-item-fixed">
+                <label class="mini-field-lbl">中款預設粗細：</label>
+                <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
+                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>版面模式：</label>
+            <div class="btn-group">
+              <button type="button" :class="{ active: isVertical }" @click="switchOrientation(true)">直式 (傳統輓聯)</button>
+              <button type="button" :class="{ active: !isVertical }" @click="switchOrientation(false)">橫式 (現代花卡)</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>卡片類型：</label>
+            <select v-model="cardCategory" @change="onCardCategoryChange">
+              <option value="funeral">喪禮弔唁</option>
+              <option value="celebration">慶賀祝典</option>
+            </select>
+          </div>
+
+          <!-- 上款設定 -->
+          <div class="panel-section">
+            <div class="section-title-with-weight">
+              <span class="section-title">1. 開頭敬詞（獨立一格）：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_prefix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row mt-1">
+              <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
+              <select v-if="cardCategory === 'funeral'" v-model="upperPrefix" style="width: 110px;">
+                <option value="敬悼">敬悼</option><option value="痛悼">痛悼</option><option value="敬唁">敬唁</option><option value="追悼">追悼</option>
+              </select>
+              <select v-else v-model="upperPrefix" style="width: 110px;">
+                <option value="祝">祝</option><option value="恭祝">恭祝</option><option value="恭賀">恭賀</option><option value="敬賀">敬賀</option>
+              </select>
+            </div>
+
+            <div class="section-title-with-weight mt-2">
+              <span class="section-title">2. 受禮對象 / 稱謂（獨立一格）：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_target" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+            <template v-if="cardCategory === 'funeral'">
+              <div class="form-row mt-1">
+                <select v-model="funeralUpperFormat" @change="onFuneralFormatChange">
+                  <option value="X媽X老夫人">X媽X老夫人 (填兩字/姓)</option><option value="X媽X夫人">X媽X夫人 (填兩字/姓)</option>
+                  <option value="X公X老先生">X公X老先生 (填兩字/名)</option><option value="X公X先生">X公X先生 (填兩字/名)</option>
+                  <option value="X女士">X女士</option><option value="X先生">X先生</option><option value="custom">自訂直接輸入</option>
+                </select>
+              </div>
+              <div v-if="isDoubleXFormat" class="double-x-row mt-1">
+                <div class="x-input-group"><span class="x-badge">前X</span><input type="text" v-model="targetX1" placeholder="本姓/夫姓" @input="combineTargetX" /></div>
+                <span class="x-connector">＋</span>
+                <div class="x-input-group"><span class="x-badge">後X</span><input type="text" v-model="targetX2" placeholder="本姓/名字" @input="combineTargetX" /></div>
+              </div>
+            </template>
+            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人或逝者姓名稱謂 (可直接修改結果)" />
+
+            <div class="section-title-with-weight mt-2">
+              <span class="section-title">3. 上款結尾詞（選填）：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
+                </div>
+                <select v-model="weights.upper_suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row mt-1">
+              <input type="text" v-model="upperSuffix" class="full-input" placeholder="留空則不顯示" />
+              <select v-if="cardCategory === 'funeral'" v-model="upperSuffix" style="width: 110px;">
+                <option value="千古">千古</option><option value="仙逝">仙逝</option><option value="靈前">靈前</option><option value="冥前">冥前</option><option value="">(留空)</option>
+              </select>
+              <select v-else v-model="upperSuffix" style="width: 110px;">
+                <option value="誌慶">誌慶</option><option value="大吉">大吉</option><option value="惠存">惠存</option><option value="">(留空)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="section-title-with-weight">
+              <span class="section-title">中款第 1 行（主要題詞）：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
+                </div>
+                <select v-model="weights.middle" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group mt-1 mb-2">
+              <label class="sub-label-tip">▼ 點選往下拉快速挑選：</label>
+              <select v-model="middleText" class="full-input bold-select-dropdown">
+                <option value="">-- 請下拉選擇主要題詞 --</option>
+                <option v-for="phrase in availableMiddlePhrases" :key="phrase" :value="phrase">{{ phrase }}</option>
+              </select>
+            </div>
+
+            <template v-if="cardCategory === 'funeral'">
+              <div class="radio-row mb-1">
+                <label><input type="radio" value="female" v-model="gender" /> 女性</label>
+                <label><input type="radio" value="male" v-model="gender" /> 男性</label>
+              </div>
+              <div class="tags-container mb-2">
+                <button type="button" v-for="phrase in currentFuneralPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
+              </div>
+            </template>
+            <template v-else>
+              <div class="tags-container mb-2">
+                <button type="button" v-for="phrase in currentCelebPhrases" :key="phrase" class="tag-btn" @click="middleText = phrase">{{ phrase }}</button>
+              </div>
+            </template>
+
+            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款第 1 行詞語" />
+
+            <div class="section-title-with-weight mt-3">
+              <span class="section-title">中款第 2 行（選填）：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
+                </div>
+                <select v-model="weights.middle_2" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">下款設定：</label>
+            <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
+              <span class="line-num">格 {{ idx + 1 }}</span>
+              <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
+              <div class="compact-size-wrap">
+                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
+              </div>
+              <select v-model="weights['bottom_' + idx]" class="mini-weight-select">
+                <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+              </select>
+            </div>
+
+            <div class="section-title-with-weight mt-2">
+              <span class="section-title">結尾敬詞：</span>
+              <div class="ctrl-row-right">
+                <div class="compact-size-wrap">
+                  <span class="compact-size-lbl">字級:</span>
+                  <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
+                </div>
+                <select v-model="weights.suffix" class="mini-weight-select">
+                  <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
+                </select>
+              </div>
+            </div>
+            <select v-model="suffixText" class="full-input mt-1">
+              <option value="敬輓">敬輓</option><option value="泣輓">泣輓</option><option value="拜輓">拜輓</option>
+              <option value="敬賀">敬賀</option><option value="恭賀">恭賀</option><option value="拜賀">拜賀</option><option value="謹致">謹致</option>
+            </select>
+          </div>
+
+          <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
+          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人</button>
+          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
+        </div>
+
+        <div class="canvas-viewport" ref="viewportRef">
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.25, +(zoomLevel - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
+          </div>
+
+          <div 
+            class="card-scaler-container" 
+            :style="{
+              width: currentCardDimensions.w * zoomLevel + 'px',
+              height: currentCardDimensions.h * zoomLevel + 'px'
+            }"
+          >
+            <!-- 🌟 花卡看板主體 (全平台書法楷體完美適配) -->
+            <div 
+              id="card-print-target" 
+              class="card-board standard-kai-font" 
+              :class="isVertical ? 'mode-vertical' : 'mode-horizontal'"
+              :style="{
+                width: currentCardDimensions.w + 'px',
+                height: currentCardDimensions.h + 'px',
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'top left',
+                fontFamily: activeCssFontFamily
+              }"
+            >
+              <div v-if="upperPrefix.trim()" class="text-box upper-prefix-box" :style="getStyle('upper_prefix')" @pointerdown="startMove($event, 'upper_prefix')">
+                <span>{{ upperPrefix }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_prefix')">⤡</div>
+              </div>
+
+              <div v-if="upperTarget.trim()" class="text-box upper-target-box" :style="getUpperTargetBoxStyle()" @pointerdown="startMove($event, 'upper_target')">
+                <span v-for="(token, tIdx) in parsedUpperTargetTokens" :key="tIdx" :style="token.isSmall ? { fontSize: maFontSize + 'px' } : {}">{{ token.char }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_target')">⤡</div>
+              </div>
+
+              <div v-if="upperSuffix && upperSuffix.trim()" class="text-box upper-suffix-box" :style="getStyle('upper_suffix')" @pointerdown="startMove($event, 'upper_suffix')">
+                <span>{{ upperSuffix }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'upper_suffix')">⤡</div>
+              </div>
+
+              <div v-if="middleText.trim()" class="text-box middle-box" :style="getStyle('middle')" @pointerdown="startMove($event, 'middle')">
+                <span>{{ middleText }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle')">⤡</div>
+              </div>
+
+              <div v-if="middleText2.trim()" class="text-box middle-box-2" :style="getStyle('middle_2')" @pointerdown="startMove($event, 'middle_2')">
+                <span>{{ middleText2 }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'middle_2')">⤡</div>
+              </div>
+
+              <template v-for="(item, idx) in bottomLines" :key="'bottom-' + idx">
+                <div v-if="item.text.trim()" class="text-box" :style="getStyle('bottom_' + idx)" @pointerdown="startMove($event, 'bottom_' + idx)">
+                  <span>{{ item.text }}</span>
+                  <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'bottom_' + idx)">⤡</div>
+                </div>
+              </template>
+
+              <div v-if="suffixText.trim()" class="text-box suffix-box" :style="getStyle('suffix')" @pointerdown="startMove($event, 'suffix')">
+                <span>{{ suffixText }}</span>
+                <div class="scale-handle no-print" @pointerdown.stop="startResize($event, 'suffix')">⤡</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
+      <div v-else-if="currentTab === 'receipt'" class="receipt-container">
+        <div class="control-panel no-print">
+          <h2>📋 橫式 A5 簽收單管理</h2>
+
+          <div class="panel-section highlight-panel">
+            <label class="section-title">依訂單編號快速帶入：</label>
+            <select v-model="selectedOrderId" @change="onSelectReceiptOrder" class="full-input bold-select">
+              <option value="">-- 請下拉選擇訂單 (即時自動帶入) --</option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }} [{{ ord.receipt_status || '未列印' }}]
+              </option>
+            </select>
+          </div>
+
+          <div class="panel-section modern-sign-card">
+            <div class="modern-sign-header">
+              <span class="modern-sign-title">✍ 收件人現場手寫簽名</span>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
+                ↺ 清除重簽
+              </button>
+            </div>
+            <div class="modern-canvas-wrapper">
+              <canvas 
+                ref="signPadCanvasRef" 
+                class="modern-live-sign-pad" 
+                width="340" 
+                height="110"
+                @pointerdown="startSign"
+                @pointermove="drawingSign"
+                @pointerup="stopSign"
+                @pointerleave="stopSign"
+              ></canvas>
+              <div v-if="!liveSignDataUrl" class="sign-watermark-hint">請在此區域手寫簽名</div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">抬頭花店名稱：</label>
+            <div class="btn-group">
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'default' }" 
+                @click="shopNameMode = 'default'"
+              >
+                宸豐蘭藝
+              </button>
+              <button 
+                type="button" 
+                :class="{ active: shopNameMode === 'custom' }" 
+                @click="shopNameMode = 'custom'"
+              >
+                自行輸入
+              </button>
+            </div>
+            <input 
+              v-if="shopNameMode === 'custom'" 
+              type="text" 
+              v-model="customShopName" 
+              class="full-input mt-2" 
+              placeholder="請輸入自訂花店名稱" 
+            />
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">✏ 簽收單內容確認與修改：</label>
+            
+            <div class="form-group">
+              <label>收件單位 / 聯絡人 / 電話：</label>
+              <input type="text" v-model="receiptForm.recipient" />
+            </div>
+
+            <div class="form-group">
+              <label>送達地址：</label>
+              <input type="text" v-model="receiptForm.address" />
+            </div>
+
+            <div class="form-group">
+              <label>送達日期：</label>
+              <input type="text" v-model="receiptForm.deliveryDate" />
+            </div>
+
+            <div class="form-group">
+              <label>花禮品項規格 (幾盆)：</label>
+              <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆、特選蘭花 2盆 (共3盆)" />
+            </div>
+
+            <div class="form-group">
+              <label>致贈單位 / 祝賀詞：</label>
+              <input type="text" v-model="receiptForm.giver" />
+            </div>
+
+            <div class="form-group">
+              <label>備註說明：</label>
+              <textarea v-model="receiptForm.notes" rows="2"></textarea>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareReceiptDirect"
+          >
+            📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            :disabled="!receiptForm.recipient && !selectedOrderId"
+            @click="printReceiptAndMarkDone"
+          >
+            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+          </button>
+        </div>
+
+        <div class="receipt-preview-area" ref="receiptViewportRef">
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+          </div>
+
+          <div 
+            class="receipt-scaler-container" 
+            :style="{
+              width: (794 * receiptZoom) + 'px',
+              height: (560 * receiptZoom) + 'px'
+            }"
+          >
+            <div 
+              id="receipt-print-target"
+              class="a5-landscape-sheet kai-font-supported standard-kai-font"
+              :style="{
+                transform: `scale(${receiptZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="sheet-header">
+                <div class="shop-name-title">{{ displayShopName }}</div>
+                <div class="sheet-main-title">銷貨 / 出貨簽收單</div>
+                <div class="header-meta">
+                  <div><b>訂單編號：</b>{{ receiptForm.orderId || '現場直接開單' }}</div>
+                  <div><b>送達日期：</b>{{ receiptForm.deliveryDate || '依約定送達' }}</div>
+                </div>
+              </div>
+
+              <table class="receipt-table">
+                <tbody>
+                  <tr>
+                    <td class="lbl">收件單位/人</td>
+                    <td class="val val-bold">{{ receiptForm.recipient || '—' }}</td>
+                    <td class="lbl">送達地址</td>
+                    <td class="val val-bold text-blue">{{ receiptForm.address || '同訂購人地址 / 門市取貨' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">花禮品項</td>
+                    <td class="val val-highlight" colspan="3">
+                      {{ receiptForm.item || '特選蘭花 1盆' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">致贈/賀詞</td>
+                    <td class="val" colspan="3">{{ receiptForm.giver || '敬領 誌慶 / 宸豐蘭藝 敬製' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">備註說明</td>
+                    <td class="val" colspan="3">{{ receiptForm.notes || '花禮已專車安全送達指定地點，敬請點交簽名確認。感謝您的惠顧！' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="sheet-footer">
+                <div class="footer-left">
+                  <div>送貨司機 / 經手人：______________</div>
+                  <div class="footer-tip">※ 專車親送・現場點交確認・花禮已送達</div>
+                </div>
+                <div class="footer-sign-box">
+                  <div class="sign-box-title">客戶簽收章 / 線上簽名欄</div>
+                  <div class="sign-box-area">
+                    <img v-if="liveSignDataUrl" :src="liveSignDataUrl" class="live-signature-img" alt="收件人真實簽名" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 模式 4：農民收據 ================= -->
+      <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
+        <div class="control-panel no-print">
+          <h2>🧾 農民出售農產品收據管理</h2>
+
+          <div class="panel-section stamp-select-panel">
+            <label class="section-title">🔴 蔡鎮遠印章（全裝置雲端同步）：</label>
+            <input type="file" id="local-seal-picker" accept="image/*" style="display:none" @change="onSelectLocalSeal" />
+            <button type="button" class="seal-choose-btn" @click="triggerLocalSealPicker">
+              📁 上傳蔡鎮遠印章圖檔 (電腦/手機/平板全部同步)
+            </button>
+          </div>
+
+          <div class="panel-section highlight-panel">
+            <label class="section-title">依訂單編號自動帶入收據：</label>
+            <select v-model="selectedFarmerOrderId" @change="onSelectFarmerReceiptOrder" class="full-input bold-select">
+              <option value="">-- 請下拉選擇訂單 (即時自動解析) --</option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+                【{{ ord.id }}】{{ ord.customer }} - ${{ ord.price }} (統編: {{ ord.tax_id || '無' }})
+              </option>
+            </select>
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">✏ 收據內容確認與自由修改：</label>
+            <div class="form-row">
+              <div class="field">
+                <label>民國年</label>
+                <input type="text" v-model="farmerReceipt.year" />
+              </div>
+              <div class="field">
+                <label>月</label>
+                <input type="text" v-model="farmerReceipt.month" />
+              </div>
+              <div class="field">
+                <label>日</label>
+                <input type="text" v-model="farmerReceipt.day" />
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label>購貨商號名稱：</label>
+              <input type="text" v-model="farmerReceipt.buyerName" />
+            </div>
+
+            <div class="form-group">
+              <label>統一編號：</label>
+              <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
+            </div>
+
+            <div class="form-group">
+              <label>住址 (整大格顯示)：</label>
+              <input type="text" v-model="farmerReceipt.buyerAddress" />
+            </div>
+
+            <div class="form-group">
+              <label>品名：</label>
+              <input type="text" v-model="farmerReceipt.itemName" />
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label>規格</label>
+                <input type="text" v-model="farmerReceipt.spec" />
+              </div>
+              <div class="field">
+                <label>數量</label>
+                <input type="text" v-model="farmerReceipt.qty" />
+              </div>
+              <div class="field">
+                <label>單價</label>
+                <input type="text" v-model="farmerReceipt.unitPrice" />
+              </div>
+            </div>
+
+            <div class="form-group mt-2">
+              <label>總金額 (元，沒填時留空)：</label>
+              <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
+            </div>
+
+            <div class="form-group">
+              <label>備註：</label>
+              <input type="text" v-model="farmerReceipt.note" />
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="line-action-btn mt-2" 
+            @click="shareFarmerReceiptDirect"
+          >
+            💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
+          </button>
+
+          <button 
+            type="button" 
+            class="print-action-btn mt-2" 
+            @click="printFarmerReceipt"
+          >
+            🖨️ 列印農民收據
+          </button>
+        </div>
+
+        <!-- 右側預覽區 -->
+        <div class="receipt-preview-area" ref="farmerReceiptViewportRef">
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+          </div>
+
+          <div 
+            class="farmer-scaler-container" 
+            :style="{
+              width: (794 * farmerZoom) + 'px',
+              height: (560 * farmerZoom) + 'px'
+            }"
+          >
+            <div 
+              id="farmer-print-target"
+              class="farmer-receipt-sheet kai-font-supported standard-kai-font"
+              :style="{
+                transform: `scale(${farmerZoom})`,
+                transformOrigin: 'top left'
+              }"
+            >
+              <div class="f-header">
+                <div class="f-title-wrap">
+                  <div class="f-main-title">農（漁、牧）民出售農（漁、牧）產品收據</div>
+                </div>
+                <div class="f-date-wrap">
+                  中華民國 {{ farmerReceipt.year }} 年 {{ farmerReceipt.month }} 月 {{ farmerReceipt.day }} 日
+                </div>
+              </div>
+
+              <!-- 農民收據手刻格線 -->
+              <div class="f-receipt-grid-table">
+                <div class="f-grid-row f-row-top">
+                  <div class="f-col-buyer-group">
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">購貨商號名稱</div>
+                      <div class="f-grid-val f-flex-1">{{ farmerReceipt.buyerName }}</div>
+                    </div>
+                    <div class="f-sub-row">
+                      <div class="f-grid-lbl f-w-head">統一編號</div>
+                      <div class="f-grid-val f-flex-1 f-tax-clean">{{ farmerReceipt.taxId }}</div>
+                    </div>
+                  </div>
+                  <div class="f-grid-lbl f-w-addr-tag">住<br><br>址</div>
+                  <div class="f-grid-val f-full-addr-box">{{ farmerReceipt.buyerAddress }}</div>
+                </div>
+
+                <div class="f-grid-row f-header-row">
+                  <div class="f-grid-lbl col-p-name">品 名</div>
+                  <div class="f-grid-lbl col-p-spec">規 格</div>
+                  <div class="f-grid-lbl col-p-qty">數 量</div>
+                  <div class="f-grid-lbl col-p-price">單 價</div>
+                  <div class="f-grid-lbl col-p-amt">金 額</div>
+                  <div class="f-grid-lbl col-p-note">備 註</div>
+                </div>
+
+                <div class="f-grid-row f-data-row">
+                  <div class="f-grid-val col-p-name f-text-center f-bold">{{ farmerReceipt.itemName }}</div>
+                  <div class="f-grid-val col-p-spec f-text-center">{{ farmerReceipt.spec }}</div>
+                  <div class="f-grid-val col-p-qty f-text-center">{{ farmerReceipt.qty }}</div>
+                  <div class="f-grid-val col-p-price f-text-center">{{ farmerReceipt.unitPrice }}</div>
+                  <div class="f-grid-val col-p-amt f-text-right f-bold f-pr">
+                    {{ (farmerReceipt.totalAmount && Number(farmerReceipt.totalAmount) > 0) ? ('$' + Number(farmerReceipt.totalAmount).toLocaleString()) : '' }}
+                  </div>
+                  <div class="f-grid-val col-p-note f-text-center">{{ farmerReceipt.note }}</div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-data-row f-empty-row">
+                  <div class="f-grid-val col-p-name"></div>
+                  <div class="f-grid-val col-p-spec"></div>
+                  <div class="f-grid-val col-p-qty"></div>
+                  <div class="f-grid-val col-p-price"></div>
+                  <div class="f-grid-val col-p-amt"></div>
+                  <div class="f-grid-val col-p-note"></div>
+                </div>
+
+                <div class="f-grid-row f-amount-row">
+                  <div class="f-grid-lbl f-w-total-lbl">合計新台幣(中文大寫):</div>
+                  <div class="f-grid-val f-amount-val-cell">
+                    <div class="f-chinese-amount-line">
+                      <span class="d-val">{{ chineseDigits.hundredThousands }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.tenThousands }}</span> 萬
+                      <span class="d-val">{{ chineseDigits.thousands }}</span> 仟
+                      <span class="d-val">{{ chineseDigits.hundreds }}</span> 佰
+                      <span class="d-val">{{ chineseDigits.tens }}</span> 拾
+                      <span class="d-val">{{ chineseDigits.ones }}</span> 元 整
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 蔡鎮遠姓名與印章 -->
+                <div class="f-grid-row f-farmer-info-row">
+                  <div class="f-grid-lbl f-w-head">農（漁、牧）民姓名</div>
+                  <div class="f-grid-val f-farmer-stamp-cell f-flex-1">
+                    <span class="f-farmer-name-clean">蔡鎮遠</span>
+                    <img :src="activeCaiSealSrc" class="cai-real-stamp-img" alt="蔡鎮遠印章" />
+                  </div>
+                </div>
+
+                <div class="f-grid-row f-id-addr-row">
+                  <div class="f-grid-lbl f-w-head">住 址</div>
+                  <div class="f-grid-val f-flex-1"></div>
+                  <div class="f-grid-lbl f-w-id-lbl">國民統一身分證編號</div>
+                  <div class="f-grid-val f-w-id-val f-bold f-text-center">F129940801</div>
+                </div>
+              </div>
+
+              <div class="f-statement">
+                本收據之農民身分確實無誤，若有不實者願依法受罰。
+              </div>
+
+              <div class="f-footer-note">
+                <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -1045,6 +1769,38 @@ const currentCardDimensions = computed(() => {
   }
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
+
+// 🖨️ 動態注入精準尺寸列印樣式 (邊界 0mm，完全消除網址頁首頁尾)
+const updateDynamicPrintStyle = () => {
+  let styleTag = document.getElementById('dynamic-cf-print-style')
+  if (!styleTag) {
+    styleTag = document.createElement('style')
+    styleTag.id = 'dynamic-cf-print-style'
+    document.head.appendChild(styleTag)
+  }
+  let pageSize = 'A4 portrait'
+  if (currentTab.value === 'couplet') {
+    const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
+    const orientation = isVertical.value ? 'portrait' : 'landscape'
+    pageSize = `${size} ${orientation}`
+  } else {
+    pageSize = 'A5 landscape'
+  }
+  styleTag.innerHTML = `
+    @page { 
+      size: ${pageSize} !important; 
+      margin: 0mm !important; 
+    }
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  `
+}
+
+watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
 
 const switchPaperSize = (size) => {
   cardPaperSize.value = size
@@ -1860,20 +2616,16 @@ const onCardCategoryChange = () => {
   }
 }
 
-// 🌟 確保所有外部字型 100% 準備完畢後再進行截圖或列印
-const ensureFontsLoaded = async () => {
-  if (document.fonts && document.fonts.ready) {
-    await document.fonts.ready
-  }
-}
+// 支援跨平台列印
+const printCouplet = () => window.print()
+const printFarmerReceipt = () => window.print()
 
-// 🌟 花卡直接傳送（自動等待字體就緒，手機平板 100% 正楷）
+// 花卡直接傳送
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return alert('找不到花卡畫面！')
   showToast('⏳ 正在生成花卡高清圖檔...')
   try {
-    await ensureFontsLoaded()
     const originalTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
@@ -1890,106 +2642,6 @@ const shareCoupletDirect = async () => {
   } catch (err) {
     showToast('⚠️ 圖片生成失敗，請重試！')
   }
-}
-
-// 🌟 終極單頁列印引擎：無網址、無時間、絕對單張、標楷體
-const printTargetAsCleanImage = async (targetId, pageSizeStr, orientationStr) => {
-  const targetEl = document.getElementById(targetId)
-  if (!targetEl) return alert('找不到列印畫面！')
-  showToast('⏳ 正在為您排版輸出無邊界高清列印...')
-  try {
-    await ensureFontsLoaded()
-    const originalTransform = targetEl.style.transform
-    targetEl.style.transform = 'none'
-
-    const canvas = await html2canvas(targetEl, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
-    })
-    targetEl.style.transform = originalTransform
-    const dataUrl = canvas.toDataURL('image/png')
-
-    // 建立純淨列印 iframe
-    let iframe = document.getElementById('cf-print-clean-iframe')
-    if (iframe) iframe.remove()
-    iframe = document.createElement('iframe')
-    iframe.id = 'cf-print-clean-iframe'
-    iframe.style.position = 'fixed'
-    iframe.style.right = '0'
-    iframe.style.bottom = '0'
-    iframe.style.width = '0'
-    iframe.style.height = '0'
-    iframe.style.border = '0'
-    document.body.appendChild(iframe)
-
-    const doc = iframe.contentWindow.document
-    doc.open()
-    doc.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>列印</title>
-        <style>
-          @page {
-            size: ${pageSizeStr} ${orientationStr};
-            margin: 0mm !important;
-          }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body {
-            width: 100vw;
-            height: 100vh;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-          }
-          img {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            display: block;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${dataUrl}" onload="window.focus(); window.print();" />
-      </body>
-      </html>
-    `)
-    doc.close()
-  } catch (err) {
-    showToast('⚠️️ 列印處理失敗，請重試！')
-  }
-}
-
-const printCardDirectClean = () => {
-  const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
-  const orient = isVertical.value ? 'portrait' : 'landscape'
-  printTargetAsCleanImage('card-print-target', size, orient)
-}
-
-const printReceiptDirectClean = async () => {
-  if (selectedOrderId.value) {
-    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
-    if (ord) await updateOrderField(ord, 'receipt_status', '已列印')
-  }
-  printTargetAsCleanImage('receipt-print-target', 'A5', 'landscape')
-}
-
-const printFarmerReceiptDirectClean = () => {
-  printTargetAsCleanImage('farmer-print-target', 'A5', 'landscape')
 }
 
 const cloudDrafts = ref([])
@@ -2095,13 +2747,19 @@ const fillReceiptFromOrder = (ord) => {
   currentTab.value = 'receipt'
   nextTick(() => autoFitReceipt())
 }
+const printReceiptAndMarkDone = async () => {
+  if (selectedOrderId.value) {
+    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+    if (ord) await updateOrderField(ord, 'receipt_status', '已列印')
+  }
+  window.print()
+}
 
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
   showToast('⏳ 正在生成簽收單圖片...')
   try {
-    await ensureFontsLoaded()
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
     const canvas = await html2canvas(targetEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
@@ -2162,7 +2820,6 @@ const shareFarmerReceiptDirect = async () => {
   if (!targetEl) return alert('找不到農民收據！')
   showToast('⏳ 正在生成收據圖片...')
   try {
-    await ensureFontsLoaded()
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
     const canvas = await html2canvas(targetEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
@@ -2215,27 +2872,13 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
-  // 自動載入字型全字庫（保證手機與平板標楷體完整呈現）
+  // 自動載入 Google 官方繁體書法正楷字庫
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
     link.id = 'google-noto-fonts-cdn'
     link.rel = 'stylesheet'
     link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap'
     document.head.appendChild(link)
-  }
-
-  if (!document.getElementById('cns11643-tw-kai-font')) {
-    const style = document.createElement('style')
-    style.id = 'cns11643-tw-kai-font'
-    style.innerHTML = `
-      @font-face {
-        font-family: 'TW-Kai';
-        src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
-        font-weight: normal;
-        font-display: swap;
-      }
-    `
-    document.head.appendChild(style)
   }
 
   window.addEventListener('resize', () => {
@@ -2666,6 +3309,7 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
+/* 🌟 正楷字體全平台完美適配 */
 .standard-kai-font, .kai-font-supported {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
 }
@@ -2716,7 +3360,8 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
+}
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -2778,5 +3423,83 @@ input, select, textarea {
   .form-grid { grid-template-columns: 1fr; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* =========================================================================
+   🌟 列印修復：單頁輸出、不吐空白第二張
+========================================================================= */
+@media print {
+  @page {
+    margin: 0mm !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: 99.5% !important;
+    max-height: 99.5vh !important;
+    overflow: hidden !important;
+  }
+
+  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
+    display: none !important;
+  }
+
+  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
+  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    background: white !important; 
+    display: block !important; 
+    position: static !important;
+    width: 100% !important;
+    height: 99.5% !important;
+    max-height: 99.5vh !important;
+    overflow: hidden !important;
+    transform: none !important;
+  }
+
+  /* 花卡列印：滿版單頁輸出 */
+  #card-print-target { 
+    position: absolute !important; 
+    top: 0 !important; 
+    left: 0 !important; 
+    transform: none !important; 
+    box-shadow: none !important; 
+    margin: 0 !important; 
+    display: block !important; 
+    visibility: visible !important; 
+    border: none !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+  #card-print-target * { visibility: visible !important; }
+
+  /* A5 簽收單與農民收據：精準 192mm x 130mm 單頁輸出 */
+  #receipt-print-target, #farmer-print-target { 
+    position: relative !important; 
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important; 
+    box-shadow: none !important; 
+    width: 192mm !important; 
+    max-width: 192mm !important;
+    height: 130mm !important; 
+    max-height: 130mm !important;
+    margin: 3mm auto 0 auto !important; 
+    padding: 4mm 6mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+  }
 }
 </style>
