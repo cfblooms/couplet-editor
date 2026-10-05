@@ -644,7 +644,7 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 (自由輸入) -->
+          <!-- 模組 3：進貨與庫存 -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
@@ -659,13 +659,11 @@
                   </select>
                 </div>
 
-                <!-- 蘭花品種名稱 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>品種名稱：</label>
                   <input v-model="formInv.item_name" placeholder="例: 滿天紅、大辣椒" />
                 </div>
 
-                <!-- 陶瓷盆規格 -->
                 <div v-if="formInv.category === '陶瓷盆'" class="field">
                   <label>盆器規格：</label>
                   <select v-model="formInv.pot_type" @change="onPotTypeChange">
@@ -677,7 +675,6 @@
                   </select>
                 </div>
 
-                <!-- 耗材品名：純文字輸入框，完全開放自由打字 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>耗材品名 (直接自行輸入)：</label>
                   <input 
@@ -687,7 +684,6 @@
                   />
                 </div>
 
-                <!-- 耗材詳細規格 / 包裝單位：純文字輸入框 -->
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>詳細規格 / 包裝單位：</label>
                   <input 
@@ -697,7 +693,6 @@
                   />
                 </div>
 
-                <!-- 蘭花規格細項 -->
                 <div v-if="formInv.category === '蘭花'" class="field">
                   <label>花梗：</label>
                   <select v-model="formInv.spec_spike">
@@ -886,7 +881,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <h3>{{ editingRetId ? '✏ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -982,10 +977,10 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5 自動自適應印表機) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
-          <h2>⚙️ 卡片與題詞設定</h2>
+          <h2>⚙️️ 卡片與題詞設定</h2>
 
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
@@ -1215,7 +1210,8 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人</button>
-          <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
+          <!-- 🌟 使用零邊界點對點乾淨輸出，絕不吐空白第二張，底端不出現網址時間 -->
+          <button type="button" class="print-action-btn mt-2" @click="printCardDirectClean">🖨️ 列印花卡 (保證單張・無網址時間)</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1233,7 +1229,7 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 (全平台標楷體強化) -->
+            <!-- 🌟 花卡看板主體 (全平台書法楷體完美適配) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1393,13 +1389,14 @@
             📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
           </button>
 
+          <!-- 🌟 使用零邊界點對點乾淨輸出，絕不吐空白第二張，底端不出現網址時間 -->
           <button 
             type="button" 
             class="print-action-btn mt-2" 
             :disabled="!receiptForm.recipient && !selectedOrderId"
-            @click="printReceiptAndMarkDone"
+            @click="printReceiptDirectClean"
           >
-            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+            🖨️️ 列印 A5 橫式簽收單 (保證單張・無網址時間)
           </button>
         </div>
 
@@ -1420,7 +1417,7 @@
           >
             <div 
               id="receipt-print-target"
-              class="a5-landscape-sheet kai-font-supported"
+              class="a5-landscape-sheet kai-font-supported standard-kai-font"
               :style="{
                 transform: `scale(${receiptZoom})`,
                 transformOrigin: 'top left'
@@ -1501,7 +1498,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️️ 收據內容確認與自由修改：</label>
+            <label class="section-title">✏ 收據內容確認與自由修改：</label>
             <div class="form-row">
               <div class="field">
                 <label>民國年</label>
@@ -1571,12 +1568,13 @@
             💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
           </button>
 
+          <!-- 🌟 使用零邊界點對點乾淨輸出，絕不吐空白第二張，底端不出現網址時間 -->
           <button 
             type="button" 
             class="print-action-btn mt-2" 
-            @click="printFarmerReceipt"
+            @click="printFarmerReceiptDirectClean"
           >
-            🖨️ 列印農民收據
+            🖨️ 列印農民收據 (保證單張・無網址時間)
           </button>
         </div>
 
@@ -1598,7 +1596,7 @@
           >
             <div 
               id="farmer-print-target"
-              class="farmer-receipt-sheet kai-font-supported"
+              class="farmer-receipt-sheet kai-font-supported standard-kai-font"
               :style="{
                 transform: `scale(${farmerZoom})`,
                 transformOrigin: 'top left'
@@ -1737,6 +1735,7 @@ const showToast = (msg) => {
   toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
 }
 
+// 行動端分享彈窗變數
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
 const shareModalFilename = ref('圖片.png')
@@ -1774,38 +1773,6 @@ const currentCardDimensions = computed(() => {
   }
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
-
-// 🖨️ 動態注入精準尺寸列印樣式 (邊界 0mm，完全消除網址頁首頁尾)
-const updateDynamicPrintStyle = () => {
-  let styleTag = document.getElementById('dynamic-cf-print-style')
-  if (!styleTag) {
-    styleTag = document.createElement('style')
-    styleTag.id = 'dynamic-cf-print-style'
-    document.head.appendChild(styleTag)
-  }
-  let pageSize = 'A4 portrait'
-  if (currentTab.value === 'couplet') {
-    const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
-    const orientation = isVertical.value ? 'portrait' : 'landscape'
-    pageSize = `${size} ${orientation}`
-  } else {
-    pageSize = 'A5 landscape'
-  }
-  styleTag.innerHTML = `
-    @page { 
-      size: ${pageSize} !important; 
-      margin: 0mm !important; 
-    }
-    @media print {
-      body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-    }
-  `
-}
-
-watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
 
 const switchPaperSize = (size) => {
   cardPaperSize.value = size
@@ -2621,25 +2588,105 @@ const onCardCategoryChange = () => {
   }
 }
 
-const printCouplet = () => window.print()
-
-const shareCoupletDirect = async () => {
-  const targetEl = document.getElementById('card-print-target')
-  if (!targetEl) return alert('找不到花卡畫面！')
-  showToast('⏳ 正在生成花卡高清圖檔...')
+// 🌟 終極乾淨點對點列印引擎：將目標元素轉為高畫質純圖片，送入無干擾專屬列印視窗
+// 徹底消除所有網址、時間、頁首頁尾，且保證絕對單張輸出，絕不吐空白第二張！
+const printTargetAsCleanImage = async (targetId, pageSizeStr, orientationStr) => {
+  const targetEl = document.getElementById(targetId)
+  if (!targetEl) return alert('找不到列印畫面！')
+  showToast('⏳ 正在為您排版輸出無邊界高清列印...')
   try {
     const originalTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
+
     const canvas = await html2canvas(targetEl, {
-      scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
-      ignoreElements: (element) => element.classList && (element.classList.contains('scale-handle') || element.classList.contains('no-print'))
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
     targetEl.style.transform = originalTransform
-    const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
-    renderImageBlobToModal(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖檔準備完成')
+    const dataUrl = canvas.toDataURL('image/png')
+
+    // 建立一個完全純淨的列印隱藏 iframe
+    let iframe = document.getElementById('cf-print-clean-iframe')
+    if (iframe) iframe.remove()
+    iframe = document.createElement('iframe')
+    iframe.id = 'cf-print-clean-iframe'
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+
+    const doc = iframe.contentWindow.document
+    doc.open()
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>列印</title>
+        <style>
+          @page {
+            size: ${pageSizeStr} ${orientationStr};
+            margin: 0mm !important;
+          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+          }
+          img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${dataUrl}" onload="window.focus(); window.print();" />
+      </body>
+      </html>
+    `)
+    doc.close()
   } catch (err) {
-    showToast('⚠️ 圖片生成失敗，請重試！')
+    showToast('⚠️ 列印處理失敗，請重試！')
   }
+}
+
+// 三大功能直接綁定「乾淨單張、無網址時間、標楷體」列印方法
+const printCardDirectClean = () => {
+  const size = cardPaperSize.value === 'A5' ? 'A5' : 'A4'
+  const orient = isVertical.value ? 'portrait' : 'landscape'
+  printTargetAsCleanImage('card-print-target', size, orient)
+}
+
+const printReceiptDirectClean = async () => {
+  if (selectedOrderId.value) {
+    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+    if (ord) await updateOrderField(ord, 'receipt_status', '已列印')
+  }
+  printTargetAsCleanImage('receipt-print-target', 'A5', 'landscape')
+}
+
+const printFarmerReceiptDirectClean = () => {
+  printTargetAsCleanImage('farmer-print-target', 'A5', 'landscape')
 }
 
 const cloudDrafts = ref([])
@@ -2684,9 +2731,7 @@ const startNewCard = () => {
   upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 已為您建立空白花卡！')
 }
 
-// ==========================================
-// 5. 簽收單管理
-// ==========================================
+// 簽收單管理
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -2747,13 +2792,6 @@ const fillReceiptFromOrder = (ord) => {
   currentTab.value = 'receipt'
   nextTick(() => autoFitReceipt())
 }
-const printReceiptAndMarkDone = async () => {
-  if (selectedOrderId.value) {
-    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
-    if (ord) await updateOrderField(ord, 'receipt_status', '已列印')
-  }
-  window.print()
-}
 
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
@@ -2771,9 +2809,7 @@ const shareReceiptDirect = async () => {
   }
 }
 
-// ==========================================
-// 6. 農民收據
-// ==========================================
+// 農民收據
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115', month: '09', day: '03', buyerName: '永全證券股份有限公司', taxId: '12345678',
@@ -2816,7 +2852,6 @@ const fillFarmerReceiptFromOrder = (ord) => {
   currentTab.value = 'farmer_receipt'
   nextTick(() => autoFitFarmerReceipt())
 }
-const printFarmerReceipt = () => window.print()
 
 const shareFarmerReceiptDirect = async () => {
   const targetEl = document.getElementById('farmer-print-target')
@@ -2830,7 +2865,7 @@ const shareFarmerReceiptDirect = async () => {
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
     renderImageBlobToModal(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   } catch (err) {
-    showToast('⚠️ 圖片生成失敗，請重試！')
+    showToast('⚠️️ 圖片生成失敗，請重試！')
   }
 }
 
@@ -2859,6 +2894,8 @@ const renderImageBlobToModal = (canvas, filename, shareTitle, successMsg) => {
     showToast(`📸 ${successMsg}！已生成預覽，可長按或點擊按鈕直接發送！`)
   }, 'image/png')
 }
+
+const shareCoupletDirectOriginal = shareCoupletDirect
 
 const initSystemData = () => {
   autoFitZoom()
@@ -3331,7 +3368,7 @@ input, select, textarea {
   font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
 }
 
-/* 🌟 A5 橫式簽收單 (794x560 螢幕預覽比例) */
+/* A5 橫式簽收單 */
 .receipt-scaler-container { position: relative; flex-shrink: 0; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 32px 38px; box-sizing: border-box;
@@ -3361,7 +3398,7 @@ input, select, textarea {
 .sign-box-area { flex: 1; min-height: 50px; display: flex; justify-content: center; align-items: center; }
 .live-signature-img { max-height: 58px; max-width: 95%; object-fit: contain; }
 
-/* 🌟 農民收據 (794x560 螢幕預覽比例) */
+/* 農民收據 */
 .farmer-scaler-container { position: relative; flex-shrink: 0; }
 .farmer-receipt-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 16px 26px; box-sizing: border-box;
@@ -3440,91 +3477,5 @@ input, select, textarea {
   .form-grid { grid-template-columns: 1fr; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
-}
-
-/* =========================================================================
-   🌟 全平台列印修復 (強制單頁、抑制頁尾網址、絕不吐白紙第二張)
-========================================================================= */
-@media print {
-  @page {
-    margin: 0mm !important;
-  }
-
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    width: 100% !important;
-    height: 99.5% !important;
-    max-height: 99.5vh !important;
-    overflow: hidden !important;
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
-  }
-
-  /* 隱藏所有操作介面 */
-  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
-    display: none !important;
-  }
-
-  /* 拔除所有造成手機截斷或分頁的容器屬性 */
-  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
-  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container { 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    background: white !important; 
-    display: block !important; 
-    position: static !important;
-    width: 100% !important;
-    height: 99.5% !important;
-    max-height: 99.5vh !important;
-    overflow: hidden !important;
-    transform: none !important;
-  }
-
-  /* 🌟 花卡列印：安全收斂至 99% 高度內，單頁輸出，禁止分頁 */
-  #card-print-target { 
-    position: absolute !important; 
-    top: 0 !important; 
-    left: 0 !important; 
-    transform: none !important; 
-    box-shadow: none !important; 
-    margin: 0 !important; 
-    display: block !important; 
-    visibility: visible !important; 
-    border: none !important;
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
-    page-break-inside: avoid !important;
-    break-after: avoid !important;
-    break-inside: avoid !important;
-  }
-  #card-print-target * { visibility: visible !important; }
-
-  /* 🌟 A5 簽收單與農民收據：高度收在 130mm 內，完全單頁輸出 */
-  #receipt-print-target, #farmer-print-target { 
-    position: relative !important; 
-    top: 0 !important;
-    left: 0 !important;
-    transform: none !important; 
-    box-shadow: none !important; 
-    width: 192mm !important; 
-    max-width: 192mm !important;
-    height: 130mm !important; 
-    max-height: 130mm !important;
-    margin: 3mm auto 0 auto !important; 
-    padding: 4mm 6mm !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
-    page-break-inside: avoid !important;
-    break-after: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* 強制標楷體 */
-  #receipt-print-target *, #farmer-print-target *, #card-print-target * {
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
-  }
 }
 </style>
