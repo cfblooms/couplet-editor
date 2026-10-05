@@ -31,7 +31,7 @@
 
     <!-- ================= 系統主畫面 ================= -->
     <div v-else class="system-root">
-      <!-- 頂端主導覽列 (正常管理字體) -->
+      <!-- 頂端主導覽列 -->
       <header class="no-print top-nav">
         <div class="nav-title">🌸 宸豐蘭藝</div>
         <div class="nav-tabs">
@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送 / 無邊界列印專用彈窗 (手機列印不帶網址時間的最佳方式) -->
+      <!-- 圖片傳送 / 無色透明背景列印專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -87,45 +87,33 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
-            <div class="share-img-scroll-container">
-              <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
+            <!-- 🌟 背景採用棋盤透明提示紋路，確認文字與印章完全無白底、無色透明！ -->
+            <div class="share-img-scroll-container checkerboard-bg">
+              <img :src="shareModalImg" class="share-preview-img-contained" alt="無底色透明預覽圖" />
             </div>
             
             <div class="share-btn-action-group">
-              <button type="button" class="mobile-print-btn" @click="triggerImagePrint">
-                🖨️ 手機/電腦直接列印此圖 (無網址・無日期・一張紙)
+              <button type="button" class="mobile-print-btn" @click="triggerTransparentPrint">
+                🖨️ 手機/電腦直接列印 (無白底・適用粉紅/紅底紙・無網址)
               </button>
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
                 📲 一鍵傳送至 LINE 給客人
               </button>
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
-                💾 儲存圖檔
+                💾 儲存透明圖檔 (PNG)
               </a>
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>手機無網址列印與傳送小提示：</b></span>
-              <span>• <b>消除底部網址</b>：點擊上方「直接列印此圖」，系統會以相片方式送印，<b>底端絕不出現任何網址與時間</b>！</span>
-              <span>• <b>傳送客人</b>：在圖片上<b>長按「儲存影像」</b>或點「一鍵傳送至 LINE」，傳出的就是標準書法楷書！</span>
+              <span>💡 <b>特製紙張（紅色/粉紅色）列印提示：</b></span>
+              <span>• <b>已設定無色透明</b>：圖檔完全不帶白色底，印在紅色或粉紅紙上時，<b>只會印出墨水文字與印章，絕不吃底色！</b></span>
+              <span>• <b>手機列印無網址</b>：點擊上方「直接列印」，手機將以單張照片輸出，<b>底部絕不出現網址、日期與頁碼！</b></span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 品種照片放大檢視彈窗 -->
-      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
-        <div class="image-modal-content" @click.stop>
-          <div class="image-modal-header">
-            <span>🌸 {{ activeModalTitle }}</span>
-            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
-          </div>
-          <div class="share-modal-body">
-            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= 模式 1：蘭花管理系統 (正常管理介面字體) ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 (標準管理字體) ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -213,7 +201,7 @@
                 </div>
               </div>
 
-              <!-- 多組花禮規格設定區塊 -->
+              <!-- 多組花禮規格 -->
               <div class="items-section mt-3">
                 <div class="items-header">
                   <h4>🌸 花禮品項與盆數規格</h4>
@@ -274,7 +262,7 @@
                 </div>
               </div>
 
-              <!-- 費用與總計資訊 -->
+              <!-- 費用與總計 -->
               <div class="form-grid mt-3">
                 <div class="field highlight-field">
                   <label>額外運費 (元)</label>
@@ -366,115 +354,23 @@
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
-                      <td>
-                        <select 
-                          v-model="ord.need_receipt" 
-                          :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
-                          @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
-                          class="uniform-status-select"
-                        >
-                          <option value="不需收據">不需收據</option>
-                          <option value="需開收據">需開收據</option>
-                        </select>
-                      </td>
+                      <td>{{ ord.need_receipt || '不需收據' }}</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
-                      
-                      <td>
-                        <select 
-                          v-model="ord.card_status" 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
-                          :class="getCardStatusClass(ord.card_status)"
-                          @change="updateOrderField(ord, 'card_status', ord.card_status)"
-                          class="uniform-status-select"
-                        >
-                          <option value="未製作">未製作</option>
-                          <option value="已製作">已製作</option>
-                          <option value="免製作">免製作</option>
-                        </select>
-                      </td>
-
-                      <td>
-                        <select 
-                          v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
-                          :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
-                          @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
-                          class="uniform-status-select"
-                        >
-                          <option value="未列印">未列印</option>
-                          <option value="已列印">已列印</option>
-                        </select>
-                      </td>
-
-                      <td>
-                        <select 
-                          v-model="ord.shipped_status" 
-                          :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
-                          @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
-                          class="uniform-status-select"
-                        >
-                          <option value="未出貨">未出貨</option>
-                          <option value="已出貨">已出貨</option>
-                        </select>
-                      </td>
-
-                      <td>
-                        <select 
-                          v-model="ord.payment_status" 
-                          :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
-                          @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
-                          class="uniform-status-select"
-                        >
-                          <option value="未結">未結</option>
-                          <option value="已結">已結</option>
-                        </select>
-                      </td>
-
+                      <td><span class="badge">{{ ord.card_status || '未製作' }}</span></td>
+                      <td><span class="badge">{{ ord.receipt_status || '未列印' }}</span></td>
+                      <td><span class="badge">{{ ord.shipped_status || '未出貨' }}</span></td>
+                      <td><span class="badge">{{ ord.payment_status || '未結' }}</span></td>
                       <td class="action-cell">
                         <div class="stacked-action-container">
-                          <div class="stacked-action-col">
-                            <button 
-                              class="cozy-btn clean-btn-noborder" 
-                              style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
-                              @click="fillReceiptFromOrder(ord)" 
-                              title="帶入簽收單"
-                            >
-                              🖨️ 簽收單
-                            </button>
-                            <button 
-                              class="cozy-btn clean-btn-noborder" 
-                              style="background-color: #DEE2FF !important; color: #28305c !important;" 
-                              @click="fillFarmerReceiptFromOrder(ord)" 
-                              title="帶入農民收據"
-                            >
-                              🧾 農民收據
-                            </button>
-                          </div>
-                          <div class="stacked-action-col">
-                            <button 
-                              class="cozy-btn icon-only-btn clean-btn-noborder" 
-                              style="background-color: #E0FBFC !important; color: #155e75 !important;" 
-                              @click="startEditOrder(ord)" 
-                              title="修改此訂單"
-                            >
-                              ✏️
-                            </button>
-                            <button 
-                              class="cozy-btn icon-only-btn clean-btn-noborder" 
-                              style="background-color: #ebd8da !important; color: #6e2e34 !important;" 
-                              @click="deleteItem('orders', ord.id, loadOrders)" 
-                              title="刪除此訂單"
-                            >
-                              🗑️
-                            </button>
-                          </div>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #DEE2FF !important; color: #28305c !important;" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
                     </tr>
-                    <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -483,7 +379,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (字體選單提供書法標楷) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援無底色透明輸出) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -500,9 +396,8 @@
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
-                <!-- 🌟 明確提供「標楷體 / 楷書體」讓您自由切換，手機電腦都相容 -->
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / 書法楷書體 (全平台通用)</option>
+                  <option value="kai">標準標楷體 / 書法楷書體 (手機/電腦通用)</option>
                   <option value="song">古典宋體 / 明體風格</option>
                   <option value="fangsong">仿宋古典體 (FangSong)</option>
                   <option value="sans">現代簡約黑體</option>
@@ -534,15 +429,13 @@
             </select>
           </div>
 
-          <!-- 上款設定 -->
+          <!-- 上款 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞：</span>
               <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <div class="form-row mt-1">
-              <input type="text" v-model="upperPrefix" class="full-input" placeholder="例: 敬悼 或 恭祝" />
-            </div>
+            <input type="text" v-model="upperPrefix" class="full-input mt-1" placeholder="例: 敬悼 或 恭祝" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象：</span>
@@ -557,7 +450,7 @@
             <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空則不顯示" />
           </div>
 
-          <!-- 中款設定 -->
+          <!-- 中款 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">中款第 1 行：</span>
@@ -572,7 +465,7 @@
             <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
-          <!-- 下款設定 -->
+          <!-- 下款 -->
           <div class="panel-section">
             <label class="section-title">下款設定：</label>
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
@@ -593,9 +486,10 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人</button>
-          <!-- 🌟 彈出純圖片送印：手機保證不帶網址、不帶時間、只印 1 頁 -->
-          <button type="button" class="print-action-btn mt-2" @click="openImagePrintModal('card-print-target', `花卡_${cardPaperSize}`)">
-            🖨️ 列印花卡 (保證單張・無網址時間)
+          
+          <!-- 🌟 點擊列印：自動產出「無色透明背景」PNG，無網址時間、一張紙輸出！ -->
+          <button type="button" class="print-action-btn mt-2" @click="openTransparentPrintModal('card-print-target', `花卡_${cardPaperSize}`)">
+            🖨️ 列印花卡 (無色透明底・無網址時間)
           </button>
         </div>
 
@@ -613,10 +507,10 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
-            <!-- 🌟 花卡主體 (支援書法正楷) -->
+            <!-- 🌟 花卡主體 (透明底色設定，支援粉紅/紅底紙張) -->
             <div 
               id="card-print-target" 
-              class="card-board target-kai-font" 
+              class="card-board target-kai-font transparent-target" 
               :class="isVertical ? 'mode-vertical' : 'mode-horizontal'"
               :style="{
                 width: currentCardDimensions.w + 'px',
@@ -654,7 +548,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (強制標楷書法體) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (支援無底色透明輸出) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -700,8 +594,8 @@
           <button type="button" class="line-action-btn mt-2" @click="shareReceiptDirect">
             📤 簽好直接傳送 (LINE/下載)
           </button>
-          <button type="button" class="print-action-btn mt-2" @click="openImagePrintModal('receipt-print-target', '簽收單_A5')">
-            🖨️ 列印 A5 簽收單 (保證單張・無網址時間)
+          <button type="button" class="print-action-btn mt-2" @click="openTransparentPrintModal('receipt-print-target', '簽收單_A5')">
+            🖨️ 列印 A5 簽收單 (無色透明底・無網址時間)
           </button>
         </div>
 
@@ -721,7 +615,7 @@
           >
             <div 
               id="receipt-print-target"
-              class="a5-landscape-sheet target-kai-font"
+              class="a5-landscape-sheet target-kai-font transparent-target"
               :style="{
                 transform: `scale(${receiptZoom})`,
                 transformOrigin: 'top left'
@@ -776,7 +670,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (強制標楷書法體) ================= -->
+      <!-- ================= 模式 4：農民收據 (支援無底色透明輸出) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -819,8 +713,8 @@
           <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptDirect">
             💬 直接傳送收據給客人
           </button>
-          <button type="button" class="print-action-btn mt-2" @click="openImagePrintModal('farmer-print-target', '農民收據_A5')">
-            🖨️ 列印農民收據 (保證單張・無網址時間)
+          <button type="button" class="print-action-btn mt-2" @click="openTransparentPrintModal('farmer-print-target', '農民收據_A5')">
+            🖨️ 列印農民收據 (無色透明底・無網址時間)
           </button>
         </div>
 
@@ -840,7 +734,7 @@
           >
             <div 
               id="farmer-print-target"
-              class="farmer-receipt-sheet target-kai-font"
+              class="farmer-receipt-sheet target-kai-font transparent-target"
               :style="{
                 transform: `scale(${farmerZoom})`,
                 transformOrigin: 'top left'
@@ -998,7 +892,7 @@ const currentCardDimensions = computed(() => {
 })
 
 // ==========================================
-// 2. 內部驗證與資料連線
+// 2. 內部驗證與資料庫
 // ==========================================
 const INTERNAL_PASSCODE = 'cf000725'
 const isAuthenticated = ref(localStorage.getItem('cf_admin_auth') === 'true')
@@ -1063,7 +957,7 @@ const weights = ref({
 })
 const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }])
 
-// 🌟 書法正楷映射：優先採用已在 index.html 載入的 Noto Serif TC 書法楷體切片，全平台生效
+// 🌟 書法正楷映射：優先採用 index.html 載入的 Noto Serif TC，手機電腦皆保證楷體風格
 const fontMapping = {
   kai: '"Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif',
   song: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -1114,33 +1008,37 @@ const getUpperTargetBoxStyle = () => {
   }
 }
 
-// 🌟 徹底根治「手機列印有網址、時間、頁數」：產出高清純影像送印
-const openImagePrintModal = async (targetId, titlePrefix) => {
+// =========================================================================
+// 🌟 核心：100% 無色透明背景 (Transparent PNG) 產出引擎
+// =========================================================================
+const openTransparentPrintModal = async (targetId, titlePrefix) => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
-  showToast('⏳ 正在為您排版輸出無邊界列印圖檔...')
+  showToast('⏳ 正在為您產出「無色透明背景」高畫質圖檔...')
   try {
     if (document.fonts?.ready) await document.fonts.ready
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
+    // 🌟 backgroundColor: null 強制去除任何白底，100% 透明無色！
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: null, 
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
     targetEl.style.transform = origTransform
 
+    // 轉為純 PNG (支援 Alpha 透明通道)
     canvas.toBlob((blob) => {
       if (!blob) return
       if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
         URL.revokeObjectURL(shareModalImg.value)
       }
       shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = `${titlePrefix} 列印預覽`
-      shareModalFilename.value = `${titlePrefix}.png`
+      shareModalTitle.value = `${titlePrefix} (無色透明底)`
+      shareModalFilename = `${titlePrefix}_透明底.png`
       currentBlobToShare.value = blob
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'print.png', { type: 'image/png' })] }))
     }, 'image/png')
@@ -1149,8 +1047,8 @@ const openImagePrintModal = async (targetId, titlePrefix) => {
   }
 }
 
-// 在彈窗內觸發無網址相片列印
-const triggerImagePrint = () => {
+// 🌟 在彈窗內觸發無網址相片列印 (透明底圖直接噴印在紅色或粉紅紙上)
+const triggerTransparentPrint = () => {
   if (!shareModalImg.value) return
   const imgUrl = shareModalImg.value
   const printWin = window.open('', '_blank')
@@ -1162,7 +1060,10 @@ const triggerImagePrint = () => {
           <style>
             @page { size: auto; margin: 0mm !important; }
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }
+            body { 
+              display: flex; justify-content: center; align-items: center; 
+              min-height: 100vh; background: transparent !important; 
+            }
             img { max-width: 100%; max-height: 100vh; object-fit: contain; }
           </style>
         </head>
@@ -1173,16 +1074,15 @@ const triggerImagePrint = () => {
     `)
     printWin.document.close()
   } else {
-    // 若手機封鎖彈出視窗，自動開啟新分頁
     window.location.href = imgUrl
   }
 }
 
-const shareCoupletDirect = () => openImagePrintModal('card-print-target', '花卡傳送')
-const shareReceiptDirect = () => openImagePrintModal('receipt-print-target', '簽收單傳送')
-const shareFarmerReceiptDirect = () => openImagePrintModal('farmer-print-target', '農民收據傳送')
+const shareCoupletDirect = () => openTransparentPrintModal('card-print-target', '花卡傳送')
+const shareReceiptDirect = () => openTransparentPrintModal('receipt-print-target', '簽收單傳送')
+const shareFarmerReceiptDirect = () => openTransparentPrintModal('farmer-print-target', '農民收據傳送')
 
-// 簽收單與收據表單狀態
+// 簽收單與收據表單
 const selectedOrderId = ref('')
 const receiptForm = ref({
   orderId: '', deliveryDate: '115-09-03 送達', recipient: '永全證券 陳總經理',
@@ -1208,7 +1108,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 管理介面字體保持清爽俐落的標準黑體/細明體 */
+/* 🌟 管理介面保持清爽標準字體 */
 .main-wrapper {
   display: flex; flex-direction: column; height: 100vh; font-size: 13.5px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -1265,7 +1165,7 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 
 .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container { position: relative; flex-shrink: 0; }
 .card-board {
-  background: white !important; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none;
+  position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none;
 }
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; }
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
@@ -1276,9 +1176,19 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
   font-family: "Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif !important;
 }
 
+/* 🌟 核心：無色透明背景實作（螢幕上給純淨白色或無色，截圖時完全無背景） */
+.transparent-target {
+  background-color: transparent !important;
+}
+/* 預覽模式下提供半透明白色襯底讓字體清晰，但截圖時自動無色 */
+.card-scaler-container, .receipt-scaler-container, .farmer-scaler-container {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+}
+
 /* 簽收單 */
 .a5-landscape-sheet {
-  width: 794px; height: 560px; background: white; padding: 32px 38px; box-sizing: border-box;
+  width: 794px; height: 560px; padding: 32px 38px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute;
 }
 .sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; }
@@ -1286,15 +1196,15 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 .sheet-main-title { font-size: 23px; font-weight: bold; color: #dc2626; }
 .receipt-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
 .receipt-table td { border: 1.5px solid #334155; padding: 7px 10px; }
-.receipt-table .lbl { width: 15%; background: #f1f5f9; font-weight: bold; text-align: center; }
+.receipt-table .lbl { width: 15%; background: rgba(241, 245, 249, 0.5); font-weight: bold; text-align: center; }
 .sheet-footer { display: flex; justify-content: space-between; }
-.footer-sign-box { width: 215px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background: #fafafa; }
-.sign-box-title { background: #e2e8f0; font-size: 12.5px; font-weight: bold; text-align: center; padding: 2px 0; }
+.footer-sign-box { width: 215px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; }
+.sign-box-title { font-size: 12.5px; font-weight: bold; text-align: center; padding: 2px 0; }
 .sign-box-area { flex: 1; min-height: 50px; }
 
 /* 農民收據 */
 .farmer-receipt-sheet {
-  width: 794px; height: 560px; background: white; padding: 16px 26px; box-sizing: border-box;
+  width: 794px; height: 560px; padding: 16px 26px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute;
 }
 .f-main-title { font-size: 24px; font-weight: 900; text-align: center; }
@@ -1331,11 +1241,22 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 .image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
 .close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; }
 .share-modal-body { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+/* 棋盤格透明提示背景 */
+.checkerboard-bg {
+  background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
 .share-img-scroll-container {
   width: 100%; display: flex; justify-content: center; align-items: center;
-  background-color: #f1f5f9; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 12px;
+  border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 12px;
 }
-.share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+.share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; }
 .share-btn-action-group { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap; }
 .mobile-print-btn {
   flex: 1.5; min-width: 180px; background: #16a34a; color: white; border: none; padding: 10px;
