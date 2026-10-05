@@ -3439,10 +3439,15 @@ input, select, textarea {
   z-index: 1; pointer-events: none;
 }
 .rotate-landscape-bg {
-  width: 100% !important;
-  height: 100% !important;
-  transform: rotate(90deg) scale(1.42);
-  transform-origin: center center;
+  /* 將底圖的寬高對調：寬度取卡片的高、高度取卡片的寬 */
+  width: 100vh !important; /* 或是依外層容器比例填滿 */
+  width: calc(100% * 1.414) !important;
+  height: calc(100% * 1.414) !important;
+  top: 50% !important;
+  left: 50% !important;
+  /* 🌟 -90deg 代表「逆時針旋轉 90 度」，translate(-50%, -50%) 保證旋轉後精確置中對齊 */
+  transform: translate(-50%, -50%) rotate(-90deg) !important;
+  transform-origin: center center !important;
 }
 
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; z-index: 2; }
