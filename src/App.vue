@@ -87,9 +87,8 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
-            <!-- 🌟 背景採用棋盤透明提示紋路，確認文字與印章完全無白底、無色透明！ -->
             <div class="share-img-scroll-container checkerboard-bg">
-              <img :src="shareModalImg" class="share-preview-img-contained" alt="無底色透明預覽圖" />
+              <img :src="shareModalImg" class="share-preview-img-contained" alt="預覽圖" />
             </div>
             
             <div class="share-btn-action-group">
@@ -113,7 +112,20 @@
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 (標準管理字體) ================= -->
+      <!-- 品種照片放大檢視彈窗 -->
+      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
+        <div class="image-modal-content" @click.stop>
+          <div class="image-modal-header">
+            <span>🌸 {{ activeModalTitle }}</span>
+            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
+          </div>
+          <div class="share-modal-body">
+            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 模式 1：蘭花管理系統 ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -262,7 +274,7 @@
                 </div>
               </div>
 
-              <!-- 費用與總計 -->
+              <!-- 費用與總計資訊 -->
               <div class="form-grid mt-3">
                 <div class="field highlight-field">
                   <label>額外運費 (元)</label>
@@ -332,20 +344,7 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th class="col-id">單號</th>
-                      <th class="col-date">下單日</th>
-                      <th class="col-cust">客戶名稱</th>
-                      <th class="col-tax">統編</th>
-                      <th class="col-receipt">開收據</th>
-                      <th class="col-pots">總盆數</th>
-                      <th class="col-spec">規格明細</th>
-                      <th class="col-ship">運費</th>
-                      <th class="col-price">總售價</th>
-                      <th class="col-status">花卡</th>
-                      <th class="col-status">簽收單</th>
-                      <th class="col-status">出貨</th>
-                      <th class="col-status">收款</th>
-                      <th class="col-actions">單據／操作</th>
+                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>運費</th><th>總售價</th><th>花卡</th><th>簽收單</th><th>出貨</th><th>收款</th><th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -376,10 +375,46 @@
               </div>
             </div>
           </section>
+
+          <!-- 模組 2：客戶未結對帳專區 -->
+          <section v-if="subTab === 'statement'" class="tab-pane">
+            <div class="card-box">
+              <h3>📊 客戶未結帳款彙整與對帳</h3>
+              <div class="statement-filter-grid">
+                <div class="field">
+                  <label>選擇對帳客戶：</label>
+                  <select v-model="statementCustomer">
+                    <option value="">-- 請選擇客戶 (全部客戶) --</option>
+                    <option v-for="c in customers" :key="c.id" :value="c.name">
+                      {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>統計期間：</label>
+                  <select v-model="statementPeriod">
+                    <option value="all">全部歷史紀錄</option>
+                    <option value="thisWeek">本週 (週一至週日)</option>
+                    <option value="thisMonth">本月 (1日至今)</option>
+                    <option value="lastMonth">上月全月</option>
+                    <option value="custom">🗓️ 自訂日期區間</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 模組 3：進貨與庫存 -->
+          <section v-if="subTab === 'inventory'" class="tab-pane">
+            <div class="card-box">
+              <h3>📦 庫存清單</h3>
+              <p>庫存資料正常顯示。</p>
+            </div>
+          </section>
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (支援無底色透明輸出) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -397,17 +432,16 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / 書法楷書體 (手機/電腦通用)</option>
+                  <option value="kai">標準標楷體 / 書法楷書體 (全平台通用)</option>
                   <option value="song">古典宋體 / 明體風格</option>
                   <option value="fangsong">仿宋古典體 (FangSong)</option>
                   <option value="sans">現代簡約黑體</option>
                 </select>
               </div>
               <div class="inline-item-fixed">
-                <label class="mini-field-lbl">中款預設粗細：</label>
+                <label class="mini-field-lbl">中款粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
-                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="600">600 (半粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -421,33 +455,25 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label>卡片類型：</label>
-            <select v-model="cardCategory" @change="onCardCategoryChange">
-              <option value="funeral">喪禮弔唁</option>
-              <option value="celebration">慶賀祝典</option>
-            </select>
-          </div>
-
           <!-- 上款 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞：</span>
               <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperPrefix" class="full-input mt-1" placeholder="例: 敬悼 或 恭祝" />
+            <input type="text" v-model="upperPrefix" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象：</span>
               <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人姓名稱謂" />
+            <input type="text" v-model="upperTarget" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞：</span>
               <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空則不顯示" />
+            <input type="text" v-model="upperSuffix" class="full-input mt-1" />
           </div>
 
           <!-- 中款 -->
@@ -456,13 +482,13 @@
               <span class="section-title">中款第 1 行：</span>
               <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款題詞" />
+            <input type="text" v-model="middleText" class="full-input mt-1" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">中款第 2 行：</span>
               <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
+            <input type="text" v-model="middleText2" class="full-input mt-1" />
           </div>
 
           <!-- 下款 -->
@@ -471,9 +497,7 @@
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" class="flex-input" />
-              <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
             </div>
-
             <div class="section-title-with-weight mt-2">
               <span class="section-title">結尾敬詞：</span>
               <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
@@ -486,8 +510,6 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人</button>
-          
-          <!-- 🌟 點擊列印：自動產出「無色透明背景」PNG，無網址時間、一張紙輸出！ -->
           <button type="button" class="print-action-btn mt-2" @click="openTransparentPrintModal('card-print-target', `花卡_${cardPaperSize}`)">
             🖨️ 列印花卡 (無色透明底・無網址時間)
           </button>
@@ -507,7 +529,6 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
-            <!-- 🌟 花卡主體 (透明底色設定，支援粉紅/紅底紙張) -->
             <div 
               id="card-print-target" 
               class="card-board target-kai-font transparent-target" 
@@ -548,7 +569,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (支援無底色透明輸出) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -670,7 +691,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (支援無底色透明輸出) ================= -->
+      <!-- ================= 模式 4：農民收據 ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -957,7 +978,7 @@ const weights = ref({
 })
 const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }])
 
-// 🌟 書法正楷映射：優先採用 index.html 載入的 Noto Serif TC，手機電腦皆保證楷體風格
+// 🌟 書法正楷映射：優先採用 index.html 載入的 Noto Serif TC，全平台生效
 const fontMapping = {
   kai: '"Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif',
   song: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -1008,9 +1029,7 @@ const getUpperTargetBoxStyle = () => {
   }
 }
 
-// =========================================================================
 // 🌟 核心：100% 無色透明背景 (Transparent PNG) 產出引擎
-// =========================================================================
 const openTransparentPrintModal = async (targetId, titlePrefix) => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
@@ -1038,7 +1057,7 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
       }
       shareModalImg.value = URL.createObjectURL(blob)
       shareModalTitle.value = `${titlePrefix} (無色透明底)`
-      shareModalFilename = `${titlePrefix}_透明底.png`
+      shareModalFilename.value = `${titlePrefix}_透明底.png`
       currentBlobToShare.value = blob
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'print.png', { type: 'image/png' })] }))
     }, 'image/png')
@@ -1047,7 +1066,7 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
   }
 }
 
-// 🌟 在彈窗內觸發無網址相片列印 (透明底圖直接噴印在紅色或粉紅紙上)
+// 在彈窗內觸發無網址相片列印
 const triggerTransparentPrint = () => {
   if (!shareModalImg.value) return
   const imgUrl = shareModalImg.value
@@ -1176,11 +1195,10 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
   font-family: "Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif !important;
 }
 
-/* 🌟 核心：無色透明背景實作（螢幕上給純淨白色或無色，截圖時完全無背景） */
+/* 🌟 無色透明背景：預覽模式在底下襯一層淡白以供預覽，截圖時完全無色透明 */
 .transparent-target {
   background-color: transparent !important;
 }
-/* 預覽模式下提供半透明白色襯底讓字體清晰，但截圖時自動無色 */
 .card-scaler-container, .receipt-scaler-container, .farmer-scaler-container {
   background-color: rgba(255, 255, 255, 0.95);
   border-radius: 4px;
