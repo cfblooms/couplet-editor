@@ -79,7 +79,7 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 (手機列印不帶網址時間) -->
+      <!-- 圖片傳送專用彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -93,7 +93,7 @@
             
             <div class="share-btn-action-group">
               <button type="button" class="mobile-print-btn" @click="triggerImagePrint">
-                🖨️ 手機直接列印此圖 (無網址・無時間・一張紙)
+                🖨️ 手機直接列印此圖 (無網址・無日期・一張紙)
               </button>
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
                 📲 一鍵直接傳送至 LINE / 其他應用
@@ -125,7 +125,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 1：蘭花管理系統 (100% 原始樣式還原) ================= -->
+      <!-- ================= 模式 1：蘭花管理系統 (完整原始樣式) ================= -->
       <div v-if="currentTab === 'manage'" class="manage-container no-print">
         <nav class="sub-nav">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
@@ -821,8 +821,8 @@
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -870,7 +870,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
@@ -980,7 +980,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5) ================= -->
+      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A4/A5，預設乾淨純白底) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -993,7 +993,7 @@
             </div>
           </div>
 
-          <!-- 🌸 花卡底圖款式 (平時預設為純白底無金邊，只有要看款式才選 Supabase 背景) -->
+          <!-- 🌸 花卡背景底圖 (預設純白底，無金邊) -->
           <div class="panel-section highlight-panel">
             <label class="section-title">🌸 卡片背景底色 / 款式：</label>
             <select v-model="cardBgType" class="full-input bold-select">
@@ -1043,9 +1043,9 @@
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
-                <!-- 🌟 標楷體排在第一位，精準吻合微軟 Word 楷書書法風格 -->
+                <!-- 🌟 標楷體優先，全平台呈現 Word 楷書書法風格 -->
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / Word正楷 (書法標準正楷)</option>
+                  <option value="kai">標準標楷體 / Word正楷 (全平台書法楷體)</option>
                   <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
                   <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
                   <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
@@ -1265,7 +1265,7 @@
               minHeight: '280px'
             }"
           >
-            <!-- 🌟 花卡主體 (預設純白底，亦支援 Supabase 紅底/粉底切換) -->
+            <!-- 🌟 花卡主體 (預設純白底無金邊，支援切換 Supabase 紅底/粉底) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1323,7 +1323,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (100% 原始漂亮呈現) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 (白底紙張，Word楷體) ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1456,7 +1456,6 @@
               minHeight: '200px'
             }"
           >
-            <!-- 🌟 簽收單螢幕上看純白底紙，送印時自動透明 -->
             <div 
               id="receipt-print-target"
               class="a5-landscape-sheet kai-font-supported standard-kai-font"
@@ -1516,7 +1515,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (100% 原始手刻格線呈現) ================= -->
+      <!-- ================= 模式 4：農民收據 (白底紙張，Word楷體) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1637,7 +1636,6 @@
               minHeight: '200px'
             }"
           >
-            <!-- 🌟 農民收據螢幕上看純白底紙，送印時自動透明 -->
             <div 
               id="farmer-print-target"
               class="farmer-receipt-sheet kai-font-supported standard-kai-font"
@@ -1763,10 +1761,9 @@ import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
 
 // ==========================================
-// 1. 基礎狀態變數 (🌟 確保陣列初始值為 []，絕不為 undefined)
+// 1. 基礎狀態變數
 // ==========================================
 const currentTab = ref('manage')
-const subTab = ref('order')
 const cardPaperSize = ref('A4')
 const isVertical = ref(false)
 const zoomLevel = ref(0.65)
@@ -1909,13 +1906,13 @@ const handleLogout = () => {
 }
 
 // ==========================================
-// 3. Supabase 資料庫連線
+// 3. Supabase 連線與全模組資料函式
 // ==========================================
 const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// 🌟 Supabase Storage 存放的花卡背景公開網址
+// 🌟 Supabase card-assets 公開存取網址
 const SUPABASE_STORAGE_URL = 'https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets'
 
 const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
@@ -2518,7 +2515,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 4. 花卡編輯器 (支援 Supabase 雲端底圖與純白底)
+// 4. 花卡編輯器
 // ==========================================
 const cardCategory = ref('celebration')
 const cardFontFamily = ref('kai')
@@ -2529,7 +2526,7 @@ const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
-// 🌸 花卡底圖控制 (預設純白底，一般直接給客人看，不需要手動選)
+// 🌸 花卡底圖控制 (預設純白底無金邊)
 const cardBgType = ref('white')
 const customCardBgUrl = ref('')
 
@@ -2603,7 +2600,7 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 🌟 Word 楷體字型定義（全平台相容標準楷書）
+// 🌟 核心字體映射：針對花卡文字，支援 Word 楷書書法風格
 const fontMapping = {
   kai: '"DFKai-SB", "BiauKai", "標楷體", "TW-Kai", "MOESong-Regular", "Noto Serif TC", "Kaiti", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
@@ -3043,13 +3040,11 @@ onMounted(() => {
 .lock-form { display: flex; flex-direction: column; gap: 12px; }
 .lock-input {
   width: 100%; padding: 11px 13px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 15px;
-  text-align: center; letter-spacing: 2px; box-sizing: border-box; outline: none; transition: border-color 0.2s;
+  text-align: center; letter-spacing: 2px; box-sizing: border-box; outline: none;
 }
-.lock-input:focus { border-color: #2563eb; }
 .lock-btn {
-  background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-size: 14.5px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+  background: #2563eb; color: white; border: none; padding: 11px; border-radius: 8px; font-size: 14.5px; font-weight: bold; cursor: pointer;
 }
-.lock-btn:hover { background: #1d4ed8; }
 .lock-error-text { color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; }
 .lock-tip { margin-top: 20px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
 .logout-nav-btn {
@@ -3059,12 +3054,12 @@ onMounted(() => {
 
 .top-nav {
   height: 50px; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px; flex-shrink: 0; overflow-x: auto;
+  padding: 0 16px; flex-shrink: 0;
 }
-.nav-title { font-size: 16px; font-weight: 900; white-space: nowrap; margin-right: 12px; }
-.nav-tabs { display: flex; gap: 8px; align-items: center; }
+.nav-title { font-size: 16px; font-weight: 900; }
+.nav-tabs { display: flex; gap: 8px; }
 .nav-tabs button {
-  background: #334155; color: #e2e8f0; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; white-space: nowrap;
+  background: #334155; color: #e2e8f0; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;
 }
 .nav-tabs button.active { background: #2563eb; color: white; }
 
@@ -3204,7 +3199,7 @@ input, select, textarea {
 .mb-1 { margin-bottom: 4px; }
 .mb-2 { margin-bottom: 8px; }
 
-.shipping-tab-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 8px; margin-bottom: 8px; }
+.shipping-tab-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .modern-pill-tabs { display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 30px; gap: 3px; }
 .pill-tab-item {
   border: none; background: transparent; padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: bold;
@@ -3256,7 +3251,7 @@ input, select, textarea {
   display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box; overflow-y: auto;
 }
 .image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
-.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; }
+.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 0 4px; }
 .share-modal-body { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .share-img-scroll-container {
   width: 100%; display: flex; justify-content: center; align-items: center;
@@ -3461,8 +3456,7 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
-}
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -3509,7 +3503,7 @@ input, select, textarea {
 .f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
 .print-action-btn {
-  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
+  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
@@ -3522,7 +3516,7 @@ input, select, textarea {
 }
 
 /* =========================================================================
-   🌟 電腦版直接列印樣式 (背景自動透明輸出，不吃紙張底色)
+   🌟 全平台列印防空白頁與單頁強制保證
 ========================================================================= */
 @media print {
   @page {
