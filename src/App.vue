@@ -79,21 +79,31 @@
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送專用彈窗 -->
-      <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="shareModalImg = ''">
+      <!-- 圖片傳送專用彈窗 (🌟 行動端Blob URL優化，絕不破圖問號) -->
+      <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
-            <span>💬 {{ shareModalTitle }}（可直接按右鍵複製圖片）</span>
-            <button class="close-modal-btn" @click="shareModalImg = ''">✕</button>
+            <span>💬 {{ shareModalTitle }}</span>
+            <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
             <div class="share-img-scroll-container">
               <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
             </div>
+            
+            <div class="share-btn-action-group">
+              <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
+                📲 一鍵直接傳送至 LINE / 其他應用
+              </button>
+              <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
+                💾 下載圖檔至相簿 / 電腦
+              </a>
+            </div>
+
             <div class="share-tips-row">
-              <span>💡 <b>傳送給訂購人方式：</b></span>
-              <span>1. 已自動下載圖檔，可直接將圖檔<b>傳送至 LINE</b>。</span>
-              <span>2. 電腦版可在圖上點<b>滑鼠右鍵 ➔「複製圖片」</b>，到 LINE 聊天室按 <b>Ctrl + V</b> 發送。</span>
+              <span>💡 <b>傳送小提示：</b></span>
+              <span>• <b>手機/平板</b>：點擊上方「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
+              <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
             </div>
           </div>
         </div>
@@ -189,7 +199,7 @@
                   </select>
                 </div>
 
-                <!-- 🚚 送貨地址：在「是否開收據」正後方，寬度約 3 格大 -->
+                <!-- 🚚 送貨地址：同一行後方，寬度約 3 格大 -->
                 <div class="field highlight-field triple-width-field">
                   <label>🚚 送貨地址：</label>
                   <input 
@@ -614,7 +624,7 @@
                           <button 
                             class="cozy-btn clean-btn-noborder" 
                             style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
-                            @click="fillReceiptFromOrder(ord)"
+                            @click="fillReceiptFromOrder(ord)" 
                           >
                             🖨️ 簽收單
                           </button>
@@ -759,7 +769,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑️️</button>
                         </div>
                       </td>
                     </tr>
@@ -876,7 +886,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <h3>{{ editingRetId ? '✏️️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -1010,12 +1020,11 @@
             <div class="inline-font-weight-row">
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
-                <select v-model="cardFontFamily" class="full-input compact-inline-select">
-                  <option value="kai">標準楷書 (TW-Kai / 書法正楷)</option>
+                <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
+                  <option value="kai">標準標楷體 (繁體書法正楷)</option>
                   <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
                   <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
                   <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
-                  <option value="systemkai">系統原生楷體 (BiauKai / KaiTi)</option>
                 </select>
               </div>
               <div class="inline-item-fixed">
@@ -1205,7 +1214,7 @@
           </div>
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
-          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人 (免下載)</button>
+          <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送 / 複製花卡給客人</button>
           <button type="button" class="print-action-btn mt-2" @click="printCouplet">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
         </div>
 
@@ -1224,10 +1233,10 @@
               height: currentCardDimensions.h * zoomLevel + 'px'
             }"
           >
-            <!-- 🌟 花卡看板主體 -->
+            <!-- 🌟 花卡看板主體 (全字庫正楷/標楷體完美渲染) -->
             <div 
               id="card-print-target" 
-              class="card-board" 
+              class="card-board standard-kai-font" 
               :class="isVertical ? 'mode-vertical' : 'mode-horizontal'"
               :style="{
                 width: currentCardDimensions.w + 'px',
@@ -1278,7 +1287,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (🌟 100% 原始漂亮比例，自動顯示訂單送貨地址) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1295,7 +1304,7 @@
 
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
-              <span class="modern-sign-title">✍️ 收件人現場手寫簽名</span>
+              <span class="modern-sign-title">✍️️ 收件人現場手寫簽名</span>
               <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
                 ↺ 清除重簽
               </button>
@@ -1343,7 +1352,7 @@
           </div>
 
           <div class="panel-section">
-            <label class="section-title">✏️ 簽收單內容確認與修改：</label>
+            <label class="section-title">✏️️ 簽收單內容確認與修改：</label>
             
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
@@ -1402,7 +1411,6 @@
             <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
-          <!-- 🌟 保留最完美的縮放容器，螢幕外觀絕不變形 -->
           <div 
             class="receipt-scaler-container" 
             :style="{
@@ -1469,7 +1477,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (🌟 100% 原始漂亮手刻格線版面) ================= -->
+      <!-- ================= 模式 4：農民收據 ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1729,8 +1737,37 @@ const showToast = (msg) => {
   toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
 }
 
+// 🌟 行動端完美分享彈窗變數
 const shareModalImg = ref('')
 const shareModalTitle = ref('')
+const shareModalFilename = ref('圖片.png')
+const currentBlobToShare = ref(null)
+const canNativeShare = ref(false)
+
+const closeShareModal = () => {
+  if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
+    URL.revokeObjectURL(shareModalImg.value)
+  }
+  shareModalImg.value = ''
+  currentBlobToShare.value = null
+}
+
+const triggerNativeShare = async () => {
+  if (!currentBlobToShare.value) return
+  try {
+    const file = new File([currentBlobToShare.value], shareModalFilename.value, { type: 'image/png' })
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: shareModalTitle.value,
+        files: [file]
+      })
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      showToast('⚠️ 分享取消或請改用長按圖片儲存')
+    }
+  }
+}
 
 const currentCardDimensions = computed(() => {
   if (cardPaperSize.value === 'A5') {
@@ -1951,7 +1988,7 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
-// 模組表單定義 (🌟 耗材純自由輸入)
+// 模組表單定義
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
@@ -2127,9 +2164,9 @@ const saveOrder = async () => {
     phone: formOrder.value.phone, spec: fullSpecStr, pot: finalPotStr, cost: formOrder.value.cost, price: formOrder.value.price,
     tax_id: formOrder.value.tax_id, need_receipt: formOrder.value.need_receipt, note: finalNote, card_status: formOrder.value.card_status,
     receipt_status: formOrder.value.receipt_status, shipped_status: formOrder.value.shipped_status, payment_status: formOrder.value.payment_status,
-    order_date: formOrder.value.order_date, expected_date: formOrder.value.expected_date
+    order_date: formOrder.value.order_date, expected_date: formOrder.value.expected_date,
+    shipping_address: formOrder.value.shipping_address
   }
-  payload.shipping_address = formOrder.value.shipping_address
 
   if (editingOrderId.value) {
     const { error } = await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
@@ -2253,7 +2290,7 @@ const batchMarkPaid = async () => {
   loadOrders()
 }
 
-// 模組 3：進貨函式 (🌟 耗材純自由輸入)
+// 模組 3：進貨函式
 const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
 const onPotTypeChange = () => {
   const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
@@ -2471,12 +2508,12 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
+// 🌟 精準繁體書法楷體支援（跨 iOS / Android / Windows 全相容）
 const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "KaiTi", serif',
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
   fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
-  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif',
-  systemkai: '"標楷體", "DFKai-SB", "BiauKai", "TW-Kai", serif'
+  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif'
 }
 const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
 
@@ -2577,10 +2614,11 @@ const onCardCategoryChange = () => {
 
 const printCouplet = () => window.print()
 
+// 🌟 核心修復：直接傳送使用可靠的 Blob URL，行動裝置絕不破圖問號
 const shareCoupletDirect = async () => {
   const targetEl = document.getElementById('card-print-target')
   if (!targetEl) return alert('找不到花卡畫面！')
-  showToast('⏳ 正在生成無切字花卡高畫質圖片...')
+  showToast('⏳ 正在生成花卡高清圖檔...')
   try {
     const originalTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
@@ -2590,7 +2628,7 @@ const shareCoupletDirect = async () => {
     })
     targetEl.style.transform = originalTransform
     const filename = `花卡_${cardPaperSize.value}_${new Date().toISOString().split('T')[0]}.png`
-    shareOrCopyCanvasBlob(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖片準備完成')
+    renderImageBlobToModal(canvas, filename, `花卡確認 (${cardPaperSize.value})`, '花卡圖檔準備完成')
   } catch (err) {
     showToast('⚠️ 圖片生成失敗，請重試！')
   }
@@ -2709,6 +2747,7 @@ const printReceiptAndMarkDone = async () => {
   window.print()
 }
 
+// 🌟 簽收單使用 Blob URL 產生高清彈窗
 const shareReceiptDirect = async () => {
   const targetEl = document.getElementById('receipt-print-target')
   if (!targetEl) return alert('找不到簽收單！')
@@ -2719,7 +2758,7 @@ const shareReceiptDirect = async () => {
     const canvas = await html2canvas(targetEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
     targetEl.style.transform = origTransform
     const filename = `簽收單_${receiptForm.value.orderId || '現場'}_${new Date().toISOString().split('T')[0]}.png`
-    shareOrCopyCanvasBlob(canvas, filename, '簽收單確認', '簽收單圖片準備完成')
+    renderImageBlobToModal(canvas, filename, '簽收單確認', '簽收單圖片準備完成')
   } catch (err) {
     showToast('⚠️ 圖片生成失敗，請重試！')
   }
@@ -2772,6 +2811,7 @@ const fillFarmerReceiptFromOrder = (ord) => {
 }
 const printFarmerReceipt = () => window.print()
 
+// 🌟 農民收據使用 Blob URL 產生高清彈窗
 const shareFarmerReceiptDirect = async () => {
   const targetEl = document.getElementById('farmer-print-target')
   if (!targetEl) return alert('找不到農民收據！')
@@ -2782,41 +2822,37 @@ const shareFarmerReceiptDirect = async () => {
     const canvas = await html2canvas(targetEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false })
     targetEl.style.transform = origTransform
     const filename = `農民收據_${farmerReceipt.value.buyerName}_${farmerReceipt.value.year}${farmerReceipt.value.month}${farmerReceipt.value.day}.png`
-    shareOrCopyCanvasBlob(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
+    renderImageBlobToModal(canvas, filename, '農民收據確認', '農民收據圖片準備完成')
   } catch (err) {
     showToast('⚠️ 圖片生成失敗，請重試！')
   }
 }
 
-const shareOrCopyCanvasBlob = async (canvas, filename, shareTitle, successMsg) => {
-  const dataUrl = canvas.toDataURL('image/png')
-  const downloadLink = document.createElement('a')
-  downloadLink.download = filename
-  downloadLink.href = dataUrl
-  document.body.appendChild(downloadLink)
-  downloadLink.click()
-  document.body.removeChild(downloadLink)
-
-  shareModalImg.value = dataUrl
-  shareModalTitle.value = shareTitle
-
-  canvas.toBlob(async (blob) => {
+// 🌟 行動端與電腦版全相容的 Blob 圖片渲染引擎（徹底根絕問號圖與下載失效）
+const renderImageBlobToModal = (canvas, filename, shareTitle, successMsg) => {
+  canvas.toBlob((blob) => {
     if (!blob) return
-    const file = new File([blob], filename, { type: 'image/png' })
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ title: shareTitle, files: [file] })
-        return
-      } catch (err) {}
+    if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
+      URL.revokeObjectURL(shareModalImg.value)
     }
-    if (navigator.clipboard && navigator.clipboard.write) {
+    const blobUrl = URL.createObjectURL(blob)
+    shareModalImg.value = blobUrl
+    shareModalTitle.value = shareTitle
+    shareModalFilename.value = filename
+    currentBlobToShare.value = blob
+
+    // 判斷是否支援手機原生分享面板
+    canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] }))
+
+    // 電腦版嘗試寫入剪貼簿
+    if (navigator.clipboard?.write) {
       try {
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-        showToast(`📋 ${successMsg}！\n已複製到剪貼簿並完成下載！請直接至電腦版 LINE 按 Ctrl + V 貼上發送！`)
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        showToast(`📋 ${successMsg}！已複製到電腦剪貼簿，可按 Ctrl + V 貼上！`)
         return
-      } catch (err) {}
+      } catch (e) {}
     }
-    showToast(`📁 ${successMsg}！\n圖檔已下載！請直接拖曳圖片或在此視窗按右鍵「複製圖片」至 LINE 發送！`)
+    showToast(`📸 ${successMsg}！已生成預覽，可長按或點擊按鈕直接發送！`)
   }, 'image/png')
 }
 
@@ -2835,11 +2871,12 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
+  // 🌟 自動載入 Google 官方思源宋體與書法正楷全字庫（保證手機與平板正常呈現標楷體）
   if (!document.getElementById('google-noto-fonts-cdn')) {
     const link = document.createElement('link')
     link.id = 'google-noto-fonts-cdn'
     link.rel = 'stylesheet'
-    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Noto+Serif+TC:wght@400;500;600;700;800&display=swap'
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap'
     document.head.appendChild(link)
   }
 
@@ -2850,7 +2887,7 @@ onMounted(() => {
       @font-face {
         font-family: 'TW-Kai';
         src: url('https://cdn.jsdelivr.net/gh/fontsource/tw-kai/files/tw-kai-400-normal.woff2') format('woff2');
-        font-weight: 400;
+        font-weight: normal;
         font-display: swap;
       }
     `
@@ -3155,23 +3192,36 @@ input, select, textarea {
 .table-orchid-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
+/* 🌟 彈窗樣式增強：手機友善操作按鈕 */
 .image-modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
-  display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 16px; box-sizing: border-box;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.78);
+  display: flex; justify-content: center; align-items: center; z-index: 99999; padding: 14px; box-sizing: border-box;
 }
 .image-modal-content {
-  background: white; border-radius: 12px; padding: 16px; max-width: 820px; width: 100%; max-height: 92vh;
-  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box;
+  background: white; border-radius: 12px; padding: 16px; max-width: 820px; width: 100%; max-height: 94vh;
+  display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box; overflow-y: auto;
 }
-.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 14.5px; }
-.close-modal-btn { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
-.share-modal-body { display: flex; flex-direction: column; align-items: center; overflow: hidden; width: 100%; }
+.image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
+.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 0 4px; }
+.share-modal-body { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .share-img-scroll-container {
   width: 100%; display: flex; justify-content: center; align-items: center;
-  background-color: #f8fafc; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 10px;
+  background-color: #f1f5f9; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 12px;
 }
-.share-preview-img-contained { max-height: 60vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-.share-tips-row { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: #334155; line-height: 1.5; width: 100%; }
+.share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+
+.share-btn-action-group {
+  display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap;
+}
+.mobile-share-btn {
+  flex: 1; min-width: 140px; background: #06c755; color: white; border: none; padding: 10px;
+  border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
+}
+.mobile-dl-btn {
+  flex: 1; min-width: 140px; background: #2563eb; color: white; text-decoration: none; padding: 10px;
+  border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; display: inline-block; box-sizing: border-box;
+}
+.share-tips-row { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #475569; line-height: 1.5; width: 100%; background: #f8fafc; padding: 8px 10px; border-radius: 6px; }
 
 .draft-manage-panel { background: #fdfefe !important; border: 1.5px solid #dbeafe !important; }
 .draft-action-btns { display: flex; gap: 6px; margin-top: 6px; }
@@ -3274,8 +3324,9 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-.kai-font-supported {
-  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", serif !important;
+/* 🌟 正楷字體全平台完美適配 */
+.standard-kai-font, .kai-font-supported {
+  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Noto Serif TC", serif !important;
 }
 
 /* 🌟 A5 橫式簽收單 (100% 原始漂亮比例 794x560) */
@@ -3362,6 +3413,11 @@ input, select, textarea {
 
 .f-w-id-lbl { width: 190px; }
 .f-w-id-val { width: 190px; border-right: none !important; }
+
+.f-text-center { justify-content: center; text-align: center; }
+.f-text-right { justify-content: flex-end; text-align: right; }
+.f-bold { font-weight: bold; }
+.f-pr { padding-right: 12px !important; }
 
 .f-statement { font-size: 13px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 4px; }
 .f-footer-note { font-size: 10.5px; line-height: 1.4; color: #222; margin-top: 4px; text-align: justify; }
