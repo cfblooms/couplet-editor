@@ -148,7 +148,7 @@
 
             <div class="card-box" id="order-form-box">
               <div class="order-form-title-row">
-                <h3>{{ editingOrderId ? '✏️️ 修改訂單資料' : '💰 建立新訂單' }}</h3>
+                <h3>{{ editingOrderId ? '✏ 修改訂單資料' : '💰 建立新訂單' }}</h3>
                 <span class="preview-seq-badge right-aligned-badge">
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
@@ -781,7 +781,7 @@
           <!-- 模組 4：客戶資料庫 -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
-              <h3>{{ editingCustId ? '✏️️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
+              <h3>{{ editingCustId ? '✏ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field"><label>客戶/公司名稱：</label><input v-model="formCust.name" placeholder="名稱" /></div>
                 <div class="field">
@@ -823,7 +823,7 @@
                       <td class="action-cell">
                         <div class="stacked-action-col">
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑️️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑</button>
                         </div>
                       </td>
                     </tr>
@@ -1048,7 +1048,7 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / Word正楷 (全平台書法標準)</option>
+                  <option value="kai">標準標楷體 (全平台書法標準 TW-Kai)</option>
                   <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
                   <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
                   <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
@@ -1252,7 +1252,7 @@
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.max(0.2, +(zoomLevel - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(zoomLevel * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="zoomLevel = Math.min(1.2, +(zoomLevel + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
+            <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
           <div 
@@ -1447,7 +1447,7 @@
             <button type="button" class="zoom-btn" @click="receiptZoom = Math.max(0.3, +(receiptZoom - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(receiptZoom * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="receiptZoom = Math.min(1.1, +(receiptZoom + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
+            <button type="button" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
           <div 
@@ -1460,7 +1460,7 @@
             }"
           >
             <div 
-              id="receipt-print-target"
+              id="receipt-print-target" 
               class="a5-landscape-sheet kai-font-supported standard-kai-font"
               :style="{
                 transform: `scale(${receiptZoom})`,
@@ -1640,7 +1640,7 @@
             }"
           >
             <div 
-              id="farmer-print-target"
+              id="farmer-print-target" 
               class="farmer-receipt-sheet kai-font-supported standard-kai-font"
               :style="{
                 transform: `scale(${farmerZoom})`,
@@ -1764,7 +1764,7 @@ import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
 
 // ==========================================
-// 1. 基礎狀態變數 (🌟 確保 subTab 只有唯一宣告，絕不重複)
+// 1. 基礎狀態變數 (subTab 唯一宣告)
 // ==========================================
 const currentTab = ref('manage')
 const subTab = ref('order')
@@ -1816,7 +1816,7 @@ const triggerNativeShare = async () => {
   }
 }
 
-// 🌟 尺寸維度：精確支援 A3, A4, A5
+// 尺寸維度：精確支援 A3, A4, A5
 const currentCardDimensions = computed(() => {
   if (cardPaperSize.value === 'A3') {
     return isVertical.value ? { w: 1123, h: 1587 } : { w: 1587, h: 1123 }
@@ -1920,7 +1920,7 @@ const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// 🌟 Supabase card-assets bucket 連線
+// Supabase card-assets bucket 連線
 const SUPABASE_STORAGE_URL = 'https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets'
 
 const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
@@ -2519,7 +2519,7 @@ const exportOrdersToExcel = () => {
 }
 
 // ==========================================
-// 4. 花卡編輯器狀態與安全函式 (🌟 提前宣告確保絕不出現 reading 'middle' 錯誤)
+// 4. 花卡編輯器狀態與函式
 // ==========================================
 const cardCategory = ref('celebration')
 const cardFontFamily = ref('kai')
@@ -2530,7 +2530,7 @@ const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
-// 🌟 底圖選擇狀態 (默認純白底 none)
+// 🌟 底圖選擇狀態 (防快取版)
 const cardBgType = ref('none')
 const customCardBgUrl = ref('')
 
@@ -2539,10 +2539,11 @@ const activeBackgroundImageStyle = computed(() => {
   if (cardBgType.value === 'custom' && customCardBgUrl.value) {
     return `url(${customCardBgUrl.value})`
   }
+  // 加上 ?t 破除快取，精確對應 Supabase Storage
   const map = {
-    red: `url('${SUPABASE_STORAGE_URL}/card-bg-red.jpg')`,
-    pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink.jpg')`,
-    white: `url('${SUPABASE_STORAGE_URL}/card-bg-white.jpg')`
+    red: `url('${SUPABASE_STORAGE_URL}/card-bg-red.jpg?v=2')`,
+    pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink.jpg?v=2')`,
+    white: `url('${SUPABASE_STORAGE_URL}/card-bg-white.jpg?v=2')`
   }
   return map[cardBgType.value] || 'none'
 })
@@ -2557,7 +2558,6 @@ const onCustomCardBgUpload = (e) => {
   reader.readAsDataURL(file)
 }
 
-// 🌟 提前初始化 weights，保證 weights.middle 隨時存在
 const weights = ref({
   upper_prefix: '700',
   upper_target: '700',
@@ -2588,7 +2588,6 @@ const defaultHorizontal = {
   suffix: { x: 880, y: 530, size: 34 }
 }
 
-// 🌟 提前初始化 layout
 const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
 
 const getWeightStyle = (wVal) => {
@@ -2603,9 +2602,9 @@ const getWeightStyle = (wVal) => {
   return styles
 }
 
-// 🌟 跨平台楷書字型對應
+// 🌟 跨平台楷書與字型映射
 const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif',
+  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif',
   notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
   fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
   notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif'
@@ -2668,7 +2667,6 @@ const switchOrientation = (vertical) => {
 }
 const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
 
-// 🌟 安全防呆防護：絕不因缺漏屬性造成 Vue 白畫面
 const getStyle = (key) => {
   const item = layout.value?.[key] || { x: 50, y: 50, size: 30 }
   return { 
@@ -3005,10 +3003,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 🌟 引入開源標準繁體楷書字型，確保全平台手機、平板、電腦皆能顯示標準正楷 */
+/* ================= 雲端正楷字型直接載入 (手機、平板強制支援) ================= */
+@font-face {
+  font-family: 'TW-Kai';
+  src: url('https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets/TW-Kai.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
 
-/* 🌟 100% 原始精美樣式（徹底清除全形空白，還原全部欄位與配色） */
+/* 🌟 強制簽收單與農民收據一律使用 TW-Kai 楷書 (手機、平板全部強制生效，不跑版) */
+.a5-landscape-sheet,
+.farmer-receipt-sheet,
+.a5-landscape-sheet *,
+.farmer-receipt-sheet * {
+  font-family: 'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', 'Kaiti TC', serif !important;
+}
+
+/* 🌟 100% 原始精美樣式 */
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -3328,7 +3342,7 @@ input, select, textarea {
 }
 .share-tips-row { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #475569; line-height: 1.5; width: 100%; background: #f8fafc; padding: 8px 10px; border-radius: 6px; }
 
-/* 🌟 雲端草稿管理樣式 (100% 原始漂亮呈現) */
+/* 雲端草稿管理樣式 */
 .draft-manage-panel { background: #fdfefe !important; border: 1.5px solid #dbeafe !important; }
 .draft-action-btns { display: flex; gap: 6px; margin-top: 6px; }
 .ultra-light-purple-btn {
@@ -3396,7 +3410,6 @@ input, select, textarea {
 .tag-btn { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 5px; font-size: 12px; border-radius: 4px; cursor: pointer; }
 .reset-btn { width: 100%; padding: 7px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; font-size: 12.5px; }
 
-/* 🌟 預覽視窗樣式：確保一定可見 */
 .canvas-viewport {
   flex: 1; display: flex; flex-direction: column; align-items: center; overflow: auto;
   padding: 18px 18px 70px 18px; position: relative; background-color: #cbd5e1; -webkit-overflow-scrolling: touch;
@@ -3446,9 +3459,9 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* 🌟 正楷字體全平台適配 (以 Noto Serif TC 和繁體楷體為核心) */
+/* 正楷字體全平台適配 (TW-Kai 楷書為核心) */
 .standard-kai-font, .kai-font-supported {
-  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
+  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
 }
 
 /* A5 橫式簽收單 */
@@ -3543,11 +3556,6 @@ input, select, textarea {
 .f-statement { font-size: 12.5px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 3px; }
 .f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
-.stamp-select-panel { background: #fdf2f8; border: 1.5px dashed #db2777; }
-.seal-choose-btn {
-  width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
-}
-
 .print-action-btn {
   width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
 }
@@ -3577,7 +3585,7 @@ input, select, textarea {
     height: 98vh !important;
     max-height: 98vh !important;
     overflow: hidden !important;
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
+    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
 
   .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
@@ -3641,7 +3649,7 @@ input, select, textarea {
 
   /* 強制標楷體 */
   #receipt-print-target *, #farmer-print-target *, #card-print-target * {
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
+    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
 }
 </style>
