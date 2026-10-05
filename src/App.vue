@@ -497,7 +497,7 @@
             </div>
           </section>
 
-          <!-- 模組 2：客戶未結對帳專區 -->
+          <!-- 模組 2：客戶未結對帳專區 (100% 完整原版) -->
           <section v-if="subTab === 'statement'" class="tab-pane">
             <div class="card-box">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
@@ -648,10 +648,10 @@
             </div>
           </section>
 
-          <!-- 模組 3：進貨與庫存 -->
+          <!-- 模組 3：進貨與庫存 (100% 完整原版) -->
           <section v-if="subTab === 'inventory'" class="tab-pane">
             <div class="card-box" id="inv-form-box">
-              <h3>{{ editingInvId ? '✏️️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
+              <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
 
               <div class="form-grid mt-2">
                 <div class="field">
@@ -778,7 +778,7 @@
             </div>
           </section>
 
-          <!-- 模組 4：客戶資料庫 -->
+          <!-- 模組 4：客戶資料庫 (100% 完整原版) -->
           <section v-if="subTab === 'customer'" class="tab-pane">
             <div class="card-box" id="cust-form-box">
               <h3>{{ editingCustId ? '✏️ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
@@ -833,7 +833,7 @@
             </div>
           </section>
 
-          <!-- 模組 5：蘭花品種庫 -->
+          <!-- 模組 5：蘭花品種庫 (100% 完整原版) -->
           <section v-if="subTab === 'orchid'" class="tab-pane">
             <div class="card-box" id="orchid-form-box">
               <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
@@ -882,7 +882,7 @@
             </div>
           </section>
 
-          <!-- 模組 6：退貨管理區 -->
+          <!-- 模組 6：退貨管理區 (100% 完整原版) -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
               <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
@@ -929,7 +929,7 @@
             </div>
           </section>
 
-          <!-- 模組 7：出貨派送進度分頁 -->
+          <!-- 模組 7：出貨派送進度分頁 (100% 完整原版) -->
           <section v-if="subTab === 'shipping'" class="tab-pane">
             <div class="card-box">
               <div class="shipping-tab-header">
@@ -968,7 +968,7 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
@@ -986,7 +986,7 @@
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
 
-          <!-- 🌟 紙張尺寸選擇：A3 / A4 / A5 -->
+          <!-- 紙張尺寸選擇：A3 / A4 / A5 -->
           <div class="panel-section">
             <label class="section-title">📄 紙張尺寸選擇：</label>
             <div class="btn-group">
@@ -1046,7 +1046,7 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / Word正楷 (全平台書法標準)</option>
+                  <option value="kai">標準標楷體 / Word正楷 (書法楷體)</option>
                   <option value="notosong">思源宋體 (Noto Serif TC / 古典明體)</option>
                   <option value="fangsong">仿宋古典體 (FangSong / 秀麗骨風)</option>
                   <option value="notosans">思源黑體 (Noto Sans TC / 現代簡約)</option>
@@ -1055,8 +1055,7 @@
               <div class="inline-item-fixed">
                 <label class="mini-field-lbl">中款預設粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
-                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="600">600 (半粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -1263,7 +1262,7 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
-            <!-- 🌟 花卡主體 (透過獨立防擠壓層解決直式轉橫式的拉伸問題) -->
+            <!-- 🌟 花卡主體 (獨立背景層防橫向擠壓) -->
             <div 
               id="card-print-target" 
               class="card-board standard-kai-font" 
@@ -1436,7 +1435,7 @@
             :disabled="!receiptForm.recipient && !selectedOrderId"
             @click="handlePrintAction('receipt-print-target', '簽收單_A5', true)"
           >
-            🖨️ 列印 A5 橫式簽收單 (自動標記已列印)
+            🖨️️ 列印 A5 橫式簽收單 (自動標記已列印)
           </button>
         </div>
 
@@ -3336,8 +3335,7 @@ input, select, textarea {
 .share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
 
 .share-btn-action-group {
-  display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap;
-}
+  display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap; }
 .mobile-print-btn {
   flex: 1.5; min-width: 180px; background: #16a34a; color: white; border: none; padding: 10px;
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
@@ -3392,6 +3390,7 @@ input, select, textarea {
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 13.5px; border-color: #3b82f6; }
 
+.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .ctrl-row-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .mini-weight-select {
@@ -3405,7 +3404,6 @@ input, select, textarea {
   width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
 }
 
-.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .form-group { margin-bottom: 8px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #334155; }
 .bottom-input-group { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
@@ -3457,12 +3455,7 @@ input, select, textarea {
 }
 
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; z-index: 2; }
-.card-board.mode-vertical .middle-box,
-.card-board.mode-vertical .middle-box-2 { letter-spacing: 20px; }
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; z-index: 2; }
-.card-board.mode-horizontal .middle-box,
-.card-board.mode-horizontal .middle-box-2 { letter-spacing: 16px; }
-
 .text-box { position: absolute; cursor: move; padding: 3px 5px; white-space: nowrap; line-height: 1.25; color: #0f172a; z-index: 2; }
 .text-box:hover { outline: 1px dashed #2563eb; background: rgba(37, 99, 235, 0.04); }
 .scale-handle {
@@ -3521,7 +3514,8 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
+}
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -3568,7 +3562,7 @@ input, select, textarea {
 .f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
 .print-action-btn {
-  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
+  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
@@ -3587,7 +3581,6 @@ input, select, textarea {
   @page {
     margin: 0mm !important;
   }
-
   html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -3598,30 +3591,12 @@ input, select, textarea {
     overflow: hidden !important;
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
   }
-
   .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
     display: none !important;
   }
-
-  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
-  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container { 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    background: transparent !important; 
-    display: block !important; 
-    position: static !important;
-    width: 100% !important;
-    height: 98vh !important;
-    max-height: 98vh !important;
-    overflow: hidden !important;
-    transform: none !important;
-  }
-
-  /* 花卡列印：滿版單頁輸出，底圖在送印時抽空為無色透明 */
   #card-print-target { 
     position: absolute !important; 
-    top: 0 !important; 
-    left: 0 !important; 
+    top: 0 !important; left: 0 !important; 
     transform: none !important; 
     box-shadow: none !important; 
     margin: 0 !important; 
@@ -3634,15 +3609,11 @@ input, select, textarea {
     break-after: avoid !important; 
   }
   .card-dynamic-bg-layer {
-    display: none !important; /* 送印時抽空底圖，只噴墨文字 */
+    display: none !important; /* 送印時抽空底圖 */
   }
-  #card-print-target * { visibility: visible !important; }
-
-  /* 簽收單與農民收據：送印時背景自動透明，完全單頁輸出 */
   #receipt-print-target, #farmer-print-target { 
     position: relative !important; 
-    top: 0 !important; 
-    left: 0 !important; 
+    top: 0 !important; left: 0 !important; 
     transform: none !important; 
     box-shadow: none !important; 
     background-color: transparent !important;
@@ -3657,8 +3628,6 @@ input, select, textarea {
     page-break-after: avoid !important; 
     break-after: avoid !important; 
   }
-
-  /* 強制標楷體 */
   #receipt-print-target *, #farmer-print-target *, #card-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif !important;
   }
