@@ -106,8 +106,8 @@
             <div class="share-tips-row">
               <span>💡 <b>傳送小提示：</b></span>
               <span>• <b>手機/平板</b>：點擊「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
-              <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
               <span>• <b>手機直接列印</b>：以相片模式直接送印，<b>底部絕不出現網址與時間</b>；送印時背景自動透明！</span>
+              <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
             </div>
           </div>
         </div>
@@ -203,7 +203,7 @@
                   </select>
                 </div>
 
-                <!-- 🚚 送貨地址 -->
+                <!-- 送貨地址 -->
                 <div class="field highlight-field triple-width-field">
                   <label>🚚 送貨地址：</label>
                   <input 
@@ -518,7 +518,7 @@
                     <option value="thisWeek">本週 (週一至週日)</option>
                     <option value="thisMonth">本月 (1日至今)</option>
                     <option value="lastMonth">上月全月</option>
-                    <option value="custom">🗓️ 自訂日期區間</option>
+                    <option value="custom">🗓️️ 自訂日期區間</option>
                   </select>
                 </div>
                 <div v-if="statementPeriod === 'custom'" class="field custom-date-range-field">
@@ -767,7 +767,7 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑</button>
                         </div>
                       </td>
@@ -871,7 +871,7 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
@@ -885,7 +885,7 @@
           <!-- 模組 6：退貨管理區 -->
           <section v-if="subTab === 'return'" class="tab-pane">
             <div class="card-box" id="return-form-box">
-              <h3>{{ editingRetId ? '✏ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
+              <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
                 <div class="field">
                   <label>退貨類型：</label>
@@ -918,7 +918,7 @@
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️</button>
                           <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
@@ -1854,7 +1854,7 @@ const switchPaperSize = (size) => {
   nextTick(() => autoFitZoom())
 }
 
-// 🌟 安全縮放：絕不允許為 0
+// 安全縮放：絕不允許為 0
 const autoFitZoom = () => {
   if (!viewportRef.value || viewportRef.value.clientWidth <= 0) {
     zoomLevel.value = 0.65
@@ -2078,6 +2078,9 @@ const loadOrders = async () => {
     if (data) orderList.value = data.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')))
   } catch (err) {}
 }
+const unshippedOrders = computed(() => orderList.value.filter(o => o.shipped_status !== '已出貨'))
+const shippedOrders = computed(() => orderList.value.filter(o => o.shipped_status === '已出貨'))
+
 const loadInventory = async () => {
   const { data } = await supabase.from('inventory').select('*').order('created_at', { ascending: false })
   if (data) inventoryList.value = data
@@ -2264,16 +2267,10 @@ const updateOrderField = async (ord, field, value) => {
   showToast(`✅ 單號 ${ord.id} 的狀態已即時更新！`)
 }
 
-// 🌟 安全徽章類別函數（絕對不缺失）
-const getCardStatusClass = (status) => {
-  if (status === '已製作') return 'badge badge-soft-green'
-  if (status === '免製作') return 'badge badge-gray'
-  return 'badge'
-}
+// 🌟 安全徽章類別函數
+const getCardStatusClass = (status) => status === '已製作' ? 'badge badge-soft-green' : (status === '免製作' ? 'badge badge-gray' : 'badge')
 
 const shippingViewFilter = ref('unshipped')
-const unshippedOrders = computed(() => orderList.value.filter(o => o.shipped_status !== '已出貨'))
-const shippedOrders = computed(() => orderList.value.filter(o => o.shipped_status === '已出貨'))
 const displayedShippingOrders = computed(() => shippingViewFilter.value === 'unshipped' ? unshippedOrders.value : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value))
 
 const getCustomerAddress = (ord) => {
@@ -2521,303 +2518,7 @@ const exportOrdersToExcel = () => {
   XLSX.writeFile(workbook, `訂單總表_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
-// ==========================================
-// 4. 花卡編輯器 (3 款 Supabase 實體卡，支援 A3/A4/A5 與旋轉防擠壓)
-// ==========================================
-const cardCategory = ref('celebration')
-const cardFontFamily = ref('kai')
-const upperPrefix = ref('祝')
-const upperTarget = ref('新北市 陳乃瑜議員')
-const upperSuffix = ref('')
-const middleText = ref('高票當選')
-const middleText2 = ref('為民服務')
-const suffixText = ref('敬賀')
-
-// 🌟 底圖選擇狀態 (預設紅卡)
-const cardBgType = ref('red')
-const customCardBgUrl = ref('')
-
-// 🌟 3. 精確指向 Supabase card-assets bucket 裡的 3 張圖檔
-const activeBackgroundImageStyle = computed(() => {
-  if (cardBgType.value === 'custom' && customCardBgUrl.value) {
-    return `url(${customCardBgUrl.value})`
-  }
-  const map = {
-    red: `url('${SUPABASE_STORAGE_URL}/card-bg-red.jpg')`,
-    pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink.jpg')`,
-    white: `url('${SUPABASE_STORAGE_URL}/card-bg-white.jpg')`
-  }
-  return map[cardBgType.value] || map.red
-})
-
-const onCustomCardBgUpload = (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    customCardBgUrl.value = event.target.result
-  }
-  reader.readAsDataURL(file)
-}
-
-const funeralUpperFormat = ref('custom')
-const targetX1 = ref('')
-const targetX2 = ref('')
-const isDoubleXFormat = computed(() => ['X媽X老夫人', 'X媽X夫人', 'X公X老先生', 'X公X先生'].includes(funeralUpperFormat.value))
-
-const onFuneralFormatChange = () => {
-  if (funeralUpperFormat.value === 'custom') return
-  if (funeralUpperFormat.value === 'X女士') upperTarget.value = '陳女士'
-  else if (funeralUpperFormat.value === 'X先生') upperTarget.value = '陳先生'
-  else combineTargetX()
-}
-const combineTargetX = () => {
-  const x1 = targetX1.value.trim() || '張'
-  const x2 = targetX2.value.trim() || '李'
-  if (funeralUpperFormat.value === 'X媽X老夫人') upperTarget.value = `${x1}媽${x2}老夫人`
-  else if (funeralUpperFormat.value === 'X媽X夫人') upperTarget.value = `${x1}媽${x2}夫人`
-  else if (funeralUpperFormat.value === 'X公X老先生') upperTarget.value = `${x1}公${x2}老先生`
-  else if (funeralUpperFormat.value === 'X公X先生') upperTarget.value = `${x1}公${x2}先生`
-}
-
-const celebrationType = ref('opening')
-const gender = ref('female')
-const ageStage = ref('f_over80')
-
-const weights = ref({
-  upper_prefix: '700', upper_target: '700', upper_suffix: '700', middle: '800', middle_2: '800',
-  bottom_0: '600', bottom_1: '700', bottom_2: '600', bottom_3: '600', bottom_4: '600', bottom_5: '600', suffix: '700'
-})
-const getWeightStyle = (wVal) => {
-  const w = String(wVal || '600')
-  const styles = { fontWeight: w }
-  if (w === '500') styles.textShadow = '0 0 0.4px #000'
-  else if (w === '550') styles.textShadow = '0 0 0.6px #000'
-  else if (w === '600') styles.textShadow = '0 0 0.8px #000'
-  else if (w === '650') styles.textShadow = '0 0 1.0px #000, 0.2px 0.2px 0 #000'
-  else if (w === '700') styles.textShadow = '0 0 1.2px #000, 0.3px 0.3px 0 #000'
-  else if (w === '800') styles.textShadow = '0 0 1.8px #000, 0.5px 0.5px 0 #000'
-  return styles
-}
-
-// 🌟 1. 跨平台標準繁體書法楷書適配（教育部標準楷體優先，全平台 iOS/Android/PC 通用）
-const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", "Noto Serif TC", serif',
-  notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
-  fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
-  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif'
-}
-const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
-
-const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }])
-const getPlaceholder = (idx) => ['第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）', '第 3 格（自訂聯名人 2）', '第 4 格（自訂）', '第 5 格（自訂）', '第 6 格（自訂）'][idx]
-
-const funeralPhrases = {
-  f_under49: ['芳華早謝', '遽促芳齡', '妝台月冷', '香消玉殞', '音容宛在'],
-  f_50_79: ['懿範長存', '淑德永昭', '萱萎北堂', '慈雲縹緲'],
-  f_over80: ['母儀千古', '駕返瑤池', '慈輝永昭', '寶婺星沉'],
-  m_under49: ['星隕少微', '壯志未酬', '天不假年', '英年仙去', '音容宛在'],
-  m_50_69: ['長才未盡', '棟折梁摧', '典則空留', '悵望音容', '英氣頓杳'],
-  m_70_79: ['駕鶴西歸', '道範長存', '碩德堪欽', '儀型足式', '高風亮節'],
-  m_over80: ['福壽全歸', '高山仰止', '碩德貽徽', '德望永昭', '典範長昭']
-}
-const currentFuneralPhrases = computed(() => funeralPhrases[ageStage.value] || [])
-
-const celebPhrases = {
-  opening: ['開幕誌慶', '開張大吉', '鴻圖大展', '駿業宏開', '生意興隆', '財源廣進', '客似雲來'],
-  moving: ['喬遷之喜', '里仁為美', '金玉滿堂'],
-  temple: ['聖誕千秋', '神威顯赫']
-}
-const currentCelebPhrases = computed(() => celebPhrases[celebrationType.value] || [])
-const availableMiddlePhrases = computed(() => cardCategory.value === 'funeral' ? currentFuneralPhrases.value : currentCelebPhrases.value)
-
-const parsedUpperTargetTokens = computed(() => upperTarget.value.split('').map(char => ({ char, isSmall: char === '媽' })))
-const maFontSize = computed(() => Math.max(12, (layout.value.upper_target?.size || 40) - 20))
-
-const defaultVertical = {
-  upper_prefix: { x: 620, y: 100, size: 36 }, upper_target: { x: 620, y: 220, size: 42 }, upper_suffix: { x: 620, y: 720, size: 36 },
-  middle: { x: 380, y: 220, size: 76 }, middle_2: { x: 280, y: 220, size: 76 },
-  bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 }, bottom_2: { x: 95, y: 480, size: 30 },
-  bottom_3: { x: 95, y: 640, size: 32 }, bottom_4: { x: 40, y: 480, size: 30 }, bottom_5: { x: 40, y: 640, size: 30 },
-  suffix: { x: 155, y: 860, size: 34 }
-}
-const defaultHorizontal = {
-  upper_prefix: { x: 80, y: 80, size: 34 }, upper_target: { x: 220, y: 80, size: 38 }, upper_suffix: { x: 920, y: 80, size: 34 },
-  middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
-  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 }, bottom_2: { x: 380, y: 520, size: 28 },
-  bottom_3: { x: 580, y: 520, size: 28 }, bottom_4: { x: 580, y: 530, size: 28 }, bottom_5: { x: 760, y: 530, size: 28 },
-  suffix: { x: 880, y: 530, size: 34 }
-}
-
-const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
-const switchOrientation = (vertical) => {
-  isVertical.value = vertical
-  layout.value = JSON.parse(JSON.stringify(vertical ? defaultVertical : defaultHorizontal))
-  nextTick(() => autoFitZoom())
-}
-const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
-
-// 🌟 安全防呆防護：絕不因缺漏屬性造成 Vue 白畫面
-const getStyle = (key) => {
-  const item = layout.value?.[key] || { x: 50, y: 50, size: 30 }
-  return { 
-    left: `${item.x ?? 50}px`, 
-    top: `${item.y ?? 50}px`, 
-    fontSize: `${item.size ?? 30}px`, 
-    ...getWeightStyle(weights.value?.[key]) 
-  }
-}
-const getUpperTargetBoxStyle = () => {
-  const item = layout.value?.upper_target || { x: 220, y: 80, size: 38 }
-  return { 
-    left: `${item.x ?? 220}px`, 
-    top: `${item.y ?? 80}px`, 
-    fontSize: `${item.size ?? 38}px`, 
-    whiteSpace: 'nowrap', 
-    overflow: 'visible', 
-    zIndex: 5, 
-    ...getWeightStyle(weights.value?.upper_target) 
-  }
-}
-
-let activeKey = null, currentAction = null, startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
-const startMove = (e, key) => {
-  activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
-  originX = layout.value[key].x; originY = layout.value[key].y
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const startResize = (e, key) => {
-  activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
-  originSize = layout.value[key].size
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-}
-const onPointerMove = (e) => {
-  if (!activeKey || !layout.value[activeKey]) return
-  const dx = (e.clientX - startX) / zoomLevel.value
-  const dy = (e.clientY - startY) / zoomLevel.value
-  if (currentAction === 'move') {
-    layout.value[activeKey].x = Math.round(originX + dx)
-    layout.value[activeKey].y = Math.round(originY + dy)
-  } else {
-    layout.value[activeKey].size = Math.max(14, Math.min(300, Math.round(originSize + (dx + dy) / 3)))
-  }
-}
-const onPointerUp = () => {
-  activeKey = null; currentAction = null
-  window.removeEventListener('pointermove', onPointerMove)
-  window.removeEventListener('pointerup', onPointerUp)
-}
-
-watch(gender, (val) => { ageStage.value = val === 'female' ? 'f_50_79' : 'm_50_69' })
-const onCardCategoryChange = () => {
-  if (cardCategory.value === 'funeral') {
-    upperPrefix.value = '敬悼'; upperSuffix.value = '千古'; suffixText.value = '敬輓'; middleText.value = currentFuneralPhrases.value[0] || '母儀千古'; middleText2.value = ''
-  } else {
-    upperPrefix.value = '祝'; upperSuffix.value = ''; suffixText.value = '敬賀'; middleText.value = currentCelebPhrases.value[0] || '高票當選'; middleText2.value = '為民服務'
-  }
-}
-
-// 🌟 6. 支援列印雙軌機制 (手機/平板相片模式無網址無時間，電腦送印自動透明)
-const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
-  if (isMobileDevice()) {
-    openPrintImageModal(targetId, titlePrefix, true)
-  } else {
-    if (isReceipt && selectedOrderId.value) {
-      const ord = orderList.value.find(o => o.id === selectedOrderId.value)
-      if (ord) updateOrderField(ord, 'receipt_status', '已列印')
-    }
-    window.print()
-  }
-}
-
-// 🌟 5. 產出列印彈窗（若送印模式自動隱藏底圖透明輸出，若確認模式則保留底圖）
-const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
-  const targetEl = document.getElementById(targetId)
-  if (!targetEl) return alert('找不到目標畫面！')
-  showToast(isPrintMode ? '⏳ 正在生成無色透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
-  try {
-    if (document.fonts?.ready) await document.fonts.ready
-    const origTransform = targetEl.style.transform
-    targetEl.style.transform = 'none'
-
-    const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
-    let origDisplay = ''
-    if (bgLayer && isPrintMode) {
-      origDisplay = bgLayer.style.display
-      bgLayer.style.display = 'none'
-    }
-
-    const canvas = await html2canvas(targetEl, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: isPrintMode ? null : '#ffffff',
-      logging: false,
-      ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
-    })
-
-    targetEl.style.transform = origTransform
-    if (bgLayer && isPrintMode) {
-      bgLayer.style.display = origDisplay
-    }
-
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-        URL.revokeObjectURL(shareModalImg.value)
-      }
-      shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = isPrintMode ? `${titlePrefix} (透明列印)` : `${titlePrefix} (確認預覽)`
-      shareModalFilename.value = `${titlePrefix}.png`
-      currentBlobToShare.value = blob
-      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: 'image/png' })] }))
-    }, 'image/png')
-  } catch (err) {
-    showToast('⚠️ 生成失敗，請重試！')
-  }
-}
-
-// 🌟 6. 手機直接列印相片 (頁面無網址、無日期時間、單頁乾淨送印)
-const triggerImagePrint = () => {
-  if (!shareModalImg.value) return
-  const imgUrl = shareModalImg.value
-  const printWin = window.open('', '_blank')
-  if (printWin) {
-    printWin.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>列印</title>
-          <style>
-            @page { size: auto; margin: 0mm !important; }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              width: 100vw; height: 100vh; margin: 0 !important; padding: 0 !important;
-              display: flex; justify-content: center; align-items: center; 
-              background: transparent !important; overflow: hidden !important;
-            }
-            img { max-width: 100%; max-height: 100%; object-fit: contain; }
-          </style>
-        </head>
-        <body onload="window.focus(); window.print(); window.close();">
-          <img src="${imgUrl}" />
-        </body>
-      </html>
-    `)
-    printWin.document.close()
-  } else {
-    window.location.href = imgUrl
-  }
-}
-
-const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花卡確認', false)
-const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
-const shareFarmerReceiptDirect = () => openPrintImageModal('farmer-print-target', '農民收據確認', false)
-
-// 🌟 雲端草稿庫功能 (100% 完整原味保存)
+// 雲端草稿庫函式
 const loadCloudDrafts = async () => {
   try {
     const { data } = await supabase.from('card_drafts').select('*').order('created_at', { ascending: false })
@@ -2832,26 +2533,7 @@ const saveCurrentAsCloudDraft = async () => {
   const phrase = middleText.value.trim() || '無中款'
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
-  await supabase.from('card_drafts').insert([{ 
-    id: draftId, 
-    title: draftTitle, 
-    data: { 
-      cardPaperSize: cardPaperSize.value, 
-      isVertical: isVertical.value, 
-      cardCategory: cardCategory.value, 
-      cardFontFamily: cardFontFamily.value, 
-      cardBgType: cardBgType.value,
-      upperPrefix: upperPrefix.value, 
-      upperTarget: upperTarget.value, 
-      upperSuffix: upperSuffix.value, 
-      middleText: middleText.value, 
-      middleText2: middleText2.value, 
-      suffixText: suffixText.value, 
-      bottomLines: bottomLines.value, 
-      weights: weights.value, 
-      layout: layout.value 
-    } 
-  }])
+  await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, cardBgType: cardBgType.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
   showToast(`☁️ 花卡已成功存至雲端！`)
   await loadCloudDrafts()
   selectedDraftId.value = draftId
@@ -2860,20 +2542,10 @@ const loadCloudDraft = (id) => {
   const item = cloudDrafts.value.find(d => d.id === id)
   if (item?.data) {
     const draft = item.data
-    cardPaperSize.value = draft.cardPaperSize || 'A4'
-    isVertical.value = draft.isVertical
-    cardCategory.value = draft.cardCategory
-    cardFontFamily.value = draft.cardFontFamily || 'kai'
-    cardBgType.value = draft.cardBgType || 'red'
-    upperPrefix.value = draft.upperPrefix || ''
-    upperTarget.value = draft.upperTarget || ''
-    upperSuffix.value = draft.upperSuffix || ''
-    middleText.value = draft.middleText || ''
-    middleText2.value = draft.middleText2 || ''
-    suffixText.value = draft.suffixText || '敬輓'
-    bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines))
-    weights.value = JSON.parse(JSON.stringify(draft.weights))
-    layout.value = JSON.parse(JSON.stringify(draft.layout))
+    cardPaperSize.value = draft.cardPaperSize || 'A4'; isVertical.value = draft.isVertical; cardCategory.value = draft.cardCategory; cardFontFamily.value = draft.cardFontFamily || 'kai'; cardBgType.value = draft.cardBgType || 'red'
+    upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
+    middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
+    bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
     showToast(`📂 已載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
@@ -2885,14 +2557,7 @@ const deleteCloudDraft = async (id) => {
   selectedDraftId.value = ''
 }
 const startNewCard = () => {
-  upperTarget.value = ''
-  middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'
-  middleText2.value = ''
-  selectedDraftId.value = ''
-  targetX1.value = ''
-  targetX2.value = ''
-  resetPositions()
-  showToast('✨ 已為您建立空白花卡！')
+  upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 已為您建立空白花卡！')
 }
 
 // 簽收單管理
@@ -3394,6 +3059,7 @@ input, select, textarea {
 .highlight-panel { background: #eff6ff; border: 2px solid #3b82f6; }
 .bold-select { font-weight: bold; font-size: 13.5px; border-color: #3b82f6; }
 
+.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .section-title-with-weight { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .ctrl-row-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 .mini-weight-select {
@@ -3407,7 +3073,6 @@ input, select, textarea {
   width: 100%; margin-top: 6px; padding: 7px; background: #db2777; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;
 }
 
-.section-title { font-size: 13px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
 .form-group { margin-bottom: 8px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #334155; }
 .bottom-input-group { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
@@ -3576,7 +3241,7 @@ input, select, textarea {
 }
 
 .print-action-btn {
-  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
+  width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
@@ -3589,7 +3254,7 @@ input, select, textarea {
 }
 
 /* =========================================================================
-   🌟 5. 全平台列印防空白頁與單頁強制保證（送印時背景抽空為 100% 透明）
+   🌟 5. 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
 ========================================================================= */
 @media print {
   @page {
