@@ -1,6 +1,6 @@
 <template>
   <div class="main-wrapper">
-    <!-- ================= 內部安全通行碼驗證畫面 ================= -->
+    <!-- ================= 內部通行碼驗證畫面 ================= -->
     <div v-if="!isAuthenticated" class="auth-lock-overlay">
       <div class="auth-lock-card">
         <div class="lock-icon">🔒</div>
@@ -74,12 +74,12 @@
         </div>
       </header>
 
-      <!-- 浮動提示橫條 -->
+      <!-- 提示橫條 -->
       <div v-if="toastMessage" class="floating-toast no-print">
         {{ toastMessage }}
       </div>
 
-      <!-- 圖片傳送 / 無色透明背景列印專用彈窗 -->
+      <!-- 圖片傳送 / 無色透明背景列印彈窗 -->
       <div v-if="shareModalImg" class="image-modal-overlay no-print" @click="closeShareModal">
         <div class="image-modal-content share-preview-modal" @click.stop>
           <div class="image-modal-header">
@@ -104,23 +104,10 @@
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>特製紙張（紅色/粉紅色）列印提示：</b></span>
-              <span>• <b>已設定無色透明</b>：圖檔完全不帶白色底，印在紅色或粉紅紙上時，<b>只會印出墨水文字與印章，絕不吃底色！</b></span>
-              <span>• <b>手機列印無網址</b>：點擊上方「直接列印」，手機將以單張照片輸出，<b>底部絕不出現網址、日期與頁碼！</b></span>
+              <span>💡 <b>列印與傳送提示：</b></span>
+              <span>• <b>已設定無色透明</b>：圖檔不帶白色底，印在紅色或粉紅紙上時只印出墨水文字與印章。</span>
+              <span>• <b>消除底部網址</b>：點擊上方「直接列印」，手機將以單張照片輸出，底端不出現網址與時間。</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 品種照片放大檢視彈窗 -->
-      <div v-if="activeModalPhoto" class="image-modal-overlay no-print" @click="activeModalPhoto = null">
-        <div class="image-modal-content" @click.stop>
-          <div class="image-modal-header">
-            <span>🌸 {{ activeModalTitle }}</span>
-            <button class="close-modal-btn" @click="activeModalPhoto = null">✕</button>
-          </div>
-          <div class="share-modal-body">
-            <img :src="activeModalPhoto" class="share-preview-img-contained" alt="品種大圖" />
           </div>
         </div>
       </div>
@@ -375,42 +362,6 @@
               </div>
             </div>
           </section>
-
-          <!-- 模組 2：客戶未結對帳專區 -->
-          <section v-if="subTab === 'statement'" class="tab-pane">
-            <div class="card-box">
-              <h3>📊 客戶未結帳款彙整與對帳</h3>
-              <div class="statement-filter-grid">
-                <div class="field">
-                  <label>選擇對帳客戶：</label>
-                  <select v-model="statementCustomer">
-                    <option value="">-- 請選擇客戶 (全部客戶) --</option>
-                    <option v-for="c in customers" :key="c.id" :value="c.name">
-                      {{ c.name }} ({{ c.type }} / {{ c.billing_cycle || '每單結' }})
-                    </option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>統計期間：</label>
-                  <select v-model="statementPeriod">
-                    <option value="all">全部歷史紀錄</option>
-                    <option value="thisWeek">本週 (週一至週日)</option>
-                    <option value="thisMonth">本月 (1日至今)</option>
-                    <option value="lastMonth">上月全月</option>
-                    <option value="custom">🗓️ 自訂日期區間</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 模組 3：進貨與庫存 -->
-          <section v-if="subTab === 'inventory'" class="tab-pane">
-            <div class="card-box">
-              <h3>📦 庫存清單</h3>
-              <p>庫存資料正常顯示。</p>
-            </div>
-          </section>
         </div>
       </div>
 
@@ -432,16 +383,17 @@
               <div class="inline-item-flex">
                 <label class="mini-field-lbl">字體選擇：</label>
                 <select v-model="cardFontFamily" class="full-input compact-inline-select font-bold">
-                  <option value="kai">標準標楷體 / 書法楷書體 (全平台通用)</option>
+                  <option value="kai">標準標楷體 / 書法楷書體 (手機/電腦通用)</option>
                   <option value="song">古典宋體 / 明體風格</option>
                   <option value="fangsong">仿宋古典體 (FangSong)</option>
                   <option value="sans">現代簡約黑體</option>
                 </select>
               </div>
               <div class="inline-item-fixed">
-                <label class="mini-field-lbl">中款粗細：</label>
+                <label class="mini-field-lbl">中款預設粗細：</label>
                 <select v-model="weights.middle" class="full-input compact-inline-select font-bold text-blue">
-                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="600">600 (半粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
+                  <option value="400">400 (正常)</option><option value="500">500 (微厚)</option><option value="550">550 (中厚)</option>
+                  <option value="600">600 (半粗)</option><option value="650">650 (厚粗)</option><option value="700">700 (粗體)</option><option value="800">800 (特粗)</option>
                 </select>
               </div>
             </div>
@@ -455,25 +407,33 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <label>卡片類型：</label>
+            <select v-model="cardCategory" @change="onCardCategoryChange">
+              <option value="funeral">喪禮弔唁</option>
+              <option value="celebration">慶賀祝典</option>
+            </select>
+          </div>
+
           <!-- 上款 -->
           <div class="panel-section">
             <div class="section-title-with-weight">
               <span class="section-title">1. 開頭敬詞：</span>
               <input type="number" v-model.number="layout.upper_prefix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperPrefix" class="full-input mt-1" />
+            <input type="text" v-model="upperPrefix" class="full-input mt-1" placeholder="例: 敬悼 或 恭祝" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">2. 受禮對象：</span>
               <input type="number" v-model.number="layout.upper_target.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperTarget" class="full-input mt-1" />
+            <input type="text" v-model="upperTarget" class="full-input mt-1" placeholder="受禮人姓名稱謂" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">3. 上款結尾詞：</span>
               <input type="number" v-model.number="layout.upper_suffix.size" min="14" max="250" class="compact-size-input" />
             </div>
-            <input type="text" v-model="upperSuffix" class="full-input mt-1" />
+            <input type="text" v-model="upperSuffix" class="full-input mt-1" placeholder="留空則不顯示" />
           </div>
 
           <!-- 中款 -->
@@ -482,13 +442,13 @@
               <span class="section-title">中款第 1 行：</span>
               <input type="number" v-model.number="layout.middle.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText" class="full-input mt-1" />
+            <input type="text" v-model="middleText" class="full-input mt-1" placeholder="中款題詞" />
 
             <div class="section-title-with-weight mt-2">
               <span class="section-title">中款第 2 行：</span>
               <input type="number" v-model.number="layout.middle_2.size" min="14" max="300" class="compact-size-input" />
             </div>
-            <input type="text" v-model="middleText2" class="full-input mt-1" />
+            <input type="text" v-model="middleText2" class="full-input mt-1" placeholder="留空則不顯示第 2 行" />
           </div>
 
           <!-- 下款 -->
@@ -497,7 +457,9 @@
             <div v-for="(item, idx) in bottomLines" :key="idx" class="bottom-input-group">
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" class="flex-input" />
+              <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
             </div>
+
             <div class="section-title-with-weight mt-2">
               <span class="section-title">結尾敬詞：</span>
               <input type="number" v-model.number="layout.suffix.size" min="14" max="200" class="compact-size-input" />
@@ -529,6 +491,7 @@
               height: (currentCardDimensions.h * zoomLevel) + 'px'
             }"
           >
+            <!-- 🌟 花卡主體 (透明底色設定) -->
             <div 
               id="card-print-target" 
               class="card-board target-kai-font transparent-target" 
@@ -1014,7 +977,7 @@ const getStyle = (key) => {
   return { 
     left: `${item.x ?? 50}px`, 
     top: `${item.y ?? 50}px`, 
-    fontSize: `${item.size ?? 30}px`,
+    fontSize: `${item.size ?? 30}px`, 
     fontWeight: weights.value?.[key] || '700'
   }
 }
@@ -1024,12 +987,14 @@ const getUpperTargetBoxStyle = () => {
     left: `${item.x ?? 220}px`, 
     top: `${item.y ?? 80}px`, 
     fontSize: `${item.size ?? 38}px`, 
-    whiteSpace: 'nowrap',
+    whiteSpace: 'nowrap', 
     fontWeight: weights.value?.upper_target || '700'
   }
 }
 
-// 🌟 核心：100% 無色透明背景 (Transparent PNG) 產出引擎
+// =========================================================================
+// 🌟 100% 無色透明背景 (Transparent PNG) 產出引擎
+// =========================================================================
 const openTransparentPrintModal = async (targetId, titlePrefix) => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
@@ -1039,7 +1004,6 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
-    // 🌟 backgroundColor: null 強制去除任何白底，100% 透明無色！
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
@@ -1049,7 +1013,6 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
     })
     targetEl.style.transform = origTransform
 
-    // 轉為純 PNG (支援 Alpha 透明通道)
     canvas.toBlob((blob) => {
       if (!blob) return
       if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
@@ -1066,7 +1029,6 @@ const openTransparentPrintModal = async (targetId, titlePrefix) => {
   }
 }
 
-// 在彈窗內觸發無網址相片列印
 const triggerTransparentPrint = () => {
   if (!shareModalImg.value) return
   const imgUrl = shareModalImg.value
@@ -1190,12 +1152,12 @@ input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #cbd5
 .card-board.mode-horizontal .text-box { writing-mode: horizontal-tb; letter-spacing: 6px; }
 .text-box { position: absolute; cursor: move; white-space: nowrap; color: #0f172a; padding: 2px 4px; }
 
-/* 🌟 單據與花卡專屬：強制套用 Noto Serif TC 書法正楷切片 */
+/* 🌟 單據與花卡專屬字體 */
 .target-kai-font {
   font-family: "Noto Serif TC", "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", serif !important;
 }
 
-/* 🌟 無色透明背景：預覽模式在底下襯一層淡白以供預覽，截圖時完全無色透明 */
+/* 🌟 無色透明背景 */
 .transparent-target {
   background-color: transparent !important;
 }
