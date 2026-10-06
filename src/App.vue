@@ -2791,9 +2791,11 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   }
 }
 
-const triggerImagePrint = () => {
+coconst triggerImagePrint = () => {
   if (!shareModalImg.value) return
   const imgUrl = shareModalImg.value
+  
+  // 建立乾淨的純圖片列印視窗
   const printWin = window.open('', '_blank')
   if (printWin) {
     printWin.document.write(`
@@ -2801,27 +2803,46 @@ const triggerImagePrint = () => {
       <html>
         <head>
           <title>列印</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <style>
-            @page { size: auto; margin: 0mm !important; }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              width: 100vw; height: 100vh; margin: 0 !important; padding: 0 !important;
-              display: flex; justify-content: center; align-items: center; 
-              background: transparent !important; overflow: hidden !important;
+            @page {
+              size: auto;
+              margin: 0mm !important;
             }
-            img { max-width: 100%; max-height: 100%; object-fit: contain; }
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              overflow: hidden !important;
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              background: transparent !important;
+            }
+            img {
+              max-width: 100% !important;
+              max-height: 100% !important;
+              width: auto !important;
+              height: auto !important;
+              object-fit: contain !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
           </style>
         </head>
-        <body onload="window.focus(); window.print(); window.close();">
-          <img src="${imgUrl}" />
+        <body>
+          <img src="${imgUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 250);" />
         </body>
       </html>
     `)
     printWin.document.close()
   } else {
+    // 若手機瀏覽器攔截開新視窗，直接導向該圖片供長按儲存或列印
     window.location.href = imgUrl
   }
 }
+
 
 const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花卡確認', false)
 const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
@@ -3574,8 +3595,12 @@ input, select, textarea {
 /* =========================================================================
    🌟 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
 ========================================================================= */
+/* =========================================================================
+   🌟 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
+========================================================================= */
 @media print {
   @page {
+    size: auto;
     margin: 0mm !important;
   }
 
@@ -3584,8 +3609,7 @@ input, select, textarea {
     padding: 0 !important;
     background: transparent !important;
     width: 100% !important;
-    height: 98vh !important;
-    max-height: 98vh !important;
+    height: 100% !important;
     overflow: hidden !important;
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
@@ -3602,8 +3626,7 @@ input, select, textarea {
     display: block !important; 
     position: static !important;
     width: 100% !important;
-    height: 98vh !important;
-    max-height: 98vh !important;
+    height: 100% !important;
     overflow: hidden !important;
     transform: none !important;
   }
@@ -3620,7 +3643,8 @@ input, select, textarea {
     visibility: visible !important; 
     border: none !important; 
     background-color: transparent !important;
-    max-height: 98vh !important; 
+    page-break-inside: avoid !important; 
+    break-inside: avoid !important; 
     page-break-after: avoid !important; 
     break-after: avoid !important; 
   }
@@ -3629,7 +3653,7 @@ input, select, textarea {
   }
   #card-print-target * { visibility: visible !important; }
 
-  /* 簽收單與農民收據：高度收在 130mm 內，完全單頁輸出 */
+  /* 簽收單與農民收據：高度自動收斂，強制單頁 */
   #receipt-print-target, #farmer-print-target { 
     position: relative !important; 
     top: 0 !important; 
@@ -3640,16 +3664,16 @@ input, select, textarea {
     width: 192mm !important; 
     max-width: 192mm !important; 
     height: 130mm !important; 
-    max-height: 130mm !important; 
-    margin: 3mm auto 0 auto !important; 
+    margin: 2mm auto 0 auto !important; 
     padding: 4mm 6mm !important; 
     box-sizing: border-box !important; 
     overflow: hidden !important; 
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
     page-break-after: avoid !important; 
     break-after: avoid !important; 
   }
 
-  /* 強制標楷體 */
   #receipt-print-target *, #farmer-print-target *, #card-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
