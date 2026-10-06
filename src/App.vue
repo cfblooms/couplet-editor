@@ -2749,30 +2749,39 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
 const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
-  showToast(isPrintMode ? '⏳ 正在生成無色透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
+  showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
+  
   try {
     if (document.fonts?.ready) await document.fonts.ready
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
+    // 🌟 核心：只要是列印模式 (isPrintMode === true)，不管選什麼底圖，強制隱藏底圖與背景色
     const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
-    let origDisplay = ''
-    if (bgLayer && isPrintMode) {
-      origDisplay = bgLayer.style.display
-      bgLayer.style.display = 'none'
+    let origBgDisplay = ''
+    let origBgColor = targetEl.style.backgroundColor
+    
+    if (isPrintMode) {
+      if (bgLayer) {
+        origBgDisplay = bgLayer.style.display
+        bgLayer.style.display = 'none' // 抽空底圖
+      }
+      targetEl.style.backgroundColor = 'transparent' // 抽空底色
     }
 
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: isPrintMode ? null : '#ffffff',
+      backgroundColor: null, // 透明背景輸出
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
+    // 🌟 輸出完成後，立刻還原手機螢幕上的原樣，讓你看得到底圖
     targetEl.style.transform = origTransform
-    if (bgLayer && isPrintMode) {
-      bgLayer.style.display = origDisplay
+    if (isPrintMode) {
+      if (bgLayer) bgLayer.style.display = origBgDisplay
+      targetEl.style.backgroundColor = origBgColor
     }
 
     canvas.toBlob((blob) => {
@@ -2781,7 +2790,7 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
         URL.revokeObjectURL(shareModalImg.value)
       }
       shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = isPrintMode ? `${titlePrefix} (透明列印)` : `${titlePrefix} (確認預覽)`
+      shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
       shareModalFilename.value = `${titlePrefix}.png`
       currentBlobToShare.value = blob
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: 'image/png' })] }))
