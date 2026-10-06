@@ -2801,7 +2801,6 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
 }
 
 const triggerImagePrint = async () => {
-  // 1. 自動判斷當前要印哪一個目標（花卡、簽收單或農民收據）
   let targetId = 'card-print-target'
   if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
   else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
@@ -2809,76 +2808,83 @@ const triggerImagePrint = async () => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
 
-  showToast('⏳ 正在自動抽空背景，準備透明送印...')
+  showToast('⏳ 正在為手機準備透明送印...')
 
   try {
     if (document.fonts?.ready) await document.fonts.ready
     const origTransform = targetEl.style.transform
     targetEl.style.transform = 'none'
 
-    // 2. 強制抽掉底圖層與底色（保證 100% 透明無底圖）
+    // 抽空底圖與底色
     const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
     let origBgDisplay = ''
     let origBgColor = targetEl.style.backgroundColor
     
     if (bgLayer) {
       origBgDisplay = bgLayer.style.display
-      bgLayer.style.display = 'none' // 抽空底圖
+      bgLayer.style.display = 'none'
     }
-    targetEl.style.backgroundColor = 'transparent' // 抽空底色
+    targetEl.style.backgroundColor = 'transparent'
 
-    // 3. 轉成高解析透明圖
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: null, // 透明背景
+      backgroundColor: null,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 4. 立即還原畫面上的底圖（不影響螢幕預覽）
+    // 還原螢幕顯示
     targetEl.style.transform = origTransform
     if (bgLayer) bgLayer.style.display = origBgDisplay
     targetEl.style.backgroundColor = origBgColor
 
-    const transparentImgUrl = canvas.toDataURL('image/png')
+    const imgDataUrl = canvas.toDataURL('image/png')
 
-    // 5. 送印透明圖
-    const printWin = window.open('', '_blank')
-    if (printWin) {
-      printWin.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>列印</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-              @page { size: auto; margin: 0mm !important; }
-              html, body {
-                margin: 0 !important; padding: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                overflow: hidden !important; display: flex !important;
-                justify-content: center !important; align-items: center !important;
-                background: transparent !important;
-              }
-              img {
-                max-width: 100% !important; max-height: 100% !important;
-                width: auto !important; height: auto !important;
-                object-fit: contain !important; page-break-inside: avoid !important;
-              }
-            </style>
-          </head>
-          <body>
-            <img src="${transparentImgUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 250);" />
-          </body>
-        </html>
-      `)
-      printWin.document.close()
-    } else {
-      window.location.href = transparentImgUrl
+    // 🌟 透過隱藏 iframe 呼叫列印，避開 iOS Safari 的彈窗攔截
+    let printFrame = document.getElementById('cf-mobile-print-iframe')
+    if (printFrame) {
+      document.body.removeChild(printFrame)
     }
+    printFrame = document.createElement('iframe')
+    printFrame.id = 'cf-mobile-print-iframe'
+    printFrame.style.position = 'fixed'
+    printFrame.style.right = '0'
+    printFrame.style.bottom = '0'
+    printFrame.style.width = '0'
+    printFrame.style.height = '0'
+    printFrame.style.border = '0'
+    document.body.appendChild(printFrame)
+
+    const frameDoc = printFrame.contentWindow || printFrame.contentDocument.document || printFrame.contentDocument
+    frameDoc.document.open()
+    frameDoc.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            @page { size: auto; margin: 0mm !important; }
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100% !important; height: 100% !important;
+              display: flex !important; justify-content: center !important; align-items: center !important;
+              background: transparent !important;
+            }
+            img {
+              max-width: 100% !important;
+              max-height: 98vh !important;
+              object-fit: contain !important;
+            }
+          </style>
+        </head>
+        <body>
+          <img src="${imgDataUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 200);" />
+        </body>
+      </html>
+    `)
+    frameDoc.document.close()
   } catch (err) {
-    showToast('⚠️ 送印準備失敗，請重試！')
+    showToast('⚠️ 生成失敗，請重試！')
   }
 }
 
