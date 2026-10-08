@@ -6,12 +6,12 @@
         <div class="lock-icon">🔒</div>
         <h2>宸豐蘭藝・內部管理系統</h2>
         <p class="lock-subtitle">本系統僅限內部工作人員使用，請輸入管理密碼</p>
-        
+
         <div class="lock-form">
-          <input 
-            type="password" 
-            v-model="inputPasscode" 
-            placeholder="請輸入內部通行密碼" 
+          <input
+            type="password"
+            v-model="inputPasscode"
+            placeholder="請輸入內部通行密碼"
             class="lock-input"
             autofocus
             @keydown.enter.prevent="handleLogin"
@@ -35,47 +35,22 @@
       <header class="no-print top-nav">
         <div class="nav-title">🌸 宸豐蘭藝</div>
         <div class="nav-tabs">
-          <button 
-            type="button" 
-            :class="{ active: currentTab === 'manage' }" 
-            @click="currentTab = 'manage'"
-          >
+          <button type="button" :class="{ active: currentTab === 'manage' }" @click="currentTab = 'manage'">
             💼 蘭花庫存・客戶・訂單管理
           </button>
-          <button 
-            type="button" 
-            :class="{ active: currentTab === 'couplet' }" 
-            @click="currentTab = 'couplet'"
-          >
+          <button type="button" :class="{ active: currentTab === 'couplet' }" @click="currentTab = 'couplet'">
             🎴 花卡 / 輓聯編輯器 (A3/A4/A5)
           </button>
-          <button 
-            type="button" 
-            :class="{ active: currentTab === 'receipt' }" 
-            @click="currentTab = 'receipt'"
-          >
+          <button type="button" :class="{ active: currentTab === 'receipt' }" @click="currentTab = 'receipt'">
             📄 訂單 A5 簽收單 (支援線上簽名)
           </button>
-          <button 
-            type="button" 
-            :class="{ active: currentTab === 'farmer_receipt' }" 
-            @click="currentTab = 'farmer_receipt'"
-          >
+          <button type="button" :class="{ active: currentTab === 'farmer_receipt' }" @click="currentTab = 'farmer_receipt'">
             🧾 農民收據
           </button>
-          <button 
-            type="button" 
-            :class="{ active: currentTab === 'dispatch' }" 
-            @click="currentTab = 'dispatch'"
-          >
+          <button type="button" :class="{ active: currentTab === 'dispatch' }" @click="currentTab = 'dispatch'">
             🚚 同業代送單 (A5)
           </button>
-          <button 
-            type="button" 
-            class="logout-nav-btn" 
-            @click="handleLogout"
-            title="登出並鎖定系統"
-          >
+          <button type="button" class="logout-nav-btn" @click="handleLogout" title="登出並鎖定系統">
             🔒 登出
           </button>
         </div>
@@ -97,22 +72,22 @@
             <div class="share-img-scroll-container">
               <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
             </div>
-            
-           <div class="share-btn-action-group">
-              <!-- 🌟 只有在列印模式 (無底圖) 時才顯示列印按鈕，給客人看的「直接傳送」彈窗徹底移除此鈕 -->
-              <button 
-                v-if="shareModalTitle.includes('透明送印')" 
-                type="button" 
-                class="mobile-print-btn" 
+
+            <div class="share-btn-action-group">
+              <!-- 只有在列印模式 (無底圖) 時才顯示列印按鈕 -->
+              <button
+                v-if="shareModalTitle.includes('透明送印')"
+                type="button"
+                class="mobile-print-btn"
                 @click="triggerImagePrint"
               >
                 🖨️ 手機直接列印 (AirPrint)
               </button>
-              
+
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-                📲 一鍵傳送至 LINE (客人確認 / Epson 遠端列印)
+                📲 一鍵傳送至 LINE
               </button>
-              
+
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
                 💾 下載圖檔至相簿 / 電腦
               </a>
@@ -121,7 +96,7 @@
             <div class="share-tips-row">
               <span>💡 <b>操作小提示：</b></span>
               <span v-if="shareModalTitle.includes('透明送印')">
-                • <b>Epson LINE 列印</b>：點「一鍵傳送至 LINE」選取 Epson 印表機對話框，即可自動透明送印，無底色、不縮放！
+                • <b>手機列印</b>：點「手機直接列印」開啟無底色滿版文件，再從分享選單選擇列印。
               </span>
               <span v-else>
                 • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
@@ -171,7 +146,7 @@
                   預計產生單號：<b>{{ editingOrderId || previewNextOrderId }}</b>
                 </span>
               </div>
-              
+
               <div class="form-grid">
                 <div class="field highlight-date-field">
                   <label>📅 下單日期：</label>
@@ -224,10 +199,10 @@
                 <!-- 送貨地址 -->
                 <div class="field highlight-field triple-width-field">
                   <label>🚚 送貨地址：</label>
-                  <input 
-                    v-model="formOrder.shipping_address" 
-                    type="text" 
-                    placeholder="例: 桃園市中壢區培英路...號 或 門市自取" 
+                  <input
+                    v-model="formOrder.shipping_address"
+                    type="text"
+                    placeholder="例: 桃園市中壢區培英路...號 或 門市自取"
                   />
                 </div>
               </div>
@@ -240,39 +215,26 @@
                 </div>
 
                 <datalist id="inv-flower-select-options">
-                  <option 
-                    v-for="f in flowerInventory" 
-                    :key="f.id" 
-                    :value="f.item_name"
-                  >
+                  <option v-for="f in flowerInventory" :key="f.id" :value="f.item_name">
                     【庫存 {{ f.qty }} 棵】規格: {{ f.spec }} / 成本單價 ${{ f.unit_cost || 0 }}
                   </option>
                 </datalist>
 
-                <div 
-                  v-for="(item, idx) in formOrder.items" 
-                  :key="idx" 
-                  class="order-item-card"
-                >
+                <div v-for="(item, idx) in formOrder.items" :key="idx" class="order-item-card">
                   <div class="item-card-title">
                     <span>品項 {{ idx + 1 }}</span>
-                    <button 
-                      v-if="formOrder.items.length > 1" 
-                      type="button" 
-                      class="remove-item-btn" 
-                      @click="removeOrderItemRow(idx)"
-                    >
+                    <button v-if="formOrder.items.length > 1" type="button" class="remove-item-btn" @click="removeOrderItemRow(idx)">
                       🗑
                     </button>
                   </div>
                   <div class="item-grid">
                     <div class="field">
                       <label>品種名稱</label>
-                      <input 
-                        v-model="item.orchid_name" 
-                        list="inv-flower-select-options" 
-                        @change="onFlowerSelectChange(item)" 
-                        placeholder="手動輸入或選取庫存" 
+                      <input
+                        v-model="item.orchid_name"
+                        list="inv-flower-select-options"
+                        @change="onFlowerSelectChange(item)"
+                        placeholder="手動輸入或選取庫存"
                       />
                     </div>
                     <div class="field highlight-field">
@@ -289,7 +251,7 @@
                     </div>
                     <div class="field">
                       <label>花色</label>
-                      <input v-model="item.flower_color" placeholder="例: 紅花、粉花、白花紅心" @input="calcOrderPrice" />
+                      <input v-model="item.flower_color" placeholder="例: 紅花、粉花、白花紅心" />
                     </div>
                     <div class="field">
                       <label>使用盆器</label>
@@ -317,7 +279,7 @@
                   </div>
 
                   <!-- 花卡資訊 (代送單與詳細對帳單調用) -->
-                  <div class="form-grid mt-2" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                  <div class="form-grid mt-2 card-info-grid">
                     <div class="field">
                       <label>🎴 花卡上款 (送給誰)</label>
                       <input v-model="item.card_upper" placeholder="例: 華德羅氏佛堂安座" />
@@ -387,9 +349,7 @@
                 <button class="primary-btn" @click="saveOrder">
                   {{ editingOrderId ? '確認更新此訂單' : '確認建立訂單' }}
                 </button>
-                <button v-if="editingOrderId" class="secondary-btn" @click="cancelEditOrder">
-                  取消
-                </button>
+                <button v-if="editingOrderId" class="secondary-btn" @click="cancelEditOrder">取消</button>
               </div>
             </div>
 
@@ -427,8 +387,8 @@
                       <td><b>{{ ord.customer }}</b></td>
                       <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>
-                        <select 
-                          v-model="ord.need_receipt" 
+                        <select
+                          v-model="ord.need_receipt"
                           :class="ord.need_receipt === '需開收據' ? 'badge badge-green' : 'badge badge-gray'"
                           @change="updateOrderField(ord, 'need_receipt', ord.need_receipt)"
                           class="uniform-status-select"
@@ -441,11 +401,11 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td>{{ getOrderShippingFee(ord) > 0 ? '$' + getOrderShippingFee(ord) : '免運' }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
-                      
+
                       <td>
-                        <select 
-                          v-model="ord.card_status" 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
+                        <select
+                          v-model="ord.card_status"
+                          :style="ord.card_status === '未製作' ? unmadeStyle : {}"
                           :class="getCardStatusClass(ord.card_status)"
                           @change="updateOrderField(ord, 'card_status', ord.card_status)"
                           class="uniform-status-select"
@@ -457,9 +417,9 @@
                       </td>
 
                       <td>
-                        <select 
-                          v-model="ord.receipt_status" 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
+                        <select
+                          v-model="ord.receipt_status"
+                          :style="ord.receipt_status === '未列印' ? unmadeStyle : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           @change="updateOrderField(ord, 'receipt_status', ord.receipt_status)"
                           class="uniform-status-select"
@@ -470,8 +430,8 @@
                       </td>
 
                       <td>
-                        <select 
-                          v-model="ord.shipped_status" 
+                        <select
+                          v-model="ord.shipped_status"
                           :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)"
                           class="uniform-status-select"
@@ -482,8 +442,8 @@
                       </td>
 
                       <td>
-                        <select 
-                          v-model="ord.payment_status" 
+                        <select
+                          v-model="ord.payment_status"
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
                           class="uniform-status-select"
@@ -496,40 +456,13 @@
                       <td class="action-cell">
                         <div class="stacked-action-container">
                           <div class="stacked-action-col">
-                            <button 
-                              class="cozy-btn clean-btn-noborder" 
-                              style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
-                              @click="fillReceiptFromOrder(ord)" 
-                              title="帶入簽收單"
-                            >
-                              🖨️ 簽收單
-                            </button>
-                            <button 
-                              class="cozy-btn clean-btn-noborder" 
-                              style="background-color: #DEE2FF !important; color: #28305c !important;" 
-                              @click="fillFarmerReceiptFromOrder(ord)" 
-                              title="帶入農民收據"
-                            >
-                              🧾 農民收據
-                            </button>
+                            <button class="cozy-btn clean-btn-noborder btn-receipt" @click="fillReceiptFromOrder(ord)" title="帶入簽收單">🖨️ 簽收單</button>
+                            <button class="cozy-btn clean-btn-noborder btn-farmer" @click="fillFarmerReceiptFromOrder(ord)" title="帶入農民收據">🧾 農民收據</button>
+                            <button class="cozy-btn clean-btn-noborder btn-dispatch" @click="fillDispatchFromOrder(ord)" title="帶入同業代送單">🚚 代送單</button>
                           </div>
                           <div class="stacked-action-col">
-                            <button 
-                              class="cozy-btn icon-only-btn clean-btn-noborder" 
-                              style="background-color: #E0FBFC !important; color: #155e75 !important;" 
-                              @click="startEditOrder(ord)" 
-                              title="修改此訂單"
-                            >
-                              ✏️
-                            </button>
-                            <button 
-                              class="cozy-btn icon-only-btn clean-btn-noborder" 
-                              style="background-color: #ebd8da !important; color: #6e2e34 !important;" 
-                              @click="deleteItem('orders', ord.id, loadOrders)" 
-                              title="刪除此訂單"
-                            >
-                              🗑️
-                            </button>
+                            <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditOrder(ord)" title="修改此訂單">✏️</button>
+                            <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('orders', ord.id, loadOrders)" title="刪除此訂單">🗑️</button>
                           </div>
                         </div>
                       </td>
@@ -543,7 +476,7 @@
 
           <!-- 模組 2：客戶未結對帳專區 -->
           <section v-if="subTab === 'statement'" class="tab-pane">
-            <div class="card-box">
+            <div class="card-box no-print">
               <h3>📊 客戶未結帳款彙整與對帳</h3>
               <div class="statement-filter-grid">
                 <div class="field">
@@ -603,18 +536,14 @@
               </div>
 
               <div class="statement-actions mt-3">
-              <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
+                <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
                   🖨️ 列印詳細對帳單 (A4・含卡款與未結)
                 </button>
-                <button class="line-btn" @click="copyLineStatement">
-                  📋 一鍵複製 LINE 對帳明細
-                </button>
-                <button class="excel-btn" @click="exportStatementExcel">
-                  📊 下載客戶對帳單 Excel
-                </button>
-                <button 
+                <button class="line-btn" @click="copyLineStatement">📋 一鍵複製 LINE 對帳明細</button>
+                <button class="excel-btn" @click="exportStatementExcel">📊 下載客戶對帳單 Excel</button>
+                <button
                   v-if="statementOrders.length > 0 && statementPaymentFilter === '未結'"
-                  class="batch-pay-btn" 
+                  class="batch-pay-btn"
                   @click="batchMarkPaid"
                 >
                   ✅ 一鍵將此清單標記為「已結清」
@@ -622,7 +551,7 @@
               </div>
             </div>
 
-            <div class="card-box mt-3">
+            <div class="card-box mt-3 no-print">
               <h3>📑 對帳單訂單明細 ({{ statementOrders.length }} 筆)</h3>
               <div class="table-responsive">
                 <table class="data-table">
@@ -642,26 +571,22 @@
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
                       <td class="nowrap-cell">
-                        <span 
-                          :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
-                          :class="getCardStatusClass(ord.card_status)" 
+                        <span
+                          :style="ord.card_status === '未製作' ? unmadeStyle : {}"
+                          :class="getCardStatusClass(ord.card_status)"
                           class="uniform-status-badge"
-                        >
-                          {{ ord.card_status || '未製作' }}
-                        </span>
+                        >{{ ord.card_status || '未製作' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <span 
-                          :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}"
+                        <span
+                          :style="ord.receipt_status === '未列印' ? unmadeStyle : {}"
                           :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'"
                           class="uniform-status-badge"
-                        >
-                          {{ ord.receipt_status || '未列印' }}
-                        </span>
+                        >{{ ord.receipt_status || '未列印' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <select 
-                          v-model="ord.payment_status" 
+                        <select
+                          v-model="ord.payment_status"
                           :class="ord.payment_status === '已結' ? 'badge badge-green' : 'badge badge-red'"
                           @change="updateOrderField(ord, 'payment_status', ord.payment_status)"
                           class="uniform-status-select"
@@ -672,27 +597,17 @@
                       </td>
                       <td>
                         <div class="stacked-action-col">
-                          <button 
-                            class="cozy-btn clean-btn-noborder" 
-                            style="background-color: #F3EEC3 !important; color: #5a5410 !important;" 
-                            @click="fillReceiptFromOrder(ord)" 
-                          >
-                            🖨️ 簽收單
-                          </button>
-                          <button 
-                            class="cozy-btn clean-btn-noborder" 
-                            style="background-color: #DEE2FF !important; color: #28305c !important;" 
-                            @click="fillFarmerReceiptFromOrder(ord)" 
-                          >
-                            🧾 農民收據
-                          </button>
+                          <button class="cozy-btn clean-btn-noborder btn-receipt" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder btn-farmer" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                         </div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </div><!-- A4 詳細對帳單實體列印版型 (平時不影響操作，按列印自動調用) -->
+            </div>
+
+            <!-- A4 詳細對帳單實體列印版型 (平時隱藏，按列印才呈現) -->
             <div id="statement-print-target" class="card-box mt-3 statement-a4-sheet no-screen-display">
               <div class="statement-sheet-header">
                 <div class="shop-title-row">
@@ -803,20 +718,12 @@
 
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>耗材品名 (直接自行輸入)：</label>
-                  <input 
-                    v-model="formInv.item_name" 
-                    type="text"
-                    placeholder="例: 水苔、透明軟盆、花卡插籤、肥料、鐵線" 
-                  />
+                  <input v-model="formInv.item_name" type="text" placeholder="例: 水苔、透明軟盆、花卡插籤、肥料、鐵線" />
                 </div>
 
                 <div v-if="formInv.category === '耗材/配件'" class="field highlight-field">
                   <label>詳細規格 / 包裝單位：</label>
-                  <input 
-                    v-model="formInv.spec_supply" 
-                    type="text"
-                    placeholder="例: 5kg/包、3.5吋 100入/袋、50米/捲" 
-                  />
+                  <input v-model="formInv.spec_supply" type="text" placeholder="例: 5kg/包、3.5吋 100入/袋、50米/捲" />
                 </div>
 
                 <div v-if="formInv.category === '蘭花'" class="field">
@@ -889,8 +796,8 @@
                       <td>{{ inv.date }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditInv(inv)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('inventory', inv.id, loadInventory)">🗑</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditInv(inv)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('inventory', inv.id, loadInventory)">🗑</button>
                         </div>
                       </td>
                     </tr>
@@ -947,8 +854,8 @@
                       <td>{{ c.line_note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditCust(c)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('customers', c.id, loadCustomers)">🗑</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditCust(c)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('customers', c.id, loadCustomers)">🗑</button>
                         </div>
                       </td>
                     </tr>
@@ -996,8 +903,8 @@
                       <td>{{ item.note }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrchid(item)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditOrchid(item)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('orchids', item.id, loadOrchids)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -1043,8 +950,8 @@
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditRet(ret)">✏️</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #ebd8da !important; color: #6e2e34 !important;" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditRet(ret)">✏️</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -1081,10 +988,10 @@
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td>{{ ord.spec }}</td>
                       <td class="nowrap-cell">
-                        <span :style="ord.card_status === '未製作' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="getCardStatusClass(ord.card_status)" class="uniform-status-badge">{{ ord.card_status || '未製作' }}</span>
+                        <span :style="ord.card_status === '未製作' ? unmadeStyle : {}" :class="getCardStatusClass(ord.card_status)" class="uniform-status-badge">{{ ord.card_status || '未製作' }}</span>
                       </td>
                       <td class="nowrap-cell">
-                        <span :style="ord.receipt_status === '未列印' ? { backgroundColor: '#F9F0F0 !important', color: '#D96B66 !important', border: '1px solid #F0D5D5 !important' } : {}" :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'" class="uniform-status-badge">{{ ord.receipt_status || '未列印' }}</span>
+                        <span :style="ord.receipt_status === '未列印' ? unmadeStyle : {}" :class="ord.receipt_status === '已列印' ? 'badge badge-soft-green' : 'badge'" class="uniform-status-badge">{{ ord.receipt_status || '未列印' }}</span>
                       </td>
                       <td class="nowrap-cell">
                         <select v-model="ord.shipped_status" :class="ord.shipped_status === '已出貨' ? 'badge badge-green' : 'badge badge-red'" @change="updateOrderField(ord, 'shipped_status', ord.shipped_status)" class="uniform-status-select">
@@ -1093,8 +1000,9 @@
                       </td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
-                          <button class="cozy-btn clean-btn-noborder" style="background-color: #F3EEC3 !important; color: #5a5410 !important;" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
-                          <button class="cozy-btn icon-only-btn clean-btn-noborder" style="background-color: #E0FBFC !important; color: #155e75 !important;" @click="startEditOrder(ord)">✏️</button>
+                          <button class="cozy-btn clean-btn-noborder btn-receipt" @click="fillReceiptFromOrder(ord)">🖨️ 簽收單</button>
+                          <button class="cozy-btn clean-btn-noborder btn-dispatch" @click="fillDispatchFromOrder(ord)">🚚 代送單</button>
+                          <button class="cozy-btn icon-only-btn clean-btn-noborder btn-edit" @click="startEditOrder(ord)">✏️</button>
                         </div>
                       </td>
                     </tr>
@@ -1121,7 +1029,7 @@
             </div>
           </div>
 
-          <!-- 實體底圖切換 (默認純白無底圖，選取後套用您在 Supabase 的 3 款真圖) -->
+          <!-- 實體底圖切換 -->
           <div class="panel-section highlight-panel">
             <label class="section-title">🌸 實體卡片樣式底圖 (客人預覽用)：</label>
             <select v-model="cardBgType" class="full-input bold-select">
@@ -1131,13 +1039,7 @@
               <option value="white">✨ 質感白底金邊花紋卡 (Supabase 白)</option>
               <option value="custom">📁 自行上傳其他底圖檔...</option>
             </select>
-            <input 
-              v-if="cardBgType === 'custom'" 
-              type="file" 
-              accept="image/*" 
-              class="full-input mt-1" 
-              @change="onCustomCardBgUpload" 
-            />
+            <input v-if="cardBgType === 'custom'" type="file" accept="image/*" class="full-input mt-1" @change="onCustomCardBgUpload" />
             <div class="sub-label-tip mt-1">
               💡 <b>防擠壓與列印說明</b>：
               <br>• 默認純白底，選取底圖可直接傳給客人確認實際效果！
@@ -1342,13 +1244,13 @@
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
               <div class="compact-size-wrap">
-                <input 
-                  type="number" 
-                  :value="layout['bottom_' + idx]?.size || 28" 
+                <input
+                  type="number"
+                  :value="layout['bottom_' + idx]?.size || 28"
                   @input="e => { if (!layout['bottom_' + idx]) layout['bottom_' + idx] = { x: 100, y: 500, size: 28 }; layout['bottom_' + idx].size = Number(e.target.value) }"
-                  min="14" 
-                  max="150" 
-                  class="compact-size-input" 
+                  min="14"
+                  max="150"
+                  class="compact-size-input"
                 />
               </div>
               <select v-model="weights['bottom_' + idx]" class="mini-weight-select">
@@ -1387,8 +1289,8 @@
             <button type="button" class="fit-btn" @click="autoFitZoom">📱 配合螢幕大小</button>
           </div>
 
-          <div 
-            class="card-scaler-container" 
+          <div
+            class="card-scaler-container"
             :style="{
               width: (currentCardDimensions.w * zoomLevel) + 'px',
               height: (currentCardDimensions.h * zoomLevel) + 'px',
@@ -1396,11 +1298,11 @@
               minHeight: '280px'
             }"
           >
-            <!-- 🌟 花卡主體 (獨立背景層防橫向擠壓，送印自動隱藏) -->
-            <div 
-              id="card-print-target" 
-              class="card-board" 
-              :class="isVertical ? 'mode-vertical' : 'mode-horizontal'"
+            <!-- 花卡主體 (獨立背景層防橫向擠壓，送印自動隱藏) -->
+            <div
+              id="card-print-target"
+              class="card-board"
+              :class="[isVertical ? 'mode-vertical' : 'mode-horizontal', cardFontFamily === 'kai' ? 'standard-kai-font' : '']"
               :style="{
                 width: currentCardDimensions.w + 'px',
                 height: currentCardDimensions.h + 'px',
@@ -1409,8 +1311,8 @@
                 fontFamily: activeCssFontFamily
               }"
             >
-              <!-- 🌟 獨立底圖層：非純白底時才呈現圖片，橫式等比自動旋轉對齊，絕不擠壓變形 -->
-              <div 
+              <!-- 獨立底圖層：非純白底時才呈現圖片 -->
+              <div
                 v-if="cardBgType !== 'none'"
                 class="card-dynamic-bg-layer"
                 :class="{ 'rotate-landscape-bg': !isVertical }"
@@ -1458,7 +1360,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 3：A5 橫式簽收單 (100% 原始漂亮呈現) ================= -->
+      <!-- ================= 模式 3：A5 橫式簽收單 ================= -->
       <div v-else-if="currentTab === 'receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>📋 橫式 A5 簽收單管理</h2>
@@ -1476,15 +1378,13 @@
           <div class="panel-section modern-sign-card">
             <div class="modern-sign-header">
               <span class="modern-sign-title">✍ 收件人現場手寫簽名</span>
-              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">
-                ↺ 清除重簽
-              </button>
+              <button type="button" class="modern-clean-sign-btn" @click="clearLiveSignature" title="清除目前的簽名並重簽">↺ 清除重簽</button>
             </div>
             <div class="modern-canvas-wrapper">
-              <canvas 
-                ref="signPadCanvasRef" 
-                class="modern-live-sign-pad" 
-                width="340" 
+              <canvas
+                ref="signPadCanvasRef"
+                class="modern-live-sign-pad"
+                width="340"
                 height="110"
                 @pointerdown="startSign"
                 @pointermove="drawingSign"
@@ -1498,75 +1398,48 @@
           <div class="panel-section">
             <label class="section-title">抬頭花店名稱：</label>
             <div class="btn-group">
-              <button 
-                type="button" 
-                :class="{ active: shopNameMode === 'default' }" 
-                @click="shopNameMode = 'default'"
-              >
-                宸豐蘭藝
-              </button>
-              <button 
-                type="button" 
-                :class="{ active: shopNameMode === 'custom' }" 
-                @click="shopNameMode = 'custom'"
-              >
-                自行輸入
-              </button>
+              <button type="button" :class="{ active: shopNameMode === 'default' }" @click="shopNameMode = 'default'">宸豐蘭藝</button>
+              <button type="button" :class="{ active: shopNameMode === 'custom' }" @click="shopNameMode = 'custom'">自行輸入</button>
             </div>
-            <input 
-              v-if="shopNameMode === 'custom'" 
-              type="text" 
-              v-model="customShopName" 
-              class="full-input mt-2" 
-              placeholder="請輸入自訂花店名稱" 
-            />
+            <input v-if="shopNameMode === 'custom'" type="text" v-model="customShopName" class="full-input mt-2" placeholder="請輸入自訂花店名稱" />
           </div>
 
           <div class="panel-section">
             <label class="section-title">✏ 簽收單內容確認與修改：</label>
-            
+
             <div class="form-group">
               <label>收件單位 / 聯絡人 / 電話：</label>
               <input type="text" v-model="receiptForm.recipient" />
             </div>
-
             <div class="form-group">
               <label>送達地址：</label>
               <input type="text" v-model="receiptForm.address" />
             </div>
-
             <div class="form-group">
               <label>送達日期：</label>
               <input type="text" v-model="receiptForm.deliveryDate" />
             </div>
-
             <div class="form-group">
               <label>花禮品項規格 (幾盆)：</label>
               <input type="text" v-model="receiptForm.item" placeholder="例：特選蘭花 1盆、特選蘭花 2盆 (共3盆)" />
             </div>
-
             <div class="form-group">
               <label>致贈單位 / 祝賀詞：</label>
               <input type="text" v-model="receiptForm.giver" />
             </div>
-
             <div class="form-group">
               <label>備註說明：</label>
               <textarea v-model="receiptForm.notes" rows="2"></textarea>
             </div>
           </div>
 
-          <button 
-            type="button" 
-            class="line-action-btn mt-2" 
-            @click="shareReceiptDirect"
-          >
+          <button type="button" class="line-action-btn mt-2" @click="shareReceiptDirect">
             📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
           </button>
 
-          <button 
-            type="button" 
-            class="print-action-btn mt-2" 
+          <button
+            type="button"
+            class="print-action-btn mt-2"
             :disabled="!receiptForm.recipient && !selectedOrderId"
             @click="handlePrintAction('receipt-print-target', '簽收單_A5', true)"
           >
@@ -1582,8 +1455,8 @@
             <button type="button" class="fit-btn" @click="autoFitReceipt">📱 適配螢幕</button>
           </div>
 
-          <div 
-            class="receipt-scaler-container" 
+          <div
+            class="receipt-scaler-container"
             :style="{
               width: (794 * receiptZoom) + 'px',
               height: (560 * receiptZoom) + 'px',
@@ -1591,13 +1464,10 @@
               minHeight: '200px'
             }"
           >
-            <div 
-              id="receipt-print-target" 
+            <div
+              id="receipt-print-target"
               class="a5-landscape-sheet kai-font-supported standard-kai-font"
-              :style="{
-                transform: `scale(${receiptZoom})`,
-                transformOrigin: 'top left'
-              }"
+              :style="{ transform: `scale(${receiptZoom})`, transformOrigin: 'top left' }"
             >
               <div class="sheet-header">
                 <div class="shop-name-title">{{ displayShopName }}</div>
@@ -1618,9 +1488,7 @@
                   </tr>
                   <tr>
                     <td class="lbl">花禮品項</td>
-                    <td class="val val-highlight" colspan="3">
-                      {{ receiptForm.item || '特選蘭花 1盆' }}
-                    </td>
+                    <td class="val val-highlight" colspan="3">{{ receiptForm.item || '特選蘭花 1盆' }}</td>
                   </tr>
                   <tr>
                     <td class="lbl">致贈/賀詞</td>
@@ -1650,7 +1518,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 4：農民收據 (100% 原始手刻格線呈現) ================= -->
+      <!-- ================= 模式 4：農民收據 (手刻格線) ================= -->
       <div v-else-if="currentTab === 'farmer_receipt'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🧾 農民出售農產品收據管理</h2>
@@ -1676,79 +1544,49 @@
           <div class="panel-section">
             <label class="section-title">✏ 收據內容確認與自由修改：</label>
             <div class="form-row">
-              <div class="field">
-                <label>民國年</label>
-                <input type="text" v-model="farmerReceipt.year" />
-              </div>
-              <div class="field">
-                <label>月</label>
-                <input type="text" v-model="farmerReceipt.month" />
-              </div>
-              <div class="field">
-                <label>日</label>
-                <input type="text" v-model="farmerReceipt.day" />
-              </div>
+              <div class="field"><label>民國年</label><input type="text" v-model="farmerReceipt.year" /></div>
+              <div class="field"><label>月</label><input type="text" v-model="farmerReceipt.month" /></div>
+              <div class="field"><label>日</label><input type="text" v-model="farmerReceipt.day" /></div>
             </div>
 
             <div class="form-group mt-2">
               <label>購貨商號名稱：</label>
               <input type="text" v-model="farmerReceipt.buyerName" />
             </div>
-
             <div class="form-group">
               <label>統一編號：</label>
               <input type="text" v-model="farmerReceipt.taxId" maxlength="8" />
             </div>
-
             <div class="form-group">
               <label>住址 (整大格顯示)：</label>
               <input type="text" v-model="farmerReceipt.buyerAddress" />
             </div>
-
             <div class="form-group">
               <label>品名：</label>
               <input type="text" v-model="farmerReceipt.itemName" />
             </div>
 
             <div class="form-row">
-              <div class="field">
-                <label>規格</label>
-                <input type="text" v-model="farmerReceipt.spec" />
-              </div>
-              <div class="field">
-                <label>數量</label>
-                <input type="text" v-model="farmerReceipt.qty" />
-              </div>
-              <div class="field">
-                <label>單價</label>
-                <input type="text" v-model="farmerReceipt.unitPrice" />
-              </div>
+              <div class="field"><label>規格</label><input type="text" v-model="farmerReceipt.spec" /></div>
+              <div class="field"><label>數量</label><input type="text" v-model="farmerReceipt.qty" /></div>
+              <div class="field"><label>單價</label><input type="text" v-model="farmerReceipt.unitPrice" /></div>
             </div>
 
             <div class="form-group mt-2">
               <label>總金額 (元，沒填時留空)：</label>
               <input type="number" v-model.number="farmerReceipt.totalAmount" @input="updateChineseAmount" placeholder="沒填時不印金額" />
             </div>
-
             <div class="form-group">
               <label>備註：</label>
               <input type="text" v-model="farmerReceipt.note" />
             </div>
           </div>
 
-          <button 
-            type="button" 
-            class="line-action-btn mt-2" 
-            @click="shareFarmerReceiptDirect"
-          >
+          <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptDirect">
             💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
           </button>
 
-          <button 
-            type="button" 
-            class="print-action-btn mt-2" 
-            @click="handlePrintAction('farmer-print-target', '農民收據_A5')"
-          >
+          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('farmer-print-target', '農民收據_A5')">
             🖨️ 列印農民收據
           </button>
         </div>
@@ -1762,8 +1600,8 @@
             <button type="button" class="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
           </div>
 
-          <div 
-            class="farmer-scaler-container" 
+          <div
+            class="farmer-scaler-container"
             :style="{
               width: (794 * farmerZoom) + 'px',
               height: (560 * farmerZoom) + 'px',
@@ -1771,13 +1609,10 @@
               minHeight: '200px'
             }"
           >
-            <div 
-              id="farmer-print-target" 
+            <div
+              id="farmer-print-target"
               class="farmer-receipt-sheet kai-font-supported standard-kai-font"
-              :style="{
-                transform: `scale(${farmerZoom})`,
-                transformOrigin: 'top left'
-              }"
+              :style="{ transform: `scale(${farmerZoom})`, transformOrigin: 'top left' }"
             >
               <div class="f-header">
                 <div class="f-title-wrap">
@@ -1874,9 +1709,7 @@
                 </div>
               </div>
 
-              <div class="f-statement">
-                本收據之農民身分確實無誤，若有不實者願依法受罰。
-              </div>
+              <div class="f-statement">本收據之農民身分確實無誤，若有不實者願依法受罰。</div>
 
               <div class="f-footer-note">
                 <b>附註：</b>依據財政部 68.11.2 台財稅第三七六六五號函：自 68 年 11 月 16 日起，凡農民出售其本身所生產、捕獲或畜養之農林漁牧產品所出具之收據，一律免納印花稅，農民資格之鑑定標準，依農業發展條例第三條第三款及該條例施行細則第二條第一款規定係指直接操作或經營農業生產之自然人。
@@ -1886,7 +1719,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 5：同業代送單 (A5 橫式標準規格) ================= -->
+      <!-- ================= 模式 5：同業代送單 (A5 橫式) ================= -->
       <div v-else-if="currentTab === 'dispatch'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🚚 同業代送單管理 (A5)</h2>
@@ -1905,7 +1738,7 @@
             <label class="section-title">✏️ 代送資料確認與修改：</label>
             <div class="form-group">
               <label>代送同業／司機名稱：</label>
-              <input type="text" v-model="dispatchForm.driverName" placeholder="例: 來來花苑 或 外送司機" />
+              <input type="text" v-model="dispatchForm.driverName" />
             </div>
             <div class="form-group">
               <label>司機／同業聯絡電話：</label>
@@ -1924,7 +1757,11 @@
               <input type="text" v-model="dispatchForm.deliveryTime" placeholder="例: 115.10.08 17時00分前" />
             </div>
             <div class="form-group">
-              <label>貨品品名與盆數規格：</label>
+              <label>貨品盆數：</label>
+              <input type="number" min="1" v-model.number="dispatchForm.potsQty" />
+            </div>
+            <div class="form-group">
+              <label>貨品規格與款式備註：</label>
               <input type="text" v-model="dispatchForm.itemName" placeholder="例: 蝴蝶蘭 1盆 (落地5株・紅花・白落地盆)" />
             </div>
             <div class="form-group">
@@ -1957,8 +1794,20 @@
             <button type="button" class="fit-btn" @click="autoFitDispatch">📱 適配螢幕</button>
           </div>
 
-          <div class="receipt-scaler-container" :style="{ width: (794 * dispatchZoom) + 'px', height: (560 * dispatchZoom) + 'px' }">
-            <div id="dispatch-print-target" class="dispatch-sheet kai-font-supported standard-kai-font" :style="{ transform: `scale(${dispatchZoom})`, transformOrigin: 'top left' }">
+          <div
+            class="receipt-scaler-container"
+            :style="{
+              width: (794 * dispatchZoom) + 'px',
+              height: (560 * dispatchZoom) + 'px',
+              minWidth: '280px',
+              minHeight: '200px'
+            }"
+          >
+            <div
+              id="dispatch-print-target"
+              class="dispatch-sheet kai-font-supported standard-kai-font"
+              :style="{ transform: `scale(${dispatchZoom})`, transformOrigin: 'top left' }"
+            >
               <div class="d-header">
                 <div class="d-shop-title">宸豐蘭藝</div>
                 <div class="d-main-title">【代送單】</div>
@@ -2011,7 +1860,7 @@
 
               <div class="d-footer-sign">
                 <span>現場點交簽收人：____________________</span>
-                <span style="font-size: 11.5px; color: #64748b;">※ 花禮已完整送達現場插牌定位</span>
+                <span class="d-footer-tip">※ 花禮已完整送達現場插牌定位</span>
               </div>
             </div>
           </div>
@@ -2022,13 +1871,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
 
 // ==========================================
-// 1. 基礎狀態變數 (subTab 唯一宣告)
+// 1. 基礎狀態變數
 // ==========================================
 const currentTab = ref('manage')
 const subTab = ref('order')
@@ -2043,14 +1892,8 @@ const receiptViewportRef = ref(null)
 const farmerReceiptViewportRef = ref(null)
 const dispatchViewportRef = ref(null)
 
-const autoFitDispatch = () => {
-  if (!dispatchViewportRef.value || dispatchViewportRef.value.clientWidth <= 0) {
-    dispatchZoom.value = 0.85
-    return
-  }
-  const availWidth = Math.max(dispatchViewportRef.value.clientWidth - 28, 280)
-  dispatchZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.45), 1.0)
-}
+// 「未製作／未列印」共用的淡紅狀態樣式
+const unmadeStyle = { backgroundColor: '#F9F0F0', color: '#D96B66', border: '1px solid #F0D5D5' }
 
 const toastMessage = ref('')
 let toastTimer = null
@@ -2079,10 +1922,7 @@ const triggerNativeShare = async () => {
   try {
     const file = new File([currentBlobToShare.value], shareModalFilename.value, { type: 'image/png' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: shareModalTitle.value,
-        files: [file]
-      })
+      await navigator.share({ title: shareModalTitle.value, files: [file] })
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
@@ -2102,27 +1942,28 @@ const currentCardDimensions = computed(() => {
   return isVertical.value ? { w: 794, h: 1123 } : { w: 1123, h: 794 }
 })
 
-const updateDynamicPrintStyle = () => {
+const setPrintPageStyle = (pageSize) => {
   let styleTag = document.getElementById('dynamic-cf-print-style')
   if (!styleTag) {
     styleTag = document.createElement('style')
     styleTag.id = 'dynamic-cf-print-style'
     document.head.appendChild(styleTag)
   }
-  let pageSize = 'A4 portrait'
-  if (currentTab.value === 'couplet') {
-    const size = cardPaperSize.value === 'A3' ? 'A3' : (cardPaperSize.value === 'A5' ? 'A5' : 'A4')
-    const orientation = isVertical.value ? 'portrait' : 'landscape'
-    pageSize = `${size} ${orientation}`
-  } else {
-    pageSize = 'A5 landscape'
-  }
   styleTag.innerHTML = `
-    @page { 
-      size: ${pageSize} !important; 
-      margin: 0mm !important; 
+    @page {
+      size: ${pageSize} !important;
+      margin: 0mm !important;
     }
   `
+}
+
+const updateDynamicPrintStyle = () => {
+  let pageSize = 'A5 landscape'
+  if (currentTab.value === 'couplet') {
+    const size = ['A3', 'A4', 'A5'].includes(cardPaperSize.value) ? cardPaperSize.value : 'A4'
+    pageSize = `${size} ${isVertical.value ? 'portrait' : 'landscape'}`
+  }
+  setPrintPageStyle(pageSize)
 }
 
 watch([() => currentTab.value, () => isVertical.value, () => cardPaperSize.value], updateDynamicPrintStyle, { immediate: true })
@@ -2142,23 +1983,27 @@ const autoFitZoom = () => {
   zoomLevel.value = Math.min(Math.max(+(availableWidth / cardWidth).toFixed(2), 0.25), 1.0)
 }
 
-const autoFitReceipt = () => {
-  if (!receiptViewportRef.value || receiptViewportRef.value.clientWidth <= 0) {
-    receiptZoom.value = 0.85
+const fitSheet = (viewportEl, zoomRef) => {
+  if (!viewportEl || viewportEl.clientWidth <= 0) {
+    zoomRef.value = 0.85
     return
   }
-  const availWidth = Math.max(receiptViewportRef.value.clientWidth - 28, 280)
-  receiptZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.45), 1.0)
+  const availWidth = Math.max(viewportEl.clientWidth - 28, 280)
+  zoomRef.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.45), 1.0)
+}
+const autoFitReceipt = () => fitSheet(receiptViewportRef.value, receiptZoom)
+const autoFitFarmerReceipt = () => fitSheet(farmerReceiptViewportRef.value, farmerZoom)
+const autoFitDispatch = () => fitSheet(dispatchViewportRef.value, dispatchZoom)
+
+const autoFitAll = () => {
+  autoFitZoom()
+  autoFitReceipt()
+  autoFitFarmerReceipt()
+  autoFitDispatch()
 }
 
-const autoFitFarmerReceipt = () => {
-  if (!farmerReceiptViewportRef.value || farmerReceiptViewportRef.value.clientWidth <= 0) {
-    farmerZoom.value = 0.85
-    return
-  }
-  const availWidth = Math.max(farmerReceiptViewportRef.value.clientWidth - 28, 280)
-  farmerZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.45), 1.0)
-}
+// 切換分頁後，預覽區才剛掛載，需重新適配螢幕
+watch(currentTab, () => nextTick(autoFitAll))
 
 // ==========================================
 // 2. 內部密碼驗證
@@ -2170,7 +2015,7 @@ const authError = ref(false)
 
 const handleLogin = () => {
   const entered = (inputPasscode.value || '').trim().toLowerCase()
-  if (entered === INTERNAL_PASSCODE || entered === 'cf000725') {
+  if (entered === INTERNAL_PASSCODE) {
     isAuthenticated.value = true
     authError.value = false
     try { localStorage.setItem('cf_admin_auth', 'true') } catch (e) {}
@@ -2195,7 +2040,7 @@ const supabaseUrl = 'https://ivofrjibdezbyxxmutok.supabase.co'
 const supabaseKey = 'sb_publishable_b9oJamVY0UutjpXogYH6tQ_W4iuOiyr'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Supabase card-assets bucket 連線
+// Supabase card-assets bucket (卡片底圖與 TW-Kai 字型都放在這裡)
 const SUPABASE_STORAGE_URL = 'https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets'
 
 const userCustomSeal = ref(localStorage.getItem('user_cai_seal_img') || '')
@@ -2222,7 +2067,7 @@ const onSelectLocalSeal = async (e) => {
   reader.onload = async (event) => {
     const base64Data = event.target.result
     userCustomSeal.value = base64Data
-    localStorage.setItem('user_cai_seal_img', base64Data)
+    try { localStorage.setItem('user_cai_seal_img', base64Data) } catch (err) {}
 
     try {
       await supabase.from('system_settings').upsert({
@@ -2257,30 +2102,6 @@ const openLargePhoto = (url, name) => {
   activeModalTitle.value = name
 }
 
-const formatSimpleItemName = (ord) => {
-  if (!ord) return '特選蘭花 1盆'
-  const specText = String(ord.spec || '')
-  if (specText.includes(';')) {
-    const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
-    if (parts.length > 0) {
-      const parsedParts = parts.map(p => {
-        const segs = p.split('|')
-        const namePart = segs[0].trim()
-        const potsMatch = namePart.match(/(\d+)\s*盆/)
-        const pots = potsMatch ? `${potsMatch[1]}盆` : '1盆'
-        const cleanName = namePart.replace(/\(\d+盆\)/g, '').replace(/\(.*?\)/g, '').trim() || '特選蘭花'
-        return `${cleanName} ${pots}`
-      })
-      const totalPots = getOrderTotalPots(ord)
-      return `${parsedParts.join('、')}（共${totalPots}盆）`
-    }
-  }
-  const rawFirst = specText.split('|')[0].trim()
-  const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim() || '特選蘭花'
-  const totalPots = getOrderTotalPots(ord)
-  return `${cleanName} ${totalPots}盆`
-}
-
 const getOrderTotalPots = (ord) => {
   if (!ord) return 1
   const specText = String(ord.spec || '')
@@ -2293,6 +2114,30 @@ const getOrderTotalPots = (ord) => {
   const metaMatch = noteText.match(/\[共(\d+)\s*盆/)
   if (metaMatch) return parseInt(metaMatch[1]) || 1
   return 1
+}
+
+const formatSimpleItemName = (ord) => {
+  if (!ord) return '特選蘭花 1盆'
+  const specText = String(ord.spec || '')
+  if (specText.includes(';')) {
+    const parts = specText.split(';').map(s => s.trim()).filter(Boolean)
+    if (parts.length > 0) {
+      const parsedParts = parts.map(p => {
+        const segs = p.split('|')
+        const namePart = segs[0].trim()
+        const potsMatch = namePart.match(/(\d+)\s*盆/)
+        const pots = potsMatch ? `${potsMatch[1]}盆` : '1盆'
+        const cleanName = namePart.replace(/\(\d+\s*盆\)/g, '').replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+        return `${cleanName} ${pots}`
+      })
+      const totalPots = getOrderTotalPots(ord)
+      return `${parsedParts.join('、')}（共${totalPots}盆）`
+    }
+  }
+  const rawFirst = specText.split('|')[0].trim()
+  const cleanName = rawFirst.replace(/\(.*?\)/g, '').trim() || '特選蘭花'
+  const totalPots = getOrderTotalPots(ord)
+  return `${cleanName} ${totalPots}盆`
 }
 
 const getOrderShippingFee = (ord) => {
@@ -2325,16 +2170,20 @@ const generateDateSeqIdByDate = (prefix, dateStrVal, existingList) => {
   return `${targetPrefix}${String(maxSeq + 1).padStart(2, '0')}`
 }
 
+const todayStr = () => new Date().toISOString().split('T')[0]
+
 const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
-const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
-const formInv = ref({
+const formCust = ref({ name: '', type: '批發', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
+const makeEmptyInv = () => ({
   category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中',
-  pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0]
+  pot_type: '白落地盆', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: todayStr()
 })
-const formRet = ref({
+const formInv = ref(makeEmptyInv())
+const makeEmptyRet = () => ({
   return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300,
-  date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良'
+  date: todayStr(), reason: '運送碰撞 / 開花不良'
 })
+const formRet = ref(makeEmptyRet())
 
 const makeEmptyItem = () => ({
   orchid_name: '特選蘭花',
@@ -2349,15 +2198,16 @@ const makeEmptyItem = () => ({
   card_bottom: ''
 })
 
-const formOrder = ref({
+const makeEmptyOrder = () => ({
   cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678',
   shipping_address: '', shipping_fee: 0, cost: 600, price: 2500, tax_id: '',
   need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印',
   shipped_status: '未出貨', payment_status: '未結',
-  order_date: new Date().toISOString().split('T')[0],
+  order_date: todayStr(),
   expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
   items: [makeEmptyItem()]
 })
+const formOrder = ref(makeEmptyOrder())
 
 const previewNextOrderId = computed(() => generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value))
 const flowerInventory = computed(() => inventoryList.value.filter(i => i.category === '蘭花'))
@@ -2409,27 +2259,20 @@ const removeOrderItemRow = (idx) => {
   }
 }
 
+const POT_COST_MAP = {
+  '白落地盆': 100, '黑落地盆': 100, '紅落地盆': 200, '紅羅馬盆': 370, '白羅馬盆': 370,
+  '金邊盆': 100, '大桌上盆': 100, '小桌上盆': 100, '單株盆': 50, '無盆': 0
+}
+
 const calcOrderPrice = () => {
   let totalPrice = 0
   let totalCost = 0
-  const potCostMap = { 
-    '白落地盆': 100, 
-    '黑落地盆': 100, 
-    '紅落地盆': 200, 
-    '紅羅馬盆': 370, 
-    '白羅馬盆': 370, 
-    '金邊盆': 100, 
-    '大桌上盆': 100, 
-    '小桌上盆': 100, 
-    '單株盆': 50, 
-    '無盆': 0 
-  }
   formOrder.value.items.forEach(item => {
     const p = Number(item.pots_qty) || 1
     const s = Number(item.stalks) || 0
     const u = Number(item.unit_price) || 0
     totalPrice += (s * u) * p
-    const potCost = potCostMap[item.pot] ?? 100
+    const potCost = POT_COST_MAP[item.pot] ?? 100
     let quickCost = 0
     if (item.quick_pot === '使用快捷盆 (70)') quickCost = 70
     else if (item.quick_pot === '使用快捷盆 (80)') quickCost = 80
@@ -2443,7 +2286,7 @@ const onOrderCustSelect = () => {
   const matched = customers.value.find(c => c.name === formOrder.value.customer)
   if (matched) {
     formOrder.value.phone = matched.phone || ''
-    formOrder.value.cust_type = matched.type === '批發商' ? '批發' : matched.type
+    formOrder.value.cust_type = matched.type === '批發商' ? '批發' : (matched.type || '批發')
     formOrder.value.billing_cycle = matched.billing_cycle || '每單結'
     if (!formOrder.value.shipping_address) {
       formOrder.value.shipping_address = matched.line_note || ''
@@ -2459,6 +2302,14 @@ const extractOrderAddress = (ord) => {
   if (addrMatch) return addrMatch[1].trim()
   const cust = customers.value.find(c => c.name === ord.customer)
   return cust?.line_note || ''
+}
+
+const getOrderCardInfo = (ord, type) => {
+  const noteStr = String(ord?.note || '')
+  const label = { upper: '上款', middle: '中款', bottom: '下款' }[type]
+  if (!label) return '—'
+  const m = noteStr.match(new RegExp(`\\[${label}[:：](.*?)\\]`))
+  return m && m[1] ? m[1] : '—'
 }
 
 const startEditOrder = (ord) => {
@@ -2507,33 +2358,31 @@ const startEditOrder = (ord) => {
     receipt_status: ord.receipt_status || '未列印', shipped_status: ord.shipped_status || '未出貨', payment_status: ord.payment_status || '未結',
     order_date: ord.order_date, expected_date: ord.expected_date, items: parsedItems
   }
+  currentTab.value = 'manage'
   subTab.value = 'order'
   nextTick(() => document.getElementById('order-form-box')?.scrollIntoView({ behavior: 'smooth' }))
 }
 
 const cancelEditOrder = () => {
   editingOrderId.value = null
-  formOrder.value = {
-    cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678', shipping_address: '', shipping_fee: 0, cost: 600, price: 2500,
-    tax_id: '', need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印', shipped_status: '未出貨', payment_status: '未結',
-    order_date: new Date().toISOString().split('T')[0], expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-    items: [makeEmptyItem()]
-  }
+  formOrder.value = makeEmptyOrder()
 }
 
 const saveOrder = async () => {
-  const specParts = formOrder.value.items.map(item => `${item.orchid_name || '特選蘭花'} (${item.pots_qty || 1}盆) | ${item.stalks || 1}棵 (單價${item.unit_price || 0}元) | 花色:${item.flower_color || '紅花'} | 盆:${item.pot || '白落地盆'}`)
+  if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
+
+  const specParts = formOrder.value.items.map(item =>
+    `${item.orchid_name || '特選蘭花'} (${item.pots_qty || 1}盆) | ${item.stalks || 1}棵 (單價${item.unit_price || 0}元) | 花色:${item.flower_color || '紅花'} | 盆:${item.pot || '白落地盆'}`
+  )
   const fullSpecStr = specParts.join('; ')
   const mainItem = formOrder.value.items[0] || {}
   const quickSuffix = mainItem.quick_pot && mainItem.quick_pot !== '未使用' ? ` + ${mainItem.quick_pot.replace('使用', '')}` : ''
   const finalPotStr = (mainItem.pot || '白落地盆') + quickSuffix
-  
+
   const baseNote = String(formOrder.value.note || '')
     .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
     .replace(/\[送達地址[:：].*?\]/g, '')
-    .replace(/\[上款[:：].*?\]/g, '')
-    .replace(/\[中款[:：].*?\]/g, '')
-    .replace(/\[下款[:：].*?\]/g, '')
+    .replace(/\[(上款|中款|下款)[:：].*?\]/g, '')
     .trim()
   const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
   const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee || 0}元]`
@@ -2541,7 +2390,6 @@ const saveOrder = async () => {
   const cardUpperTag = mainItem.card_upper ? `[上款:${mainItem.card_upper}]` : ''
   const cardMiddleTag = mainItem.card_middle ? `[中款:${mainItem.card_middle}]` : ''
   const cardBottomTag = mainItem.card_bottom ? `[下款:${mainItem.card_bottom}]` : ''
-
   const finalNote = [baseNote, metaTag, addrTag, cardUpperTag, cardMiddleTag, cardBottomTag].filter(Boolean).join(' ')
 
   const payload = {
@@ -2555,31 +2403,24 @@ const saveOrder = async () => {
 
   if (editingOrderId.value) {
     const { error } = await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
-    if (!error) {
-      alert(`訂單 ${editingOrderId.value} 修改成功！`)
-      cancelEditOrder()
-      loadOrders()
-    } else {
+    if (error) {
+      // 資料表沒有 shipping_address 欄位時，退回只存 note 內的地址標籤
       delete payload.shipping_address
       await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
-      alert(`訂單 ${editingOrderId.value} 修改成功！`)
-      cancelEditOrder()
-      loadOrders()
     }
+    alert(`訂單 ${editingOrderId.value} 修改成功！`)
+    cancelEditOrder()
+    loadOrders()
   } else {
     const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
     const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
-    if (!error) {
-      alert(`訂單建立成功！單號：${newId}`)
-      cancelEditOrder()
-      loadOrders()
-    } else {
+    if (error) {
       delete payload.shipping_address
       await supabase.from('orders').insert([{ id: newId, ...payload }])
-      alert(`訂單建立成功！單號：${newId}`)
-      cancelEditOrder()
-      loadOrders()
     }
+    alert(`訂單建立成功！單號：${newId}`)
+    cancelEditOrder()
+    loadOrders()
   }
 }
 
@@ -2592,18 +2433,21 @@ const updateOrderField = async (ord, field, value) => {
 const getCardStatusClass = (status) => status === '已製作' ? 'badge badge-soft-green' : (status === '免製作' ? 'badge badge-gray' : 'badge')
 
 const shippingViewFilter = ref('unshipped')
-const displayedShippingOrders = computed(() => shippingViewFilter.value === 'unshipped' ? unshippedOrders.value : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value))
+const displayedShippingOrders = computed(() =>
+  shippingViewFilter.value === 'unshipped' ? unshippedOrders.value
+    : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value)
+)
 
 const getCustomerAddress = (ord) => {
   const addr = extractOrderAddress(ord)
   return addr || '同訂購人地址 / 門市取貨'
 }
 
-// 模組 2：對帳專區函式
+// ---------- 模組 2：對帳專區 ----------
 const statementCustomer = ref('')
 const statementPeriod = ref('all')
-const statementStartDate = ref(new Date().toISOString().split('T')[0])
-const statementEndDate = ref(new Date().toISOString().split('T')[0])
+const statementStartDate = ref(todayStr())
+const statementEndDate = ref(todayStr())
 const statementPaymentFilter = ref('未結')
 
 const statementOrders = computed(() => {
@@ -2617,10 +2461,10 @@ const statementOrders = computed(() => {
       const day = now.getDay() || 7
       const monday = new Date(now)
       monday.setDate(now.getDate() - day + 1)
-      monday.setHours(0,0,0,0)
+      monday.setHours(0, 0, 0, 0)
       const sunday = new Date(monday)
       sunday.setDate(monday.getDate() + 6)
-      sunday.setHours(23,59,59,999)
+      sunday.setHours(23, 59, 59, 999)
       return orderDate >= monday && orderDate <= sunday
     }
     if (statementPeriod.value === 'thisMonth') {
@@ -2643,20 +2487,14 @@ const statementOrders = computed(() => {
   })
 })
 const statementTotalAmount = computed(() => statementOrders.value.reduce((sum, o) => sum + (Number(o.price) || 0), 0))
-const statementUnpaidAmount = computed(() => {
-  return statementOrders.value
-    .filter(o => o.payment_status === '未結')
-    .reduce((sum, o) => sum + (Number(o.price) || 0), 0)
-})
+const statementUnpaidAmount = computed(() =>
+  statementOrders.value.filter(o => o.payment_status === '未結').reduce((sum, o) => sum + (Number(o.price) || 0), 0)
+)
+const statementTotalPots = computed(() => statementOrders.value.reduce((sum, o) => sum + getOrderTotalPots(o), 0))
 
 const getStatementPeriodText = () => {
-  if (!statementOrders.value || statementOrders.value.length === 0) {
-    return '無訂單資料'
-  }
-  const dates = statementOrders.value
-    .map(o => o.expected_date || o.order_date)
-    .filter(Boolean)
-    .sort()
+  if (!statementOrders.value || statementOrders.value.length === 0) return '無訂單資料'
+  const dates = statementOrders.value.map(o => o.expected_date || o.order_date).filter(Boolean).sort()
   if (dates.length === 0) return '未記錄日期'
   const minDate = dates[0]
   const maxDate = dates[dates.length - 1]
@@ -2673,23 +2511,6 @@ const getCustomerPhone = (custName) => {
   return c?.phone || '—'
 }
 
-const getOrderCardInfo = (ord, type) => {
-  const noteStr = String(ord.note || '')
-  if (type === 'upper') {
-    const m = noteStr.match(/\[上款[:：](.*?)\]/)
-    return m ? m[1] : '—'
-  }
-  if (type === 'middle') {
-    const m = noteStr.match(/\[中款[:：](.*?)\]/)
-    return m ? m[1] : '—'
-  }
-  if (type === 'bottom') {
-    const m = noteStr.match(/\[下款[:：](.*?)\]/)
-    return m ? m[1] : '—'
-  }
-  return '—'
-}
-const statementTotalPots = computed(() => statementOrders.value.reduce((sum, o) => sum + getOrderTotalPots(o), 0))
 const currentCustomerInfoText = computed(() => {
   if (!statementCustomer.value) return '全部客戶統整'
   const c = customers.value.find(item => item.name === statementCustomer.value)
@@ -2709,7 +2530,7 @@ const exportStatementExcel = () => {
   const worksheet = XLSX.utils.json_to_sheet(statementOrders.value)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, '對帳明細')
-  XLSX.writeFile(workbook, `對帳單_${new Date().toISOString().split('T')[0]}.xlsx`)
+  XLSX.writeFile(workbook, `對帳單_${todayStr()}.xlsx`)
 }
 const batchMarkPaid = async () => {
   if (!confirm('確定標記為已結？')) return
@@ -2719,42 +2540,27 @@ const batchMarkPaid = async () => {
   loadOrders()
 }
 
-// 模組 3：進貨函式
+// ---------- 模組 3：進貨 ----------
+const INV_POT_COST_MAP = { ...POT_COST_MAP, '使用快捷盆 (70)': 70, '使用快捷盆 (80)': 80 }
+
 const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
 const onPotTypeChange = () => {
-  const potCostMap = { 
-    '白落地盆': 100, 
-    '黑落地盆': 100, 
-    '紅落地盆': 200, 
-    '紅羅馬盆': 370, 
-    '白羅馬盆': 370, 
-    '金邊盆': 100, 
-    '大桌上盆': 100, 
-    '小桌上盆': 100, 
-    '單株盆': 50,
-    '使用快捷盆 (70)': 70,
-    '使用快捷盆 (80)': 80
-  }
-  formInv.value.unit_cost = potCostMap[formInv.value.pot_type] || 100
+  formInv.value.unit_cost = INV_POT_COST_MAP[formInv.value.pot_type] ?? 100
   calcInvCost()
 }
 const startEditInv = (inv) => {
   editingInvId.value = inv.id
-  formInv.value = { 
-    ...inv, 
+  formInv.value = {
+    ...makeEmptyInv(),
+    ...inv,
     spec_supply: inv.category === '耗材/配件' ? inv.spec : '',
-    spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中', 
-    pot_type: inv.category === '陶瓷盆' ? inv.item_name : '桌上盆 (100)' 
+    pot_type: inv.category === '陶瓷盆' ? inv.item_name : '白落地盆'
   }
   nextTick(() => document.getElementById('inv-form-box')?.scrollIntoView({ behavior: 'smooth' }))
 }
 const cancelEditInv = () => {
   editingInvId.value = null
-  formInv.value = { 
-    category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', 
-    spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, 
-    cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] 
-  }
+  formInv.value = makeEmptyInv()
 }
 const saveInventory = async () => {
   const isFlower = formInv.value.category === '蘭花'
@@ -2768,7 +2574,7 @@ const saveInventory = async () => {
     finalName = formInv.value.item_name ? formInv.value.item_name.trim() : '特選蘭花'
     finalSpec = `規格:${formInv.value.spec_spike}|顏色:${formInv.value.spec_color}|大小:${formInv.value.spec_size}|高矮:${formInv.value.spec_height}`
   } else if (isPot) {
-    finalName = formInv.value.pot_type.split(' ')[0]
+    finalName = formInv.value.pot_type
     finalSpec = '盆器固定規格'
   } else if (isSupply) {
     finalName = formInv.value.item_name ? formInv.value.item_name.trim() : '常用耗材'
@@ -2778,13 +2584,13 @@ const saveInventory = async () => {
   if (!finalName) return alert('請輸入品項名稱！')
 
   const payload = {
-    category: formInv.value.category, 
+    category: formInv.value.category,
     item_name: finalName,
     spec: finalSpec,
-    qty: formInv.value.qty, 
-    unit_cost: formInv.value.unit_cost, 
-    cost: formInv.value.cost, 
-    supplier: formInv.value.supplier, 
+    qty: formInv.value.qty,
+    unit_cost: formInv.value.unit_cost,
+    cost: formInv.value.cost,
+    supplier: formInv.value.supplier,
     date: formInv.value.date
   }
 
@@ -2802,7 +2608,7 @@ const saveInventory = async () => {
   }
 }
 
-// 模組 4：客戶函式
+// ---------- 模組 4：客戶 ----------
 const startEditCust = (c) => {
   editingCustId.value = c.id
   formCust.value = { ...c }
@@ -2810,30 +2616,26 @@ const startEditCust = (c) => {
 }
 const cancelEditCust = () => {
   editingCustId.value = null
-  formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
+  formCust.value = { name: '', type: '批發', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
 }
 const saveCustomer = async () => {
   if (!formCust.value.name) return alert('請輸入客戶名稱！')
   if (editingCustId.value) {
     await supabase.from('customers').update({ ...formCust.value }).eq('id', editingCustId.value)
-    cancelEditCust()
-    loadCustomers()
   } else {
     const newId = generateDateSeqIdByDate('CU', '', customers.value)
     await supabase.from('customers').insert([{ id: newId, ...formCust.value }])
-    cancelEditCust()
-    loadCustomers()
   }
+  cancelEditCust()
+  loadCustomers()
 }
 
-// 模組 5：品種函式
+// ---------- 模組 5：品種 ----------
 const onPhotoFileChange = (e) => {
   const file = e.target.files[0]
   if (!file) return
   const reader = new FileReader()
-  reader.onload = (event) => {
-    formOrchid.value.photo_url = event.target.result
-  }
+  reader.onload = (event) => { formOrchid.value.photo_url = event.target.result }
   reader.readAsDataURL(file)
 }
 const startEditOrchid = (item) => {
@@ -2849,17 +2651,15 @@ const saveOrchid = async () => {
   if (!formOrchid.value.name) return alert('請輸入品種名稱！')
   if (editingOrchidId.value) {
     await supabase.from('orchids').update({ ...formOrchid.value }).eq('id', editingOrchidId.value)
-    cancelEditOrchid()
-    loadOrchids()
   } else {
     const newId = generateDateSeqIdByDate('FL', '', orchids.value)
     await supabase.from('orchids').insert([{ id: newId, ...formOrchid.value }])
-    cancelEditOrchid()
-    loadOrchids()
   }
+  cancelEditOrchid()
+  loadOrchids()
 }
 
-// 模組 6：退貨函式
+// ---------- 模組 6：退貨 ----------
 const calcRetTotal = () => { formRet.value.total_amount = (Number(formRet.value.qty) || 0) * (Number(formRet.value.unit_price) || 0) }
 const startEditRet = (ret) => {
   editingRetId.value = ret.id
@@ -2868,21 +2668,19 @@ const startEditRet = (ret) => {
 }
 const cancelEditRet = () => {
   editingRetId.value = null
-  formRet.value = { return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300, date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良' }
+  formRet.value = makeEmptyRet()
 }
 const saveReturn = async () => {
   if (!formRet.value.party_name) return alert('請輸入對象名稱！')
   calcRetTotal()
   if (editingRetId.value) {
     await supabase.from('returns').update({ ...formRet.value }).eq('id', editingRetId.value)
-    cancelEditRet()
-    loadReturns()
   } else {
     const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
     await supabase.from('returns').insert([{ id: newId, ...formRet.value }])
-    cancelEditRet()
-    loadReturns()
   }
+  cancelEditRet()
+  loadReturns()
 }
 
 const deleteItem = async (table, id, reloadFn) => {
@@ -2894,7 +2692,7 @@ const exportOrdersToExcel = () => {
   const worksheet = XLSX.utils.json_to_sheet(orderList.value)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, '全部訂單')
-  XLSX.writeFile(workbook, `訂單總表_${new Date().toISOString().split('T')[0]}.xlsx`)
+  XLSX.writeFile(workbook, `訂單總表_${todayStr()}.xlsx`)
 }
 
 // ==========================================
@@ -2909,7 +2707,7 @@ const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
 
-// 🌟 字體選擇對應 (原本範本有使用但未定義)
+// 字體選擇對應 (TW-Kai 由 Supabase bucket 載入)
 const activeCssFontFamily = computed(() => {
   const map = {
     kai: `'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', 'Kaiti TC', serif`,
@@ -2920,7 +2718,7 @@ const activeCssFontFamily = computed(() => {
   return map[cardFontFamily.value] || map.kai
 })
 
-// 🌟 底圖選擇狀態 (防快取版)
+// 底圖選擇狀態 (防快取版)
 const cardBgType = ref('none')
 const customCardBgUrl = ref('')
 
@@ -2929,10 +2727,8 @@ const activeBackgroundImageStyle = computed(() => {
   if (cardBgType.value === 'custom' && customCardBgUrl.value) {
     return `url(${customCardBgUrl.value})`
   }
-  
   // 直式用原檔名，橫式自動抓帶 -h 的橫圖檔名
   const suffix = isVertical.value ? '' : '-h'
-  
   const map = {
     red: `url('${SUPABASE_STORAGE_URL}/card-bg-red${suffix}.jpg?v=2')`,
     pink: `url('${SUPABASE_STORAGE_URL}/card-bg-pink${suffix}.jpg?v=2')`,
@@ -2945,9 +2741,7 @@ const onCustomCardBgUpload = (e) => {
   const file = e.target.files[0]
   if (!file) return
   const reader = new FileReader()
-  reader.onload = (event) => {
-    customCardBgUrl.value = event.target.result
-  }
+  reader.onload = (event) => { customCardBgUrl.value = event.target.result }
   reader.readAsDataURL(file)
 }
 
@@ -2963,8 +2757,8 @@ const weights = ref({
   bottom_3: '600',
   bottom_4: '600',
   bottom_5: '600',
-  bottom_6: '600', // 🌟 新增格 7
-  bottom_7: '600', // 🌟 新增格 8
+  bottom_6: '600',
+  bottom_7: '600',
   suffix: '700'
 })
 
@@ -2973,7 +2767,7 @@ const defaultVertical = {
   middle: { x: 380, y: 220, size: 76 }, middle_2: { x: 280, y: 220, size: 76 },
   bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 }, bottom_2: { x: 95, y: 480, size: 30 },
   bottom_3: { x: 95, y: 640, size: 32 }, bottom_4: { x: 40, y: 480, size: 30 }, bottom_5: { x: 40, y: 640, size: 30 },
-  bottom_6: { x: -10, y: 480, size: 30 }, bottom_7: { x: -10, y: 640, size: 30 }, // 🌟 新增直式格 7、8 座標
+  bottom_6: { x: -10, y: 480, size: 30 }, bottom_7: { x: -10, y: 640, size: 30 },
   suffix: { x: 155, y: 860, size: 34 }
 }
 
@@ -2982,24 +2776,24 @@ const defaultHorizontal = {
   middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
   bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 340, y: 530, size: 34 }, bottom_2: { x: 340, y: 520, size: 28 },
   bottom_3: { x: 500, y: 520, size: 28 }, bottom_4: { x: 500, y: 530, size: 28 }, bottom_5: { x: 660, y: 530, size: 28 },
-  bottom_6: { x: 780, y: 520, size: 28 }, bottom_7: { x: 780, y: 530, size: 28 }, // 🌟 新增橫式格 7、8 座標
+  bottom_6: { x: 780, y: 520, size: 28 }, bottom_7: { x: 780, y: 530, size: 28 },
   suffix: { x: 900, y: 530, size: 34 }
 }
 
 const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
 
-// 🌟 擴充至 8 格
+// 下款共 8 格
 const bottomLines = ref([
-  { text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, 
+  { text: '白沙屯媽祖' }, { text: '彰化拱聖宮' },
   { text: '' }, { text: '' }, { text: '' }, { text: '' },
-  { text: '' }, { text: '' } // 🌟 第 7 格、第 8 格
+  { text: '' }, { text: '' }
 ])
 
 const getPlaceholder = (idx) => [
-  '第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）', 
-  '第 3 格（自訂聯名人 2）', '第 4 格（自訂）', 
+  '第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）',
+  '第 3 格（自訂聯名人 2）', '第 4 格（自訂）',
   '第 5 格（自訂）', '第 6 格（自訂）',
-  '第 7 格（自訂）', '第 8 格（自訂）' // 🌟 提示字詞擴充
+  '第 7 格（自訂）', '第 8 格（自訂）'
 ][idx]
 
 const funeralUpperFormat = ref('custom')
@@ -3055,7 +2849,7 @@ const switchOrientation = (vertical) => {
 }
 const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
 
-// 🌟 補回遺失的字重與文字陰影計算函式
+// 字重與文字陰影
 const getWeightStyle = (wVal) => {
   const w = String(wVal || '600')
   const styles = { fontWeight: w }
@@ -3071,35 +2865,36 @@ const getWeightStyle = (wVal) => {
 const getStyle = (key) => {
   const fallback = { x: 50, y: 50, size: 28 }
   const item = (layout.value && layout.value[key]) ? layout.value[key] : fallback
-  
-  return { 
-    left: `${item.x ?? 50}px`, 
-    top: `${item.y ?? 50}px`, 
-    fontSize: `${item.size ?? 28}px`, 
-    ...getWeightStyle(weights.value?.[key] || '600') 
+  return {
+    left: `${item.x ?? 50}px`,
+    top: `${item.y ?? 50}px`,
+    fontSize: `${item.size ?? 28}px`,
+    ...getWeightStyle(weights.value?.[key] || '600')
   }
 }
 const getUpperTargetBoxStyle = () => {
   const item = layout.value?.upper_target || { x: 220, y: 80, size: 38 }
-  return { 
-    left: `${item.x ?? 220}px`, 
-    top: `${item.y ?? 80}px`, 
-    fontSize: `${item.size ?? 38}px`, 
-    whiteSpace: 'nowrap', 
-    overflow: 'visible', 
-    zIndex: 5, 
-    ...getWeightStyle(weights.value?.upper_target) 
+  return {
+    left: `${item.x ?? 220}px`,
+    top: `${item.y ?? 80}px`,
+    fontSize: `${item.size ?? 38}px`,
+    whiteSpace: 'nowrap',
+    overflow: 'visible',
+    zIndex: 5,
+    ...getWeightStyle(weights.value?.upper_target)
   }
 }
 
 let activeKey = null, currentAction = null, startX = 0, startY = 0, originX = 0, originY = 0, originSize = 30
 const startMove = (e, key) => {
+  if (!layout.value[key]) return
   activeKey = key; currentAction = 'move'; startX = e.clientX; startY = e.clientY
   originX = layout.value[key].x; originY = layout.value[key].y
   window.addEventListener('pointermove', onPointerMove)
   window.addEventListener('pointerup', onPointerUp)
 }
 const startResize = (e, key) => {
+  if (!layout.value[key]) return
   activeKey = key; currentAction = 'resize'; startX = e.clientX; startY = e.clientY
   originSize = layout.value[key].size
   window.addEventListener('pointermove', onPointerMove)
@@ -3131,7 +2926,9 @@ const onCardCategoryChange = () => {
   }
 }
 
-// 支援列印雙軌機制
+// ==========================================
+// 5. 列印與圖片傳送
+// ==========================================
 const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
 const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
@@ -3143,32 +2940,20 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
     pageSize = 'A4 portrait'
   } else if (currentTab.value === 'couplet') {
     const size = cardPaperSize.value || 'A4'
-    const orientation = isVertical.value ? 'portrait' : 'landscape'
-    pageSize = `${size} ${orientation}`
+    pageSize = `${size} ${isVertical.value ? 'portrait' : 'landscape'}`
+  }
+  setPrintPageStyle(pageSize)
+
+  // 2. 簽收單列印後自動標記為已列印
+  if (isReceipt && selectedOrderId.value) {
+    const ord = orderList.value.find(o => o.id === selectedOrderId.value)
+    if (ord && ord.receipt_status !== '已列印') updateOrderField(ord, 'receipt_status', '已列印')
   }
 
-  // 強制寫入印表機 @page 規格
-  let styleTag = document.getElementById('dynamic-cf-print-style')
-  if (!styleTag) {
-    styleTag = document.createElement('style')
-    styleTag.id = 'dynamic-cf-print-style'
-    document.head.appendChild(styleTag)
-  }
-  styleTag.innerHTML = `
-    @page { 
-      size: ${pageSize} !important; 
-      margin: 0mm !important; 
-    }
-  `
-
-  // 2. 執行列印
+  // 3. 執行列印 (手機走圖片送印，電腦走瀏覽器列印)
   if (isMobileDevice() && !isStatement) {
     openPrintImageModal(targetId, titlePrefix, true)
   } else {
-    if (isReceipt && selectedOrderId.value) {
-      const ord = orderList.value.find(o => o.id === selectedOrderId.value)
-      if (ord) updateOrderField(ord, 'receipt_status', '已列印')
-    }
     if (isStatement) {
       document.body.classList.add('printing-statement')
       window.addEventListener('afterprint', () => document.body.classList.remove('printing-statement'), { once: true })
@@ -3181,39 +2966,45 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
   showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
-  
+
+  const parentEl = targetEl.parentElement
+  const origTransform = targetEl.style.transform
+  const origParentWidth = parentEl ? parentEl.style.width : ''
+  const origParentHeight = parentEl ? parentEl.style.height : ''
+  const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
+  const origBgDisplay = bgLayer ? bgLayer.style.display : ''
+  const origBgColor = targetEl.style.backgroundColor
+
+  // 依不同單據暫時解鎖父容器為 1:1 真實像素，防止手機寬度擠壓
+  let baseW = 794
+  let baseH = 560
+  if (targetId === 'card-print-target') {
+    baseW = currentCardDimensions.value.w
+    baseH = currentCardDimensions.value.h
+  }
+
+  const restore = () => {
+    targetEl.style.transform = origTransform
+    if (parentEl) {
+      parentEl.style.width = origParentWidth
+      parentEl.style.height = origParentHeight
+    }
+    if (isPrintMode) {
+      if (bgLayer) bgLayer.style.display = origBgDisplay
+      targetEl.style.backgroundColor = origBgColor
+    }
+  }
+
   try {
     if (document.fonts?.ready) await document.fonts.ready
-    
-    // 🌟 1. 記錄元素與父容器的原始狀態
-    const parentEl = targetEl.parentElement
-    const origTransform = targetEl.style.transform
-    const origParentWidth = parentEl ? parentEl.style.width : ''
-    const origParentHeight = parentEl ? parentEl.style.height : ''
-    
-    // 🌟 2. 依不同單據暫時解鎖父容器為 1:1 真實像素，防止手機寬度擠壓
-    let baseW = 794
-    let baseH = 560
-    if (targetId === 'card-print-target') {
-      baseW = currentCardDimensions.value.w
-      baseH = currentCardDimensions.value.h
-    }
-    
+
     targetEl.style.transform = 'none'
     if (parentEl) {
       parentEl.style.width = baseW + 'px'
       parentEl.style.height = baseH + 'px'
     }
-
-    // 列印模式抽空底圖
-    const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
-    let origBgDisplay = ''
-    let origBgColor = targetEl.style.backgroundColor
     if (isPrintMode) {
-      if (bgLayer) {
-        origBgDisplay = bgLayer.style.display
-        bgLayer.style.display = 'none'
-      }
+      if (bgLayer) bgLayer.style.display = 'none'
       targetEl.style.backgroundColor = 'transparent'
     }
 
@@ -3229,16 +3020,7 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 🌟 3. 截圖完成，立刻還原手機螢幕上的排版與縮放
-    targetEl.style.transform = origTransform
-    if (parentEl) {
-      parentEl.style.width = origParentWidth
-      parentEl.style.height = origParentHeight
-    }
-    if (isPrintMode) {
-      if (bgLayer) bgLayer.style.display = origBgDisplay
-      targetEl.style.backgroundColor = origBgColor
-    }
+    restore()
 
     canvas.toBlob((blob) => {
       if (!blob) return
@@ -3252,6 +3034,7 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
       canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
     }, 'image/png')
   } catch (err) {
+    restore()
     showToast('⚠️ 生成失敗，請重試！')
   }
 }
@@ -3267,34 +3050,55 @@ const triggerImagePrint = async () => {
 
   showToast('⏳ 正在生成無網址滿版文件...')
 
+  const parentEl = targetEl.parentElement
+  const origTransform = targetEl.style.transform
+  const origParentWidth = parentEl ? parentEl.style.width : ''
+  const origParentHeight = parentEl ? parentEl.style.height : ''
+  const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
+  const origBgDisplay = bgLayer ? bgLayer.style.display : ''
+  const origBgColor = targetEl.style.backgroundColor
+
+  let baseW = 794
+  let baseH = 560
+  if (targetId === 'card-print-target') {
+    baseW = currentCardDimensions.value.w
+    baseH = currentCardDimensions.value.h
+  }
+
+  const restore = () => {
+    targetEl.style.transform = origTransform
+    if (parentEl) {
+      parentEl.style.width = origParentWidth
+      parentEl.style.height = origParentHeight
+    }
+    if (bgLayer) bgLayer.style.display = origBgDisplay
+    targetEl.style.backgroundColor = origBgColor
+  }
+
   try {
     if (document.fonts?.ready) await document.fonts.ready
-    
-    const origTransform = targetEl.style.transform
-    targetEl.style.transform = 'none'
 
-    // 抽空底圖與底色
-    const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
-    let origBgDisplay = ''
-    let origBgColor = targetEl.style.backgroundColor
-    if (bgLayer) {
-      origBgDisplay = bgLayer.style.display
-      bgLayer.style.display = 'none'
+    targetEl.style.transform = 'none'
+    if (parentEl) {
+      parentEl.style.width = baseW + 'px'
+      parentEl.style.height = baseH + 'px'
     }
+    if (bgLayer) bgLayer.style.display = 'none'
     targetEl.style.backgroundColor = 'transparent'
 
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
+      width: baseW,
+      height: baseH,
+      windowWidth: baseW + 50,
+      windowHeight: baseH + 50,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 還原螢幕畫面
-    targetEl.style.transform = origTransform
-    if (bgLayer) bgLayer.style.display = origBgDisplay
-    targetEl.style.backgroundColor = origBgColor
+    restore()
 
     const imgDataUrl = canvas.toDataURL('image/png')
 
@@ -3302,7 +3106,7 @@ const triggerImagePrint = async () => {
     const { jsPDF } = window.jspdf || {}
     let isLandscapeMode = !isVertical.value
     let format = 'a4'
-    if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt' || currentTab.value === 'dispatch') {
+    if (currentTab.value !== 'couplet') {
       isLandscapeMode = true
       format = 'a5'
     } else if (cardPaperSize.value) {
@@ -3310,38 +3114,30 @@ const triggerImagePrint = async () => {
     }
 
     if (jsPDF) {
-      const pdf = new jsPDF({
-        orientation: isLandscapeMode ? 'landscape' : 'portrait',
-        unit: 'mm',
-        format: format
-      })
-
+      const pdf = new jsPDF({ orientation: isLandscapeMode ? 'landscape' : 'portrait', unit: 'mm', format })
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = pdf.internal.pageSize.getHeight()
-
-      // 1:1 滿版置入 PDF
+      // 1:1 滿版置入 PDF，iPhone 開啟後「分享 ➔ 列印」即為無網址、滿版的原生文件輸出
       pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      
-      const pdfBlob = pdf.output('blob')
-      const pdfBlobUrl = URL.createObjectURL(pdfBlob)
-
-      // 🌟 直接在新視窗/分頁打開 PDF 檔案
-      // iPhone 開啟 PDF 後，點擊下方的「分享 ➔ 列印」，即為 100% 無網址、滿版、不切底的原生文件輸出
+      const pdfBlobUrl = URL.createObjectURL(pdf.output('blob'))
       window.location.href = pdfBlobUrl
     } else {
       window.open(imgDataUrl, '_blank')
     }
   } catch (err) {
+    restore()
     showToast('⚠️ 生成失敗，請重試！')
   }
 }
 
-
 const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花卡確認', false)
 const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
 const shareFarmerReceiptDirect = () => openPrintImageModal('farmer-print-target', '農民收據確認', false)
+const shareDispatchDirect = () => openPrintImageModal('dispatch-print-target', '同業代送單確認', false)
 
-// 雲端草稿庫函式
+// ==========================================
+// 6. 雲端草稿庫
+// ==========================================
 const cloudDrafts = ref([])
 const selectedDraftId = ref('')
 const loadCloudDrafts = async () => {
@@ -3357,8 +3153,18 @@ const saveCurrentAsCloudDraft = async () => {
   const phrase = middleText.value.trim() || '無中款'
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
-  await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, cardBgType: cardBgType.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
-  showToast(`☁️ 花卡已成功存至雲端！`)
+  await supabase.from('card_drafts').insert([{
+    id: draftId,
+    title: draftTitle,
+    data: {
+      cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value,
+      cardFontFamily: cardFontFamily.value, cardBgType: cardBgType.value,
+      upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value,
+      middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value,
+      bottomLines: bottomLines.value, weights: weights.value, layout: layout.value
+    }
+  }])
+  showToast('☁️ 花卡已成功存至雲端！')
   await loadCloudDrafts()
   selectedDraftId.value = draftId
 }
@@ -3366,10 +3172,24 @@ const loadCloudDraft = (id) => {
   const item = cloudDrafts.value.find(d => d.id === id)
   if (item?.data) {
     const draft = item.data
-    cardPaperSize.value = draft.cardPaperSize || 'A4'; isVertical.value = draft.isVertical; cardCategory.value = draft.cardCategory; cardFontFamily.value = draft.cardFontFamily || 'kai'; cardBgType.value = draft.cardBgType || 'none'
-    upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
-    middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
-    bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
+    cardPaperSize.value = draft.cardPaperSize || 'A4'
+    isVertical.value = !!draft.isVertical
+    cardCategory.value = draft.cardCategory || 'celebration'
+    cardFontFamily.value = draft.cardFontFamily || 'kai'
+    cardBgType.value = draft.cardBgType || 'none'
+    upperPrefix.value = draft.upperPrefix || ''
+    upperTarget.value = draft.upperTarget || ''
+    upperSuffix.value = draft.upperSuffix || ''
+    middleText.value = draft.middleText || ''
+    middleText2.value = draft.middleText2 || ''
+    suffixText.value = draft.suffixText || '敬輓'
+    // 舊草稿只有 6 格下款，補齊到 8 格
+    const savedLines = JSON.parse(JSON.stringify(draft.bottomLines || []))
+    while (savedLines.length < 8) savedLines.push({ text: '' })
+    bottomLines.value = savedLines
+    weights.value = { ...weights.value, ...JSON.parse(JSON.stringify(draft.weights || {})) }
+    const baseLayout = isVertical.value ? defaultVertical : defaultHorizontal
+    layout.value = { ...JSON.parse(JSON.stringify(baseLayout)), ...JSON.parse(JSON.stringify(draft.layout || {})) }
     showToast(`📂 已載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
@@ -3381,10 +3201,19 @@ const deleteCloudDraft = async (id) => {
   selectedDraftId.value = ''
 }
 const startNewCard = () => {
-  upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 已為您建立空白花卡！')
+  upperTarget.value = ''
+  middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'
+  middleText2.value = ''
+  selectedDraftId.value = ''
+  targetX1.value = ''
+  targetX2.value = ''
+  resetPositions()
+  showToast('✨ 已為您建立空白花卡！')
 }
 
-// 簽收單管理
+// ==========================================
+// 7. 簽收單
+// ==========================================
 const shopNameMode = ref('default')
 const customShopName = ref('')
 const displayShopName = computed(() => shopNameMode.value === 'default' ? '宸豐蘭藝' : (customShopName.value || '宸豐蘭藝'))
@@ -3402,7 +3231,10 @@ let isSigning = false, lastSignX = 0, lastSignY = 0
 const getSignCoords = (e) => {
   if (!signPadCanvasRef.value) return { x: 0, y: 0 }
   const rect = signPadCanvasRef.value.getBoundingClientRect()
-  return { x: (e.clientX - rect.left) * (signPadCanvasRef.value.width / rect.width), y: (e.clientY - rect.top) * (signPadCanvasRef.value.height / rect.height) }
+  return {
+    x: (e.clientX - rect.left) * (signPadCanvasRef.value.width / rect.width),
+    y: (e.clientY - rect.top) * (signPadCanvasRef.value.height / rect.height)
+  }
 }
 const startSign = (e) => {
   isSigning = true
@@ -3441,12 +3273,16 @@ const onSelectReceiptOrder = () => {
 }
 const fillReceiptFromOrder = (ord) => {
   selectedOrderId.value = ord.id
-  onSelectReceiptOrder()
   currentTab.value = 'receipt'
-  nextTick(() => autoFitReceipt())
+  nextTick(() => {
+    onSelectReceiptOrder()
+    autoFitReceipt()
+  })
 }
 
-// 農民收據
+// ==========================================
+// 8. 農民收據
+// ==========================================
 const selectedFarmerOrderId = ref('')
 const farmerReceipt = ref({
   year: '115', month: '09', day: '03', buyerName: '永全證券股份有限公司', taxId: '12345678',
@@ -3462,9 +3298,12 @@ const updateChineseAmount = () => {
     chineseDigits.value = { hundredThousands: '', tenThousands: '', thousands: '', hundreds: '', tens: '', ones: '' }
     return
   }
-  const padded = amt.toString().padStart(6, '0')
+  const padded = amt.toString().padStart(6, '0').slice(-6)
   const digits = padded.split('').map(d => Number(d) === 0 ? '—' : digitMap[Number(d)])
-  chineseDigits.value = { hundredThousands: digits[0], tenThousands: digits[1], thousands: digits[2], hundreds: digits[3], tens: digits[4], ones: digits[5] }
+  chineseDigits.value = {
+    hundredThousands: digits[0], tenThousands: digits[1], thousands: digits[2],
+    hundreds: digits[3], tens: digits[4], ones: digits[5]
+  }
 }
 const onSelectFarmerReceiptOrder = () => {
   const ord = orderList.value.find(o => o.id === selectedFarmerOrderId.value)
@@ -3485,16 +3324,28 @@ const onSelectFarmerReceiptOrder = () => {
 }
 const fillFarmerReceiptFromOrder = (ord) => {
   selectedFarmerOrderId.value = ord.id
-  onSelectFarmerReceiptOrder()
   currentTab.value = 'farmer_receipt'
-  nextTick(() => autoFitFarmerReceipt())
+  nextTick(() => {
+    onSelectFarmerReceiptOrder()
+    autoFitFarmerReceipt()
+  })
 }
-// 🌟 同業代送單 (A5) 專用資料與函式
+
+// ==========================================
+// 9. 同業代送單 (A5)
+// ==========================================
 const selectedDispatchOrderId = ref('')
 const dispatchForm = ref({
   orderId: '', orderDate: '', driverName: '', driverPhone: '', recipient: '',
   address: '', deliveryTime: '', potsQty: 1, itemName: '', cardUpper: '', cardMiddle: '', cardBottom: ''
 })
+
+const formatDispatchSpec = (ord) =>
+  String(ord.spec || '')
+    .split(';')
+    .map(p => p.split('|').map(s => s.trim()).filter(Boolean).join('・'))
+    .filter(Boolean)
+    .join('；')
 
 const onSelectDispatchOrder = () => {
   const ord = orderList.value.find(o => o.id === selectedDispatchOrderId.value)
@@ -3505,19 +3356,26 @@ const onSelectDispatchOrder = () => {
     dispatchForm.value.address = extractOrderAddress(ord) || '同訂購人地址'
     dispatchForm.value.deliveryTime = `${ord.expected_date} 專車送達`
     dispatchForm.value.potsQty = getOrderTotalPots(ord)
-    dispatchForm.value.itemName = `${ord.spec}`
+    dispatchForm.value.itemName = formatDispatchSpec(ord)
     dispatchForm.value.cardUpper = getOrderCardInfo(ord, 'upper')
     dispatchForm.value.cardMiddle = getOrderCardInfo(ord, 'middle')
     dispatchForm.value.cardBottom = getOrderCardInfo(ord, 'bottom')
   }
 }
+const fillDispatchFromOrder = (ord) => {
+  selectedDispatchOrderId.value = ord.id
+  currentTab.value = 'dispatch'
+  nextTick(() => {
+    onSelectDispatchOrder()
+    autoFitDispatch()
+  })
+}
 
-const shareDispatchDirect = () => openPrintImageModal('dispatch-print-target', '同業代送單確認', false)
+// ==========================================
+// 10. 初始化
+// ==========================================
 const initSystemData = () => {
-  autoFitDispatch()
-  autoFitZoom()
-  autoFitReceipt()
-  autoFitFarmerReceipt()
+  autoFitAll()
   updateChineseAmount()
   fetchSealFromCloud()
   loadOrders()
@@ -3529,26 +3387,24 @@ const initSystemData = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('resize', () => {
-    autoFitDispatch()
-    autoFitZoom()
-    autoFitReceipt()
-    autoFitFarmerReceipt()
-  })
-
+  window.addEventListener('resize', autoFitAll)
   if (isAuthenticated.value) {
-    nextTick(() => {
-      initSystemData()
-    })
+    nextTick(() => initSystemData())
   }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', autoFitAll)
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
 })
 </script>
 
 <style scoped>
-/* ⚠️ @import 必須放在樣式最前面，否則會被瀏覽器忽略 */
+/* @import 必須放在最前面，否則會被瀏覽器忽略 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
 
-/* ================= 雲端正楷字型直接載入 (手機、平板強制支援) ================= */
+/* ================= 雲端正楷字型 (存放於 Supabase card-assets bucket) ================= */
 @font-face {
   font-family: 'TW-Kai';
   src: url('https://ivofrjibdezbyxxmutok.supabase.co/storage/v1/object/public/card-assets/TW-Kai.woff2') format('woff2');
@@ -3557,15 +3413,22 @@ onMounted(() => {
   font-display: swap;
 }
 
-/* 🌟 強制簽收單與農民收據一律使用 TW-Kai 楷書 (手機、平板全部強制生效，不跑版) */
+/* 簽收單、農民收據、代送單一律使用 TW-Kai 楷書 */
 .a5-landscape-sheet,
 .farmer-receipt-sheet,
+.dispatch-sheet,
 .a5-landscape-sheet *,
-.farmer-receipt-sheet * {
+.farmer-receipt-sheet *,
+.dispatch-sheet * {
   font-family: 'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', 'Kaiti TC', serif !important;
 }
 
-/* 🌟 100% 原始精美樣式 */
+/* 正楷字體全平台適配 */
+.standard-kai-font, .kai-font-supported {
+  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
+}
+
+/* ================= 整體版面 ================= */
 .main-wrapper {
   display: flex;
   flex-direction: column;
@@ -3581,6 +3444,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* ================= 登入畫面 ================= */
 .auth-lock-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -3610,6 +3474,7 @@ onMounted(() => {
   border-radius: 6px !important; font-size: 12.5px !important; font-weight: bold !important; cursor: pointer !important; margin-left: 8px;
 }
 
+/* ================= 導覽列 ================= */
 .top-nav {
   height: 50px; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; flex-shrink: 0; overflow-x: auto;
@@ -3620,6 +3485,12 @@ onMounted(() => {
   background: #334155; color: #e2e8f0; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; white-space: nowrap;
 }
 .nav-tabs button.active { background: #2563eb; color: white; }
+
+.floating-toast {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 100000;
+  background: #0f172a; color: #ffffff; padding: 9px 18px; border-radius: 24px;
+  font-size: 13.5px; font-weight: bold; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35); max-width: 90vw; text-align: center;
+}
 
 .manage-container { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .sub-nav {
@@ -3638,6 +3509,7 @@ onMounted(() => {
 }
 .cancel-edit-btn { background: #dc2626; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
+/* ================= 卡片、表單 ================= */
 .card-box { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
 .card-box h3 { margin: 0; font-size: 15.5px; color: #1e293b; }
 
@@ -3645,6 +3517,7 @@ onMounted(() => {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
 }
 .right-aligned-badge { margin-left: auto; }
+.preview-seq-badge { background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 14px; font-size: 12.5px; }
 
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .field label { display: block; font-size: 12.5px; font-weight: bold; color: #475569; margin-bottom: 4px; }
@@ -3653,44 +3526,33 @@ input, select, textarea {
   border-radius: 6px; font-size: 13.5px; box-sizing: border-box;
 }
 
-.triple-width-field {
-  grid-column: span 3 !important;
-}
+.triple-width-field { grid-column: span 3 !important; }
 @media (max-width: 900px) {
-  .triple-width-field {
-    grid-column: span 1 !important;
-  }
+  .triple-width-field { grid-column: span 1 !important; }
 }
 
-.items-section {
-  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;
-}
-.items-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
-}
+.items-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+.items-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .items-header h4 { margin: 0; font-size: 13.5px; color: #1e293b; font-weight: bold; }
 .add-item-btn {
   background: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 12.5px; cursor: pointer;
 }
-.order-item-card {
-  background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 8px;
-}
+.order-item-card { background: white; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 .item-card-title {
   display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #3b82f6; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0;
 }
-.remove-item-btn {
-  background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 5px; border-radius: 4px; font-size: 12px; cursor: pointer;
-}
-.item-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;
-}
+.remove-item-btn { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 5px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.card-info-grid { background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1; }
 
 .highlight-field { background-color: #f0fdf4; padding: 6px; border-radius: 6px; border: 1px solid #bbf7d0; }
 .highlight-field label { color: #15803d; }
 .bold-price-input { font-weight: bold; color: #1d4ed8; font-size: 15px; }
+.bold-date-input { font-weight: bold; }
 .bold-select-field { font-weight: bold; color: #1e3a8a; background: #eff6ff; }
 .text-purple { color: #7e22ce; }
 .font-heavy { font-weight: 800 !important; font-size: 15px !important; }
+.font-bold { font-weight: bold; }
 
 .btn-action-row { display: flex; gap: 8px; }
 .primary-btn { background: #2563eb; color: white; border: none; padding: 7px 16px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
@@ -3698,12 +3560,11 @@ input, select, textarea {
 .excel-btn { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; }
 .line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14.5px; cursor: pointer; width: 100%; }
 
+/* ================= 對帳專區 ================= */
 .statement-filter-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px;
 }
-.custom-date-range-field {
-  background: #fefce8; border: 1.5px solid #fde047; border-radius: 6px; padding: 6px;
-}
+.custom-date-range-field { background: #fefce8; border: 1.5px solid #fde047; border-radius: 6px; padding: 6px; }
 .statement-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .sum-card { padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
 .red-card { background: #fef2f2; border-color: #fecaca; }
@@ -3718,37 +3579,23 @@ input, select, textarea {
 .line-btn { background: #06c755; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
 .batch-pay-btn { background: #ea580c; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
 
+/* ================= 資料表 ================= */
 .table-header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; min-width: 1050px; }
 .data-table th { background: #f8fafc; padding: 8px 6px; border-bottom: 2px solid #e2e8f0; color: #334155; font-size: 13px; font-weight: bold; white-space: nowrap; }
 .data-table td { padding: 6px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+.nowrap-cell { white-space: nowrap; }
+.addr-cell { max-width: 240px; line-height: 1.35; }
 
-.col-status, .col-receipt {
-  width: 82px !important;
-  min-width: 82px !important;
-  text-align: center;
-}
+.col-status, .col-receipt { width: 82px !important; min-width: 82px !important; text-align: center; }
 .uniform-status-select {
-  width: 78px !important;
-  min-width: 78px !important;
-  padding: 3px 2px !important;
-  font-size: 12px !important;
-  font-weight: bold !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  text-align: center !important;
-  box-sizing: border-box !important;
+  width: 78px !important; min-width: 78px !important; padding: 3px 2px !important; font-size: 12px !important;
+  font-weight: bold !important; border-radius: 4px !important; cursor: pointer !important; text-align: center !important; box-sizing: border-box !important;
 }
 .uniform-status-badge {
-  display: inline-block !important;
-  width: 74px !important;
-  padding: 3px 2px !important;
-  font-size: 12px !important;
-  font-weight: bold !important;
-  border-radius: 4px !important;
-  text-align: center !important;
-  box-sizing: border-box !important;
+  display: inline-block !important; width: 74px !important; padding: 3px 2px !important; font-size: 12px !important;
+  font-weight: bold !important; border-radius: 4px !important; text-align: center !important; box-sizing: border-box !important;
 }
 
 .spec-cell-wrap { max-width: 220px; line-height: 1.35; word-break: break-all; font-size: 13px; }
@@ -3760,13 +3607,13 @@ input, select, textarea {
   padding: 4px 7px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700;
   white-space: nowrap; text-align: center; transition: all 0.15s ease-in-out;
 }
-.clean-btn-noborder {
-  border: none !important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-}
-.icon-only-btn {
-  padding: 3px 6px !important; font-size: 13.5px !important; min-width: 28px;
-}
+.clean-btn-noborder { border: none !important; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+.icon-only-btn { padding: 3px 6px !important; font-size: 13.5px !important; min-width: 28px; }
+.btn-receipt { background-color: #F3EEC3 !important; color: #5a5410 !important; }
+.btn-farmer { background-color: #DEE2FF !important; color: #28305c !important; }
+.btn-dispatch { background-color: #D9F2E3 !important; color: #1c5a38 !important; }
+.btn-edit { background-color: #E0FBFC !important; color: #155e75 !important; }
+.btn-del { background-color: #ebd8da !important; color: #6e2e34 !important; }
 
 .badge { padding: 2px 5px; border-radius: 4px; font-size: 12.5px; font-weight: bold; border: none; cursor: pointer; }
 .badge-purple { background: #f3e8ff; color: #7e22ce; }
@@ -3787,40 +3634,25 @@ input, select, textarea {
 .mb-1 { margin-bottom: 4px; }
 .mb-2 { margin-bottom: 8px; }
 
-.shipping-tab-header {
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
-}
-.modern-pill-tabs {
-  display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 30px; gap: 3px;
-}
+.shipping-tab-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.modern-pill-tabs { display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 30px; gap: 3px; }
 .pill-tab-item {
   border: none; background: transparent; padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: bold;
   color: #475569; cursor: pointer; transition: all 0.2s ease;
 }
 .pill-tab-item:hover { color: #0f172a; }
-.pill-tab-item.active {
-  background: #1e293b; color: #ffffff; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2);
-}
+.pill-tab-item.active { background: #1e293b; color: #ffffff; box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2); }
 
-.modern-sign-card {
-  background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; padding: 10px !important;
-}
-.modern-sign-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
-}
-.modern-sign-title {
-  font-size: 13px; font-weight: bold; color: #1e293b;
-}
+/* ================= 簽名板 ================= */
+.modern-sign-card { background: #f8fafc !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; padding: 10px !important; }
+.modern-sign-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.modern-sign-title { font-size: 13px; font-weight: bold; color: #1e293b; }
 .modern-clean-sign-btn {
   background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 2px 7px; border-radius: 4px;
   font-size: 11.5px; font-weight: bold; cursor: pointer; transition: all 0.15s ease;
 }
-.modern-clean-sign-btn:hover {
-  background: #fee2e2; color: #dc2626; border-color: #fca5a5;
-}
-.modern-canvas-wrapper {
-  position: relative; width: 100%; display: flex; justify-content: center;
-}
+.modern-clean-sign-btn:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.modern-canvas-wrapper { position: relative; width: 100%; display: flex; justify-content: center; }
 .modern-live-sign-pad {
   width: 100%; height: 100px; background: #ffffff; border: 1.5px dashed #94a3b8; border-radius: 6px;
   cursor: crosshair; touch-action: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
@@ -3830,27 +3662,23 @@ input, select, textarea {
   font-size: 12.5px; color: #cbd5e1; font-weight: bold; pointer-events: none; user-select: none;
 }
 
-.double-x-row {
-  display: flex; align-items: center; gap: 6px; background: #eff6ff; padding: 5px 7px; border-radius: 6px; border: 1px dashed #93c5fd;
-}
+.double-x-row { display: flex; align-items: center; gap: 6px; background: #eff6ff; padding: 5px 7px; border-radius: 6px; border: 1px dashed #93c5fd; }
 .x-input-group { display: flex; align-items: center; gap: 4px; flex: 1; }
-.x-badge {
-  background: #3b82f6; color: white; font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 4px; white-space: nowrap;
-}
+.x-badge { background: #3b82f6; color: white; font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 4px; white-space: nowrap; }
 .x-connector { font-weight: bold; color: #60a5fa; }
 .sub-label-tip { font-size: 11.5px; color: #64748b; font-weight: bold; display: block; margin-bottom: 2px; }
+.sub-lbl { font-size: 12px; font-weight: bold; color: #475569; display: block; margin-bottom: 3px; }
 .bold-select-dropdown { background: #f8fafc; font-weight: bold; color: #1e3a8a; border-color: #93c5fd; }
 
-.photo-preview-wrap {
-  display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1;
-}
-.preview-label { font-size: 12px; font-weight: bold; color: #475569; }
+/* ================= 品種照片 ================= */
+.photo-preview-wrap { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
 .preview-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
 .remove-photo-btn { background: #ef4444; color: white; border: none; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 .photo-col { width: 56px; text-align: center; }
 .table-orchid-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; }
 .no-photo-badge { font-size: 11px; color: #94a3b8; }
 
+/* ================= 彈窗 ================= */
 .image-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.78);
   display: flex; justify-content: center; align-items: center; z-index: 99999; padding: 14px; box-sizing: border-box;
@@ -3860,7 +3688,7 @@ input, select, textarea {
   display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); box-sizing: border-box; overflow-y: auto;
 }
 .image-modal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
-.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 0 4px; }
+.close-modal-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 0 4px; width: auto; }
 .share-modal-body { display: flex; flex-direction: column; align-items: center; width: 100%; }
 .share-img-scroll-container {
   width: 100%; display: flex; justify-content: center; align-items: center;
@@ -3868,9 +3696,7 @@ input, select, textarea {
 }
 .share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
 
-.share-btn-action-group {
-  display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap;
-}
+.share-btn-action-group { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap; }
 .mobile-print-btn {
   flex: 1.5; min-width: 180px; background: #16a34a; color: white; border: none; padding: 10px;
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
@@ -3885,7 +3711,7 @@ input, select, textarea {
 }
 .share-tips-row { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #475569; line-height: 1.5; width: 100%; background: #f8fafc; padding: 8px 10px; border-radius: 6px; }
 
-/* 雲端草稿管理樣式 */
+/* ================= 雲端草稿 ================= */
 .draft-manage-panel { background: #fdfefe !important; border: 1.5px solid #dbeafe !important; }
 .draft-action-btns { display: flex; gap: 6px; margin-top: 6px; }
 .ultra-light-purple-btn {
@@ -3901,7 +3727,7 @@ input, select, textarea {
 .mint-new-card-btn:hover { background: #d1fae5; border-color: #6ee7b7; }
 .draft-selector-row { display: flex; gap: 6px; align-items: center; }
 .mini-refresh-btn { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; font-size: 11px; padding: 2px 5px; cursor: pointer; }
-.mini-del-draft-btn { background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 13px; }
+.mini-del-draft-btn { background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 13px; width: auto; }
 
 .inline-font-weight-row { display: flex; gap: 8px; align-items: flex-end; width: 100%; }
 .inline-item-flex { flex: 1.6; }
@@ -3916,6 +3742,7 @@ input, select, textarea {
   width: 40px !important; padding: 1px 2px !important; font-size: 11.5px !important; font-weight: bold !important; text-align: center; border: none !important; outline: none;
 }
 
+/* ================= 編輯器共用版面 ================= */
 .app-container, .receipt-container { display: flex; flex: 1; overflow: hidden; }
 .couplet-screen-wrapper { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 50px); }
 .control-panel {
@@ -3949,6 +3776,7 @@ input, select, textarea {
 }
 .btn-group button.active { background: #2563eb; color: white; }
 .radio-row { display: flex; gap: 12px; font-size: 12.5px; }
+.radio-row input { width: auto; }
 .tags-container { display: flex; flex-wrap: wrap; gap: 4px; }
 .tag-btn { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 3px 5px; font-size: 12px; border-radius: 4px; cursor: pointer; }
 .reset-btn { width: 100%; padding: 7px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 4px; cursor: pointer; font-size: 12.5px; }
@@ -3969,23 +3797,20 @@ input, select, textarea {
 .zoom-text { font-size: 12.5px; font-weight: bold; min-width: 40px; text-align: center; }
 .fit-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 12px; cursor: pointer; }
 
+/* ================= 花卡 ================= */
 .card-scaler-container { position: relative; margin-bottom: 35px; flex-shrink: 0; }
 .card-board {
   background: #ffffff !important; position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.18); user-select: none; touch-action: none; border: none !important;
   overflow: hidden;
 }
 
-/* 🌟 防擠壓動態背景層：直式正常鋪滿，橫式等比自動旋轉對齊，絕不擠壓變形 */
+/* 防擠壓動態背景層：橫式底圖本身就是橫圖，直接鋪滿即可 */
 .card-dynamic-bg-layer {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   background-size: cover; background-position: center; background-repeat: no-repeat;
   z-index: 1; pointer-events: none;
 }
-.rotate-landscape-bg {
-  /* 既然圖片本身就是橫的，直接鋪滿即可，不用任何旋轉 */
-  width: 100% !important;
-  height: 100% !important;
-}
+.rotate-landscape-bg { width: 100% !important; height: 100% !important; }
 
 .card-board.mode-vertical .text-box { writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 8px; z-index: 2; }
 .card-board.mode-vertical .middle-box,
@@ -4001,21 +3826,14 @@ input, select, textarea {
   background: #2563eb; color: white; border-radius: 3px; font-size: 10.5px; display: flex; justify-content: center; align-items: center; cursor: nwse-resize;
 }
 
-/* 正楷字體全平台適配 (TW-Kai 楷書為核心) */
-.standard-kai-font, .kai-font-supported {
-  font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
-}
-
-/* A5 橫式簽收單 */
+/* ================= A5 橫式簽收單 ================= */
 .receipt-scaler-container { position: relative; flex-shrink: 0; }
 .a5-landscape-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 32px 38px; box-sizing: border-box;
   display: flex; flex-direction: column; justify-content: space-between; writing-mode: horizontal-tb; direction: ltr;
   color: #111827; box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
 }
-.sheet-header {
-  display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px;
-}
+.sheet-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; }
 .shop-name-title { font-size: 27px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
 .sheet-main-title { font-size: 23px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
 .header-meta { font-size: 13.5px; line-height: 1.45; text-align: right; color: #334155; }
@@ -4029,14 +3847,12 @@ input, select, textarea {
 .sheet-footer { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; margin-top: 2px; }
 .footer-left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-size: 14.5px; padding: 2px 0; }
 .footer-tip { font-size: 12.5px; color: #64748b; }
-.footer-sign-box {
-  width: 215px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa;
-}
+.footer-sign-box { width: 215px; border: 1.5px dashed #475569; border-radius: 6px; display: flex; flex-direction: column; background-color: #fafafa; }
 .sign-box-title { background: #e2e8f0; font-size: 12.5px; font-weight: bold; text-align: center; padding: 2px 0; color: #334155; }
 .sign-box-area { flex: 1; min-height: 50px; display: flex; justify-content: center; align-items: center; }
 .live-signature-img { max-height: 58px; max-width: 95%; object-fit: contain; }
 
-/* 農民收據 */
+/* ================= 農民收據 ================= */
 .farmer-scaler-container { position: relative; flex-shrink: 0; }
 .farmer-receipt-sheet {
   width: 794px; height: 560px; background: #ffffff; padding: 16px 26px; box-sizing: border-box;
@@ -4052,7 +3868,8 @@ input, select, textarea {
 .f-grid-row:last-child { border-bottom: none; }
 .f-grid-lbl {
   display: flex; justify-content: center; align-items: center; font-weight: bold; letter-spacing: 2px;
-  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px; }
+  text-align: center; border-right: 1px solid #000; padding: 3px 5px; box-sizing: border-box; flex-shrink: 0; font-size: 15.5px;
+}
 .f-grid-val { display: flex; align-items: center; padding-left: 10px; border-right: 1px solid #000; box-sizing: border-box; font-size: 15.5px; }
 .f-grid-val:last-child { border-right: none; }
 .f-flex-1 { flex: 1; }
@@ -4078,9 +3895,7 @@ input, select, textarea {
 
 .f-w-total-lbl { width: 205px; white-space: nowrap; font-size: 15.5px; }
 .f-amount-val-cell { flex: 1; border-right: none !important; padding: 2px 10px; }
-.f-chinese-amount-line {
-  display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16.5px; font-weight: bold;
-}
+.f-chinese-amount-line { display: flex; align-items: center; justify-content: space-around; width: 100%; font-size: 16.5px; font-weight: bold; }
 .f-chinese-amount-line .d-val { color: #1e3a8a; min-width: 24px; text-align: center; font-size: 17px; display: inline-block; }
 
 .f-farmer-stamp-cell { border-right: none !important; padding-left: 24px !important; display: flex; align-items: center; gap: 14px; }
@@ -4098,135 +3913,38 @@ input, select, textarea {
 .f-statement { font-size: 12.5px; text-align: center; letter-spacing: 1px; font-weight: bold; margin-top: 3px; }
 .f-footer-note { font-size: 10px; line-height: 1.35; color: #222; margin-top: 3px; text-align: justify; }
 
+/* ================= 同業代送單 (A5 橫式)：字級與簽收單一致 ================= */
+.dispatch-sheet {
+  width: 794px; height: 560px; background: #ffffff; padding: 28px 38px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; color: #111827;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
+  writing-mode: horizontal-tb; direction: ltr;
+}
+.d-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #1e293b; padding-bottom: 6px; }
+.d-shop-title { font-size: 27px; font-weight: 900; letter-spacing: 2px; color: #0f172a; }
+.d-main-title { font-size: 23px; font-weight: bold; letter-spacing: 4px; color: #dc2626; }
+.d-meta-top { font-size: 13.5px; line-height: 1.45; text-align: right; color: #334155; }
+.d-driver-info-box { display: flex; justify-content: space-between; font-size: 15.5px; padding: 6px 0; border-bottom: 1px dashed #64748b; }
+.d-goods-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 15.5px; }
+.d-goods-table th, .d-goods-table td { border: 1.5px solid #334155; padding: 7px 10px; }
+.d-goods-table th { background: #f1f5f9; font-weight: bold; text-align: center; font-size: 15.5px; }
+.d-card-section { border: 1.5px solid #334155; padding: 8px 12px; margin-top: 6px; background: #fffdfa; font-size: 16.5px; }
+.d-card-line { margin: 3px 0; }
+.d-delivery-box { display: flex; justify-content: space-between; border: 1.5px solid #334155; padding: 8px 12px; margin-top: 6px; font-size: 15.5px; }
+.d-del-left { flex: 1.5; }
+.d-del-right { flex: 1; border-left: 1px dashed #94a3b8; padding-left: 12px; }
+.d-footer-sign { display: flex; justify-content: space-between; align-items: center; font-size: 14.5px; margin-top: 3px; }
+.d-footer-tip { font-size: 12.5px; color: #64748b; }
+
 .print-action-btn {
   width: 100%; padding: 11px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer;
 }
 .print-action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-@media (max-width: 768px) {
-  .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
-  .control-panel { width: 100%; max-height: 46vh; }
-  .form-grid { grid-template-columns: 1fr; }
-  .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
-  .shipping-tab-header { flex-direction: column; align-items: flex-start; }
-}
+/* ================= A4 詳細對帳單 ================= */
+.no-screen-display { display: none !important; }
 
-/* =========================================================================
-   🌟 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
-========================================================================= */
-@media print {
-  @page {
-    size: auto;
-    margin: 0mm !important;
-  }
-
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
-  }
-
-  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
-    display: none !important;
-  }
-
-  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
-  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container { 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    background: transparent !important; 
-    display: block !important; 
-    position: static !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    transform: none !important;
-  }
-
-  /* 花卡列印：滿版單頁輸出，底圖在送印時抽空為無色透明 */
-  #card-print-target { 
-    position: absolute !important; 
-    top: 0 !important; 
-    left: 0 !important; 
-    transform: none !important; 
-    box-shadow: none !important; 
-    margin: 0 !important; 
-    display: block !important; 
-    visibility: visible !important; 
-    border: none !important; 
-    background-color: transparent !important;
-    page-break-inside: avoid !important; 
-    break-inside: avoid !important; 
-    page-break-after: avoid !important; 
-    break-after: avoid !important; 
-  }
-  .card-dynamic-bg-layer {
-    display: none !important;
-  }
-  #card-print-target * { visibility: visible !important; }
-
-  /* 簽收單與農民收據：高度自動收斂，強制單頁 */
-  #receipt-print-target, #farmer-print-target { 
-    position: relative !important; 
-    top: 0 !important; 
-    left: 0 !important; 
-    transform: none !important; 
-    box-shadow: none !important; 
-    background-color: transparent !important;
-    width: 192mm !important; 
-    max-width: 192mm !important; 
-    height: 130mm !important; 
-    margin: 2mm auto 0 auto !important; 
-    padding: 4mm 6mm !important; 
-    box-sizing: border-box !important; 
-    overflow: hidden !important; 
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    page-break-after: avoid !important; 
-    break-after: avoid !important; 
-  }
-
-  #receipt-print-target *, #farmer-print-target *, #card-print-target * {
-    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
-  }
-}
-/* ⬆️ 上方 @media print 在此關閉 (原本漏掉結尾大括號) */
-
-/* 平時螢幕隱藏詳細對帳單，送印時才呈現 */
-.no-screen-display {
-  display: none !important;
-}
-
-/* 🌟 同業代送單 (A5 橫式) 專用樣式 */
-.dispatch-sheet {
-  width: 794px; height: 560px; background: #ffffff; padding: 22px 28px; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: space-between; color: #000;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
-  font-family: 'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', serif !important;
-}
-.d-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 4px; }
-.d-shop-title { font-size: 24px; font-weight: 900; }
-.d-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #0f172a; }
-.d-meta-top { font-size: 13.5px; text-align: right; }
-.d-driver-info-box { display: flex; justify-content: space-between; font-size: 14.5px; padding: 6px 0; border-bottom: 1px dashed #64748b; }
-.d-goods-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 14.5px; }
-.d-goods-table th, .d-goods-table td { border: 1.5px solid #000; padding: 6px 8px; }
-.d-goods-table th { background: #f8fafc; font-weight: bold; text-align: center; }
-.d-card-section { border: 1.5px solid #000; padding: 7px 12px; margin-top: 6px; background: #fffdfa; font-size: 15px; }
-.d-card-line { margin: 3px 0; }
-.d-delivery-box { display: flex; justify-content: space-between; border: 1.5px solid #000; padding: 7px 12px; margin-top: 6px; font-size: 14px; }
-.d-del-left { flex: 1.5; }
-.d-del-right { flex: 1; border-left: 1px dashed #cbd5e1; padding-left: 12px; }
-.d-footer-sign { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-top: 3px; }
-
-/* 🌟 A4 詳細對帳單專用樣式 */
-.statement-a4-sheet {
-  background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
+.statement-a4-sheet { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 .statement-sheet-header { border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; }
 .shop-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
 .shop-title-row h2 { margin: 0; font-size: 22px; color: #0f172a; }
@@ -4236,74 +3954,82 @@ input, select, textarea {
 .statement-detail-table th { background: #f1f5f9; padding: 8px 6px; border-bottom: 1.5px solid #cbd5e1; color: #1e293b; }
 .statement-detail-table td { padding: 6px; }
 .main-info-row td { border-top: 1px solid #e2e8f0; font-weight: 500; }
-.sub-card-row td { 
-  background: #fafafa; 
-  border-bottom: 1.5px solid #cbd5e1; 
-  padding: 6px 10px; 
-}
-
-.statement-card-line { 
-  font-size: 13px; 
-  color: #334155; 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  gap: 12px; 
-  width: 100%; 
-  box-sizing: border-box; 
-}
-
-.statement-card-line .card-text-group {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.unpaid-tag { 
-  margin-left: auto; 
-  margin-right: 8px !important; 
-  font-weight: 800; 
-  color: #dc2626; 
-  background: #fee2e2; 
-  padding: 3px 10px; 
-  border-radius: 4px; 
-  white-space: nowrap; 
-  flex-shrink: 0; 
-  font-size: 12.5px; 
-  display: inline-block; 
+.sub-card-row td { background: #fafafa; border-bottom: 1.5px solid #cbd5e1; padding: 6px 10px; }
+.statement-card-line { font-size: 13px; color: #334155; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; }
+.unpaid-tag {
+  margin-left: auto; margin-right: 8px; font-weight: 800; color: #dc2626; background: #fee2e2;
+  padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-size: 12.5px; display: inline-block;
 }
 .statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
 .footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
 .statement-sign-line { font-size: 13.5px; font-weight: bold; }
 
-/* 🌟 列印時將代送單與詳細對帳單納入標準規範 */
+/* ================= 手機版 ================= */
+@media (max-width: 768px) {
+  .app-container, .receipt-container, .couplet-screen-wrapper { flex-direction: column; overflow-y: auto; height: auto; }
+  .control-panel { width: 100%; max-height: 46vh; }
+  .form-grid { grid-template-columns: 1fr; }
+  .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
+  .shipping-tab-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* =========================================================================
+   列印：單頁保證，送印時底圖與底色自動透明
+========================================================================= */
 @media print {
-  #dispatch-print-target {
-    position: relative !important; top: 0 !important; left: 0 !important; transform: none !important;
-    box-shadow: none !important; background-color: transparent !important; width: 192mm !important;
-    max-width: 192mm !important; height: 130mm !important; margin: 2mm auto 0 auto !important;
-    padding: 4mm 6mm !important; box-sizing: border-box !important; overflow: hidden !important;
+  @page { size: auto; margin: 0mm !important; }
+
+  html, body {
+    margin: 0 !important; padding: 0 !important; background: transparent !important;
+    width: 100% !important; height: 100% !important; overflow: hidden !important;
+  }
+
+  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
+    display: none !important;
+  }
+
+  .main-wrapper, .couplet-screen-wrapper, .system-root, .app-container, .receipt-container,
+  .canvas-viewport, .receipt-preview-area, .receipt-scaler-container, .farmer-scaler-container, .card-scaler-container {
+    margin: 0 !important; padding: 0 !important; background: transparent !important;
+    display: block !important; position: static !important;
+    width: 100% !important; height: 100% !important; overflow: hidden !important; transform: none !important;
+  }
+
+  /* 花卡：滿版單頁輸出，底圖在送印時抽空 (字體沿用畫面上選的字體) */
+  #card-print-target {
+    position: absolute !important; top: 0 !important; left: 0 !important; transform: none !important;
+    box-shadow: none !important; margin: 0 !important; display: block !important; visibility: visible !important;
+    border: none !important; background-color: transparent !important;
     page-break-inside: avoid !important; break-inside: avoid !important;
-    display: block !important;
+    page-break-after: avoid !important; break-after: avoid !important;
   }
-  #statement-print-target {
-    position: static !important; 
-    width: 97% !important; 
-    max-width: 97% !important;
-    margin: 0 auto !important; 
-    padding: 4mm 4mm !important;
-    box-shadow: none !important; 
-    border: none !important; 
-    display: block !important;
-    box-sizing: border-box !important;
+  .card-dynamic-bg-layer { display: none !important; }
+  #card-print-target * { visibility: visible !important; }
+
+  /* 簽收單、農民收據、代送單：A5 單頁 */
+  #receipt-print-target, #farmer-print-target, #dispatch-print-target {
+    position: relative !important; top: 0 !important; left: 0 !important; transform: none !important;
+    box-shadow: none !important; background-color: transparent !important;
+    width: 192mm !important; max-width: 192mm !important; height: 130mm !important;
+    margin: 2mm auto 0 auto !important; padding: 4mm 6mm !important; box-sizing: border-box !important;
+    overflow: hidden !important; display: flex !important;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+    page-break-after: avoid !important; break-after: avoid !important;
   }
-  #dispatch-print-target *, #statement-print-target * {
+
+  #receipt-print-target *, #farmer-print-target *, #dispatch-print-target *, #statement-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
 
-  /* 列印對帳單時：只留下 A4 對帳單，隱藏管理畫面其他區塊 */
+  /* A4 詳細對帳單 */
+  #statement-print-target {
+    position: static !important; width: 97% !important; max-width: 97% !important;
+    margin: 0 auto !important; padding: 4mm 4mm !important;
+    box-shadow: none !important; border: none !important; display: block !important; box-sizing: border-box !important;
+  }
+
+  /* 列印對帳單時：只留下 A4 對帳單，其他管理畫面隱藏 */
   .manage-container, .manage-content {
     display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important;
   }
