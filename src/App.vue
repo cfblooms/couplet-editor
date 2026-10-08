@@ -103,8 +103,8 @@
               </button>
               
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-  📲 一鍵直接傳送至 LINE / 其他應用
-</button>
+                📲 一鍵傳送至 LINE (客人確認 / Epson 遠端列印)
+              </button>
               
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
                 💾 下載圖檔至相簿 / 電腦
@@ -2886,29 +2886,13 @@ const triggerImagePrint = async () => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
 
-  showToast('⏳ 正在為手機準備滿版送印...')
+  showToast('⏳ 正在生成無網址滿版文件...')
 
   try {
     if (document.fonts?.ready) await document.fonts.ready
     
-    const parentEl = targetEl.parentElement
     const origTransform = targetEl.style.transform
-    const origParentWidth = parentEl ? parentEl.style.width : ''
-    const origParentHeight = parentEl ? parentEl.style.height : ''
-    
-    let baseW = 794
-    let baseH = 560
-    if (targetId === 'card-print-target') {
-      baseW = currentCardDimensions.value.w
-      baseH = currentCardDimensions.value.h
-    }
-
-    // 暫時解鎖父容器為真實 1:1 像素，避免手機螢幕擠壓
     targetEl.style.transform = 'none'
-    if (parentEl) {
-      parentEl.style.width = baseW + 'px'
-      parentEl.style.height = baseH + 'px'
-    }
 
     // 抽空底圖與底色
     const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
@@ -2924,76 +2908,50 @@ const triggerImagePrint = async () => {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
-      width: baseW,
-      height: baseH,
-      windowWidth: baseW + 50,
-      windowHeight: baseH + 50,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 截圖完成立即還原手機螢幕
+    // 還原螢幕畫面
     targetEl.style.transform = origTransform
-    if (parentEl) {
-      parentEl.style.width = origParentWidth
-      parentEl.style.height = origParentHeight
-    }
     if (bgLayer) bgLayer.style.display = origBgDisplay
     targetEl.style.backgroundColor = origBgColor
 
-    // 🌟 將圖片轉為 Blob 獨立影像文件，以 100% 滿版無邊界模式載入
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      const blobUrl = URL.createObjectURL(blob)
+    const imgDataUrl = canvas.toDataURL('image/png')
 
-      let oldFrame = document.getElementById('cf-mobile-print-iframe')
-      if (oldFrame) document.body.removeChild(oldFrame)
+    // 判斷紙張與方向
+    const { jsPDF } = window.jspdf || {}
+    let isLandscapeMode = !isVertical.value
+    let format = 'a4'
+    if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
+      isLandscapeMode = true
+      format = 'a5'
+    } else if (cardPaperSize.value) {
+      format = cardPaperSize.value.toLowerCase()
+    }
 
-      const printFrame = document.createElement('iframe')
-      printFrame.id = 'cf-mobile-print-iframe'
-      printFrame.style.position = 'fixed'
-      printFrame.style.left = '0'
-      printFrame.style.top = '0'
-      printFrame.style.width = '100vw'
-      printFrame.style.height = '100vh'
-      printFrame.style.zIndex = '-9999'
-      printFrame.style.opacity = '0.01'
-      printFrame.style.border = 'none'
-      printFrame.style.pointerEvents = 'none'
-      document.body.appendChild(printFrame)
+    if (jsPDF) {
+      const pdf = new jsPDF({
+        orientation: isLandscapeMode ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: format
+      })
 
-      const frameDoc = printFrame.contentWindow.document
-      frameDoc.open()
-      // 🌟 強制設定 margin: 0 與 100% 絕對填滿，破除 iOS Safari 的邊界縮小機制
-      frameDoc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              @page { size: auto; margin: 0 !important; }
-              html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                overflow: hidden !important;
-                background: transparent !important;
-              }
-              img {
-                width: 100% !important;
-                height: 100% !important;
-                object-fit: fill !important;
-                display: block !important;
-              }
-            </style>
-          </head>
-          <body>
-            <img src="${blobUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 250);" />
-          </body>
-        </html>
-      `)
-      frameDoc.close()
-    }, 'image/png')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+
+      // 1:1 滿版置入 PDF
+      pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      
+      const pdfBlob = pdf.output('blob')
+      const pdfBlobUrl = URL.createObjectURL(pdfBlob)
+
+      // 🌟 直接在新視窗/分頁打開 PDF 檔案
+      // iPhone 開啟 PDF 後，點擊下方的「分享 ➔ 列印」，即為 100% 無網址、滿版、不切底的原生文件輸出
+      window.location.href = pdfBlobUrl
+    } else {
+      window.open(imgDataUrl, '_blank')
+    }
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
   }
