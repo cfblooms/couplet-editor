@@ -2573,6 +2573,8 @@ const weights = ref({
   bottom_3: '600',
   bottom_4: '600',
   bottom_5: '600',
+  bottom_6: '600', // 🌟 新增格 7
+  bottom_7: '600', // 🌟 新增格 8
   suffix: '700'
 })
 
@@ -2581,41 +2583,34 @@ const defaultVertical = {
   middle: { x: 380, y: 220, size: 76 }, middle_2: { x: 280, y: 220, size: 76 },
   bottom_0: { x: 155, y: 480, size: 30 }, bottom_1: { x: 155, y: 640, size: 36 }, bottom_2: { x: 95, y: 480, size: 30 },
   bottom_3: { x: 95, y: 640, size: 32 }, bottom_4: { x: 40, y: 480, size: 30 }, bottom_5: { x: 40, y: 640, size: 30 },
+  bottom_6: { x: -10, y: 480, size: 30 }, bottom_7: { x: -10, y: 640, size: 30 }, // 🌟 新增直式格 7、8 座標
   suffix: { x: 155, y: 860, size: 34 }
 }
+
 const defaultHorizontal = {
   upper_prefix: { x: 80, y: 80, size: 34 }, upper_target: { x: 220, y: 80, size: 38 }, upper_suffix: { x: 920, y: 80, size: 34 },
   middle: { x: 220, y: 220, size: 68 }, middle_2: { x: 220, y: 310, size: 68 },
-  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 380, y: 530, size: 34 }, bottom_2: { x: 380, y: 520, size: 28 },
-  bottom_3: { x: 580, y: 520, size: 28 }, bottom_4: { x: 580, y: 530, size: 28 }, bottom_5: { x: 760, y: 530, size: 28 },
-  suffix: { x: 880, y: 530, size: 34 }
+  bottom_0: { x: 180, y: 520, size: 28 }, bottom_1: { x: 340, y: 530, size: 34 }, bottom_2: { x: 340, y: 520, size: 28 },
+  bottom_3: { x: 500, y: 520, size: 28 }, bottom_4: { x: 500, y: 530, size: 28 }, bottom_5: { x: 660, y: 530, size: 28 },
+  bottom_6: { x: 780, y: 520, size: 28 }, bottom_7: { x: 780, y: 530, size: 28 }, // 🌟 新增橫式格 7、8 座標
+  suffix: { x: 900, y: 530, size: 34 }
 }
 
 const layout = ref(JSON.parse(JSON.stringify(defaultHorizontal)))
 
-const getWeightStyle = (wVal) => {
-  const w = String(wVal || '600')
-  const styles = { fontWeight: w }
-  if (w === '500') styles.textShadow = '0 0 0.4px #000'
-  else if (w === '550') styles.textShadow = '0 0 0.6px #000'
-  else if (w === '600') styles.textShadow = '0 0 0.8px #000'
-  else if (w === '650') styles.textShadow = '0 0 1.0px #000'
-  else if (w === '700') styles.textShadow = '0 0 1.2px #000'
-  else if (w === '800') styles.textShadow = '0 0 1.8px #000'
-  return styles
-}
+// 🌟 擴充至 8 格
+const bottomLines = ref([
+  { text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, 
+  { text: '' }, { text: '' }, { text: '' }, { text: '' },
+  { text: '' }, { text: '' } // 🌟 第 7 格、第 8 格
+])
 
-// 🌟 跨平台楷書與字型映射
-const fontMapping = {
-  kai: '"TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif',
-  notosong: '"Noto Serif TC", "Songti TC", "SimSun", "PMingLiU", serif',
-  fangsong: '"FangSong", "STFangsong", "華康仿宋體", serif',
-  notosans: '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif'
-}
-const activeCssFontFamily = computed(() => fontMapping[cardFontFamily.value] || fontMapping.kai)
-
-const bottomLines = ref([{ text: '白沙屯媽祖' }, { text: '彰化拱聖宮' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }])
-const getPlaceholder = (idx) => ['第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）', '第 3 格（自訂聯名人 2）', '第 4 格（自訂）', '第 5 格（自訂）', '第 6 格（自訂）'][idx]
+const getPlaceholder = (idx) => [
+  '第 1 格（例：單位 / 公司）', '第 2 格（例：職稱姓名 1）', 
+  '第 3 格（自訂聯名人 2）', '第 4 格（自訂）', 
+  '第 5 格（自訂）', '第 6 格（自訂）',
+  '第 7 格（自訂）', '第 8 格（自訂）' // 🌟 提示字詞擴充
+][idx]
 
 const funeralUpperFormat = ref('custom')
 const targetX1 = ref('')
@@ -2735,6 +2730,31 @@ const onCardCategoryChange = () => {
 const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
 const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
+  // 1. 動態鎖定紙張大小與直橫向
+  let pageSize = 'A4 portrait'
+  if (currentTab.value === 'couplet') {
+    const size = cardPaperSize.value || 'A4'
+    const orientation = isVertical.value ? 'portrait' : 'landscape'
+    pageSize = `${size} ${orientation}`
+  } else {
+    pageSize = 'A5 landscape'
+  }
+
+  // 強制寫入印表機 @page 規格
+  let styleTag = document.getElementById('dynamic-cf-print-style')
+  if (!styleTag) {
+    styleTag = document.createElement('style')
+    styleTag.id = 'dynamic-cf-print-style'
+    document.head.appendChild(styleTag)
+  }
+  styleTag.innerHTML = `
+    @page { 
+      size: ${pageSize} !important; 
+      margin: 0mm !important; 
+    }
+  `
+
+  // 2. 執行列印
   if (isMobileDevice()) {
     openPrintImageModal(targetId, titlePrefix, true)
   } else {
