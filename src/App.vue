@@ -103,8 +103,8 @@
               </button>
               
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-                📲 一鍵傳送至 LINE (客人確認 / Epson 遠端列印)
-              </button>
+  📲 一鍵直接傳送至 LINE / 其他應用
+</button>
               
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
                 💾 下載圖檔至相簿 / 電腦
@@ -2886,7 +2886,7 @@ const triggerImagePrint = async () => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
 
-  showToast('⏳ 正在生成高解析送印畫面...')
+  showToast('⏳ 正在為手機準備滿版送印...')
 
   try {
     if (document.fonts?.ready) await document.fonts.ready
@@ -2903,6 +2903,7 @@ const triggerImagePrint = async () => {
       baseH = currentCardDimensions.value.h
     }
 
+    // 暫時解鎖父容器為真實 1:1 像素，避免手機螢幕擠壓
     targetEl.style.transform = 'none'
     if (parentEl) {
       parentEl.style.width = baseW + 'px'
@@ -2931,7 +2932,7 @@ const triggerImagePrint = async () => {
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 還原螢幕縮放
+    // 截圖完成立即還原手機螢幕
     targetEl.style.transform = origTransform
     if (parentEl) {
       parentEl.style.width = origParentWidth
@@ -2940,74 +2941,59 @@ const triggerImagePrint = async () => {
     if (bgLayer) bgLayer.style.display = origBgDisplay
     targetEl.style.backgroundColor = origBgColor
 
-    const imgDataUrl = canvas.toDataURL('image/png')
+    // 🌟 將圖片轉為 Blob 獨立影像文件，以 100% 滿版無邊界模式載入
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      const blobUrl = URL.createObjectURL(blob)
 
-    // 🌟 移除舊 iframe，建立具備實體像素且透明置底的列印容器，避免 iOS 判定為空內容
-    let oldFrame = document.getElementById('cf-mobile-print-iframe')
-    if (oldFrame) document.body.removeChild(oldFrame)
+      let oldFrame = document.getElementById('cf-mobile-print-iframe')
+      if (oldFrame) document.body.removeChild(oldFrame)
 
-    const printFrame = document.createElement('iframe')
-    printFrame.id = 'cf-mobile-print-iframe'
-    // 給予可視尺寸但完全透明且在最底層，確保 iOS WebKit 100% 完整解碼圖片
-    printFrame.style.position = 'fixed'
-    printFrame.style.left = '0'
-    printFrame.style.top = '0'
-    printFrame.style.width = '100vw'
-    printFrame.style.height = '100vh'
-    printFrame.style.zIndex = '-9999'
-    printFrame.style.opacity = '0.01'
-    printFrame.style.border = 'none'
-    printFrame.style.pointerEvents = 'none'
-    document.body.appendChild(printFrame)
+      const printFrame = document.createElement('iframe')
+      printFrame.id = 'cf-mobile-print-iframe'
+      printFrame.style.position = 'fixed'
+      printFrame.style.left = '0'
+      printFrame.style.top = '0'
+      printFrame.style.width = '100vw'
+      printFrame.style.height = '100vh'
+      printFrame.style.zIndex = '-9999'
+      printFrame.style.opacity = '0.01'
+      printFrame.style.border = 'none'
+      printFrame.style.pointerEvents = 'none'
+      document.body.appendChild(printFrame)
 
-    const frameDoc = printFrame.contentWindow.document
-    frameDoc.open()
-    frameDoc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>列印</title>
-          <style>
-            @page { size: auto; margin: 0mm !important; }
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              width: 100% !important;
-              height: 100% !important;
-              display: flex !important;
-              justify-content: center !important;
-              align-items: center !important;
-              background: transparent !important;
-            }
-            img {
-              max-width: 98% !important;
-              max-height: 98% !important;
-              width: auto !important;
-              height: auto !important;
-              object-fit: contain !important;
-            }
-          </style>
-        </head>
-        <body>
-          <img id="print-pic" src="${imgDataUrl}" />
-          <script>
-            const img = document.getElementById('print-pic');
-            function doPrint() {
-              setTimeout(() => {
-                window.focus();
-                window.print();
-              }, 300);
-            }
-            if (img.complete) {
-              doPrint();
-            } else {
-              img.onload = doPrint;
-            }
-          <\/script>
-        </body>
-      </html>
-    `)
-    frameDoc.close()
+      const frameDoc = printFrame.contentWindow.document
+      frameDoc.open()
+      // 🌟 強制設定 margin: 0 與 100% 絕對填滿，破除 iOS Safari 的邊界縮小機制
+      frameDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              @page { size: auto; margin: 0 !important; }
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+                background: transparent !important;
+              }
+              img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: fill !important;
+                display: block !important;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${blobUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 250);" />
+          </body>
+        </html>
+      `)
+      frameDoc.close()
+    }, 'image/png')
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
   }
