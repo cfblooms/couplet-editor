@@ -4262,17 +4262,17 @@ input, select, textarea {
 
 .unpaid-tag { 
   margin-left: auto; 
+  margin-right: 8px !important; 
   font-weight: 800; 
   color: #dc2626; 
   background: #fee2e2; 
-  padding: 3px 8px; 
+  padding: 3px 10px; 
   border-radius: 4px; 
   white-space: nowrap; 
   flex-shrink: 0; 
-  font-size: 13px; 
+  font-size: 12.5px; 
   display: inline-block; 
 }
-.unpaid-tag { margin-left: auto; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; }
 .statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
 .footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
@@ -4289,8 +4289,15 @@ input, select, textarea {
     display: block !important;
   }
   #statement-print-target {
-    position: static !important; width: 100% !important; margin: 0 !important; padding: 6mm !important;
-    box-shadow: none !important; border: none !important; display: block !important;
+    position: static !important; 
+    width: 97% !important; 
+    max-width: 97% !important;
+    margin: 0 auto !important; 
+    padding: 4mm 4mm !important;
+    box-shadow: none !important; 
+    border: none !important; 
+    display: block !important;
+    box-sizing: border-box !important;
   }
   #dispatch-print-target *, #statement-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
