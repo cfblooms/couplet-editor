@@ -787,11 +787,17 @@
                 <div v-if="formInv.category === '陶瓷盆'" class="field">
                   <label>盆器規格：</label>
                   <select v-model="formInv.pot_type" @change="onPotTypeChange">
-                    <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                    <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                    <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                    <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
-                    <option value="快捷盆 (70)">快捷盆 (成本70)</option>
+                    <option value="白落地盆">白落地盆 (成本100)</option>
+                    <option value="黑落地盆">黑落地盆 (成本100)</option>
+                    <option value="紅落地盆">紅落地盆 (成本200)</option>
+                    <option value="紅羅馬盆">紅羅馬盆 (成本370)</option>
+                    <option value="白羅馬盆">白羅馬盆 (成本370)</option>
+                    <option value="金邊盆">金邊盆 (成本100)</option>
+                    <option value="大桌上盆">大桌上盆 (成本100)</option>
+                    <option value="小桌上盆">小桌上盆 (成本100)</option>
+                    <option value="單株盆">單株盆 (成本50)</option>
+                    <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
+                    <option value="使用快捷盆 (80)">使用快捷盆 (成本80)</option>
                   </select>
                 </div>
 
@@ -903,7 +909,10 @@
                 <div class="field">
                   <label>客戶類型：</label>
                   <select v-model="formCust.type">
-                    <option value="批發商">批發商</option><option value="零售客">零售客</option><option value="合作花店">合作花店</option><option value="其他">其他</option>
+                    <option value="批發">批發</option>
+                    <option value="零售">零售</option>
+                    <option value="花店">花店</option>
+                    <option value="個人">個人</option>
                   </select>
                 </div>
                 <div class="field">
@@ -2641,11 +2650,17 @@ const statementUnpaidAmount = computed(() => {
 })
 
 const getStatementPeriodText = () => {
-  if (statementPeriod.value === 'thisWeek') return '本週 (週一至週日)'
-  if (statementPeriod.value === 'thisMonth') return '本月 (1日至今)'
-  if (statementPeriod.value === 'lastMonth') return '上月全月'
-  if (statementPeriod.value === 'custom') return `${statementStartDate.value} ～ ${statementEndDate.value}`
-  return '全部歷史紀錄'
+  if (!statementOrders.value || statementOrders.value.length === 0) {
+    return '無訂單資料'
+  }
+  const dates = statementOrders.value
+    .map(o => o.expected_date || o.order_date)
+    .filter(Boolean)
+    .sort()
+  if (dates.length === 0) return '未記錄日期'
+  const minDate = dates[0]
+  const maxDate = dates[dates.length - 1]
+  return minDate === maxDate ? minDate : `${minDate} ～ ${maxDate}`
 }
 
 const getTodayDateStr = () => {
@@ -2707,7 +2722,19 @@ const batchMarkPaid = async () => {
 // 模組 3：進貨函式
 const calcInvCost = () => { formInv.value.cost = (Number(formInv.value.qty) || 0) * (Number(formInv.value.unit_cost) || 0) }
 const onPotTypeChange = () => {
-  const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '快捷盆 (70)': 70 }
+  const potCostMap = { 
+    '白落地盆': 100, 
+    '黑落地盆': 100, 
+    '紅落地盆': 200, 
+    '紅羅馬盆': 370, 
+    '白羅馬盆': 370, 
+    '金邊盆': 100, 
+    '大桌上盆': 100, 
+    '小桌上盆': 100, 
+    '單株盆': 50,
+    '使用快捷盆 (70)': 70,
+    '使用快捷盆 (80)': 80
+  }
   formInv.value.unit_cost = potCostMap[formInv.value.pot_type] || 100
   calcInvCost()
 }
@@ -4209,8 +4236,42 @@ input, select, textarea {
 .statement-detail-table th { background: #f1f5f9; padding: 8px 6px; border-bottom: 1.5px solid #cbd5e1; color: #1e293b; }
 .statement-detail-table td { padding: 6px; }
 .main-info-row td { border-top: 1px solid #e2e8f0; font-weight: 500; }
-.sub-card-row td { background: #fafafa; border-bottom: 1px solid #cbd5e1; padding: 4px 8px; }
-.statement-card-line { font-size: 12.5px; color: #334155; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.sub-card-row td { 
+  background: #fafafa; 
+  border-bottom: 1.5px solid #cbd5e1; 
+  padding: 6px 10px; 
+}
+
+.statement-card-line { 
+  font-size: 13px; 
+  color: #334155; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 12px; 
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+.statement-card-line .card-text-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.unpaid-tag { 
+  margin-left: auto; 
+  font-weight: 800; 
+  color: #dc2626; 
+  background: #fee2e2; 
+  padding: 3px 8px; 
+  border-radius: 4px; 
+  white-space: nowrap; 
+  flex-shrink: 0; 
+  font-size: 13px; 
+  display: inline-block; 
+}
 .unpaid-tag { margin-left: auto; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; }
 .statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
 .footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
