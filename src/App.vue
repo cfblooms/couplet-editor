@@ -1217,7 +1217,14 @@
               <span class="line-num">格 {{ idx + 1 }}</span>
               <input type="text" v-model="item.text" :placeholder="getPlaceholder(idx)" class="flex-input" />
               <div class="compact-size-wrap">
-                <input type="number" v-model.number="layout['bottom_' + idx].size" min="14" max="150" class="compact-size-input" />
+                <input 
+                  type="number" 
+                  :value="layout['bottom_' + idx]?.size || 28" 
+                  @input="e => { if (!layout['bottom_' + idx]) layout['bottom_' + idx] = { x: 100, y: 500, size: 28 }; layout['bottom_' + idx].size = Number(e.target.value) }"
+                  min="14" 
+                  max="150" 
+                  class="compact-size-input" 
+                />
               </div>
               <select v-model="weights['bottom_' + idx]" class="mini-weight-select">
                 <option value="400">400</option><option value="500">500</option><option value="550">550</option><option value="600">600</option><option value="650">650</option><option value="700">700</option><option value="800">800</option>
@@ -2666,12 +2673,15 @@ const switchOrientation = (vertical) => {
 const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
 
 const getStyle = (key) => {
-  const item = layout.value?.[key] || { x: 50, y: 50, size: 30 }
+  // 🌟 若找不到對應 key，自動提供安全預設座標，防止整頁崩潰
+  const fallback = { x: 50, y: 50, size: 28 }
+  const item = (layout.value && layout.value[key]) ? layout.value[key] : fallback
+  
   return { 
     left: `${item.x ?? 50}px`, 
     top: `${item.y ?? 50}px`, 
-    fontSize: `${item.size ?? 30}px`, 
-    ...getWeightStyle(weights.value?.[key]) 
+    fontSize: `${item.size ?? 28}px`, 
+    ...getWeightStyle(weights.value?.[key] || '600') 
   }
 }
 const getUpperTargetBoxStyle = () => {
