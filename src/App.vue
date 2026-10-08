@@ -91,23 +91,34 @@
               <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
             </div>
             
-            <div class="share-btn-action-group">
-              <button type="button" class="mobile-print-btn" @click="triggerImagePrint">
-                🖨️ 手機直接列印 (無網址・無日期・一張紙)
+           <div class="share-btn-action-group">
+              <!-- 🌟 只有在列印模式 (無底圖) 時才顯示列印按鈕，給客人看的「直接傳送」彈窗徹底移除此鈕 -->
+              <button 
+                v-if="shareModalTitle.includes('透明送印')" 
+                type="button" 
+                class="mobile-print-btn" 
+                @click="triggerImagePrint"
+              >
+                🖨️ 手機直接列印 (AirPrint)
               </button>
+              
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-                📲 一鍵直接傳送至 LINE / 其他應用
+                📲 一鍵傳送至 LINE (客人確認 / Epson 遠端列印)
               </button>
+              
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
                 💾 下載圖檔至相簿 / 電腦
               </a>
             </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>傳送小提示：</b></span>
-              <span>• <b>手機/平板</b>：點擊「一鍵直接傳送」直接選 LINE，或在圖片上<b>長按「儲存影像」</b>。</span>
-              <span>• <b>電腦版</b>：在圖片上點<b>右鍵 ➔「複製圖片」</b>，到 LINE 按 <b>Ctrl + V</b> 即可送出。</span>
-              <span>• <b>手機直接列印</b>：以相片模式直接送印，<b>底部絕不出現網址與時間</b>；送印時背景自動透明！</span>
+              <span>💡 <b>操作小提示：</b></span>
+              <span v-if="shareModalTitle.includes('透明送印')">
+                • <b>Epson LINE 列印</b>：點「一鍵傳送至 LINE」選取 Epson 印表機對話框，即可自動透明送印，無底色、不縮放！
+              </span>
+              <span v-else>
+                • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
+              </span>
             </div>
           </div>
         </div>
