@@ -145,8 +145,8 @@
       </div>
 
       <!-- ================= 模式 1：蘭花管理系統 ================= -->
-      <div v-if="currentTab === 'manage'" class="manage-container no-print">
-        <nav class="sub-nav">
+      <div v-if="currentTab === 'manage'" class="manage-container">
+        <nav class="sub-nav no-print">
           <button :class="{ active: subTab === 'order' }" @click="subTab = 'order'">💰 1. 訂單與帳務</button>
           <button :class="{ active: subTab === 'statement' }" @click="subTab = 'statement'">📊 2. 客戶未結對帳專區</button>
           <button :class="{ active: subTab === 'inventory' }" @click="subTab = 'inventory'">📦 3. 進貨與庫存</button>
@@ -158,7 +158,7 @@
 
         <div class="manage-content">
           <!-- 模組 1：訂單與帳務 -->
-          <section v-if="subTab === 'order'" class="tab-pane">
+          <section v-if="subTab === 'order'" class="tab-pane no-print">
             <div v-if="editingOrderId" class="edit-banner">
               <span>✏️ 目前正在編輯訂單：<b>{{ editingOrderId }}</b></span>
               <button class="cancel-edit-btn" @click="cancelEditOrder">✕ 取消修改</button>
@@ -765,7 +765,7 @@
           </section>
 
           <!-- 模組 3：進貨與庫存 -->
-          <section v-if="subTab === 'inventory'" class="tab-pane">
+          <section v-if="subTab === 'inventory'" class="tab-pane no-print">
             <div class="card-box" id="inv-form-box">
               <h3>{{ editingInvId ? '✏️ 修改進貨紀錄' : '📦 建立進貨與耗材入庫' }}</h3>
 
@@ -895,7 +895,7 @@
           </section>
 
           <!-- 模組 4：客戶資料庫 -->
-          <section v-if="subTab === 'customer'" class="tab-pane">
+          <section v-if="subTab === 'customer'" class="tab-pane no-print">
             <div class="card-box" id="cust-form-box">
               <h3>{{ editingCustId ? '✏ 修改客戶資料' : '👥 建立新客戶名冊' }}</h3>
               <div class="form-grid mt-2">
@@ -950,7 +950,7 @@
           </section>
 
           <!-- 模組 5：蘭花品種庫 -->
-          <section v-if="subTab === 'orchid'" class="tab-pane">
+          <section v-if="subTab === 'orchid'" class="tab-pane no-print">
             <div class="card-box" id="orchid-form-box">
               <h3>{{ editingOrchidId ? '✏️ 修改蘭花品種' : '🌸 建立新品種照片庫' }}</h3>
               <div class="form-grid mt-2">
@@ -999,7 +999,7 @@
           </section>
 
           <!-- 模組 6：退貨管理區 -->
-          <section v-if="subTab === 'return'" class="tab-pane">
+          <section v-if="subTab === 'return'" class="tab-pane no-print">
             <div class="card-box" id="return-form-box">
               <h3>{{ editingRetId ? '✏️ 修改退貨紀錄' : '🔄 登記退貨退款' }}</h3>
               <div class="form-grid mt-2">
@@ -1046,7 +1046,7 @@
           </section>
 
           <!-- 模組 7：出貨派送進度分頁 -->
-          <section v-if="subTab === 'shipping'" class="tab-pane">
+          <section v-if="subTab === 'shipping'" class="tab-pane no-print">
             <div class="card-box">
               <div class="shipping-tab-header">
                 <h3>🚚 訂單出貨與派送進度總覽</h3>
@@ -1390,7 +1390,7 @@
             <!-- 🌟 花卡主體 (獨立背景層防橫向擠壓，送印自動隱藏) -->
             <div 
               id="card-print-target" 
-              class="card-board standard-kai-font" 
+              class="card-board" 
               :class="isVertical ? 'mode-vertical' : 'mode-horizontal'"
               :style="{
                 width: currentCardDimensions.w + 'px',
@@ -1750,7 +1750,7 @@
             <button type="button" class="zoom-btn" @click="farmerZoom = Math.max(0.3, +(farmerZoom - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(farmerZoom * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="farmerZoom = Math.min(1.1, +(farmerZoom + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
+            <button type="button" class="fit-btn" @click="autoFitFarmerReceipt">📱 適配螢幕</button>
           </div>
 
           <div 
@@ -1876,8 +1876,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <!-- ================= 模式 5：同業代送單 (A5 橫式標準規格) ================= -->
+
+      <!-- ================= 模式 5：同業代送單 (A5 橫式標準規格) ================= -->
       <div v-else-if="currentTab === 'dispatch'" class="receipt-container">
         <div class="control-panel no-print">
           <h2>🚚 同業代送單管理 (A5)</h2>
@@ -1945,7 +1945,7 @@
             <button type="button" class="zoom-btn" @click="dispatchZoom = Math.max(0.3, +(dispatchZoom - 0.05).toFixed(2))">－</button>
             <span class="zoom-text">{{ Math.round(dispatchZoom * 100) }}%</span>
             <button type="button" class="zoom-btn" @click="dispatchZoom = Math.min(1.1, +(dispatchZoom + 0.05).toFixed(2))">＋</button>
-            <button type="fit-btn" @click="autoFitDispatch">📱 適配螢幕</button>
+            <button type="button" class="fit-btn" @click="autoFitDispatch">📱 適配螢幕</button>
           </div>
 
           <div class="receipt-scaler-container" :style="{ width: (794 * dispatchZoom) + 'px', height: (560 * dispatchZoom) + 'px' }">
@@ -2008,6 +2008,7 @@
           </div>
         </div>
       </div>
+    </div>
   </div>
 </template>
 
@@ -2016,13 +2017,6 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
-
-// 使用瀏覽器本地日期，避免 UTC 日期造成台灣凌晨日期偏移。
-const getLocalDateStr = (offsetDays = 0) => {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 // ==========================================
 // 1. 基礎狀態變數 (subTab 唯一宣告)
@@ -2326,31 +2320,34 @@ const formOrchid = ref({ name: '', note: '標準優良品種', photo_url: '' })
 const formCust = ref({ name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' })
 const formInv = ref({
   category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', spec_size: '大', spec_height: '中',
-  pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: getLocalDateStr()
+  pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0]
 })
 const formRet = ref({
   return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300,
-  date: getLocalDateStr(), reason: '運送碰撞 / 開花不良'
+  date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良'
 })
+
+const makeEmptyItem = () => ({
+  orchid_name: '特選蘭花',
+  flower_color: '紅花',
+  pots_qty: 1,
+  stalks: 10,
+  unit_price: 250,
+  pot: '白落地盆',
+  quick_pot: '未使用',
+  card_upper: '',
+  card_middle: '',
+  card_bottom: ''
+})
+
 const formOrder = ref({
   cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678',
   shipping_address: '', shipping_fee: 0, cost: 600, price: 2500, tax_id: '',
   need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印',
   shipped_status: '未出貨', payment_status: '未結',
-  order_date: getLocalDateStr(),
-  expected_date: getLocalDateStr(3),
- items: [{ 
-    orchid_name: '特選蘭花', 
-    flower_color: '紅花',
-    pots_qty: 1, 
-    stalks: 10, 
-    unit_price: 250, 
-    pot: '白落地盆', 
-    quick_pot: '未使用',
-    card_upper: '',
-    card_middle: '',
-    card_bottom: ''
-  }]
+  order_date: new Date().toISOString().split('T')[0],
+  expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+  items: [makeEmptyItem()]
 })
 
 const previewNextOrderId = computed(() => generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value))
@@ -2393,7 +2390,7 @@ const onFlowerSelectChange = (item) => {
 }
 
 const addOrderItemRow = () => {
-  formOrder.value.items.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
+  formOrder.value.items.push(makeEmptyItem())
   calcOrderPrice()
 }
 const removeOrderItemRow = (idx) => {
@@ -2423,7 +2420,7 @@ const calcOrderPrice = () => {
     const s = Number(item.stalks) || 0
     const u = Number(item.unit_price) || 0
     totalPrice += (s * u) * p
-    const potCost = Object.prototype.hasOwnProperty.call(potCostMap, item.pot) ? potCostMap[item.pot] : 100
+    const potCost = potCostMap[item.pot] ?? 100
     let quickCost = 0
     if (item.quick_pot === '使用快捷盆 (70)') quickCost = 70
     else if (item.quick_pot === '使用快捷盆 (80)') quickCost = 80
@@ -2437,7 +2434,7 @@ const onOrderCustSelect = () => {
   const matched = customers.value.find(c => c.name === formOrder.value.customer)
   if (matched) {
     formOrder.value.phone = matched.phone || ''
-    formOrder.value.cust_type = ({ '批發商': '批發', '零售客': '零售', '合作花店': '花店', '其他': '個人', '個人': '個人', '零售': '零售', '花店': '花店', '批發': '批發' })[matched.type] || '個人'
+    formOrder.value.cust_type = matched.type === '批發商' ? '批發' : matched.type
     formOrder.value.billing_cycle = matched.billing_cycle || '每單結'
     if (!formOrder.value.shipping_address) {
       formOrder.value.shipping_address = matched.line_note || ''
@@ -2460,25 +2457,37 @@ const startEditOrder = (ord) => {
   const parsedItems = []
   const specText = String(ord.spec || '')
   const parts = specText.includes(';') ? specText.split(';').map(s => s.trim()).filter(Boolean) : [specText]
-  parts.forEach(p => {
+
+  const potStr = String(ord.pot || '白落地盆')
+  const mainPot = potStr.replace(/\s*\+\s*快捷盆.*$/, '').trim() || '白落地盆'
+  const quickPot = potStr.includes('(80)') ? '使用快捷盆 (80)' : (potStr.includes('快捷盆') ? '使用快捷盆 (70)' : '未使用')
+  const cardVal = (t) => { const v = getOrderCardInfo(ord, t); return v === '—' ? '' : v }
+
+  parts.forEach((p, i) => {
     const stalksMatch = p.match(/(\d+)\s*棵/)
     const unitMatch = p.match(/單價(\d+)元/)
     const potsMatch = p.match(/\((\d+)\s*盆\)/)
-    const nameMatch = p.split('(')[0].trim() || '特選蘭花'
+    const colorMatch = p.match(/花色[:：]([^|]*)/)
+    const potMatch = p.match(/盆[:：]([^|]*)$/)
     parsedItems.push({
-      orchid_name: nameMatch,
+      orchid_name: p.split('(')[0].trim() || '特選蘭花',
+      flower_color: colorMatch ? colorMatch[1].trim() : '紅花',
       pots_qty: potsMatch ? parseInt(potsMatch[1]) : 1,
       stalks: stalksMatch ? parseInt(stalksMatch[1]) : 10,
       unit_price: unitMatch ? parseInt(unitMatch[1]) : 250,
-      pot: (ord.pot || '桌上盆 (100)').replace(/\s*\+\s*快捷盆/, '').trim(),
-      quick_pot: (ord.pot || '').includes('快捷盆') ? '使用快捷盆 (70)' : '未使用'
+      pot: potMatch ? potMatch[1].trim() : mainPot,
+      quick_pot: i === 0 ? quickPot : '未使用',
+      card_upper: i === 0 ? cardVal('upper') : '',
+      card_middle: i === 0 ? cardVal('middle') : '',
+      card_bottom: i === 0 ? cardVal('bottom') : ''
     })
   })
-  if (parsedItems.length === 0) parsedItems.push({ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' })
-  
+  if (parsedItems.length === 0) parsedItems.push(makeEmptyItem())
+
   const cleanNote = String(ord.note || '')
     .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
     .replace(/\[送達地址[:：].*?\]/g, '')
+    .replace(/\[(上款|中款|下款)[:：].*?\]/g, '')
     .trim()
 
   formOrder.value = {
@@ -2498,21 +2507,16 @@ const cancelEditOrder = () => {
   formOrder.value = {
     cust_type: '批發', customer: '', billing_cycle: '每單結', phone: '0912-345678', shipping_address: '', shipping_fee: 0, cost: 600, price: 2500,
     tax_id: '', need_receipt: '不需收據', note: '', card_status: '未製作', receipt_status: '未列印', shipped_status: '未出貨', payment_status: '未結',
-    order_date: getLocalDateStr(), expected_date: getLocalDateStr(3),
-    items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
+    order_date: new Date().toISOString().split('T')[0], expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+    items: [makeEmptyItem()]
   }
 }
 
 const saveOrder = async () => {
-  if (!Array.isArray(formOrder.value.items) || formOrder.value.items.length === 0) return alert('請至少新增一組花禮品項！')
-  if (!String(formOrder.value.customer || '').trim()) return alert('請選擇或輸入客戶名稱！')
-  if (!formOrder.value.order_date) return alert('請選擇訂單日期！')
-  if (formOrder.value.items.some(item => !String(item.orchid_name || '').trim() || Number(item.pots_qty) < 1 || Number(item.stalks) < 1 || Number(item.unit_price) < 0)) return alert('請檢查品種、盆數、株數與單價，數量至少需為 1。')
-
   const specParts = formOrder.value.items.map(item => `${item.orchid_name || '特選蘭花'} (${item.pots_qty || 1}盆) | ${item.stalks || 1}棵 (單價${item.unit_price || 0}元) | 花色:${item.flower_color || '紅花'} | 盆:${item.pot || '白落地盆'}`)
   const fullSpecStr = specParts.join('; ')
   const mainItem = formOrder.value.items[0] || {}
-  const quickSuffix = mainItem.quick_pot !== '未使用' ? ` + ${mainItem.quick_pot.replace('使用', '')}` : ''
+  const quickSuffix = mainItem.quick_pot && mainItem.quick_pot !== '未使用' ? ` + ${mainItem.quick_pot.replace('使用', '')}` : ''
   const finalPotStr = (mainItem.pot || '白落地盆') + quickSuffix
   
   const baseNote = String(formOrder.value.note || '')
@@ -2540,51 +2544,40 @@ const saveOrder = async () => {
     shipping_address: formOrder.value.shipping_address
   }
 
-  try {
-    if (editingOrderId.value) {
-      const orderId = editingOrderId.value
-      const { error } = await supabase.from('orders').update(payload).eq('id', orderId)
-      if (error) {
-        console.error('訂單修改失敗：', error)
-        alert(`訂單修改失敗：${error.message || '資料庫更新錯誤'}\n表單內容已保留，請確認後重試。`)
-        return
-      }
-      alert(`訂單 ${orderId} 修改成功！`)
+  if (editingOrderId.value) {
+    const { error } = await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
+    if (!error) {
+      alert(`訂單 ${editingOrderId.value} 修改成功！`)
+      cancelEditOrder()
+      loadOrders()
     } else {
-      const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
-      const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
-      if (error) {
-        console.error('訂單建立失敗：', error)
-        alert(`訂單建立失敗：${error.message || '資料庫新增錯誤'}\n表單內容已保留，請確認後重試。`)
-        return
-      }
-      alert(`訂單建立成功！單號：${newId}`)
+      delete payload.shipping_address
+      await supabase.from('orders').update(payload).eq('id', editingOrderId.value)
+      alert(`訂單 ${editingOrderId.value} 修改成功！`)
+      cancelEditOrder()
+      loadOrders()
     }
-    cancelEditOrder()
-    await loadOrders()
-  } catch (err) {
-    console.error('訂單儲存發生例外：', err)
-    alert(`訂單儲存失敗：${err?.message || '未知錯誤'}\n表單內容已保留，請稍後重試。`)
+  } else {
+    const newId = generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value)
+    const { error } = await supabase.from('orders').insert([{ id: newId, ...payload }])
+    if (!error) {
+      alert(`訂單建立成功！單號：${newId}`)
+      cancelEditOrder()
+      loadOrders()
+    } else {
+      delete payload.shipping_address
+      await supabase.from('orders').insert([{ id: newId, ...payload }])
+      alert(`訂單建立成功！單號：${newId}`)
+      cancelEditOrder()
+      loadOrders()
+    }
   }
 }
 
 const updateOrderField = async (ord, field, value) => {
-  const previousValue = ord[field]
-  try {
-    const { error } = await supabase.from('orders').update({ [field]: value }).eq('id', ord.id)
-    if (error) {
-      console.error('訂單狀態更新失敗：', error)
-      alert(`單號 ${ord.id} 更新失敗：${error.message || '資料庫更新錯誤'}`)
-      ord[field] = previousValue
-      return
-    }
-    ord[field] = value
-    showToast(`✅ 單號 ${ord.id} 的狀態已即時更新！`)
-  } catch (err) {
-    ord[field] = previousValue
-    console.error('訂單狀態更新發生例外：', err)
-    alert(`訂單狀態更新失敗：${err?.message || '未知錯誤'}`)
-  }
+  ord[field] = value
+  await supabase.from('orders').update({ [field]: value }).eq('id', ord.id)
+  showToast(`✅ 單號 ${ord.id} 的狀態已即時更新！`)
 }
 
 const getCardStatusClass = (status) => status === '已製作' ? 'badge badge-soft-green' : (status === '免製作' ? 'badge badge-gray' : 'badge')
@@ -2600,8 +2593,8 @@ const getCustomerAddress = (ord) => {
 // 模組 2：對帳專區函式
 const statementCustomer = ref('')
 const statementPeriod = ref('all')
-const statementStartDate = ref(getLocalDateStr())
-const statementEndDate = ref(getLocalDateStr())
+const statementStartDate = ref(new Date().toISOString().split('T')[0])
+const statementEndDate = ref(new Date().toISOString().split('T')[0])
 const statementPaymentFilter = ref('未結')
 
 const statementOrders = computed(() => {
@@ -2623,8 +2616,8 @@ const statementOrders = computed(() => {
     }
     if (statementPeriod.value === 'thisMonth') {
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-      return orderDate >= firstDay && orderDate <= todayEnd
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+      return orderDate >= firstDay && orderDate <= lastDay
     }
     if (statementPeriod.value === 'lastMonth') {
       const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -2632,7 +2625,7 @@ const statementOrders = computed(() => {
       return orderDate >= firstDay && orderDate <= lastMonthEnd
     }
     if (statementPeriod.value === 'custom') {
-      if (!statementStartDate.value || !statementEndDate.value || statementStartDate.value > statementEndDate.value) return false
+      if (!statementStartDate.value || !statementEndDate.value) return true
       const sDate = new Date(statementStartDate.value + 'T00:00:00')
       const eDate = new Date(statementEndDate.value + 'T23:59:59')
       return orderDate >= sDate && orderDate <= eDate
@@ -2701,26 +2694,14 @@ const exportStatementExcel = () => {
   const worksheet = XLSX.utils.json_to_sheet(statementOrders.value)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, '對帳明細')
-  XLSX.writeFile(workbook, `對帳單_${getLocalDateStr()}.xlsx`)
+  XLSX.writeFile(workbook, `對帳單_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 const batchMarkPaid = async () => {
-  const ids = statementOrders.value.map(o => o.id).filter(Boolean)
-  if (ids.length === 0) return alert('目前篩選條件沒有可結清的訂單。')
-  const amount = statementOrders.value.reduce((sum, o) => sum + (Number(o.price) || 0), 0)
-  if (!confirm(`即將將目前篩選的 ${ids.length} 筆訂單（總額 NT$ ${amount.toLocaleString()}）標記為已結。\n請確認客戶與日期範圍正確。`)) return
-  try {
-    const { error } = await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
-    if (error) {
-      console.error('批次結清失敗：', error)
-      alert(`批次結清失敗：${error.message || '資料庫更新錯誤'}`)
-      return
-    }
-    showToast(`✅ 已批次結清 ${ids.length} 筆訂單！`)
-    await loadOrders()
-  } catch (err) {
-    console.error('批次結清發生例外：', err)
-    alert(`批次結清失敗：${err?.message || '未知錯誤'}`)
-  }
+  if (!confirm('確定標記為已結？')) return
+  const ids = statementOrders.value.map(o => o.id)
+  await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
+  showToast('✅ 已批次結清成功！')
+  loadOrders()
 }
 
 // 模組 3：進貨函式
@@ -2745,7 +2726,7 @@ const cancelEditInv = () => {
   formInv.value = { 
     category: '蘭花', item_name: '', spec_supply: '', spec_spike: '單梗', spec_color: '紅', 
     spec_size: '大', spec_height: '中', pot_type: '桌上盆 (100)', qty: 10, unit_cost: 100, 
-    cost: 1000, supplier: '某某花農', date: getLocalDateStr() 
+    cost: 1000, supplier: '某某花農', date: new Date().toISOString().split('T')[0] 
   }
 }
 const saveInventory = async () => {
@@ -2780,24 +2761,17 @@ const saveInventory = async () => {
     date: formInv.value.date
   }
 
-  try {
-    if (editingInvId.value) {
-      const { error } = await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
-      if (error) throw error
-      cancelEditInv()
-      await loadInventory()
-      showToast('✅ 進貨紀錄修改成功！')
-    } else {
-      const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
-      const { error } = await supabase.from('inventory').insert([{ id: newId, ...payload }])
-      if (error) throw error
-      cancelEditInv()
-      await loadInventory()
-      showToast(`✅ 進貨已入庫！編號：${newId}`)
-    }
-  } catch (err) {
-    console.error('進貨儲存失敗：', err)
-    alert(`進貨儲存失敗：${err?.message || '資料庫操作錯誤'}；表單內容已保留。`)
+  if (editingInvId.value) {
+    await supabase.from('inventory').update(payload).eq('id', editingInvId.value)
+    cancelEditInv()
+    loadInventory()
+    showToast('✅ 進貨紀錄修改成功！')
+  } else {
+    const newId = generateDateSeqIdByDate('IN', formInv.value.date, inventoryList.value)
+    await supabase.from('inventory').insert([{ id: newId, ...payload }])
+    cancelEditInv()
+    loadInventory()
+    showToast(`✅ 進貨已入庫！編號：${newId}`)
   }
 }
 
@@ -2812,22 +2786,16 @@ const cancelEditCust = () => {
   formCust.value = { name: '', type: '批發商', billing_cycle: '每單結', phone: '0912-345678', line_note: '' }
 }
 const saveCustomer = async () => {
-  if (!String(formCust.value.name || '').trim()) return alert('請輸入客戶名稱！')
-  try {
-    if (editingCustId.value) {
-      const { error } = await supabase.from('customers').update({ name: formCust.value.name.trim(), type: formCust.value.type, billing_cycle: formCust.value.billing_cycle, phone: formCust.value.phone, line_note: formCust.value.line_note }).eq('id', editingCustId.value)
-      if (error) throw error
-    } else {
-      const newId = generateDateSeqIdByDate('CU', '', customers.value)
-      const { error } = await supabase.from('customers').insert([{ id: newId, ...formCust.value, name: formCust.value.name.trim() }])
-      if (error) throw error
-    }
+  if (!formCust.value.name) return alert('請輸入客戶名稱！')
+  if (editingCustId.value) {
+    await supabase.from('customers').update({ ...formCust.value }).eq('id', editingCustId.value)
     cancelEditCust()
-    await loadCustomers()
-    showToast('✅ 客戶資料已儲存！')
-  } catch (err) {
-    console.error('客戶儲存失敗：', err)
-    alert(`客戶儲存失敗：${err?.message || '資料庫操作錯誤'}；表單內容已保留。`)
+    loadCustomers()
+  } else {
+    const newId = generateDateSeqIdByDate('CU', '', customers.value)
+    await supabase.from('customers').insert([{ id: newId, ...formCust.value }])
+    cancelEditCust()
+    loadCustomers()
   }
 }
 
@@ -2851,22 +2819,16 @@ const cancelEditOrchid = () => {
   formOrchid.value = { name: '', note: '標準優良品種', photo_url: '' }
 }
 const saveOrchid = async () => {
-  if (!String(formOrchid.value.name || '').trim()) return alert('請輸入品種名稱！')
-  try {
-    if (editingOrchidId.value) {
-      const { error } = await supabase.from('orchids').update({ name: formOrchid.value.name.trim(), note: formOrchid.value.note, photo_url: formOrchid.value.photo_url }).eq('id', editingOrchidId.value)
-      if (error) throw error
-    } else {
-      const newId = generateDateSeqIdByDate('FL', '', orchids.value)
-      const { error } = await supabase.from('orchids').insert([{ id: newId, ...formOrchid.value, name: formOrchid.value.name.trim() }])
-      if (error) throw error
-    }
+  if (!formOrchid.value.name) return alert('請輸入品種名稱！')
+  if (editingOrchidId.value) {
+    await supabase.from('orchids').update({ ...formOrchid.value }).eq('id', editingOrchidId.value)
     cancelEditOrchid()
-    await loadOrchids()
-    showToast('✅ 品種資料已儲存！')
-  } catch (err) {
-    console.error('品種儲存失敗：', err)
-    alert(`品種儲存失敗：${err?.message || '資料庫操作錯誤'}；表單內容已保留。`)
+    loadOrchids()
+  } else {
+    const newId = generateDateSeqIdByDate('FL', '', orchids.value)
+    await supabase.from('orchids').insert([{ id: newId, ...formOrchid.value }])
+    cancelEditOrchid()
+    loadOrchids()
   }
 }
 
@@ -2879,46 +2841,33 @@ const startEditRet = (ret) => {
 }
 const cancelEditRet = () => {
   editingRetId.value = null
-  formRet.value = { return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300, date: getLocalDateStr(), reason: '運送碰撞 / 開花不良' }
+  formRet.value = { return_type: '退給花農', party_name: '', target_item: '', qty: 2, unit_price: 150, total_amount: 300, date: new Date().toISOString().split('T')[0], reason: '運送碰撞 / 開花不良' }
 }
 const saveReturn = async () => {
-  if (!String(formRet.value.party_name || '').trim()) return alert('請輸入對象名稱！')
+  if (!formRet.value.party_name) return alert('請輸入對象名稱！')
   calcRetTotal()
-  try {
-    if (editingRetId.value) {
-      const { error } = await supabase.from('returns').update({ ...formRet.value }).eq('id', editingRetId.value)
-      if (error) throw error
-    } else {
-      const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
-      const { error } = await supabase.from('returns').insert([{ id: newId, ...formRet.value }])
-      if (error) throw error
-    }
+  if (editingRetId.value) {
+    await supabase.from('returns').update({ ...formRet.value }).eq('id', editingRetId.value)
     cancelEditRet()
-    await loadReturns()
-    showToast('✅ 退貨紀錄已儲存！')
-  } catch (err) {
-    console.error('退貨儲存失敗：', err)
-    alert(`退貨儲存失敗：${err?.message || '資料庫操作錯誤'}；表單內容已保留。`)
+    loadReturns()
+  } else {
+    const newId = generateDateSeqIdByDate('RT', formRet.value.date, returnList.value)
+    await supabase.from('returns').insert([{ id: newId, ...formRet.value }])
+    cancelEditRet()
+    loadReturns()
   }
 }
 
 const deleteItem = async (table, id, reloadFn) => {
   if (!confirm(`確定要刪除編號 ${id} 嗎？此操作無法還原！`)) return
-  try {
-    const { error } = await supabase.from(table).delete().eq('id', id)
-    if (error) throw error
-    await reloadFn()
-    showToast(`✅ 編號 ${id} 已刪除。`)
-  } catch (err) {
-    console.error('刪除資料失敗：', err)
-    alert(`刪除失敗：${err?.message || '資料庫操作錯誤'}`)
-  }
+  await supabase.from(table).delete().eq('id', id)
+  reloadFn()
 }
 const exportOrdersToExcel = () => {
   const worksheet = XLSX.utils.json_to_sheet(orderList.value)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, '全部訂單')
-  XLSX.writeFile(workbook, `訂單總表_${getLocalDateStr()}.xlsx`)
+  XLSX.writeFile(workbook, `訂單總表_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
 // ==========================================
@@ -2932,6 +2881,17 @@ const upperSuffix = ref('')
 const middleText = ref('高票當選')
 const middleText2 = ref('為民服務')
 const suffixText = ref('敬賀')
+
+// 🌟 字體選擇對應 (原本範本有使用但未定義)
+const activeCssFontFamily = computed(() => {
+  const map = {
+    kai: `'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', 'Kaiti TC', serif`,
+    notosong: `'Noto Serif TC', 'Songti TC', serif`,
+    fangsong: `'FangSong', '仿宋', 'STFangsong', serif`,
+    notosans: `'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif`
+  }
+  return map[cardFontFamily.value] || map.kai
+})
 
 // 🌟 底圖選擇狀態 (防快取版)
 const cardBgType = ref('none')
@@ -3148,14 +3108,16 @@ const onCardCategoryChange = () => {
 const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
 const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
+  const isStatement = targetId === 'statement-print-target'
+
   // 1. 動態鎖定紙張大小與直橫向
-  let pageSize = 'A4 portrait'
-  if (currentTab.value === 'couplet') {
+  let pageSize = 'A5 landscape'
+  if (isStatement) {
+    pageSize = 'A4 portrait'
+  } else if (currentTab.value === 'couplet') {
     const size = cardPaperSize.value || 'A4'
     const orientation = isVertical.value ? 'portrait' : 'landscape'
     pageSize = `${size} ${orientation}`
-  } else {
-    pageSize = 'A5 landscape'
   }
 
   // 強制寫入印表機 @page 規格
@@ -3173,12 +3135,16 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
   `
 
   // 2. 執行列印
-  if (isMobileDevice()) {
+  if (isMobileDevice() && !isStatement) {
     openPrintImageModal(targetId, titlePrefix, true)
   } else {
     if (isReceipt && selectedOrderId.value) {
       const ord = orderList.value.find(o => o.id === selectedOrderId.value)
       if (ord) updateOrderField(ord, 'receipt_status', '已列印')
+    }
+    if (isStatement) {
+      document.body.classList.add('printing-statement')
+      window.addEventListener('afterprint', () => document.body.classList.remove('printing-statement'), { once: true })
     }
     window.print()
   }
@@ -3267,6 +3233,7 @@ const triggerImagePrint = async () => {
   let targetId = 'card-print-target'
   if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
   else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
+  else if (currentTab.value === 'dispatch') targetId = 'dispatch-print-target'
 
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
@@ -3308,7 +3275,7 @@ const triggerImagePrint = async () => {
     const { jsPDF } = window.jspdf || {}
     let isLandscapeMode = !isVertical.value
     let format = 'a4'
-    if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt') {
+    if (currentTab.value === 'receipt' || currentTab.value === 'farmer_receipt' || currentTab.value === 'dispatch') {
       isLandscapeMode = true
       format = 'a5'
     } else if (cardPaperSize.value) {
@@ -3363,41 +3330,28 @@ const saveCurrentAsCloudDraft = async () => {
   const phrase = middleText.value.trim() || '無中款'
   const draftTitle = `【${targetName}】${phrase} (${timeStr})`
   const draftId = 'draft_' + Date.now()
-  try {
-    const { error } = await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, cardBgType: cardBgType.value, customCardBgUrl: customCardBgUrl.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
-    if (error) throw error
-    await loadCloudDrafts()
-    selectedDraftId.value = draftId
-    showToast('☁️ 花卡已成功存至雲端！')
-  } catch (err) {
-    console.error('雲端草稿儲存失敗：', err)
-    alert(`雲端草稿儲存失敗：${err?.message || '資料庫操作錯誤'}`)
-  }
+  await supabase.from('card_drafts').insert([{ id: draftId, title: draftTitle, data: { cardPaperSize: cardPaperSize.value, isVertical: isVertical.value, cardCategory: cardCategory.value, cardFontFamily: cardFontFamily.value, cardBgType: cardBgType.value, upperPrefix: upperPrefix.value, upperTarget: upperTarget.value, upperSuffix: upperSuffix.value, middleText: middleText.value, middleText2: middleText2.value, suffixText: suffixText.value, bottomLines: bottomLines.value, weights: weights.value, layout: layout.value } }])
+  showToast(`☁️ 花卡已成功存至雲端！`)
+  await loadCloudDrafts()
+  selectedDraftId.value = draftId
 }
 const loadCloudDraft = (id) => {
   const item = cloudDrafts.value.find(d => d.id === id)
   if (item?.data) {
     const draft = item.data
-    cardPaperSize.value = draft.cardPaperSize || 'A4'; isVertical.value = draft.isVertical; cardCategory.value = draft.cardCategory; cardFontFamily.value = draft.cardFontFamily || 'kai'; cardBgType.value = draft.cardBgType || 'none'; customCardBgUrl.value = draft.customCardBgUrl || ''
+    cardPaperSize.value = draft.cardPaperSize || 'A4'; isVertical.value = draft.isVertical; cardCategory.value = draft.cardCategory; cardFontFamily.value = draft.cardFontFamily || 'kai'; cardBgType.value = draft.cardBgType || 'none'
     upperPrefix.value = draft.upperPrefix || ''; upperTarget.value = draft.upperTarget || ''; upperSuffix.value = draft.upperSuffix || ''
     middleText.value = draft.middleText || ''; middleText2.value = draft.middleText2 || ''; suffixText.value = draft.suffixText || '敬輓'
-    bottomLines.value = JSON.parse(JSON.stringify(Array.isArray(draft.bottomLines) ? draft.bottomLines : [])); weights.value = JSON.parse(JSON.stringify(draft.weights || {})); layout.value = JSON.parse(JSON.stringify(draft.layout || {}))
+    bottomLines.value = JSON.parse(JSON.stringify(draft.bottomLines)); weights.value = JSON.parse(JSON.stringify(draft.weights)); layout.value = JSON.parse(JSON.stringify(draft.layout))
     showToast(`📂 已載入「${item.title}」！`)
     nextTick(() => autoFitZoom())
   }
 }
 const deleteCloudDraft = async (id) => {
   if (!confirm('確定要從雲端刪除這張暫存草稿嗎？')) return
-  try {
-    const { error } = await supabase.from('card_drafts').delete().eq('id', id)
-    if (error) throw error
-    cloudDrafts.value = cloudDrafts.value.filter(d => d.id !== id)
-    if (selectedDraftId.value === id) selectedDraftId.value = ''
-    showToast('✅ 雲端草稿已刪除。')
-  } catch (err) {
-    console.error('雲端草稿刪除失敗：', err)
-    alert(`雲端草稿刪除失敗：${err?.message || '資料庫操作錯誤'}`)
-  }
+  await supabase.from('card_drafts').delete().eq('id', id)
+  cloudDrafts.value = cloudDrafts.value.filter(d => d.id !== id)
+  selectedDraftId.value = ''
 }
 const startNewCard = () => {
   upperTarget.value = ''; middleText.value = cardCategory.value === 'funeral' ? '母儀千古' : '高票當選'; middleText2.value = ''; selectedDraftId.value = ''; targetX1.value = ''; targetX2.value = ''; resetPositions(); showToast('✨ 已為您建立空白花卡！')
@@ -3564,6 +3518,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ⚠️ @import 必須放在樣式最前面，否則會被瀏覽器忽略 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
 
 /* ================= 雲端正楷字型直接載入 (手機、平板強制支援) ================= */
@@ -3574,7 +3529,6 @@ onMounted(() => {
   font-style: normal;
   font-display: swap;
 }
-
 
 /* 🌟 強制簽收單與農民收據一律使用 TW-Kai 楷書 (手機、平板全部強制生效，不跑版) */
 .a5-landscape-sheet,
@@ -4133,9 +4087,6 @@ input, select, textarea {
 /* =========================================================================
    🌟 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
 ========================================================================= */
-/* =========================================================================
-   🌟 全平台列印防空白頁與單頁強制保證（送印時背景自動透明）
-========================================================================= */
 @media print {
   @page {
     size: auto;
@@ -4215,7 +4166,10 @@ input, select, textarea {
   #receipt-print-target *, #farmer-print-target *, #card-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
-  /* 平時螢幕隱藏詳細對帳單，送印時才呈現 */
+}
+/* ⬆️ 上方 @media print 在此關閉 (原本漏掉結尾大括號) */
+
+/* 平時螢幕隱藏詳細對帳單，送印時才呈現 */
 .no-screen-display {
   display: none !important;
 }
@@ -4279,6 +4233,22 @@ input, select, textarea {
   }
   #dispatch-print-target *, #statement-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
+  }
+
+  /* 列印對帳單時：只留下 A4 對帳單，隱藏管理畫面其他區塊 */
+  .manage-container, .manage-content {
+    display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important;
+  }
+  .manage-container .sub-nav,
+  .manage-container .edit-banner,
+  .manage-container .tab-pane > .card-box:not(#statement-print-target) {
+    display: none !important;
+  }
+  :global(html:has(body.printing-statement)),
+  :global(body.printing-statement),
+  :global(body.printing-statement) .main-wrapper,
+  :global(body.printing-statement) .system-root {
+    height: auto !important; overflow: visible !important;
   }
 }
 </style>
