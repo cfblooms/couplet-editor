@@ -65,6 +65,13 @@
           </button>
           <button 
             type="button" 
+            :class="{ active: currentTab === 'dispatch' }" 
+            @click="currentTab = 'dispatch'"
+          >
+            🚚 同業代送單 (A5)
+          </button>
+          <button 
+            type="button" 
             class="logout-nav-btn" 
             @click="handleLogout"
             title="登出並鎖定系統"
@@ -281,15 +288,49 @@
                       <input v-model.number="item.unit_price" type="number" min="0" @input="calcOrderPrice" />
                     </div>
                     <div class="field">
+                      <label>花色</label>
+                      <input v-model="item.flower_color" placeholder="例: 紅花、粉花、白花紅心" @input="calcOrderPrice" />
+                    </div>
+                    <div class="field">
                       <label>使用盆器</label>
                       <select v-model="item.pot" @change="calcOrderPrice">
-                        <option value="桌上盆 (100)">桌上盆 (成本100)</option>
-                        <option value="落地盆陶瓷-喪 (100)">落地盆陶瓷-喪 (成本100)</option>
-                        <option value="落地陶瓷盆-喜 (200)">落地陶瓷盆-喜 (成本200)</option>
-                        <option value="羅馬盆 (280)">羅馬盆 (成本280)</option>
+                        <option value="白落地盆">白落地盆 (成本100)</option>
+                        <option value="黑落地盆">黑落地盆 (成本100)</option>
+                        <option value="紅落地盆">紅落地盆 (成本200)</option>
+                        <option value="紅羅馬盆">紅羅馬盆 (成本370)</option>
+                        <option value="白羅馬盆">白羅馬盆 (成本370)</option>
+                        <option value="金邊盆">金邊盆 (成本100)</option>
+                        <option value="大桌上盆">大桌上盆 (成本100)</option>
+                        <option value="小桌上盆">小桌上盆 (成本100)</option>
+                        <option value="單株盆">單株盆 (成本50)</option>
                         <option value="無盆">無盆 (裸株/自備盆)</option>
                       </select>
                     </div>
+                    <div class="field">
+                      <label>快捷盆選擇</label>
+                      <select v-model="item.quick_pot" @change="calcOrderPrice">
+                        <option value="未使用">未使用快捷盆</option>
+                        <option value="使用快捷盆 (70)">使用快捷盆 (成本70)</option>
+                        <option value="使用快捷盆 (80)">使用快捷盆 (成本80)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- 花卡資訊 (代送單與詳細對帳單調用) -->
+                  <div class="form-grid mt-2" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                    <div class="field">
+                      <label>🎴 花卡上款 (送給誰)</label>
+                      <input v-model="item.card_upper" placeholder="例: 華德羅氏佛堂安座" />
+                    </div>
+                    <div class="field">
+                      <label>🎴 花卡中款 (賀詞/題字，代送單用)</label>
+                      <input v-model="item.card_middle" placeholder="例: 華堂集瑞 佛光普照" />
+                    </div>
+                    <div class="field">
+                      <label>🎴 花卡下款 (誰送的)</label>
+                      <input v-model="item.card_bottom" placeholder="例: 楊梅福靈宮主委...一同進獻" />
+                    </div>
+                  </div>
                     <div class="field">
                       <label>快捷盆選擇</label>
                       <select v-model="item.quick_pot" @change="calcOrderPrice">
@@ -570,6 +611,9 @@
               </div>
 
               <div class="statement-actions mt-3">
+              <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
+                  🖨️ 列印詳細對帳單 (A4・含卡款與未結)
+                </button>
                 <button class="line-btn" @click="copyLineStatement">
                   📋 一鍵複製 LINE 對帳明細
                 </button>
@@ -655,6 +699,75 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div><!-- A4 詳細對帳單實體列印版型 (平時不影響操作，按列印自動調用) -->
+            <div id="statement-print-target" class="card-box mt-3 statement-a4-sheet no-screen-display">
+              <div class="statement-sheet-header">
+                <div class="shop-title-row">
+                  <h2>宸豐蘭藝</h2>
+                  <span class="statement-badge-title">【應付／應收對帳單】</span>
+                </div>
+                <div class="statement-meta-row">
+                  <div><b>客戶／廠商：</b>{{ statementCustomer || '全部客戶統整' }}</div>
+                  <div><b>統計區間：</b>{{ getStatementPeriodText() }}</div>
+                  <div><b>聯絡電話：</b>{{ getCustomerPhone(statementCustomer) }}</div>
+                  <div><b>列印日期：</b>{{ getTodayDateStr() }}</div>
+                </div>
+              </div>
+
+              <table class="statement-detail-table">
+                <thead>
+                  <tr>
+                    <th style="width: 14%;">單號</th>
+                    <th style="width: 11%;">送貨日</th>
+                    <th style="width: 28%;">規格明細</th>
+                    <th style="width: 24%;">送達地址</th>
+                    <th style="width: 11%; text-align: right;">訂單金額</th>
+                    <th style="width: 12%; text-align: center;">結帳狀態</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="ord in statementOrders" :key="ord.id">
+                    <tr class="main-info-row">
+                      <td class="font-bold">{{ ord.id }}</td>
+                      <td>{{ ord.expected_date || ord.order_date }}</td>
+                      <td>{{ ord.spec }}</td>
+                      <td class="addr-text">{{ getCustomerAddress(ord) }}</td>
+                      <td style="text-align: right;" class="font-bold text-blue">${{ ord.price }}</td>
+                      <td style="text-align: center;">
+                        <span :class="ord.payment_status === '未結' ? 'badge badge-red' : 'badge badge-green'">
+                          {{ ord.payment_status }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr class="sub-card-row">
+                      <td colspan="6">
+                        <div class="statement-card-line">
+                          <span><b>【上款】</b>{{ getOrderCardInfo(ord, 'upper') }}</span>
+                          <span style="margin-left: 20px;"><b>【下款】</b>{{ getOrderCardInfo(ord, 'bottom') }}</span>
+                          <span v-if="ord.payment_status === '未結'" class="unpaid-tag">
+                            ※ 本單未結：${{ ord.price }}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                  <tr v-if="statementOrders.length === 0"><td colspan="6" class="text-center py-4">無對帳資料</td></tr>
+                </tbody>
+              </table>
+
+              <div class="statement-sheet-footer">
+                <div class="footer-summary-boxes">
+                  <div>總訂單數：<b>{{ statementOrders.length }}</b> 筆</div>
+                  <div>總盆數：<b>{{ statementTotalPots }}</b> 盆</div>
+                  <div>訂單總額：<b>${{ statementTotalAmount.toLocaleString() }}</b> 元</div>
+                  <div class="unpaid-highlight">
+                    🔴 本期未結總額：<b>${{ statementUnpaidAmount.toLocaleString() }}</b> 元
+                  </div>
+                </div>
+                <div class="statement-sign-line">
+                  <span>客戶確認簽章：____________________</span>
+                </div>
               </div>
             </div>
           </section>
@@ -1772,6 +1885,137 @@
         </div>
       </div>
     </div>
+    <!-- ================= 模式 5：同業代送單 (A5 橫式標準規格) ================= -->
+      <div v-else-if="currentTab === 'dispatch'" class="receipt-container">
+        <div class="control-panel no-print">
+          <h2>🚚 同業代送單管理 (A5)</h2>
+
+          <div class="panel-section highlight-panel">
+            <label class="section-title">依訂單編號快速帶入：</label>
+            <select v-model="selectedDispatchOrderId" @change="onSelectDispatchOrder" class="full-input bold-select">
+              <option value="">-- 請下拉選擇訂單 (即時帶入) --</option>
+              <option v-for="ord in orderList" :key="ord.id" :value="ord.id">
+                【{{ ord.id }}】{{ ord.customer }} - {{ formatSimpleItemName(ord) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="panel-section">
+            <label class="section-title">✏️ 代送資料確認與修改：</label>
+            <div class="form-group">
+              <label>代送同業／司機名稱：</label>
+              <input type="text" v-model="dispatchForm.driverName" placeholder="例: 來來花苑 或 外送司機" />
+            </div>
+            <div class="form-group">
+              <label>司機／同業聯絡電話：</label>
+              <input type="text" v-model="dispatchForm.driverPhone" placeholder="司機聯絡電話" />
+            </div>
+            <div class="form-group">
+              <label>收貨人姓名與電話：</label>
+              <input type="text" v-model="dispatchForm.recipient" placeholder="收貨人及電話" />
+            </div>
+            <div class="form-group">
+              <label>送貨地址：</label>
+              <input type="text" v-model="dispatchForm.address" placeholder="送達地址" />
+            </div>
+            <div class="form-group">
+              <label>預計送貨時間：</label>
+              <input type="text" v-model="dispatchForm.deliveryTime" placeholder="例: 115.10.08 17時00分前" />
+            </div>
+            <div class="form-group">
+              <label>貨品品名與盆數規格：</label>
+              <input type="text" v-model="dispatchForm.itemName" placeholder="例: 蝴蝶蘭 1盆 (落地5株・紅花・白落地盆)" />
+            </div>
+            <div class="form-group">
+              <label>花卡上款 (送給誰)：</label>
+              <input type="text" v-model="dispatchForm.cardUpper" />
+            </div>
+            <div class="form-group">
+              <label>花卡中款 (祝賀詞/題字)：</label>
+              <input type="text" v-model="dispatchForm.cardMiddle" />
+            </div>
+            <div class="form-group">
+              <label>花卡下款 (誰送的)：</label>
+              <input type="text" v-model="dispatchForm.cardBottom" />
+            </div>
+          </div>
+
+          <button type="button" class="line-action-btn mt-2" @click="shareDispatchDirect">
+            💬 直接傳送代送單至司機 LINE
+          </button>
+          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('dispatch-print-target', '同業代送單_A5')">
+            🖨️ 列印 A5 橫式同業代送單
+          </button>
+        </div>
+
+        <div class="receipt-preview-area" ref="dispatchViewportRef">
+          <div class="zoom-toolbar no-print">
+            <button type="button" class="zoom-btn" @click="dispatchZoom = Math.max(0.3, +(dispatchZoom - 0.05).toFixed(2))">－</button>
+            <span class="zoom-text">{{ Math.round(dispatchZoom * 100) }}%</span>
+            <button type="button" class="zoom-btn" @click="dispatchZoom = Math.min(1.1, +(dispatchZoom + 0.05).toFixed(2))">＋</button>
+            <button type="fit-btn" @click="autoFitDispatch">📱 適配螢幕</button>
+          </div>
+
+          <div class="receipt-scaler-container" :style="{ width: (794 * dispatchZoom) + 'px', height: (560 * dispatchZoom) + 'px' }">
+            <div id="dispatch-print-target" class="dispatch-sheet kai-font-supported standard-kai-font" :style="{ transform: `scale(${dispatchZoom})`, transformOrigin: 'top left' }">
+              <div class="d-header">
+                <div class="d-shop-title">宸豐蘭藝</div>
+                <div class="d-main-title">【代送單】</div>
+                <div class="d-meta-top">
+                  <div>訂購單號：<b>{{ dispatchForm.orderId || '無' }}</b></div>
+                  <div>訂購日期：{{ dispatchForm.orderDate || '即時單' }}</div>
+                </div>
+              </div>
+
+              <div class="d-driver-info-box">
+                <div><b>代送同業／司機：</b>{{ dispatchForm.driverName || '配合車隊' }}</div>
+                <div><b>司機電話：</b>{{ dispatchForm.driverPhone || '—' }}</div>
+              </div>
+
+              <table class="d-goods-table">
+                <thead>
+                  <tr>
+                    <th style="width: 25%;">貨品名稱</th>
+                    <th style="width: 12%;">數量</th>
+                    <th style="width: 12%;">單位</th>
+                    <th style="width: 51%;">規格與款式備註</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-bold text-center">蝴蝶蘭</td>
+                    <td class="font-bold text-center">{{ dispatchForm.potsQty || 1 }}</td>
+                    <td class="text-center">盆</td>
+                    <td>{{ dispatchForm.itemName }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="d-card-section">
+                <div class="d-card-line"><b>上款：</b><span>{{ dispatchForm.cardUpper || '—' }}</span></div>
+                <div class="d-card-line"><b>中款：</b><span class="font-bold text-red">{{ dispatchForm.cardMiddle || '—' }}</span></div>
+                <div class="d-card-line"><b>下款：</b><span>{{ dispatchForm.cardBottom || '—' }}</span></div>
+              </div>
+
+              <div class="d-delivery-box">
+                <div class="d-del-left">
+                  <div><b>送貨日期時間：</b>{{ dispatchForm.deliveryTime || '今日送達' }}</div>
+                  <div><b>送貨地址：</b><span class="text-blue font-bold">{{ dispatchForm.address || '—' }}</span></div>
+                </div>
+                <div class="d-del-right">
+                  <div><b>收件人／電話：</b></div>
+                  <div class="font-bold">{{ dispatchForm.recipient || '—' }}</div>
+                </div>
+              </div>
+
+              <div class="d-footer-sign">
+                <span>現場點交簽收人：____________________</span>
+                <span style="font-size: 11.5px; color: #64748b;">※ 花禮已完整送達現場插牌定位</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
 </template>
 
@@ -1791,9 +2035,20 @@ const isVertical = ref(false)
 const zoomLevel = ref(0.65)
 const receiptZoom = ref(0.85)
 const farmerZoom = ref(0.85)
+const dispatchZoom = ref(0.85)
 const viewportRef = ref(null)
 const receiptViewportRef = ref(null)
 const farmerReceiptViewportRef = ref(null)
+const dispatchViewportRef = ref(null)
+
+const autoFitDispatch = () => {
+  if (!dispatchViewportRef.value || dispatchViewportRef.value.clientWidth <= 0) {
+    dispatchZoom.value = 0.85
+    return
+  }
+  const availWidth = Math.max(dispatchViewportRef.value.clientWidth - 28, 280)
+  dispatchZoom.value = Math.min(Math.max(+(availWidth / 794).toFixed(2), 0.45), 1.0)
+}
 
 const toastMessage = ref('')
 let toastTimer = null
@@ -2085,7 +2340,18 @@ const formOrder = ref({
   shipped_status: '未出貨', payment_status: '未結',
   order_date: new Date().toISOString().split('T')[0],
   expected_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-  items: [{ orchid_name: '特選蘭花', pots_qty: 1, stalks: 10, unit_price: 250, pot: '桌上盆 (100)', quick_pot: '未使用' }]
+ items: [{ 
+    orchid_name: '特選蘭花', 
+    flower_color: '紅花',
+    pots_qty: 1, 
+    stalks: 10, 
+    unit_price: 250, 
+    pot: '白落地盆', 
+    quick_pot: '未使用',
+    card_upper: '',
+    card_middle: '',
+    card_bottom: ''
+  }]
 })
 
 const previewNextOrderId = computed(() => generateDateSeqIdByDate('OR', formOrder.value.order_date, orderList.value))
@@ -2141,14 +2407,27 @@ const removeOrderItemRow = (idx) => {
 const calcOrderPrice = () => {
   let totalPrice = 0
   let totalCost = 0
-  const potCostMap = { '桌上盆 (100)': 100, '落地盆陶瓷-喪 (100)': 100, '落地陶瓷盆-喜 (200)': 200, '羅馬盆 (280)': 280, '無盆': 0 }
+  const potCostMap = { 
+    '白落地盆': 100, 
+    '黑落地盆': 100, 
+    '紅落地盆': 200, 
+    '紅羅馬盆': 370, 
+    '白羅馬盆': 370, 
+    '金邊盆': 100, 
+    '大桌上盆': 100, 
+    '小桌上盆': 100, 
+    '單株盆': 50, 
+    '無盆': 0 
+  }
   formOrder.value.items.forEach(item => {
     const p = Number(item.pots_qty) || 1
     const s = Number(item.stalks) || 0
     const u = Number(item.unit_price) || 0
     totalPrice += (s * u) * p
-    const potCost = potCostMap[item.pot] || 0
-    const quickCost = item.quick_pot === '使用快捷盆 (70)' ? 70 : 0
+    const potCost = potCostMap[item.pot] || 100
+    let quickCost = 0
+    if (item.quick_pot === '使用快捷盆 (70)') quickCost = 70
+    else if (item.quick_pot === '使用快捷盆 (80)') quickCost = 80
     totalCost += (s * 60 + potCost + quickCost) * p
   })
   formOrder.value.price = totalPrice + (Number(formOrder.value.shipping_fee) || 0)
@@ -2225,21 +2504,27 @@ const cancelEditOrder = () => {
   }
 }
 
-const saveOrder = async () => {
-  if (!formOrder.value.customer) return alert('請輸入客戶名稱！')
-  const specParts = formOrder.value.items.map(item => `${item.orchid_name || '特選蘭花'} (${item.pots_qty || 1}盆) | ${item.stalks || 1}棵 (單價${item.unit_price || 0}元)`)
+const specParts = formOrder.value.items.map(item => `${item.orchid_name || '特選蘭花'} (${item.pots_qty || 1}盆) | ${item.stalks || 1}棵 (單價${item.unit_price || 0}元) | 花色:${item.flower_color || '紅花'} | 盆:${item.pot || '白落地盆'}`)
   const fullSpecStr = specParts.join('; ')
   const mainItem = formOrder.value.items[0] || {}
-  const finalPotStr = (mainItem.pot || '桌上盆 (100)') + (mainItem.quick_pot === '使用快捷盆 (70)' ? ' + 快捷盆' : '')
+  const quickSuffix = mainItem.quick_pot !== '未使用' ? ` + ${mainItem.quick_pot.replace('使用', '')}` : ''
+  const finalPotStr = (mainItem.pot || '白落地盆') + quickSuffix
   
   const baseNote = String(formOrder.value.note || '')
     .replace(/\[共\d+盆,\s*運費:\d+元\]/g, '')
     .replace(/\[送達地址[:：].*?\]/g, '')
+    .replace(/\[上款[:：].*?\]/g, '')
+    .replace(/\[中款[:：].*?\]/g, '')
+    .replace(/\[下款[:：].*?\]/g, '')
     .trim()
   const totalPots = formOrder.value.items.reduce((sum, it) => sum + (Number(it.pots_qty) || 1), 0)
   const metaTag = `[共${totalPots}盆, 運費:${formOrder.value.shipping_fee || 0}元]`
   const addrTag = formOrder.value.shipping_address ? `[送達地址:${formOrder.value.shipping_address}]` : ''
-  const finalNote = [baseNote, metaTag, addrTag].filter(Boolean).join(' ')
+  const cardUpperTag = mainItem.card_upper ? `[上款:${mainItem.card_upper}]` : ''
+  const cardMiddleTag = mainItem.card_middle ? `[中款:${mainItem.card_middle}]` : ''
+  const cardBottomTag = mainItem.card_bottom ? `[下款:${mainItem.card_bottom}]` : ''
+
+  const finalNote = [baseNote, metaTag, addrTag, cardUpperTag, cardMiddleTag, cardBottomTag].filter(Boolean).join(' ')
 
   const payload = {
     cust_type: formOrder.value.cust_type, customer: formOrder.value.customer, billing_cycle: formOrder.value.billing_cycle,
@@ -2340,6 +2625,46 @@ const statementOrders = computed(() => {
   })
 })
 const statementTotalAmount = computed(() => statementOrders.value.reduce((sum, o) => sum + (Number(o.price) || 0), 0))
+const statementUnpaidAmount = computed(() => {
+  return statementOrders.value
+    .filter(o => o.payment_status === '未結')
+    .reduce((sum, o) => sum + (Number(o.price) || 0), 0)
+})
+
+const getStatementPeriodText = () => {
+  if (statementPeriod.value === 'thisWeek') return '本週 (週一至週日)'
+  if (statementPeriod.value === 'thisMonth') return '本月 (1日至今)'
+  if (statementPeriod.value === 'lastMonth') return '上月全月'
+  if (statementPeriod.value === 'custom') return `${statementStartDate.value} ～ ${statementEndDate.value}`
+  return '全部歷史紀錄'
+}
+
+const getTodayDateStr = () => {
+  const d = new Date()
+  return `${d.getFullYear() - 1911}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+}
+
+const getCustomerPhone = (custName) => {
+  const c = customers.value.find(item => item.name === custName)
+  return c?.phone || '—'
+}
+
+const getOrderCardInfo = (ord, type) => {
+  const noteStr = String(ord.note || '')
+  if (type === 'upper') {
+    const m = noteStr.match(/\[上款[:：](.*?)\]/)
+    return m ? m[1] : '—'
+  }
+  if (type === 'middle') {
+    const m = noteStr.match(/\[中款[:：](.*?)\]/)
+    return m ? m[1] : '—'
+  }
+  if (type === 'bottom') {
+    const m = noteStr.match(/\[下款[:：](.*?)\]/)
+    return m ? m[1] : '—'
+  }
+  return '—'
+}
 const statementTotalPots = computed(() => statementOrders.value.reduce((sum, o) => sum + getOrderTotalPots(o), 0))
 const currentCustomerInfoText = computed(() => {
   if (!statementCustomer.value) return '全部客戶統整'
@@ -3110,8 +3435,32 @@ const fillFarmerReceiptFromOrder = (ord) => {
   currentTab.value = 'farmer_receipt'
   nextTick(() => autoFitFarmerReceipt())
 }
+// 🌟 同業代送單 (A5) 專用資料與函式
+const selectedDispatchOrderId = ref('')
+const dispatchForm = ref({
+  orderId: '', orderDate: '', driverName: '', driverPhone: '', recipient: '',
+  address: '', deliveryTime: '', potsQty: 1, itemName: '', cardUpper: '', cardMiddle: '', cardBottom: ''
+})
 
+const onSelectDispatchOrder = () => {
+  const ord = orderList.value.find(o => o.id === selectedDispatchOrderId.value)
+  if (ord) {
+    dispatchForm.value.orderId = ord.id
+    dispatchForm.value.orderDate = ord.order_date
+    dispatchForm.value.recipient = `${ord.customer} ${ord.phone ? '(' + ord.phone + ')' : ''}`
+    dispatchForm.value.address = extractOrderAddress(ord) || '同訂購人地址'
+    dispatchForm.value.deliveryTime = `${ord.expected_date} 專車送達`
+    dispatchForm.value.potsQty = getOrderTotalPots(ord)
+    dispatchForm.value.itemName = `${ord.spec}`
+    dispatchForm.value.cardUpper = getOrderCardInfo(ord, 'upper')
+    dispatchForm.value.cardMiddle = getOrderCardInfo(ord, 'middle')
+    dispatchForm.value.cardBottom = getOrderCardInfo(ord, 'bottom')
+  }
+}
+
+const shareDispatchDirect = () => openPrintImageModal('dispatch-print-target', '同業代送單確認', false)
 const initSystemData = () => {
+  autoFitDispatch()
   autoFitZoom()
   autoFitReceipt()
   autoFitFarmerReceipt()
@@ -3127,6 +3476,7 @@ const initSystemData = () => {
 
 onMounted(() => {
   window.addEventListener('resize', () => {
+    autoFitDispatch()
     autoFitZoom()
     autoFitReceipt()
     autoFitFarmerReceipt()
@@ -3789,6 +4139,71 @@ input, select, textarea {
   }
 
   #receipt-print-target *, #farmer-print-target *, #card-print-target * {
+    font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
+  }
+  /* 平時螢幕隱藏詳細對帳單，送印時才呈現 */
+.no-screen-display {
+  display: none !important;
+}
+
+/* 🌟 同業代送單 (A5 橫式) 專用樣式 */
+.dispatch-sheet {
+  width: 794px; height: 560px; background: #ffffff; padding: 22px 28px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between; color: #000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15); position: absolute; top: 0; left: 0;
+  font-family: 'TW-Kai', 'DFKai-SB', 'BiauKai', '標楷體', serif !important;
+}
+.d-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 4px; }
+.d-shop-title { font-size: 24px; font-weight: 900; }
+.d-main-title { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #0f172a; }
+.d-meta-top { font-size: 13.5px; text-align: right; }
+.d-driver-info-box { display: flex; justify-content: space-between; font-size: 14.5px; padding: 6px 0; border-bottom: 1px dashed #64748b; }
+.d-goods-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 14.5px; }
+.d-goods-table th, .d-goods-table td { border: 1.5px solid #000; padding: 6px 8px; }
+.d-goods-table th { background: #f8fafc; font-weight: bold; text-align: center; }
+.d-card-section { border: 1.5px solid #000; padding: 7px 12px; margin-top: 6px; background: #fffdfa; font-size: 15px; }
+.d-card-line { margin: 3px 0; }
+.d-delivery-box { display: flex; justify-content: space-between; border: 1.5px solid #000; padding: 7px 12px; margin-top: 6px; font-size: 14px; }
+.d-del-left { flex: 1.5; }
+.d-del-right { flex: 1; border-left: 1px dashed #cbd5e1; padding-left: 12px; }
+.d-footer-sign { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-top: 3px; }
+
+/* 🌟 A4 詳細對帳單專用樣式 */
+.statement-a4-sheet {
+  background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.statement-sheet-header { border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; }
+.shop-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.shop-title-row h2 { margin: 0; font-size: 22px; color: #0f172a; }
+.statement-badge-title { font-size: 18px; font-weight: bold; color: #1e3a8a; }
+.statement-meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; font-size: 13.5px; color: #334155; }
+.statement-detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.statement-detail-table th { background: #f1f5f9; padding: 8px 6px; border-bottom: 1.5px solid #cbd5e1; color: #1e293b; }
+.statement-detail-table td { padding: 6px; }
+.main-info-row td { border-top: 1px solid #e2e8f0; font-weight: 500; }
+.sub-card-row td { background: #fafafa; border-bottom: 1px solid #cbd5e1; padding: 4px 8px; }
+.statement-card-line { font-size: 12.5px; color: #334155; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.unpaid-tag { margin-left: auto; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 4px; }
+.statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
+.footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
+.unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
+.statement-sign-line { font-size: 13.5px; font-weight: bold; }
+
+/* 🌟 列印時將代送單與詳細對帳單納入標準規範 */
+@media print {
+  #dispatch-print-target {
+    position: relative !important; top: 0 !important; left: 0 !important; transform: none !important;
+    box-shadow: none !important; background-color: transparent !important; width: 192mm !important;
+    max-width: 192mm !important; height: 130mm !important; margin: 2mm auto 0 auto !important;
+    padding: 4mm 6mm !important; box-sizing: border-box !important; overflow: hidden !important;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+    display: block !important;
+  }
+  #statement-print-target {
+    position: static !important; width: 100% !important; margin: 0 !important; padding: 6mm !important;
+    box-shadow: none !important; border: none !important; display: block !important;
+  }
+  #dispatch-print-target *, #statement-print-target * {
     font-family: "TW-Kai", "MOESong-Regular", "DFKai-SB", "BiauKai", "標楷體", "Kaiti", "Kaiti TC", "STKaiti", serif !important;
   }
 }
