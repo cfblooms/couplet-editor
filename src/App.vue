@@ -2795,32 +2795,57 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   
   try {
     if (document.fonts?.ready) await document.fonts.ready
+    
+    // 🌟 1. 記錄元素與父容器的原始狀態
+    const parentEl = targetEl.parentElement
     const origTransform = targetEl.style.transform
+    const origParentWidth = parentEl ? parentEl.style.width : ''
+    const origParentHeight = parentEl ? parentEl.style.height : ''
+    
+    // 🌟 2. 依不同單據暫時解鎖父容器為 1:1 真實像素，防止手機寬度擠壓
+    let baseW = 794
+    let baseH = 560
+    if (targetId === 'card-print-target') {
+      baseW = currentCardDimensions.value.w
+      baseH = currentCardDimensions.value.h
+    }
+    
     targetEl.style.transform = 'none'
+    if (parentEl) {
+      parentEl.style.width = baseW + 'px'
+      parentEl.style.height = baseH + 'px'
+    }
 
-    // 🌟 核心：只要是列印模式 (isPrintMode === true)，不管選什麼底圖，強制隱藏底圖與背景色
+    // 列印模式抽空底圖
     const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
     let origBgDisplay = ''
     let origBgColor = targetEl.style.backgroundColor
-    
     if (isPrintMode) {
       if (bgLayer) {
         origBgDisplay = bgLayer.style.display
-        bgLayer.style.display = 'none' // 抽空底圖
+        bgLayer.style.display = 'none'
       }
-      targetEl.style.backgroundColor = 'transparent' // 抽空底色
+      targetEl.style.backgroundColor = 'transparent'
     }
 
     const canvas = await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: null, // 透明背景輸出
+      backgroundColor: null,
+      width: baseW,
+      height: baseH,
+      windowWidth: baseW + 50,
+      windowHeight: baseH + 50,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 🌟 輸出完成後，立刻還原手機螢幕上的原樣，讓你看得到底圖
+    // 🌟 3. 截圖完成，立刻還原手機螢幕上的排版與縮放
     targetEl.style.transform = origTransform
+    if (parentEl) {
+      parentEl.style.width = origParentWidth
+      parentEl.style.height = origParentHeight
+    }
     if (isPrintMode) {
       if (bgLayer) bgLayer.style.display = origBgDisplay
       targetEl.style.backgroundColor = origBgColor
@@ -2835,7 +2860,7 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
       shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
       shareModalFilename.value = `${titlePrefix}.png`
       currentBlobToShare.value = blob
-      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: 'image/png' })] }))
+      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
     }, 'image/png')
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
@@ -2854,14 +2879,31 @@ const triggerImagePrint = async () => {
 
   try {
     if (document.fonts?.ready) await document.fonts.ready
+    
+    // 🌟 1. 記錄原始縮放與父容器尺寸
+    const parentEl = targetEl.parentElement
     const origTransform = targetEl.style.transform
+    const origParentWidth = parentEl ? parentEl.style.width : ''
+    const origParentHeight = parentEl ? parentEl.style.height : ''
+    
+    let baseW = 794
+    let baseH = 560
+    if (targetId === 'card-print-target') {
+      baseW = currentCardDimensions.value.w
+      baseH = currentCardDimensions.value.h
+    }
+
+    // 暫時解鎖為 1:1 真實尺寸
     targetEl.style.transform = 'none'
+    if (parentEl) {
+      parentEl.style.width = baseW + 'px'
+      parentEl.style.height = baseH + 'px'
+    }
 
     // 抽空底圖與底色
     const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
     let origBgDisplay = ''
     let origBgColor = targetEl.style.backgroundColor
-    
     if (bgLayer) {
       origBgDisplay = bgLayer.style.display
       bgLayer.style.display = 'none'
@@ -2872,18 +2914,26 @@ const triggerImagePrint = async () => {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
+      width: baseW,
+      height: baseH,
+      windowWidth: baseW + 50,
+      windowHeight: baseH + 50,
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
 
-    // 還原螢幕顯示
+    // 還原螢幕縮放
     targetEl.style.transform = origTransform
+    if (parentEl) {
+      parentEl.style.width = origParentWidth
+      parentEl.style.height = origParentHeight
+    }
     if (bgLayer) bgLayer.style.display = origBgDisplay
     targetEl.style.backgroundColor = origBgColor
 
     const imgDataUrl = canvas.toDataURL('image/png')
 
-    // 🌟 透過隱藏 iframe 呼叫列印，避開 iOS Safari 的彈窗攔截
+    // 透過隱藏 iframe 喚起手機列印
     let printFrame = document.getElementById('cf-mobile-print-iframe')
     if (printFrame) {
       document.body.removeChild(printFrame)
