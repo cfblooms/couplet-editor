@@ -2875,12 +2875,11 @@ const triggerImagePrint = async () => {
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
 
-  showToast('⏳ 正在為手機準備透明送印...')
+  showToast('⏳ 正在生成高解析送印畫面...')
 
   try {
     if (document.fonts?.ready) await document.fonts.ready
     
-    // 🌟 1. 記錄原始縮放與父容器尺寸
     const parentEl = targetEl.parentElement
     const origTransform = targetEl.style.transform
     const origParentWidth = parentEl ? parentEl.style.width : ''
@@ -2893,7 +2892,6 @@ const triggerImagePrint = async () => {
       baseH = currentCardDimensions.value.h
     }
 
-    // 暫時解鎖為 1:1 真實尺寸
     targetEl.style.transform = 'none'
     if (parentEl) {
       parentEl.style.width = baseW + 'px'
@@ -2933,48 +2931,72 @@ const triggerImagePrint = async () => {
 
     const imgDataUrl = canvas.toDataURL('image/png')
 
-    // 透過隱藏 iframe 喚起手機列印
-    let printFrame = document.getElementById('cf-mobile-print-iframe')
-    if (printFrame) {
-      document.body.removeChild(printFrame)
-    }
-    printFrame = document.createElement('iframe')
+    // 🌟 移除舊 iframe，建立具備實體像素且透明置底的列印容器，避免 iOS 判定為空內容
+    let oldFrame = document.getElementById('cf-mobile-print-iframe')
+    if (oldFrame) document.body.removeChild(oldFrame)
+
+    const printFrame = document.createElement('iframe')
     printFrame.id = 'cf-mobile-print-iframe'
+    // 給予可視尺寸但完全透明且在最底層，確保 iOS WebKit 100% 完整解碼圖片
     printFrame.style.position = 'fixed'
-    printFrame.style.right = '0'
-    printFrame.style.bottom = '0'
-    printFrame.style.width = '0'
-    printFrame.style.height = '0'
-    printFrame.style.border = '0'
+    printFrame.style.left = '0'
+    printFrame.style.top = '0'
+    printFrame.style.width = '100vw'
+    printFrame.style.height = '100vh'
+    printFrame.style.zIndex = '-9999'
+    printFrame.style.opacity = '0.01'
+    printFrame.style.border = 'none'
+    printFrame.style.pointerEvents = 'none'
     document.body.appendChild(printFrame)
 
-    const frameDoc = printFrame.contentWindow || printFrame.contentDocument.document || printFrame.contentDocument
-    frameDoc.document.open()
-    frameDoc.document.write(`
+    const frameDoc = printFrame.contentWindow.document
+    frameDoc.open()
+    frameDoc.write(`
       <!DOCTYPE html>
       <html>
         <head>
+          <title>列印</title>
           <style>
             @page { size: auto; margin: 0mm !important; }
             html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100% !important; height: 100% !important;
-              display: flex !important; justify-content: center !important; align-items: center !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
               background: transparent !important;
             }
             img {
-              max-width: 100% !important;
-              max-height: 98vh !important;
+              max-width: 98% !important;
+              max-height: 98% !important;
+              width: auto !important;
+              height: auto !important;
               object-fit: contain !important;
             }
           </style>
         </head>
         <body>
-          <img src="${imgDataUrl}" onload="setTimeout(() => { window.focus(); window.print(); }, 200);" />
+          <img id="print-pic" src="${imgDataUrl}" />
+          <script>
+            const img = document.getElementById('print-pic');
+            function doPrint() {
+              setTimeout(() => {
+                window.focus();
+                window.print();
+              }, 300);
+            }
+            if (img.complete) {
+              doPrint();
+            } else {
+              img.onload = doPrint;
+            }
+          <\/script>
         </body>
       </html>
     `)
-    frameDoc.document.close()
+    frameDoc.close()
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
   }
