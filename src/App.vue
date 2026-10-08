@@ -2672,8 +2672,20 @@ const switchOrientation = (vertical) => {
 }
 const resetPositions = () => { layout.value = JSON.parse(JSON.stringify(isVertical.value ? defaultVertical : defaultHorizontal)) }
 
+// 🌟 補回遺失的字重與文字陰影計算函式
+const getWeightStyle = (wVal) => {
+  const w = String(wVal || '600')
+  const styles = { fontWeight: w }
+  if (w === '500') styles.textShadow = '0 0 0.4px #000'
+  else if (w === '550') styles.textShadow = '0 0 0.6px #000'
+  else if (w === '600') styles.textShadow = '0 0 0.8px #000'
+  else if (w === '650') styles.textShadow = '0 0 1.0px #000'
+  else if (w === '700') styles.textShadow = '0 0 1.2px #000'
+  else if (w === '800') styles.textShadow = '0 0 1.8px #000'
+  return styles
+}
+
 const getStyle = (key) => {
-  // 🌟 若找不到對應 key，自動提供安全預設座標，防止整頁崩潰
   const fallback = { x: 50, y: 50, size: 28 }
   const item = (layout.value && layout.value[key]) ? layout.value[key] : fallback
   
