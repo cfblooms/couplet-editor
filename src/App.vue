@@ -114,9 +114,16 @@
               </button>
 
               <!-- 4. 下載 -->
-              <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
-                {{ shareModalFileUrl ? '💾 下載 PDF 檔' : '💾 下載圖檔至相簿 / 電腦' }}
-              </a>
+              <a
+  :href="shareModalFileUrl || shareModalImg"
+  :download="shareModalFilename"
+  class="mobile-dl-btn"
+  @click="handleDownloadClick"
+>
+  {{ isMobileDevice()
+    ? (sharePdfFile ? '💾 儲存 / 傳送 PDF 檔 (不帶網址)' : '💾 儲存圖檔 (相簿 / 檔案)')
+    : (shareModalFileUrl ? '💾 下載 PDF 檔' : '💾 下載圖檔至相簿 / 電腦') }}
+</a>
             </div>
 
             <div class="share-tips-row">
@@ -621,7 +628,12 @@
                       </td>
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
-                      <td>{{ ord.need_receipt || '不需收據' }}</td>
+                      <td class="nowrap-cell">
+  <span
+    :class="ord.need_receipt === '需開收據' ? 'badge badge-soft-green' : 'badge badge-gray'"
+    class="uniform-status-badge"
+  >{{ ord.need_receipt || '不需收據' }}</span>
+</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
                       <td class="text-blue font-heavy">${{ ord.price }}</td>
