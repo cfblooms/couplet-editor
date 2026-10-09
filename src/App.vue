@@ -3850,18 +3850,18 @@ input, select, textarea {
 .excel-btn { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; }
 .line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14.5px; cursor: pointer; width: 100%; }
 
-/* ================= 搜尋欄 (紫色醒目版) ================= */
+/* ================= 搜尋欄 (紫色・無邊框版) ================= */
 .search-bar {
   display: flex; align-items: center; gap: 8px;
-  background: #faf5ff; border: 2px solid #a855f7; border-radius: 10px;
-  padding: 5px 12px; margin: 10px 0 6px 0;
-  box-shadow: 0 1px 4px rgba(168, 85, 247, 0.15);
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  background: #f3e8ff; border: none; border-radius: 10px;
+  padding: 7px 14px; margin: 10px 0 6px 0;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.25);
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.search-bar:hover { border-color: #9333ea; }
+.search-bar:hover { background: #ede0ff; }
 .search-bar:focus-within {
-  border-color: #7e22ce; background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.22);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.35), 0 2px 10px rgba(126, 34, 206, 0.2);
 }
 .search-icon { font-size: 18px; flex-shrink: 0; }
 .search-input {
@@ -3869,15 +3869,15 @@ input, select, textarea {
   border: none !important; background: transparent !important; outline: none;
   padding: 6px 2px !important; font-size: 14px !important; color: #3b0764;
 }
-.search-input::placeholder { color: #a78bfa; }
+.search-input::placeholder { color: #9f7aea; }
 .search-clear-btn {
-  background: #e9d5ff; color: #7e22ce; border: none; border-radius: 50%;
+  background: #ddd0f7; color: #7e22ce; border: none; border-radius: 50%;
   width: 22px; height: 22px; font-size: 11px; font-weight: bold; cursor: pointer; flex-shrink: 0; padding: 0;
 }
 .search-clear-btn:hover { background: #fecaca; color: #dc2626; }
 .search-count {
   font-size: 12px; font-weight: bold; color: #7e22ce; white-space: nowrap; flex-shrink: 0;
-  background: #f3e8ff; padding: 2px 8px; border-radius: 10px;
+  background: #ffffff; padding: 2px 8px; border-radius: 10px;
 }
 
 /* ================= 對帳區單號連結 / 跳轉標示 ================= */
