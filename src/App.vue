@@ -3995,8 +3995,24 @@ input, select, textarea {
   margin-left: auto; margin-right: 8px; font-weight: 800; color: #dc2626; background: #fee2e2;
   padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-size: 12.5px; display: inline-block;
 }
-.statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
-.footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
+
+.footer-summary-boxes { display.statement-sheet-footer { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-end; 
+  margin-top: 18px; 
+  padding-top: 12px; 
+  border-top: none !important; /* 🌟 拿掉貫穿的頂線，徹底消除第一條線 */
+}
+
+.footer-summary-boxes { 
+  display: flex; 
+  gap: 16px; 
+  font-size: 14px; 
+  flex-wrap: wrap;
+  border-top: 1.5px solid #cbd5e1; /* 頂線只留在左側數字上方，不延伸到簽名處 */
+  padding-top: 8px;
+}
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
 
 /* 🌟 客戶簽章：上方拉出 32px 充足空隙，底線加粗下移，確保有足夠空間蓋章與簽名 */
@@ -4007,26 +4023,26 @@ input, select, textarea {
   font-weight: bold !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  margin-left: 20px !important;
+  margin-left: 24px !important;
+  padding-bottom: 6px !important;
   border: none !important;
-  border-bottom: none !important;
-  padding-bottom: 4px !important;
 }
 
 .sign-label {
   font-size: 14.5px !important;
   font-weight: bold !important;
+  color: #0f172a !important;
   border: none !important;
 }
 
 .sign-underline-space {
   display: inline-block !important;
-  width: 200px !important;
-  min-width: 200px !important;
+  width: 220px !important;
+  min-width: 220px !important;
   border: none !important;
-  border-bottom: 1.5px solid #0f172a !important; /* 只有唯一的一條乾淨黑色底線 */
-  margin-left: 6px !important;
-  height: 22px !important;
+  border-bottom: 2px solid #0f172a !important; /* 🌟 全場唯一的一條清晰簽名線 */
+  margin-left: 8px !important;
+  height: 24px !important;
 }
 
 /* ================= 手機版 ================= */
