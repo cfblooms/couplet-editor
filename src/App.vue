@@ -74,13 +74,13 @@
             </div>
 
            <div class="share-btn-action-group">
-  <button v-if="shareModalTitle.includes('透明送印')" ... class="mobile-print-btn" @click="triggerImagePrint">
-    🖨️ 手機直接列印 (AirPrint)
-  </button>
+  <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
+  🖨️ 手機直接列印 (AirPrint)
+</button>
 
-  <button v-if="canNativeShare" ... class="mobile-share-btn" @click="triggerNativeShare">
-    📲 一鍵傳送至 LINE (手機專用)
-  </button>
+<button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
+  📲 一鍵傳送至 LINE (手機專用)
+</button>
 
   <!-- 複製圖片：PDF 模式不顯示 -->
   <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
@@ -3178,21 +3178,10 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
       if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
         URL.revokeObjectURL(shareModalImg.value)
       }
-          canvas.toBlob((blob) => {
-      if (!blob) return
-      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-        URL.revokeObjectURL(shareModalImg.value)
-      }
       if (shareModalFileUrl.value) {
         URL.revokeObjectURL(shareModalFileUrl.value)
-        shareModalFileUrl.value = ''   // ← 加在這裡
+        shareModalFileUrl.value = ''
       }
-      shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
-      shareModalFilename.value = `${titlePrefix}.png`
-      currentBlobToShare.value = blob
-      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
-    }, 'image/png')
       shareModalImg.value = URL.createObjectURL(blob)
       shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
       shareModalFilename.value = `${titlePrefix}.png`
