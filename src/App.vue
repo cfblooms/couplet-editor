@@ -73,31 +73,25 @@
               <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
             </div>
 
-            <div class="share-btn-action-group">
-              <!-- 只有在列印模式 (無底圖) 時才顯示列印按鈕 -->
-              <button
-                v-if="shareModalTitle.includes('透明送印')"
-                type="button"
-                class="mobile-print-btn"
-                @click="triggerImagePrint"
-              >
-                🖨️ 手機直接列印 (AirPrint)
-              </button>
+           <div class="share-btn-action-group">
+  <button v-if="shareModalTitle.includes('透明送印')" ... class="mobile-print-btn" @click="triggerImagePrint">
+    🖨️ 手機直接列印 (AirPrint)
+  </button>
 
-              <!-- 手機支援原生分享時顯示 -->
-              <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-                📲 一鍵傳送至 LINE (手機專用)
-              </button>
+  <button v-if="canNativeShare" ... class="mobile-share-btn" @click="triggerNativeShare">
+    📲 一鍵傳送至 LINE (手機專用)
+  </button>
 
-              <!-- 電腦版/通用：直接複製圖片到剪貼簿，LINE 按 Ctrl+V 直接貼上 -->
-              <button type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
-                📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
-              </button>
+  <!-- 複製圖片：PDF 模式不顯示 -->
+  <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
+    📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
+  </button>
 
-              <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
-                💾 下載圖檔至相簿 / 電腦
-              </a>
-            </div>
+  <!-- 下載：PDF 模式下載 PDF，否則下載圖片 -->
+  <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
+    💾 下載圖檔至相簿 / 電腦
+  </a>
+</div>
 
             <div class="share-tips-row">
               <span>💡 <b>操作小提示：</b></span>
@@ -1915,16 +1909,17 @@ const showToast = (msg) => {
 }
 
 const shareModalImg = ref('')
+const shareModalFileUrl = ref('')
 const shareModalTitle = ref('')
 const shareModalFilename = ref('圖片.png')
 const currentBlobToShare = ref(null)
 const canNativeShare = ref(false)
 
 const closeShareModal = () => {
-  if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-    URL.revokeObjectURL(shareModalImg.value)
-  }
+  if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) URL.revokeObjectURL(shareModalImg.value)
+  if (shareModalFileUrl.value) URL.revokeObjectURL(shareModalFileUrl.value)
   shareModalImg.value = ''
+  shareModalFileUrl.value = ''
   currentBlobToShare.value = null
 }
 
@@ -1946,9 +1941,10 @@ const copyShareImageToClipboard = async () => {
 const triggerNativeShare = async () => {
   if (!currentBlobToShare.value) return
   try {
-    const file = new File([currentBlobToShare.value], shareModalFilename.value, { type: 'image/png' })
+    const blob = currentBlobToShare.value
+    const file = new File([blob], shareModalFilename.value, { type: blob.type || 'image/png' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ title: shareModalTitle.value, files: [file] })
+      await navigator.share({ files: [file] })
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
@@ -3136,6 +3132,7 @@ const printStatementPdf = async () => {
     const pw = pdf.internal.pageSize.getWidth()
     const ph = pdf.internal.pageSize.getHeight()
 
+        let previewUrl = ''
     pages.forEach(([s, e], i) => {
       const pageCanvas = document.createElement('canvas')
       pageCanvas.width = fullCanvas.width
@@ -3149,11 +3146,22 @@ const printStatementPdf = async () => {
         0, Math.round(s * SCALE), fullCanvas.width, Math.round((e - s) * SCALE),
         0, Math.round(offsetY * SCALE), fullCanvas.width, Math.round((e - s) * SCALE)
       )
+      const jpg = pageCanvas.toDataURL('image/jpeg', 0.95)
+      if (i === 0) previewUrl = jpg
       if (i > 0) pdf.addPage()
-      pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pw, ph)
+      pdf.addImage(jpg, 'JPEG', 0, 0, pw, ph)
     })
 
-    window.location.href = URL.createObjectURL(pdf.output('blob'))
+    const pdfBlob = pdf.output('blob')
+    const fileName = `詳細對帳單_${todayStr()}.pdf`
+    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' })
+
+    shareModalImg.value = previewUrl
+    shareModalTitle.value = '詳細對帳單 PDF (確認預覽)'
+    shareModalFilename.value = fileName
+    shareModalFileUrl.value = URL.createObjectURL(pdfBlob)
+    currentBlobToShare.value = pdfFile
+    canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [pdfFile] }))
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
   } finally {
@@ -3170,6 +3178,21 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
       if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
         URL.revokeObjectURL(shareModalImg.value)
       }
+          canvas.toBlob((blob) => {
+      if (!blob) return
+      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
+        URL.revokeObjectURL(shareModalImg.value)
+      }
+      if (shareModalFileUrl.value) {
+        URL.revokeObjectURL(shareModalFileUrl.value)
+        shareModalFileUrl.value = ''   // ← 加在這裡
+      }
+      shareModalImg.value = URL.createObjectURL(blob)
+      shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
+      shareModalFilename.value = `${titlePrefix}.png`
+      currentBlobToShare.value = blob
+      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
+    }, 'image/png')
       shareModalImg.value = URL.createObjectURL(blob)
       shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
       shareModalFilename.value = `${titlePrefix}.png`
