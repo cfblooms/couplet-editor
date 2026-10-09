@@ -2723,10 +2723,12 @@ const copyLineStatement = () => {
 }
 const exportStatementExcel = () => {
   if (statementOrders.value.length === 0) return alert('目前無資料可匯出！')
+  const custName = statementCustomer.value ? safeFileName(statementCustomer.value) : ''
+  const sheetName = custName ? custName.replace(/[\\/?*[\]:]/g, '').slice(0, 31) || '對帳明細' : '對帳明細'
   const worksheet = XLSX.utils.json_to_sheet(statementOrders.value)
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, '對帳明細')
-  XLSX.writeFile(workbook, `對帳單_${todayStr()}.xlsx`)
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  XLSX.writeFile(workbook, custName ? `${custName}_對帳單_${todayStr()}.xlsx` : `對帳單_${todayStr()}.xlsx`)
 }
 const batchMarkPaid = async () => {
   const ids = statementOrders.value.map(o => o.id)
@@ -4016,7 +4018,7 @@ input, select, textarea {
   background-color: #f1f5f9; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 12px;
 }
 .share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
-.share-img-scroll-container { max-height: 58vh; overflow-y: auto; }
+.share-img-scroll-container { max-height: 58vh; overflow-y: auto; align-items: flex-start; }
 .share-pages-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
 .share-pages-stack .share-preview-img-contained { max-height: none; width: 100%; }
 .share-btn-action-group { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap; }
