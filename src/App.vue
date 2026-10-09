@@ -69,66 +69,50 @@
             <button class="close-modal-btn" @click="closeShareModal">✕</button>
           </div>
           <div class="share-modal-body">
-            <div class="share-img-scroll-container">
-              <img :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
-            </div>
+  <div class="share-img-scroll-container">
+    <div v-if="sharePagePreviews.length" class="share-pages-stack">
+      <img v-for="(p, i) in sharePagePreviews" :key="i" :src="p" class="share-preview-img-contained" :alt="'第' + (i + 1) + '頁'" />
+    </div>
+    <img v-else :src="shareModalImg" class="share-preview-img-contained" alt="傳送預覽圖" />
+  </div>
 
-           <div class="share-btn-action-group">
-  <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
-  🖨️ 手機直接列印 (AirPrint)
-</button>
-<div class="share-btn-action-group">
-  <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
-    🖨️ 手機直接列印 (AirPrint)
-  </button>
+  <div class="share-btn-action-group">
+    <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
+      🖨️ 手機直接列印 (AirPrint)
+    </button>
 
-  <button v-if="shareModalFileUrl" type="button" class="mobile-print-btn" @click="openPdfForPrint">
-    🖨️ 開啟 PDF 列印 (AirPrint)
-  </button>
+    <button v-if="shareModalFileUrl" type="button" class="mobile-print-btn" @click="openPdfForPrint">
+      🖨️ 開啟 PDF 列印 (AirPrint)
+    </button>
 
-  <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-    📲 一鍵傳送至 LINE (手機專用)
-  </button>
+    <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
+      📲 一鍵傳送至 LINE (手機專用)
+    </button>
 
-  <!-- 複製圖片：PDF 模式不顯示 -->
-  <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
-    📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
-  </button>
+    <!-- 複製圖片：PDF 模式不顯示 -->
+    <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
+      📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
+    </button>
 
-  <!-- 下載：PDF 模式下載 PDF，否則下載圖片 -->
-  <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
-    💾 下載圖檔至相簿 / 電腦
-  </a>
+    <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
+      {{ shareModalFileUrl ? '💾 下載 PDF 檔' : '💾 下載圖檔至相簿 / 電腦' }}
+    </a>
+  </div>
+
+  <div class="share-tips-row">
+    <span>💡 <b>操作小提示：</b></span>
+    <span v-if="shareModalTitle.includes('透明送印')">
+      • <b>手機列印</b>：點「手機直接列印」開啟無底色滿版文件，再從分享選單選擇列印。
+    </span>
+    <span v-else-if="shareModalFileUrl">
+      • <b>傳 LINE</b>：手機點「一鍵傳送至 LINE」會以圖片傳送；電腦請下載 PDF 後拖進 LINE 對話框。<br>
+      • <b>列印</b>：點「開啟 PDF 列印」，在 PDF 畫面按分享圖示選「列印」。
+    </span>
+    <span v-else>
+      • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
+    </span>
+  </div>
 </div>
-
-<button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-  📲 一鍵傳送至 LINE (手機專用)
-</button>
-
-  <!-- 複製圖片：PDF 模式不顯示 -->
-  <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
-    📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
-  </button>
-
-  <!-- 下載：PDF 模式下載 PDF，否則下載圖片 -->
-  <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
-    💾 下載圖檔至相簿 / 電腦
-  </a>
-</div>
-
-            <div class="share-tips-row">
-  <span>💡 <b>操作小提示：</b></span>
-  <span v-if="shareModalTitle.includes('透明送印')">
-    • <b>手機列印</b>：點「手機直接列印」開啟無底色滿版文件，再從分享選單選擇列印。
-  </span>
-  <span v-else-if="shareModalFileUrl">
-    • <b>列印對帳單</b>：點「開啟 PDF 列印」，在 PDF 畫面按分享圖示，選「列印」即可。
-  </span>
-  <span v-else>
-    • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
-  </span>
-</div>
-          </div>
         </div>
       </div>
 
@@ -1940,12 +1924,16 @@ const shareModalTitle = ref('')
 const shareModalFilename = ref('圖片.png')
 const currentBlobToShare = ref(null)
 const canNativeShare = ref(false)
+const sharePagePreviews = ref([])      // 對帳單多頁預覽圖
+const shareFilesForNative = ref([])    // 手機分享用的 JPG 檔
 
 const closeShareModal = () => {
   if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) URL.revokeObjectURL(shareModalImg.value)
   if (shareModalFileUrl.value) URL.revokeObjectURL(shareModalFileUrl.value)
   shareModalImg.value = ''
   shareModalFileUrl.value = ''
+  sharePagePreviews.value = []
+  shareFilesForNative.value = []
   currentBlobToShare.value = null
 }
 
@@ -1965,12 +1953,17 @@ const copyShareImageToClipboard = async () => {
   }
 }
 const triggerNativeShare = async () => {
-  if (!currentBlobToShare.value) return
-  try {
+  let files = shareFilesForNative.value
+  if (!files.length) {
+    if (!currentBlobToShare.value) return
     const blob = currentBlobToShare.value
-    const file = new File([blob], shareModalFilename.value, { type: blob.type || 'image/png' })
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file] })
+    files = [new File([blob], shareModalFilename.value, { type: blob.type || 'image/png' })]
+  }
+  try {
+    if (navigator.canShare && navigator.canShare({ files })) {
+      await navigator.share({ files })
+    } else {
+      showToast('⚠️ 此裝置無法直接分享，請點「下載」後從 LINE 選取檔案')
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
@@ -3101,16 +3094,16 @@ const captureToCanvas = async (targetId, isPrintMode) => {
   }
 }
 // 手機列印詳細對帳單：A4 自動分頁，不會把一筆訂單切成兩半 (只有對帳單使用)
+const // 手機列印 / 傳 LINE / 電腦傳 LINE 共用：A4 自動分頁，不會把一筆訂單切成兩半
 const printStatementPdf = async () => {
   const el = document.getElementById('statement-print-target')
   if (!el) return alert('找不到對帳單！')
-  showToast('⏳ 正在生成對帳單 PDF...')
+  showToast('⏳ 正在生成對帳單...')
 
   const A4_W = 794
   const A4_H = 1123
   const MARGIN = 24
 
-  // 對帳單平時是隱藏的，截圖前暫時顯示在畫面最底層，使用者看不到
   const savedStyle = el.getAttribute('style') || ''
   const hadHideClass = el.classList.contains('no-screen-display')
   el.classList.remove('no-screen-display')
@@ -3124,7 +3117,6 @@ const printStatementPdf = async () => {
     const SCALE = totalH > 3000 ? 1.5 : 2
     const top = el.getBoundingClientRect().top
 
-    // 可以換頁的位置：每筆訂單 (含上款／下款那行) 的底部，以及總計區的上緣
     const breaks = [...el.querySelectorAll('.sub-card-row')]
       .map(r => Math.round(r.getBoundingClientRect().bottom - top))
     const footer = el.querySelector('.statement-sheet-footer')
@@ -3132,19 +3124,11 @@ const printStatementPdf = async () => {
     breaks.sort((a, b) => a - b)
 
     const fullCanvas = await html2canvas(el, {
-      scale: SCALE,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      width: A4_W,
-      height: totalH,
-      windowWidth: A4_W + 50,
-      windowHeight: totalH + 50,
-      scrollX: 0,
-      scrollY: 0,
-      logging: false
+      scale: SCALE, useCORS: true, backgroundColor: '#ffffff',
+      width: A4_W, height: totalH, windowWidth: A4_W + 50, windowHeight: totalH + 50,
+      scrollX: 0, scrollY: 0, logging: false
     })
 
-    // 算出每一頁要截的範圍
     const pages = []
     let start = 0
     while (start < totalH - 1) {
@@ -3164,8 +3148,10 @@ const printStatementPdf = async () => {
     const pw = pdf.internal.pageSize.getWidth()
     const ph = pdf.internal.pageSize.getHeight()
 
-        let previewUrl = ''
-    pages.forEach(([s, e], i) => {
+    const previews = []
+    const imgFiles = []
+    for (let i = 0; i < pages.length; i++) {
+      const [s, e] = pages[i]
       const pageCanvas = document.createElement('canvas')
       pageCanvas.width = fullCanvas.width
       pageCanvas.height = Math.round(A4_H * SCALE)
@@ -3179,21 +3165,31 @@ const printStatementPdf = async () => {
         0, Math.round(offsetY * SCALE), fullCanvas.width, Math.round((e - s) * SCALE)
       )
       const jpg = pageCanvas.toDataURL('image/jpeg', 0.95)
-      if (i === 0) previewUrl = jpg
+      previews.push(jpg)
+
+      // 每頁另存一張 JPG：分享給 LINE 用圖片，LINE 才一定出現在分享選單
+      const jpgBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.95))
+      if (jpgBlob) {
+        imgFiles.push(new File([jpgBlob], `詳細對帳單_${todayStr()}_第${i + 1}頁.jpg`, { type: 'image/jpeg' }))
+      }
+
       if (i > 0) pdf.addPage()
       pdf.addImage(jpg, 'JPEG', 0, 0, pw, ph)
-    })
+    }
 
     const pdfBlob = pdf.output('blob')
     const fileName = `詳細對帳單_${todayStr()}.pdf`
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' })
 
-    shareModalImg.value = previewUrl
-    shareModalTitle.value = '詳細對帳單 PDF (確認預覽)'
+    closeShareModal()
+    sharePagePreviews.value = previews
+    shareModalImg.value = previews[0]
+    shareModalTitle.value = `詳細對帳單 (共 ${pages.length} 頁・確認預覽)`
     shareModalFilename.value = fileName
-    shareModalFileUrl.value = URL.createObjectURL(pdfBlob)
+    shareModalFileUrl.value = URL.createObjectURL(pdfBlob)   // 列印 / 下載用 PDF
     currentBlobToShare.value = pdfFile
-    canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [pdfFile] }))
+    shareFilesForNative.value = imgFiles                      // 傳 LINE 用圖片
+    canNativeShare.value = !!(navigator.canShare && imgFiles.length && navigator.canShare({ files: imgFiles }))
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
   } finally {
@@ -3266,7 +3262,7 @@ const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花�
 const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
 const shareFarmerReceiptDirect = () => openPrintImageModal('farmer-print-target', '農民收據確認', false)
 const shareDispatchDirect = () => openPrintImageModal('dispatch-print-target', '同業代送單確認', false)
-const shareStatementDirect = () => openPrintImageModal('statement-print-target', '詳細對帳單', false)
+const shareStatementDirect = () => printStatementPdf()
 // ==========================================
 // 6. 雲端草稿庫
 // ==========================================
@@ -3827,7 +3823,9 @@ input, select, textarea {
   background-color: #f1f5f9; border-radius: 8px; padding: 10px; box-sizing: border-box; margin-bottom: 12px;
 }
 .share-preview-img-contained { max-height: 55vh; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
-
+.share-img-scroll-container { max-height: 58vh; overflow-y: auto; }
+.share-pages-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
+.share-pages-stack .share-preview-img-contained { max-height: none; width: 100%; }
 .share-btn-action-group { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; flex-wrap: wrap; }
 .mobile-print-btn {
   flex: 1.5; min-width: 180px; background: #16a34a; color: white; border: none; padding: 10px;
