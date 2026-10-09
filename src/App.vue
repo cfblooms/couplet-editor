@@ -77,6 +77,29 @@
   <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
   🖨️ 手機直接列印 (AirPrint)
 </button>
+<div class="share-btn-action-group">
+  <button v-if="shareModalTitle.includes('透明送印')" type="button" class="mobile-print-btn" @click="triggerImagePrint">
+    🖨️ 手機直接列印 (AirPrint)
+  </button>
+
+  <button v-if="shareModalFileUrl" type="button" class="mobile-print-btn" @click="openPdfForPrint">
+    🖨️ 開啟 PDF 列印 (AirPrint)
+  </button>
+
+  <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
+    📲 一鍵傳送至 LINE (手機專用)
+  </button>
+
+  <!-- 複製圖片：PDF 模式不顯示 -->
+  <button v-if="!shareModalFileUrl" type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
+    📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
+  </button>
+
+  <!-- 下載：PDF 模式下載 PDF，否則下載圖片 -->
+  <a :href="shareModalFileUrl || shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
+    💾 下載圖檔至相簿 / 電腦
+  </a>
+</div>
 
 <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
   📲 一鍵傳送至 LINE (手機專用)
@@ -94,14 +117,17 @@
 </div>
 
             <div class="share-tips-row">
-              <span>💡 <b>操作小提示：</b></span>
-              <span v-if="shareModalTitle.includes('透明送印')">
-                • <b>手機列印</b>：點「手機直接列印」開啟無底色滿版文件，再從分享選單選擇列印。
-              </span>
-              <span v-else>
-                • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
-              </span>
-            </div>
+  <span>💡 <b>操作小提示：</b></span>
+  <span v-if="shareModalTitle.includes('透明送印')">
+    • <b>手機列印</b>：點「手機直接列印」開啟無底色滿版文件，再從分享選單選擇列印。
+  </span>
+  <span v-else-if="shareModalFileUrl">
+    • <b>列印對帳單</b>：點「開啟 PDF 列印」，在 PDF 畫面按分享圖示，選「列印」即可。
+  </span>
+  <span v-else>
+    • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
+  </span>
+</div>
           </div>
         </div>
       </div>
@@ -1951,6 +1977,12 @@ const triggerNativeShare = async () => {
       showToast('⚠️ 分享取消或請改用長按圖片儲存')
     }
   }
+}
+
+const openPdfForPrint = () => {
+  if (!shareModalFileUrl.value) return
+  const w = window.open(shareModalFileUrl.value, '_blank')
+  if (!w) window.location.href = shareModalFileUrl.value
 }
 
 // 尺寸維度：精確支援 A3, A4, A5
