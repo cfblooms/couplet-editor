@@ -39,16 +39,16 @@
             💼 蘭花庫存・客戶・訂單管理
           </button>
           <button type="button" :class="{ active: currentTab === 'couplet' }" @click="currentTab = 'couplet'">
-            🎴 花卡 / 輓聯編輯器 (A3/A4/A5)
+            🎴 花卡編輯器
           </button>
           <button type="button" :class="{ active: currentTab === 'receipt' }" @click="currentTab = 'receipt'">
-            📄 訂單 A5 簽收單 (支援線上簽名)
+            📄 簽收單
           </button>
           <button type="button" :class="{ active: currentTab === 'farmer_receipt' }" @click="currentTab = 'farmer_receipt'">
             🧾 農民收據
           </button>
           <button type="button" :class="{ active: currentTab === 'dispatch' }" @click="currentTab = 'dispatch'">
-            🚚 同業代送單 (A5)
+            🚚 代送單
           </button>
           <button type="button" class="logout-nav-btn" @click="handleLogout" title="登出並鎖定系統">
             🔒 登出
@@ -83,14 +83,14 @@
             </div>
 
             <div class="share-btn-action-group">
-              <!-- 1. 列印 / 分享 PDF：分享的是 PDF 檔本身（不帶網址），分享選單內有「列印」(AirPrint) -->
+              <!-- 1. 列印 (AirPrint)：分享的是 PDF 檔本身（不帶網址），分享選單內有「列印」 -->
               <button
                 v-if="isMobileDevice() && sharePdfFile && canSharePdf"
                 type="button"
                 class="mobile-print-btn"
                 @click="triggerPdfShare"
               >
-                🖨️ 列印 / 分享 PDF
+                🖨️ 列印 (AirPrint)
               </button>
 
               <!-- 2. 傳送至 LINE：分享圖片檔（不帶網址）；透明送印模式不顯示 -->
@@ -122,12 +122,11 @@
             <div class="share-tips-row">
               <span>💡 <b>操作小提示：</b></span>
               <span v-if="shareIsPrintMode">
-                • <b>手機列印</b>：點「列印 / 分享 PDF」，在跳出的選單中選「列印」即可 AirPrint 送印。<br>
-                • 也可在同一個選單直接選 LINE，傳送的是 PDF 檔，不會帶網址。
+                • <b>手機列印</b>：點「列印 (AirPrint)」，在跳出的選單中選「列印」即可送印。
               </span>
               <span v-else-if="shareModalFileUrl">
-                • <b>傳 LINE</b>：手機點「一鍵傳送至 LINE」會以圖片傳送；電腦可點「一鍵複製圖片」後在 LINE 按 Ctrl+V，或下載 PDF 後拖進 LINE 對話框。<br>
-                • <b>列印</b>：手機點「列印 / 分享 PDF」，在選單中選「列印」。
+                • <b>傳 LINE</b>：手機點「一鍵傳送至 LINE」會以圖片傳送（不帶網址）；電腦可點「一鍵複製圖片」後在 LINE 按 Ctrl+V，或下載 PDF 後拖進 LINE 對話框。<br>
+                • <b>列印</b>：手機點「列印 (AirPrint)」，在選單中選「列印」。
               </span>
               <span v-else>
                 • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
@@ -391,6 +390,13 @@
                 <button class="excel-btn" @click="exportOrdersToExcel">📊 下載全訂單 Excel 報表</button>
               </div>
 
+              <div class="search-bar no-print">
+                <span class="search-icon">🔍</span>
+                <input v-model="orderSearch" type="text" class="search-input" placeholder="搜尋單號、下單日、客戶、價格、規格、地址…（多個關鍵字用空格隔開）" />
+                <button v-if="orderSearch" type="button" class="search-clear-btn" @click="orderSearch = ''">✕</button>
+                <span class="search-count">{{ filteredOrderList.length }} / {{ orderList.length }} 筆</span>
+              </div>
+
               <div class="table-responsive">
                 <table class="data-table">
                   <thead>
@@ -412,7 +418,12 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="ord in orderList" :key="ord.id">
+                    <tr
+                      v-for="ord in filteredOrderList"
+                      :key="ord.id"
+                      :id="'order-row-' + ord.id"
+                      :class="{ 'row-highlight': highlightOrderId === ord.id }"
+                    >
                       <td><b>{{ ord.id }}</b></td>
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
@@ -498,7 +509,9 @@
                         </div>
                       </td>
                     </tr>
-                    <tr v-if="orderList.length === 0"><td colspan="14" class="text-center">尚無訂單資料</td></tr>
+                    <tr v-if="filteredOrderList.length === 0">
+                      <td colspan="14" class="text-center">{{ orderList.length === 0 ? '尚無訂單資料' : '找不到符合的訂單' }}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -547,6 +560,13 @@
                 </div>
               </div>
 
+              <div class="search-bar no-print mt-2">
+                <span class="search-icon">🔍</span>
+                <input v-model="statementSearch" type="text" class="search-input" placeholder="搜尋單號、下單日、客戶、價格、規格、地址、卡款…（總額與列印會跟著搜尋結果）" />
+                <button v-if="statementSearch" type="button" class="search-clear-btn" @click="statementSearch = ''">✕</button>
+                <span class="search-count">{{ statementOrders.length }} 筆</span>
+              </div>
+
               <div class="statement-summary-cards mt-3">
                 <div class="sum-card red-card">
                   <div class="sum-label">💰 對帳總金額</div>
@@ -568,10 +588,10 @@
 
               <div class="statement-actions mt-3">
                 <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
-                  🖨️ 列印詳細對帳單 (A4・含卡款與未結)
+                  🖨️ 列印詳細對帳單
                 </button>
                 <button v-if="!isMobileDevice()" class="line-btn" @click="shareStatementDirect">
-                  💬 傳送詳細對帳單至 LINE (圖片)
+                  💬 傳送詳細對帳單至 LINE
                 </button>
                 <button class="line-btn" @click="copyLineStatement">📋 一鍵複製 LINE 對帳明細</button>
                 <button class="excel-btn" @click="exportStatementExcel">📊 下載客戶對帳單 Excel</button>
@@ -591,15 +611,16 @@
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>統編</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>金額</th><th>花卡狀態</th><th>簽收單狀態</th><th>收款狀態</th><th>操作</th>
+                      <th>單號 (可點)</th><th>下單日</th><th>客戶名稱</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>金額</th><th>花卡狀態</th><th>簽收單狀態</th><th>收款狀態</th><th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="ord in statementOrders" :key="ord.id">
-                      <td><b>{{ ord.id }}</b></td>
+                      <td>
+                        <button type="button" class="order-link" @click="jumpToOrder(ord.id)" title="點擊跳到訂單頁的這一筆">{{ ord.id }}</button>
+                      </td>
                       <td>{{ ord.order_date }}</td>
                       <td><b>{{ ord.customer }}</b></td>
-                      <td class="text-purple"><b>{{ ord.tax_id || '—' }}</b></td>
                       <td>{{ ord.need_receipt || '不需收據' }}</td>
                       <td><span class="badge badge-purple"><b>{{ getOrderTotalPots(ord) }} 盆</b></span></td>
                       <td class="spec-cell-wrap">{{ ord.spec }}</td>
@@ -635,6 +656,9 @@
                           <button class="cozy-btn clean-btn-noborder btn-farmer" @click="fillFarmerReceiptFromOrder(ord)">🧾 農民收據</button>
                         </div>
                       </td>
+                    </tr>
+                    <tr v-if="statementOrders.length === 0">
+                      <td colspan="11" class="text-center">找不到符合的對帳資料</td>
                     </tr>
                   </tbody>
                 </table>
@@ -813,13 +837,21 @@
 
             <div class="card-box mt-3">
               <h3>📦 進貨與庫存清單 ({{ inventoryList.length }} 筆)</h3>
+
+              <div class="search-bar no-print">
+                <span class="search-icon">🔍</span>
+                <input v-model="inventorySearch" type="text" class="search-input" placeholder="搜尋編號、類別、品名、規格、供應商、日期、價格…（多個關鍵字用空格隔開）" />
+                <button v-if="inventorySearch" type="button" class="search-clear-btn" @click="inventorySearch = ''">✕</button>
+                <span class="search-count">{{ filteredInventoryList.length }} / {{ inventoryList.length }} 筆</span>
+              </div>
+
               <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead>
                     <tr><th>編號</th><th>類別</th><th>品項名稱</th><th>規格明細</th><th>數量</th><th>單價</th><th>總成本</th><th>供應商</th><th>日期</th><th>操作</th></tr>
                   </thead>
                   <tbody>
-                    <tr v-for="inv in inventoryList" :key="inv.id">
+                    <tr v-for="inv in filteredInventoryList" :key="inv.id">
                       <td><b>{{ inv.id }}</b></td>
                       <td><span class="badge">{{ inv.category }}</span></td>
                       <td><b>{{ inv.item_name }}</b></td>
@@ -835,6 +867,9 @@
                           <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('inventory', inv.id, loadInventory)">🗑</button>
                         </div>
                       </td>
+                    </tr>
+                    <tr v-if="filteredInventoryList.length === 0">
+                      <td colspan="10" class="text-center">{{ inventoryList.length === 0 ? '尚無進貨資料' : '找不到符合的進貨紀錄' }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -977,11 +1012,19 @@
 
             <div class="card-box mt-3">
               <h3>🔄 退貨紀錄清單 ({{ returnList.length }} 筆)</h3>
+
+              <div class="search-bar no-print">
+                <span class="search-icon">🔍</span>
+                <input v-model="returnSearch" type="text" class="search-input" placeholder="搜尋退貨單號、對象、品項、日期、金額、原因…（多個關鍵字用空格隔開）" />
+                <button v-if="returnSearch" type="button" class="search-clear-btn" @click="returnSearch = ''">✕</button>
+                <span class="search-count">{{ filteredReturnList.length }} / {{ returnList.length }} 筆</span>
+              </div>
+
               <div class="table-responsive mt-2">
                 <table class="data-table">
                   <thead><tr><th>退貨單號</th><th>類型</th><th>對象</th><th>品項</th><th>株數</th><th>總額</th><th>原因</th><th>操作</th></tr></thead>
                   <tbody>
-                    <tr v-for="ret in returnList" :key="ret.id">
+                    <tr v-for="ret in filteredReturnList" :key="ret.id">
                       <td><b>{{ ret.id }}</b></td><td>{{ ret.return_type }}</td><td><b>{{ ret.party_name }}</b></td><td>{{ ret.target_item }}</td><td>{{ ret.qty }}</td><td class="text-red"><b>${{ ret.total_amount }}</b></td><td>{{ ret.reason }}</td>
                       <td class="action-cell">
                         <div class="stacked-action-col">
@@ -989,6 +1032,9 @@
                           <button class="cozy-btn icon-only-btn clean-btn-noborder btn-del" @click="deleteItem('returns', ret.id, loadReturns)">🗑️</button>
                         </div>
                       </td>
+                    </tr>
+                    <tr v-if="filteredReturnList.length === 0">
+                      <td colspan="8" class="text-center">{{ returnList.length === 0 ? '尚無退貨資料' : '找不到符合的退貨紀錄' }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1006,6 +1052,13 @@
                   <button :class="{ active: shippingViewFilter === 'shipped' }" @click="shippingViewFilter = 'shipped'" class="pill-tab-item">✅ 已出貨歷史 ({{ shippedOrders.length }})</button>
                   <button :class="{ active: shippingViewFilter === 'all' }" @click="shippingViewFilter = 'all'" class="pill-tab-item">全部 ({{ orderList.length }})</button>
                 </div>
+              </div>
+
+              <div class="search-bar no-print">
+                <span class="search-icon">🔍</span>
+                <input v-model="shippingSearch" type="text" class="search-input" placeholder="搜尋單號、送達日、客戶、電話、地址、規格、價格…（多個關鍵字用空格隔開）" />
+                <button v-if="shippingSearch" type="button" class="search-clear-btn" @click="shippingSearch = ''">✕</button>
+                <span class="search-count">{{ displayedShippingOrders.length }} 筆</span>
               </div>
 
               <div class="table-responsive mt-3">
@@ -1041,6 +1094,9 @@
                         </div>
                       </td>
                     </tr>
+                    <tr v-if="displayedShippingOrders.length === 0">
+                      <td colspan="11" class="text-center">找不到符合的訂單</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -1049,7 +1105,7 @@
         </div>
       </div>
 
-      <!-- ================= 模式 2：花卡 / 輓聯編輯器 (A3/A4/A5，Supabase 3款底圖防擠壓) ================= -->
+      <!-- ================= 模式 2：花卡編輯器 (A3/A4/A5，Supabase 3款底圖防擠壓) ================= -->
       <div v-else-if="currentTab === 'couplet'" class="app-container couplet-screen-wrapper">
         <div class="control-panel no-print">
           <h2>⚙️ 卡片與題詞設定</h2>
@@ -1313,7 +1369,7 @@
 
           <button type="button" class="reset-btn" @click="resetPositions">↺ 重設排版預設位置</button>
           <button type="button" class="line-action-btn mt-2" @click="shareCoupletDirect">💬 直接傳送帶底圖給客人確認</button>
-          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('card-print-target', `花卡_${cardPaperSize}`)">🖨️ 列印花卡 / 輓聯 ({{ cardPaperSize }})</button>
+          <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('card-print-target', `花卡_${cardPaperSize}`)">🖨️ 列印花卡</button>
         </div>
 
         <div class="canvas-viewport" ref="viewportRef">
@@ -1469,7 +1525,7 @@
           </div>
 
           <button type="button" class="line-action-btn mt-2" @click="shareReceiptDirect">
-            📤 簽好直接傳送給「下單訂購人」(LINE/下載/複製)
+            📤 簽好直接傳送給「下單訂購人」
           </button>
 
           <button
@@ -1618,7 +1674,7 @@
           </div>
 
           <button type="button" class="line-action-btn mt-2" @click="shareFarmerReceiptDirect">
-            💬 直接傳送 / 複製收據給客人 (電腦LINE可直接貼上)
+            💬 直接傳送 / 複製收據給客人
           </button>
 
           <button type="button" class="print-action-btn mt-2" @click="handlePrintAction('farmer-print-target', '農民收據_A5')">
@@ -1939,6 +1995,23 @@ const showToast = (msg) => {
   toastTimer = setTimeout(() => { toastMessage.value = '' }, 3500)
 }
 
+// ---------- 搜尋：整列資料一起比對，多個關鍵字用空格隔開 (全部都要符合) ----------
+const matchKeyword = (row, keyword) => {
+  const words = String(keyword || '').trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (!words.length) return true
+  const haystack = Object.values(row || {})
+    .map(v => (v === null || v === undefined || typeof v === 'object') ? '' : String(v))
+    .join(' ')
+    .toLowerCase()
+  return words.every(w => haystack.includes(w))
+}
+
+const orderSearch = ref('')
+const statementSearch = ref('')
+const inventorySearch = ref('')
+const returnSearch = ref('')
+const shippingSearch = ref('')
+
 // ---------- 分享 / 列印彈窗狀態（全站共用一組） ----------
 const shareModalImg = ref('')            // 預覽圖 (blob 或 dataURL)
 const shareModalFileUrl = ref('')        // PDF 的 blob 網址 (只用於「下載 PDF」)
@@ -2004,7 +2077,7 @@ const triggerNativeShare = async () => {
   }
 }
 
-// 分享「PDF 檔」：跳出系統分享選單，選單內有「列印」(AirPrint)；傳 LINE 也是傳檔案，不帶網址
+// 分享「PDF 檔」：跳出系統分享選單，選單內有「列印」(AirPrint)
 const triggerPdfShare = async () => {
   if (!sharePdfFile.value) return
   try {
@@ -2185,6 +2258,28 @@ const activeModalTitle = ref('')
 const openLargePhoto = (url, name) => {
   activeModalPhoto.value = url
   activeModalTitle.value = name
+}
+
+// 搜尋後的清單
+const filteredOrderList = computed(() => orderList.value.filter(o => matchKeyword(o, orderSearch.value)))
+const filteredInventoryList = computed(() => inventoryList.value.filter(i => matchKeyword(i, inventorySearch.value)))
+const filteredReturnList = computed(() => returnList.value.filter(r => matchKeyword(r, returnSearch.value)))
+
+// ---------- 從對帳區點單號 → 跳回訂單頁並標示該筆 ----------
+const highlightOrderId = ref('')
+let highlightTimer = null
+const jumpToOrder = (id) => {
+  orderSearch.value = ''
+  currentTab.value = 'manage'
+  subTab.value = 'order'
+  highlightOrderId.value = id
+  if (highlightTimer) clearTimeout(highlightTimer)
+  highlightTimer = setTimeout(() => { highlightOrderId.value = '' }, 4000)
+  nextTick(() => {
+    setTimeout(() => {
+      document.getElementById('order-row-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 120)
+  })
 }
 
 const getOrderTotalPots = (ord) => {
@@ -2517,18 +2612,20 @@ const updateOrderField = async (ord, field, value) => {
 
 const getCardStatusClass = (status) => status === '已製作' ? 'badge badge-soft-green' : (status === '免製作' ? 'badge badge-gray' : 'badge')
 
+// ---------- 模組 7：出貨派送 (含搜尋) ----------
 const shippingViewFilter = ref('unshipped')
-const displayedShippingOrders = computed(() =>
-  shippingViewFilter.value === 'unshipped' ? unshippedOrders.value
+const displayedShippingOrders = computed(() => {
+  const base = shippingViewFilter.value === 'unshipped' ? unshippedOrders.value
     : (shippingViewFilter.value === 'shipped' ? shippedOrders.value : orderList.value)
-)
+  return base.filter(o => matchKeyword(o, shippingSearch.value))
+})
 
 const getCustomerAddress = (ord) => {
   const addr = extractOrderAddress(ord)
   return addr || '同訂購人地址 / 門市取貨'
 }
 
-// ---------- 模組 2：對帳專區 ----------
+// ---------- 模組 2：對帳專區 (含搜尋，總額 / 列印 / 一鍵結清都跟著搜尋結果) ----------
 const statementCustomer = ref('')
 const statementPeriod = ref('all')
 const statementStartDate = ref(todayStr())
@@ -2539,6 +2636,7 @@ const statementOrders = computed(() => {
   return orderList.value.filter(o => {
     if (statementCustomer.value && o.customer !== statementCustomer.value) return false
     if (statementPaymentFilter.value !== 'all' && o.payment_status !== statementPaymentFilter.value) return false
+    if (!matchKeyword(o, statementSearch.value)) return false
     if (statementPeriod.value === 'all') return true
     const orderDate = new Date(o.order_date + 'T00:00:00')
     const now = new Date()
@@ -2618,10 +2716,12 @@ const exportStatementExcel = () => {
   XLSX.writeFile(workbook, `對帳單_${todayStr()}.xlsx`)
 }
 const batchMarkPaid = async () => {
-  if (!confirm('確定標記為已結？')) return
   const ids = statementOrders.value.map(o => o.id)
+  if (ids.length === 0) return
+  const searchNote = statementSearch.value.trim() ? `（目前有搜尋「${statementSearch.value.trim()}」，只會結清搜尋出來的訂單）` : ''
+  if (!confirm(`確定將畫面上這 ${ids.length} 筆訂單、共 $${statementTotalAmount.value.toLocaleString()} 元標記為「已結清」？${searchNote}`)) return
   await supabase.from('orders').update({ payment_status: '已結' }).in('id', ids)
-  showToast('✅ 已批次結清成功！')
+  showToast(`✅ 已批次結清 ${ids.length} 筆訂單！`)
   loadOrders()
 }
 
@@ -3241,7 +3341,7 @@ const printStatementPdf = async () => {
     shareModalTitle.value = `詳細對帳單 (共 ${pages.length} 頁・確認預覽)`
     shareModalFilename.value = fileName
     shareModalFileUrl.value = URL.createObjectURL(pdfBlob)    // 「下載 PDF」用
-    sharePdfFile.value = pdfFile                              // 「列印 / 分享 PDF」用
+    sharePdfFile.value = pdfFile                              // 「列印 (AirPrint)」用
     canSharePdf.value = !!(navigator.canShare && navigator.canShare({ files: [pdfFile] }))
     shareFilesForNative.value = imgFiles                      // 「傳 LINE」用圖片
     currentBlobToShare.value = longImageBlob                  // 「一鍵複製圖片」用 (僅電腦版)
@@ -3256,7 +3356,7 @@ const printStatementPdf = async () => {
 
 // 花卡 / 簽收單 / 收據 / 代送單：
 //   isPrintMode = false → 確認預覽圖 (傳 LINE / 複製 / 下載)
-//   isPrintMode = true  → 透明送印 PDF (手機用「列印 / 分享 PDF」送 AirPrint)
+//   isPrintMode = true  → 透明送印 PDF (手機用「列印 (AirPrint)」送印)
 const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
   showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印檔案...' : '⏳ 正在生成客人確認圖檔...')
   try {
@@ -3571,6 +3671,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', autoFitAll)
   window.removeEventListener('pointermove', onPointerMove)
   window.removeEventListener('pointerup', onPointerUp)
+  if (highlightTimer) clearTimeout(highlightTimer)
 })
 </script>
 
@@ -3733,6 +3834,39 @@ input, select, textarea {
 .secondary-btn { background: #94a3b8; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; font-size: 13.5px; cursor: pointer; }
 .excel-btn { background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; }
 .line-action-btn { background: #06c755; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14.5px; cursor: pointer; width: 100%; }
+
+/* ================= 搜尋欄 ================= */
+.search-bar {
+  display: flex; align-items: center; gap: 6px;
+  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px;
+  padding: 4px 10px; margin: 10px 0 4px 0; transition: border-color 0.15s, background 0.15s;
+}
+.search-bar:focus-within { border-color: #2563eb; background: #ffffff; }
+.search-icon { font-size: 14px; flex-shrink: 0; }
+.search-input {
+  flex: 1; width: auto !important; min-width: 0;
+  border: none !important; background: transparent !important; outline: none;
+  padding: 6px 2px !important; font-size: 14px !important;
+}
+.search-clear-btn {
+  background: #e2e8f0; color: #475569; border: none; border-radius: 50%;
+  width: 22px; height: 22px; font-size: 11px; font-weight: bold; cursor: pointer; flex-shrink: 0; padding: 0;
+}
+.search-clear-btn:hover { background: #fecaca; color: #dc2626; }
+.search-count { font-size: 12px; font-weight: bold; color: #64748b; white-space: nowrap; flex-shrink: 0; }
+
+/* ================= 對帳區單號連結 / 跳轉標示 ================= */
+.order-link {
+  width: auto; background: none; border: none; padding: 0; margin: 0;
+  color: #2563eb; font-size: inherit; font-weight: bold; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; text-align: left; white-space: nowrap;
+}
+.order-link:hover { color: #1d4ed8; background: #eff6ff; }
+.row-highlight td { animation: rowFlash 4s ease-out; }
+@keyframes rowFlash {
+  0%, 65% { background-color: #fef08a; }
+  100% { background-color: transparent; }
+}
 
 /* ================= 對帳專區 ================= */
 .statement-filter-grid {
@@ -4200,6 +4334,8 @@ input, select, textarea {
   .form-grid { grid-template-columns: 1fr; }
   .canvas-viewport, .receipt-preview-area { padding: 12px 6px 60px 6px; }
   .shipping-tab-header { flex-direction: column; align-items: flex-start; }
+  .search-bar { flex-wrap: wrap; }
+  .search-input { min-width: 140px; }
 }
 
 /* =========================================================================
@@ -4213,7 +4349,7 @@ input, select, textarea {
     width: 100% !important; height: 100% !important; overflow: hidden !important;
   }
 
-  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay {
+  .no-print, .top-nav, .sub-nav, .control-panel, .zoom-toolbar, .floating-toast, .image-modal-overlay, .search-bar {
     display: none !important;
   }
 
