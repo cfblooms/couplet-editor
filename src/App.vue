@@ -2984,96 +2984,23 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
   }
 }
 
-const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
-  const targetEl = document.getElementById(targetId)
-  if (!targetEl) return alert('找不到目標畫面！')
-  showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
-
-  const parentEl = targetEl.parentElement
-  const origTransform = targetEl.style.transform
-  const origParentWidth = parentEl ? parentEl.style.width : ''
-  const origParentHeight = parentEl ? parentEl.style.height : ''
-  const bgLayer = targetEl.querySelector('.card-dynamic-bg-layer')
-  const origBgDisplay = bgLayer ? bgLayer.style.display : ''
-  const origBgColor = targetEl.style.backgroundColor
-
-  // 依不同單據暫時解鎖父容器為 1:1 真實像素，防止手機寬度擠壓
-  let baseW = 794
-  let baseH = 560
-  if (targetId === 'statement-print-target') {
-    baseW = 794
-    baseH = 1123
-  } else if (targetId === 'card-print-target') {
-    baseW = currentCardDimensions.value.w
-    baseH = currentCardDimensions.value.h
-  }
-
-  const restore = () => {
-    targetEl.style.transform = origTransform
-    if (parentEl) {
-      parentEl.style.width = origParentWidth
-      parentEl.style.height = origParentHeight
-    }
-    if (isPrintMode) {
-      if (bgLayer) bgLayer.style.display = origBgDisplay
-      targetEl.style.backgroundColor = origBgColor
-    }
-  }
-
-  try {
-    if (document.fonts?.ready) await document.fonts.ready
-
-    targetEl.style.transform = 'none'
-    if (parentEl) {
-      parentEl.style.width = baseW + 'px'
-      parentEl.style.height = baseH + 'px'
-    }
-    if (isPrintMode) {
-      if (bgLayer) bgLayer.style.display = 'none'
-      targetEl.style.backgroundColor = 'transparent'
-    }
-
-    const canvas = await html2canvas(targetEl, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-      width: baseW,
-      height: baseH,
-      windowWidth: baseW + 50,
-      windowHeight: baseH + 50,
-      logging: false,
-      ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
-    })
-
-    restore()
-
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
-        URL.revokeObjectURL(shareModalImg.value)
-      }
-      shareModalImg.value = URL.createObjectURL(blob)
-      shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
-      shareModalFilename.value = `${titlePrefix}.png`
-      currentBlobToShare.value = blob
-      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
-    }, 'image/png')
-  } catch (err) {
-    restore()
-    showToast('⚠️ 生成失敗，請重試！')
+// 對帳單平時是隱藏的，截圖前要暫時顯示出來（藏在內容後面，使用者看不到）
+const showStatementForCapture = (el) => {
+  const savedStyle = el.getAttribute('style') || ''
+  const hadHideClass = el.classList.contains('no-screen-display')
+  el.classList.remove('no-screen-display')
+  el.style.cssText = 'display:block;position:fixed;left:0;top:0;z-index:-1;width:794px;background:#ffffff;box-sizing:border-box;'
+  return () => {
+    el.setAttribute('style', savedStyle)
+    if (hadHideClass) el.classList.add('no-screen-display')
   }
 }
-const triggerImagePrint = async () => {
-let targetId = 'card-print-target'
-  if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
-  else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
-  else if (currentTab.value === 'dispatch') targetId = 'dispatch-print-target'
-  else if (currentTab.value === 'manage' && subTab.value === 'statement') targetId = 'statement-print-target'
 
+// 把指定單據截成圖片 (花卡、簽收單、收據、代送單、對帳單共用)
+const captureToCanvas = async (targetId, isPrintMode) => {
   const targetEl = document.getElementById(targetId)
-  if (!targetEl) return alert('找不到目標畫面！')
-
-  showToast('⏳ 正在生成無網址滿版文件...')
+  if (!targetEl) throw new Error('找不到目標畫面')
+  const isStatement = targetId === 'statement-print-target'
 
   const parentEl = targetEl.parentElement
   const origTransform = targetEl.style.transform
@@ -3083,17 +3010,16 @@ let targetId = 'card-print-target'
   const origBgDisplay = bgLayer ? bgLayer.style.display : ''
   const origBgColor = targetEl.style.backgroundColor
 
-let baseW = 794
+  let baseW = 794
   let baseH = 560
-  if (targetId === 'statement-print-target') {
-    baseW = 794
-    baseH = 1123
-  } else if (targetId === 'card-print-target') {
+  if (targetId === 'card-print-target') {
     baseW = currentCardDimensions.value.w
     baseH = currentCardDimensions.value.h
   }
 
+  let restoreStatement = null
   const restore = () => {
+    if (restoreStatement) { restoreStatement(); return }
     targetEl.style.transform = origTransform
     if (parentEl) {
       parentEl.style.width = origParentWidth
@@ -3106,18 +3032,25 @@ let baseW = 794
   try {
     if (document.fonts?.ready) await document.fonts.ready
 
-    targetEl.style.transform = 'none'
-    if (parentEl) {
-      parentEl.style.width = baseW + 'px'
-      parentEl.style.height = baseH + 'px'
+    if (isStatement) {
+      restoreStatement = showStatementForCapture(targetEl)
+      baseH = Math.max(1123, targetEl.scrollHeight)
+    } else {
+      targetEl.style.transform = 'none'
+      if (parentEl) {
+        parentEl.style.width = baseW + 'px'
+        parentEl.style.height = baseH + 'px'
+      }
+      if (isPrintMode) {
+        if (bgLayer) bgLayer.style.display = 'none'
+        targetEl.style.backgroundColor = 'transparent'
+      }
     }
-    if (bgLayer) bgLayer.style.display = 'none'
-    targetEl.style.backgroundColor = 'transparent'
 
-    const canvas = await html2canvas(targetEl, {
+    return await html2canvas(targetEl, {
       scale: 2,
       useCORS: true,
-      backgroundColor: null,
+      backgroundColor: isStatement ? '#ffffff' : null,
       width: baseW,
       height: baseH,
       windowWidth: baseW + 50,
@@ -3125,12 +3058,43 @@ let baseW = 794
       logging: false,
       ignoreElements: (el) => el.classList && (el.classList.contains('scale-handle') || el.classList.contains('no-print'))
     })
-
+  } finally {
     restore()
+  }
+}
 
+const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
+  showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
+  try {
+    const canvas = await captureToCanvas(targetId, isPrintMode)
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      if (shareModalImg.value && shareModalImg.value.startsWith('blob:')) {
+        URL.revokeObjectURL(shareModalImg.value)
+      }
+      shareModalImg.value = URL.createObjectURL(blob)
+      shareModalTitle.value = isPrintMode ? `${titlePrefix} (無底圖・透明送印)` : `${titlePrefix} (確認預覽)`
+      shareModalFilename.value = `${titlePrefix}.png`
+      currentBlobToShare.value = blob
+      canNativeShare.value = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'doc.png', { type: 'image/png' })] }))
+    }, 'image/png')
+  } catch (err) {
+    showToast('⚠️ 生成失敗，請重試！')
+  }
+}
+
+const triggerImagePrint = async () => {
+  let targetId = 'card-print-target'
+  if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
+  else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
+  else if (currentTab.value === 'dispatch') targetId = 'dispatch-print-target'
+  else if (currentTab.value === 'manage' && subTab.value === 'statement') targetId = 'statement-print-target'
+
+  showToast('⏳ 正在生成無網址滿版文件...')
+  try {
+    const canvas = await captureToCanvas(targetId, true)
     const imgDataUrl = canvas.toDataURL('image/png')
 
-    // 判斷紙張與方向
     const { jsPDF } = window.jspdf || {}
     let isLandscapeMode = !isVertical.value
     let format = 'a4'
@@ -3146,17 +3110,12 @@ let baseW = 794
 
     if (jsPDF) {
       const pdf = new jsPDF({ orientation: isLandscapeMode ? 'landscape' : 'portrait', unit: 'mm', format })
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = pdf.internal.pageSize.getHeight()
-      // 1:1 滿版置入 PDF，iPhone 開啟後「分享 ➔ 列印」即為無網址、滿版的原生文件輸出
-      pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      const pdfBlobUrl = URL.createObjectURL(pdf.output('blob'))
-      window.location.href = pdfBlobUrl
+      pdf.addImage(imgDataUrl, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight())
+      window.location.href = URL.createObjectURL(pdf.output('blob'))
     } else {
       window.open(imgDataUrl, '_blank')
     }
   } catch (err) {
-    restore()
     showToast('⚠️ 生成失敗，請重試！')
   }
 }
