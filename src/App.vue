@@ -3064,8 +3064,6 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   }
 }
 const triggerImagePrint = async () => {
-  let targetId = 'card-print-target'
-  if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
 let targetId = 'card-print-target'
   if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
   else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
