@@ -3996,13 +3996,13 @@ input, select, textarea {
   padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-size: 12.5px; display: inline-block;
 }
 
-.footer-summary-boxes { display.statement-sheet-footer { 
+.statement-sheet-footer { 
   display: flex; 
   justify-content: space-between; 
   align-items: flex-end; 
   margin-top: 18px; 
   padding-top: 12px; 
-  border-top: none !important; /* 🌟 拿掉貫穿的頂線，徹底消除第一條線 */
+  border-top: none !important;
 }
 
 .footer-summary-boxes { 
@@ -4010,12 +4010,12 @@ input, select, textarea {
   gap: 16px; 
   font-size: 14px; 
   flex-wrap: wrap;
-  border-top: 1.5px solid #cbd5e1; /* 頂線只留在左側數字上方，不延伸到簽名處 */
+  border-top: 1.5px solid #cbd5e1;
   padding-top: 8px;
 }
+
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
 
-/* 🌟 客戶簽章：上方拉出 32px 充足空隙，底線加粗下移，確保有足夠空間蓋章與簽名 */
 .statement-sign-line {
   display: flex !important;
   align-items: flex-end !important;
@@ -4040,7 +4040,7 @@ input, select, textarea {
   width: 220px !important;
   min-width: 220px !important;
   border: none !important;
-  border-bottom: 2px solid #0f172a !important; /* 🌟 全場唯一的一條清晰簽名線 */
+  border-bottom: 2px solid #0f172a !important;
   margin-left: 8px !important;
   height: 24px !important;
 }
