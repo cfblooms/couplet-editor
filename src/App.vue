@@ -631,9 +631,9 @@
               <table class="statement-detail-table">
                 <thead>
                   <tr>
-                    <th style="width: 14%;">單號</th>
+                    <th style="width: 16%;">單號</th>
                     <th style="width: 11%;">送貨日</th>
-                    <th style="width: 28%;">規格明細</th>
+                    <th style="width: 26%;">規格明細</th>
                     <th style="width: 24%;">送達地址</th>
                     <th style="width: 11%; text-align: right;">訂單金額</th>
                     <th style="width: 12%; text-align: center;">結帳狀態</th>
@@ -1882,6 +1882,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 
 // ==========================================
 // 1. 基礎狀態變數
@@ -2973,8 +2974,12 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
   }
 
   // 3. 執行列印 (手機走圖片轉PDF送印，電腦走瀏覽器列印)
-  if (isMobileDevice()) {
-    openPrintImageModal(targetId, titlePrefix, true)
+    if (isMobileDevice()) {
+    if (isStatement) {
+      printStatementPdf()
+    } else {
+      openPrintImageModal(targetId, titlePrefix, true)
+    }
   } else {
     if (isStatement) {
       document.body.classList.add('printing-statement')
@@ -3062,7 +3067,95 @@ const captureToCanvas = async (targetId, isPrintMode) => {
     restore()
   }
 }
+// 手機列印詳細對帳單：A4 自動分頁，不會把一筆訂單切成兩半 (只有對帳單使用)
+const printStatementPdf = async () => {
+  const el = document.getElementById('statement-print-target')
+  if (!el) return alert('找不到對帳單！')
+  showToast('⏳ 正在生成對帳單 PDF...')
 
+  const A4_W = 794
+  const A4_H = 1123
+  const MARGIN = 24
+
+  // 對帳單平時是隱藏的，截圖前暫時顯示在畫面最底層，使用者看不到
+  const savedStyle = el.getAttribute('style') || ''
+  const hadHideClass = el.classList.contains('no-screen-display')
+  el.classList.remove('no-screen-display')
+  el.style.cssText = `display:block;position:fixed;left:0;top:0;z-index:-1;width:${A4_W}px;margin:0;background:#ffffff;box-sizing:border-box;font-family:'TW-Kai','DFKai-SB','BiauKai','標楷體','Kaiti TC',serif;`
+
+  try {
+    if (document.fonts?.ready) await document.fonts.ready
+    await nextTick()
+
+    const totalH = el.scrollHeight
+    const SCALE = totalH > 3000 ? 1.5 : 2
+    const top = el.getBoundingClientRect().top
+
+    // 可以換頁的位置：每筆訂單 (含上款／下款那行) 的底部，以及總計區的上緣
+    const breaks = [...el.querySelectorAll('.sub-card-row')]
+      .map(r => Math.round(r.getBoundingClientRect().bottom - top))
+    const footer = el.querySelector('.statement-sheet-footer')
+    if (footer) breaks.push(Math.round(footer.getBoundingClientRect().top - top))
+    breaks.sort((a, b) => a - b)
+
+    const fullCanvas = await html2canvas(el, {
+      scale: SCALE,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: A4_W,
+      height: totalH,
+      windowWidth: A4_W + 50,
+      windowHeight: totalH + 50,
+      scrollX: 0,
+      scrollY: 0,
+      logging: false
+    })
+
+    // 算出每一頁要截的範圍
+    const pages = []
+    let start = 0
+    while (start < totalH - 1) {
+      const avail = A4_H - MARGIN * (pages.length === 0 ? 1 : 2)
+      let end
+      if (totalH - start <= avail) {
+        end = totalH
+      } else {
+        const cands = breaks.filter(b => b > start + 40 && b <= start + avail)
+        end = cands.length ? cands[cands.length - 1] : start + avail
+      }
+      pages.push([start, end])
+      start = end
+    }
+
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pw = pdf.internal.pageSize.getWidth()
+    const ph = pdf.internal.pageSize.getHeight()
+
+    pages.forEach(([s, e], i) => {
+      const pageCanvas = document.createElement('canvas')
+      pageCanvas.width = fullCanvas.width
+      pageCanvas.height = Math.round(A4_H * SCALE)
+      const ctx = pageCanvas.getContext('2d')
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height)
+      const offsetY = i === 0 ? 0 : MARGIN
+      ctx.drawImage(
+        fullCanvas,
+        0, Math.round(s * SCALE), fullCanvas.width, Math.round((e - s) * SCALE),
+        0, Math.round(offsetY * SCALE), fullCanvas.width, Math.round((e - s) * SCALE)
+      )
+      if (i > 0) pdf.addPage()
+      pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pw, ph)
+    })
+
+    window.location.href = URL.createObjectURL(pdf.output('blob'))
+  } catch (err) {
+    showToast('⚠️ 生成失敗，請重試！')
+  } finally {
+    el.setAttribute('style', savedStyle)
+    if (hadHideClass) el.classList.add('no-screen-display')
+  }
+}
 const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) => {
   showToast(isPrintMode ? '⏳ 正在抽空背景，生成透明送印圖檔...' : '⏳ 正在生成客人確認圖檔...')
   try {
@@ -3946,7 +4039,14 @@ input, select, textarea {
 .statement-meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; font-size: 13.5px; color: #334155; }
 .statement-detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .statement-detail-table th { background: #f1f5f9; padding: 8px 6px; border-bottom: 1.5px solid #cbd5e1; color: #1e293b; }
-.statement-detail-table td { padding: 6px; }
+.statement-detail-table th,
+.statement-detail-table td {
+  padding: 6px;
+  vertical-align: top !important;
+  line-height: 1.5;
+}
+.main-info-row td:first-child { white-space: nowrap; }
+.main-info-row .badge { display: inline-block; line-height: 1.4; }
 .main-info-row td { border-top: 1px solid #e2e8f0; font-weight: 500; }
 .sub-card-row td { background: #fafafa; border-bottom: 1.5px solid #cbd5e1; padding: 6px 10px; }
 .statement-card-line { font-size: 13px; color: #334155; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; }
