@@ -679,9 +679,9 @@
                   </div>
                 </div>
                 <div class="statement-sign-line">
-                  <span>客戶確認簽章：</span>
-                  <span class="sign-underline-space">______________________________</span>
-                </div>
+  <span class="sign-label">客戶確認簽章：</span>
+  <span class="sign-underline-space"></span>
+</div>
               </div>
             </div>
           </section>
@@ -2972,8 +2972,8 @@ const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
     if (ord && ord.receipt_status !== '已列印') updateOrderField(ord, 'receipt_status', '已列印')
   }
 
-  // 3. 執行列印 (手機走圖片送印，電腦走瀏覽器列印)
-  if (isMobileDevice() && !isStatement) {
+  // 3. 執行列印 (手機走圖片轉PDF送印，電腦走瀏覽器列印)
+  if (isMobileDevice()) {
     openPrintImageModal(targetId, titlePrefix, true)
   } else {
     if (isStatement) {
@@ -3000,7 +3000,10 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   // 依不同單據暫時解鎖父容器為 1:1 真實像素，防止手機寬度擠壓
   let baseW = 794
   let baseH = 560
-  if (targetId === 'card-print-target') {
+  if (targetId === 'statement-print-target') {
+    baseW = 794
+    baseH = 1123
+  } else if (targetId === 'card-print-target') {
     baseW = currentCardDimensions.value.w
     baseH = currentCardDimensions.value.h
   }
@@ -3061,11 +3064,11 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
   }
 }
 
-const triggerImagePrint = async () => {
-  let targetId = 'card-print-target'
+let targetId = 'card-print-target'
   if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
   else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
   else if (currentTab.value === 'dispatch') targetId = 'dispatch-print-target'
+  else if (currentTab.value === 'manage' && subTab.value === 'statement') targetId = 'statement-print-target'
 
   const targetEl = document.getElementById(targetId)
   if (!targetEl) return alert('找不到目標畫面！')
@@ -3080,9 +3083,12 @@ const triggerImagePrint = async () => {
   const origBgDisplay = bgLayer ? bgLayer.style.display : ''
   const origBgColor = targetEl.style.backgroundColor
 
-  let baseW = 794
+let baseW = 794
   let baseH = 560
-  if (targetId === 'card-print-target') {
+  if (targetId === 'statement-print-target') {
+    baseW = 794
+    baseH = 1123
+  } else if (targetId === 'card-print-target') {
     baseW = currentCardDimensions.value.w
     baseH = currentCardDimensions.value.h
   }
@@ -3128,7 +3134,10 @@ const triggerImagePrint = async () => {
     const { jsPDF } = window.jspdf || {}
     let isLandscapeMode = !isVertical.value
     let format = 'a4'
-    if (currentTab.value !== 'couplet') {
+    if (targetId === 'statement-print-target') {
+      isLandscapeMode = false
+      format = 'a4'
+    } else if (currentTab.value !== 'couplet') {
       isLandscapeMode = true
       format = 'a5'
     } else if (cardPaperSize.value) {
@@ -3724,11 +3733,11 @@ input, select, textarea {
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
 }
 .mobile-share-btn {
-  .copy-img-btn {
-  background: #0ea5e9 !important; /* 醒目的天藍色按鈕 */
-}
   flex: 1; min-width: 140px; background: #06c755; color: white; border: none; padding: 10px;
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
+}
+.copy-img-btn {
+  background: #0ea5e9 !important;
 }
 .mobile-dl-btn {
   flex: 1; min-width: 120px; background: #2563eb; color: white; text-decoration: none; padding: 10px;
@@ -3992,22 +4001,32 @@ input, select, textarea {
 
 /* 🌟 客戶簽章：上方拉出 32px 充足空隙，底線加粗下移，確保有足夠空間蓋章與簽名 */
 .statement-sign-line {
-  display: flex;
-  align-items: flex-end;
-  font-size: 14.5px;
-  font-weight: bold;
-  white-space: nowrap;        /* 🌟 強制文字絕不被折成一個字一行 */
-  flex-shrink: 0;             /* 🌟 禁止被左邊的統計金額擠壓變形 */
-  margin-left: 20px;          /* 和左邊統計數字保持適當安全距離 */
-  padding-bottom: 6px;
+  display: flex !important;
+  align-items: flex-end !important;
+  font-size: 14.5px !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  margin-left: 20px !important;
+  border: none !important;
+  border-bottom: none !important;
+  padding-bottom: 4px !important;
+}
+
+.sign-label {
+  font-size: 14.5px !important;
+  font-weight: bold !important;
+  border: none !important;
 }
 
 .sign-underline-space {
-  display: inline-block;
-  min-width: 180px;           /* 底線寬度，留出大空間好簽名 */
-  border-bottom: 1.5px solid #0f172a; /* 漂亮的簽名水平底線 */
-  margin-left: 6px;
-  height: 24px;
+  display: inline-block !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  border: none !important;
+  border-bottom: 1.5px solid #0f172a !important; /* 只有唯一的一條乾淨黑色底線 */
+  margin-left: 6px !important;
+  height: 22px !important;
 }
 
 /* ================= 手機版 ================= */
