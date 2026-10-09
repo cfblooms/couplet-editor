@@ -3063,7 +3063,9 @@ const openPrintImageModal = async (targetId, titlePrefix, isPrintMode = false) =
     showToast('⚠️ 生成失敗，請重試！')
   }
 }
-
+const triggerImagePrint = async () => {
+  let targetId = 'card-print-target'
+  if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
 let targetId = 'card-print-target'
   if (currentTab.value === 'receipt') targetId = 'receipt-print-target'
   else if (currentTab.value === 'farmer_receipt') targetId = 'farmer-print-target'
@@ -3996,53 +3998,49 @@ input, select, textarea {
   padding: 3px 10px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; font-size: 12.5px; display: inline-block;
 }
 
-.statement-sheet-footer { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: flex-end; 
-  margin-top: 18px; 
-  padding-top: 12px; 
-  border-top: none !important;
+.statement-sheet-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 18px;
+  padding-top: 8px;
+  border: none !important;
 }
 
-.footer-summary-boxes { 
-  display: flex; 
-  gap: 16px; 
-  font-size: 14px; 
+.footer-summary-boxes {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
   flex-wrap: wrap;
-  border-top: 1.5px solid #cbd5e1;
-  padding-top: 8px;
+  border: none !important;
+  padding-top: 0;
 }
 
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
 
 .statement-sign-line {
-  display: flex !important;
-  align-items: flex-end !important;
-  font-size: 14.5px !important;
-  font-weight: bold !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  margin-left: 24px !important;
-  padding-bottom: 6px !important;
+  display: flex;
+  align-items: flex-end;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 24px;
   border: none !important;
 }
 
 .sign-label {
-  font-size: 14.5px !important;
-  font-weight: bold !important;
-  color: #0f172a !important;
+  font-size: 14.5px;
+  font-weight: bold;
+  color: #0f172a;
   border: none !important;
 }
 
 .sign-underline-space {
-  display: inline-block !important;
-  width: 220px !important;
-  min-width: 220px !important;
+  display: inline-block;
+  width: 220px;
+  height: 22px;
+  margin-left: 8px;
   border: none !important;
-  border-bottom: 2px solid #0f172a !important;
-  margin-left: 8px !important;
-  height: 24px !important;
+  border-bottom: 1.5px solid #0f172a !important;
 }
 
 /* ================= 手機版 ================= */
