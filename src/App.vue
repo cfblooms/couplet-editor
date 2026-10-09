@@ -3994,17 +3994,20 @@ input, select, textarea {
 .statement-sign-line {
   display: flex;
   align-items: flex-end;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: bold;
-  padding-top: 32px;
-  padding-bottom: 8px;
+  white-space: nowrap;        /* 🌟 強制文字絕不被折成一個字一行 */
+  flex-shrink: 0;             /* 🌟 禁止被左邊的統計金額擠壓變形 */
+  margin-left: 20px;          /* 和左邊統計數字保持適當安全距離 */
+  padding-bottom: 6px;
 }
+
 .sign-underline-space {
   display: inline-block;
-  min-width: 220px;
-  border-bottom: 1.5px solid #0f172a;
-  margin-left: 8px;
-  height: 28px;
+  min-width: 180px;           /* 底線寬度，留出大空間好簽名 */
+  border-bottom: 1.5px solid #0f172a; /* 漂亮的簽名水平底線 */
+  margin-left: 6px;
+  height: 24px;
 }
 
 /* ================= 手機版 ================= */
