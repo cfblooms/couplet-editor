@@ -85,12 +85,12 @@
             <div class="share-btn-action-group">
               <!-- 1. 列印 / 分享 PDF：分享的是 PDF 檔本身（不帶網址），分享選單內有「列印」(AirPrint) -->
               <button
-                v-if="sharePdfFile && canSharePdf"
+                v-if="isMobileDevice() && sharePdfFile && canSharePdf"
                 type="button"
                 class="mobile-print-btn"
                 @click="triggerPdfShare"
               >
-                🖨️ 列印 / 分享 PDF (選單內有「列印」AirPrint)
+                🖨️ 列印 / 分享 PDF
               </button>
 
               <!-- 2. 傳送至 LINE：分享圖片檔（不帶網址）；透明送印模式不顯示 -->
@@ -105,7 +105,7 @@
 
               <!-- 3. 複製圖片：只有單張圖片模式才有 -->
               <button
-                v-if="!shareModalFileUrl"
+                v-if="showCopyImageBtn"
                 type="button"
                 class="mobile-share-btn copy-img-btn"
                 @click="copyShareImageToClipboard"
@@ -126,8 +126,8 @@
                 • 也可在同一個選單直接選 LINE，傳送的是 PDF 檔，不會帶網址。
               </span>
               <span v-else-if="shareModalFileUrl">
-                • <b>傳 LINE</b>：手機點「一鍵傳送至 LINE」會以圖片傳送；電腦請下載 PDF 後拖進 LINE 對話框。<br>
-                • <b>列印</b>：點「列印 / 分享 PDF」，在選單中選「列印」。
+                • <b>傳 LINE</b>：手機點「一鍵傳送至 LINE」會以圖片傳送；電腦可點「一鍵複製圖片」後在 LINE 按 Ctrl+V，或下載 PDF 後拖進 LINE 對話框。<br>
+                • <b>列印</b>：手機點「列印 / 分享 PDF」，在選單中選「列印」。
               </span>
               <span v-else>
                 • <b>傳給客人確認</b>：點「一鍵傳送至 LINE」直接分享卡片美圖，或長按圖片儲存至相簿。
@@ -570,7 +570,7 @@
                 <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
                   🖨️ 列印詳細對帳單 (A4・含卡款與未結)
                 </button>
-                <button class="line-btn" @click="shareStatementDirect">
+                <button v-if="!isMobileDevice()" class="line-btn" @click="shareStatementDirect">
                   💬 傳送詳細對帳單至 LINE (圖片)
                 </button>
                 <button class="line-btn" @click="copyLineStatement">📋 一鍵複製 LINE 對帳明細</button>
@@ -647,7 +647,7 @@
                 <div class="shop-title-row">
                   <h2>宸豐蘭藝</h2>
                   <span class="shop-header-phone">📞 0958-179-725</span>
-                  <span class="statement-badge-title">【應付／應收對帳單】</span>
+                  <span class="statement-badge-title">【{{ statementCustomer || '全部客戶' }}　應付／應收對帳單】</span>
                 </div>
                 <div class="statement-meta-row">
                   <div><b>客戶／廠商：</b>{{ statementCustomer || '全部客戶統整' }}</div>
@@ -3016,6 +3016,14 @@ const onCardCategoryChange = () => {
 // ==========================================
 const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
+// 「一鍵複製圖片」按鈕：手機版對帳單不顯示；電腦版對帳單 (複製整張長圖) 與一般確認圖都顯示
+const showCopyImageBtn = computed(() =>
+  !!currentBlobToShare.value && !shareIsPrintMode.value && (!shareModalFileUrl.value || !isMobileDevice())
+)
+
+// 檔名不能含的字元一律拿掉
+const safeFileName = (name) => String(name || '').replace(/[\\/:*?"<>|]/g, '').trim() || '未命名'
+
 const handlePrintAction = (targetId, titlePrefix, isReceipt = false) => {
   const isStatement = targetId === 'statement-print-target'
 
@@ -3137,6 +3145,7 @@ const printStatementPdf = async () => {
   const el = document.getElementById('statement-print-target')
   if (!el) return alert('找不到對帳單！')
   showToast('⏳ 正在生成對帳單...')
+  const custLabel = safeFileName(statementCustomer.value || '全部客戶')
 
   const A4_W = 794
   const A4_H = 1123
@@ -3208,15 +3217,21 @@ const printStatementPdf = async () => {
       // 每頁另存一張 JPG：分享給 LINE 用圖片，LINE 才一定出現在分享選單
       const jpgBlob = await new Promise(res => pageCanvas.toBlob(res, 'image/jpeg', 0.95))
       if (jpgBlob) {
-        imgFiles.push(new File([jpgBlob], `詳細對帳單_${todayStr()}_第${i + 1}頁.jpg`, { type: 'image/jpeg' }))
+        imgFiles.push(new File([jpgBlob], `${custLabel}_詳細對帳單_${todayStr()}_第${i + 1}頁.jpg`, { type: 'image/jpeg' }))
       }
 
       if (i > 0) pdf.addPage()
       pdf.addImage(jpg, 'JPEG', 0, 0, pw, ph)
     }
 
+    // 電腦版：把整份對帳單接成一張長圖，供「一鍵複製圖片」貼進電腦版 LINE
+    let longImageBlob = null
+    if (!isMobileDevice()) {
+      longImageBlob = await new Promise(res => fullCanvas.toBlob(res, 'image/png'))
+    }
+
     const pdfBlob = pdf.output('blob')
-    const fileName = `詳細對帳單_${todayStr()}.pdf`
+    const fileName = `${custLabel}_詳細對帳單_${todayStr()}.pdf`
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' })
 
     closeShareModal()
@@ -3229,6 +3244,7 @@ const printStatementPdf = async () => {
     sharePdfFile.value = pdfFile                              // 「列印 / 分享 PDF」用
     canSharePdf.value = !!(navigator.canShare && navigator.canShare({ files: [pdfFile] }))
     shareFilesForNative.value = imgFiles                      // 「傳 LINE」用圖片
+    currentBlobToShare.value = longImageBlob                  // 「一鍵複製圖片」用 (僅電腦版)
     canNativeShare.value = !!(navigator.canShare && imgFiles.length && navigator.canShare({ files: imgFiles }))
   } catch (err) {
     showToast('⚠️ 生成失敗，請重試！')
@@ -4109,7 +4125,7 @@ input, select, textarea {
 
 .statement-a4-sheet { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 .statement-sheet-header { border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; }
-.shop-title-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+.shop-title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 6px; }
 .shop-title-row h2 { margin: 0; font-size: 22px; color: #0f172a; }
 .shop-header-phone { font-size: 15px; font-weight: bold; color: #334155; }
 .statement-badge-title { font-size: 18px; font-weight: bold; color: #1e3a8a; }
