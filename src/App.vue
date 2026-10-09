@@ -618,12 +618,12 @@
               <div class="statement-sheet-header">
                 <div class="shop-title-row">
                   <h2>宸豐蘭藝</h2>
+                  <span class="shop-header-phone">📞 0958-179-725</span>
                   <span class="statement-badge-title">【應付／應收對帳單】</span>
                 </div>
                 <div class="statement-meta-row">
                   <div><b>客戶／廠商：</b>{{ statementCustomer || '全部客戶統整' }}</div>
                   <div><b>統計區間：</b>{{ getStatementPeriodText() }}</div>
-                  <div><b>聯絡電話：</b>{{ getCustomerPhone(statementCustomer) }}</div>
                   <div><b>列印日期：</b>{{ getTodayDateStr() }}</div>
                 </div>
               </div>
@@ -679,7 +679,8 @@
                   </div>
                 </div>
                 <div class="statement-sign-line">
-                  <span>客戶確認簽章：____________________</span>
+                  <span>客戶確認簽章：</span>
+                  <span class="sign-underline-space">______________________________</span>
                 </div>
               </div>
             </div>
@@ -3970,8 +3971,9 @@ input, select, textarea {
 
 .statement-a4-sheet { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 .statement-sheet-header { border-bottom: 2px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; }
-.shop-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.shop-title-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
 .shop-title-row h2 { margin: 0; font-size: 22px; color: #0f172a; }
+.shop-header-phone { font-size: 15px; font-weight: bold; color: #334155; }
 .statement-badge-title { font-size: 18px; font-weight: bold; color: #1e3a8a; }
 .statement-meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; font-size: 13.5px; color: #334155; }
 .statement-detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -3987,7 +3989,23 @@ input, select, textarea {
 .statement-sheet-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 10px; border-top: 2px solid #1e293b; }
 .footer-summary-boxes { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
 .unpaid-highlight { color: #dc2626; font-weight: 900; font-size: 15px; }
-.statement-sign-line { font-size: 13.5px; font-weight: bold; }
+
+/* 🌟 客戶簽章：上方拉出 32px 充足空隙，底線加粗下移，確保有足夠空間蓋章與簽名 */
+.statement-sign-line {
+  display: flex;
+  align-items: flex-end;
+  font-size: 14px;
+  font-weight: bold;
+  padding-top: 32px;
+  padding-bottom: 8px;
+}
+.sign-underline-space {
+  display: inline-block;
+  min-width: 220px;
+  border-bottom: 1.5px solid #0f172a;
+  margin-left: 8px;
+  height: 28px;
+}
 
 /* ================= 手機版 ================= */
 @media (max-width: 768px) {
