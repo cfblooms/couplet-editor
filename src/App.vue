@@ -567,12 +567,7 @@
                 </div>
               </div>
 
-              <div class="search-bar no-print mt-2">
-                <span class="search-icon">🔍</span>
-                <input v-model="statementSearch" type="text" class="search-input" placeholder="搜尋單號、下單日、客戶、價格、規格、地址、卡款…（總額與列印會跟著搜尋結果）" />
-                <button v-if="statementSearch" type="button" class="search-clear-btn" @click="statementSearch = ''">✕</button>
-                <span class="search-count">{{ statementOrders.length }} 筆</span>
-              </div>
+              
 
               <div class="statement-summary-cards mt-3">
                 <div class="sum-card red-card">
@@ -614,11 +609,17 @@
 
             <div class="card-box mt-3 no-print">
               <h3>📑 對帳單訂單明細 ({{ statementOrders.length }} 筆)</h3>
+                            <div class="search-bar no-print">
+                <span class="search-icon">🔍</span>
+                <input v-model="statementSearch" type="text" class="search-input" placeholder="搜尋單號、下單日、客戶、價格、規格、地址、卡款…（總額與列印會跟著搜尋結果）" />
+                <button v-if="statementSearch" type="button" class="search-clear-btn" @click="statementSearch = ''">✕</button>
+                <span class="search-count">{{ statementOrders.length }} 筆</span>
+              </div>
               <div class="table-responsive">
                 <table class="data-table">
                   <thead>
                     <tr>
-                      <th>單號 (可點)</th><th>下單日</th><th>客戶名稱</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>金額</th><th>花卡狀態</th><th>簽收單狀態</th><th>收款狀態</th><th>操作</th>
+                      <th>單號</th><th>下單日</th><th>客戶名稱</th><th>開收據</th><th>總盆數</th><th>規格明細</th><th>金額</th><th>花卡狀態</th><th>簽收單狀態</th><th>收款狀態</th><th>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3871,7 +3872,7 @@ input, select, textarea {
 .order-link {
   width: auto; background: none; border: none; padding: 0; margin: 0;
   color: #2563eb; font-size: inherit; font-weight: bold; cursor: pointer;
-  text-decoration: underline; text-underline-offset: 3px; text-align: left; white-space: nowrap;
+  text-decoration: none; text-align: left; white-space: nowrap;
 }
 .order-link:hover { color: #1d4ed8; background: #eff6ff; }
 .row-highlight td { animation: rowFlash 4s ease-out; }
