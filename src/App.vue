@@ -84,8 +84,14 @@
                 🖨️ 手機直接列印 (AirPrint)
               </button>
 
+              <!-- 手機支援原生分享時顯示 -->
               <button v-if="canNativeShare" type="button" class="mobile-share-btn" @click="triggerNativeShare">
-                📲 一鍵傳送至 LINE
+                📲 一鍵傳送至 LINE (手機專用)
+              </button>
+
+              <!-- 電腦版/通用：直接複製圖片到剪貼簿，LINE 按 Ctrl+V 直接貼上 -->
+              <button type="button" class="mobile-share-btn copy-img-btn" @click="copyShareImageToClipboard">
+                📋 一鍵複製圖片 (電腦 LINE 直接 Ctrl+V 貼上)
               </button>
 
               <a :href="shareModalImg" :download="shareModalFilename" class="mobile-dl-btn">
@@ -1917,6 +1923,21 @@ const closeShareModal = () => {
   currentBlobToShare.value = null
 }
 
+const copyShareImageToClipboard = async () => {
+  if (!currentBlobToShare.value) return alert('尚未生成圖檔！')
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': currentBlobToShare.value })
+      ])
+      showToast('✅ 圖片已成功複製！請切換到 LINE 對話框直接按 Ctrl+V (貼上) 即可傳送！')
+    } else {
+      showToast('⚠️ 您的瀏覽器不支援直接複製圖檔，請點右側「下載圖檔」手動拖入 LINE')
+    }
+  } catch (err) {
+    showToast('⚠️ 複製失敗，請直接點「下載圖檔」或長按圖片複製')
+  }
+}
 const triggerNativeShare = async () => {
   if (!currentBlobToShare.value) return
   try {
@@ -3702,6 +3723,9 @@ input, select, textarea {
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
 }
 .mobile-share-btn {
+  .copy-img-btn {
+  background: #0ea5e9 !important; /* 醒目的天藍色按鈕 */
+}
   flex: 1; min-width: 140px; background: #06c755; color: white; border: none; padding: 10px;
   border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center;
 }
