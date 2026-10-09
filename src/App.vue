@@ -545,6 +545,9 @@
                 <button class="primary-btn" @click="handlePrintAction('statement-print-target', '詳細對帳單_A4')">
                   🖨️ 列印詳細對帳單 (A4・含卡款與未結)
                 </button>
+                <button class="line-btn" @click="shareStatementDirect">
+  💬 傳送詳細對帳單至 LINE (圖片)
+</button>
                 <button class="line-btn" @click="copyLineStatement">📋 一鍵複製 LINE 對帳明細</button>
                 <button class="excel-btn" @click="exportStatementExcel">📊 下載客戶對帳單 Excel</button>
                 <button
@@ -3052,8 +3055,10 @@ const captureToCanvas = async (targetId, isPrintMode) => {
       }
     }
 
+        const captureScale = Math.min(2, Math.sqrt(12000000 / (baseW * baseH)))
+
     return await html2canvas(targetEl, {
-      scale: 2,
+      scale: captureScale,
       useCORS: true,
       backgroundColor: isStatement ? '#ffffff' : null,
       width: baseW,
@@ -3217,7 +3222,7 @@ const shareCoupletDirect = () => openPrintImageModal('card-print-target', '花�
 const shareReceiptDirect = () => openPrintImageModal('receipt-print-target', '簽收單確認', false)
 const shareFarmerReceiptDirect = () => openPrintImageModal('farmer-print-target', '農民收據確認', false)
 const shareDispatchDirect = () => openPrintImageModal('dispatch-print-target', '同業代送單確認', false)
-
+const shareStatementDirect = () => openPrintImageModal('statement-print-target', '詳細對帳單', false)
 // ==========================================
 // 6. 雲端草稿庫
 // ==========================================
