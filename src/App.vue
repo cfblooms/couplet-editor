@@ -121,7 +121,7 @@
   @click="handleDownloadClick"
 >
   {{ isMobileDevice()
-    ? (sharePdfFile ? '💾 儲存 / 傳送 PDF 檔 (不帶網址)' : '💾 儲存圖檔 (相簿 / 檔案)')
+    ? (sharePdfFile ? '💾 儲存 / 傳送 PDF 檔' : '💾 儲存圖檔 (相簿 / 檔案)')
     : (shareModalFileUrl ? '💾 下載 PDF 檔' : '💾 下載圖檔至相簿 / 電腦') }}
 </a>
             </div>
